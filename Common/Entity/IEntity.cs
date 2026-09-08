@@ -4,8 +4,8 @@
 namespace Common.Entity;
 public interface IEntity
 {
-  IDictionary<string, IList<IParsedEntity>> PropertyCollections { get; }
+  Dictionary<string, IList<IParsedEntity>> PropertyCollections { get; }
   IList<IParsedEntity> Children { get; }
-  IDictionary<string, IParsedEntity> PropertyValues { get; }
-  IDictionary<string, object?> DataValues { get; }
+  Dictionary<string, IParsedEntity> PropertyValues { get; }
+  Dictionary<string, object?> DataValues { get; }
 }

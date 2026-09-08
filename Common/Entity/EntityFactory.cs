@@ -96,7 +96,7 @@ public static partial class EntityFactory
       throw new InvalidOperationException($"Keys ({keys.Count}) and Values ({values.Count}) do not match Origin Count ({origins.Count}).");
     }
   }
-  private static Collection<IParsedEntity> ParseAttributes (XElement element, ElementEntity parent)
+  private static Collection<IParsedEntity> ParseAttributes (XElement element)
   {
     Collection<IParsedEntity> result = [];
     foreach (XAttribute attr in element.Attributes())
@@ -106,23 +106,10 @@ public static partial class EntityFactory
         Key = attr.Name.LocalName,
         Value = attr.Value,
         Origin = attr.ToString(),
-        Parent = parent,
         Namespace = attr.Name.NamespaceName.IsEmpty ? null : attr.Name.NamespaceName
       });
     }
     return result;
-  }
-  private static T Get<T> (Match match, ParserContext context) where T : IParsedEntity, new()
-  {
-    if (context.ParsingSet?.TryGetOptions(match, context, out EntityParsingOptions? options) ?? false)
-    {
-      options.
-    }
-
-    return new()
-    {
-      Origin = match.Value,
-    };
   }
   private static ElementEntity GetHeader (Match match) => new()
   {
@@ -192,8 +179,7 @@ public static partial class EntityFactory
   };
   private static IParsedEntity GetEntity (Match match, ParserContext context)
   {
-    EntityParsingOptions options = context.ParsingSet.GetEntityOptions(match, context);
-    if (options is null)
+    if (context.ParsingSet?.TryGetOptions(match, context, out EntityParsingOptions? options) is null or false)
     {
       return new ErrorEntity()
       {
@@ -230,7 +216,11 @@ public static partial class EntityFactory
       BT.Invalid => throw new InvalidOperationException("Type was Invalid."),
       BT.Absent => throw new InvalidOperationException("Type was Absent."),
       BT.Placeholder => throw new InvalidOperationException("Type was Placeholder."),
-      BT.Document => new DocumentEntity() { Content = match.Value, Origin = match.Value },
+      BT.Document => new DocumentEntity()
+      {
+        Content = match.Value,
+        Origin = match.Value
+      },
       BT.LooseContent => GetContent(match),
       BT.Element when match.HasValidGroup("name") => new ElementEntity()   { Origin = match.Value, Name = match.Groups["name"].Value },
       BT.Attribute when context.Key is string key => new AttributeEntity() { Origin = match.Value, Key = key, Value = match.Value, },
@@ -245,6 +235,8 @@ public static partial class EntityFactory
       var prop = context.GetPropKey<IParsedEntity>();
       (prop as PropertyEntity)?.Value = prop;
     }
+
+    return generated;
   }
 
   private static IParsedEntity ValueSelector (Match match)
@@ -326,7 +318,7 @@ public static partial class EntityFactory
     context.Parent = parent;
     document.SetRoot(parent);
 
-    parent.AddAttributes(ParseAttributes(root, parent));
+    parent.AddAttributes(ParseAttributes(root));
     parent.AddChildren([.. root.Elements().Select(xe => FromXElement(xe, context))]);
 
     return document;
@@ -442,19 +434,7 @@ public static partial class EntityFactory
     IParsedEntity? parent = null;
     Collection<IParsedEntity> inside = [];
     MatchCollection matches = XML_PreCompiled.Matches(content);
-
-    foreach (EntityParsingOptions o in DefaultParsingSets.XML.EntityOptions)
-    {
-      if (o.CreateEmptyAtStart)
-      {
-        IParsedEntity empty = GetEntity(, o, new());
-        if (empty is ElementEntity ee)
-        {
-          parent = ee;
-          inside.Add(parent);
-        }
-      }
-    }
+    ParserContext context = new();
 
     document = new DocumentEntity()
     {
@@ -464,7 +444,7 @@ public static partial class EntityFactory
 
     foreach (Match match in matches)
     {
-      IParsedEntity item = CheckXMLMatch(match);
+      IParsedEntity item = CheckXMLMatch(match, context);
 
       switch (item)
       {

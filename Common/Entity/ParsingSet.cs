@@ -61,9 +61,9 @@ public class ParsingSet
       context.Depth += options.DepthChange;
     }
 
-    if (options.AddToPropKey)
+    if (options.AddToPropKey && context.PropKey is IEntity prop_entity)
     {
-      (context.PropKey as ParsedEntity)?.DataValues.Concat(entity.DataValues);
+      prop_entity.DataValues.Concat(entity.DataValues);
     }
 
     if (options.SetPropKey)
@@ -74,53 +74,67 @@ public class ParsingSet
     return entity;
   }
 
-  public IParsedEntity? Generate (Match match, EntityParsingOptions options) => options.Type switch
+  public IEntity? Generate (Match match, EntityParsingOptions options)
   {
-    
-
-    BT.Operator when options.ConstantValue is not null => new SymbolEntity()
-    {
-      Content = options.ConstantValue,
-      Origin = match.Value
-    },
-    BT.Operator => new SymbolEntity()
-    {
-      Content = match.Value,
-      Origin = match.Value
-    },
-    BT.String => new StringEntity()
-    {
-      
+    try {
+      return options.Type switch
+      {
+        BT.Operator when options.ConstantValue is not null => new SymbolEntity()
+        {
+          Content = options.ConstantValue,
+          Origin = match.Value
+        },
+        BT.Operator => new SymbolEntity()
+        {
+          Content = match.Value,
+          Origin = match.Value
+        },
+        BT.String => new StringEntity()
+        {
+          Value = match.Groups[options.StorePieceTypes["Value"]].Value,
+          Origin = match.Value
+        },
+        BT.Number => new NumberEntity()
+        {
+          Value = decimal.TryParse(match.Groups[options.StorePieceTypes["Value"]].Value, out decimal result)
+          ? result
+          : throw new InvalidValueException(match.Groups[options.StorePieceTypes["Value"]].Value),
+          Origin = match.Value,
+        },
+        BT.Boolean => GetBoolean(match),
+        BT.Null => GetNull(match),
+        BT.Comment => GetComment(match),
+        BT.IgnoredWhitespace => GetWhitespace(match),
+        BT.Array => new ArrayEntity()
+        {
+          Origin = match.Value
+        },
+        BT.Object => new ObjectEntity()
+        {
+          Origin = match.Value
+        },
+        BT.Custom => new CustomEntity()
+        {
+          Origin = match.Value,
+        },
+        BT.Invalid => throw new InvalidOperationException("Type was Invalid."),
+        BT.Absent => throw new InvalidOperationException("Type was Absent."),
+        BT.Placeholder => throw new InvalidOperationException("Type was Placeholder."),
+        BT.Document => new DocumentEntity() { Content = match.Value, Origin = match.Value },
+        BT.LooseContent => GetContent(match),
+        BT.Element when match.HasValidGroup("name") => new ElementEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
+        BT.Attribute when context.Key is string key => new AttributeEntity() { Origin = match.Value, Key = key, Value = match.Value, },
+        BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
+        BT.Property when context.Key is string key => new PropertyEntity() { Origin = match.Value, Key = key, Value = GetString(match) },
+        BT.Operator => GetSymbol(match),
+        _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
+      };
     }
-    BT.Number => GetNumber(match),
-    BT.Boolean => GetBoolean(match),
-    BT.Null => GetNull(match),
-    BT.Comment => GetComment(match),
-    BT.IgnoredWhitespace => GetWhitespace(match),
-    BT.Array => new ArrayEntity()
+    catch (InvalidValueException ive)
     {
-      Origin = match.Value
-    },
-    BT.Object => new ObjectEntity()
-    {
-      Origin = match.Value
-    },
-    BT.Custom => new CustomEntity()
-    {
-      Origin = match.Value,
-    },
-    BT.Invalid => throw new InvalidOperationException("Type was Invalid."),
-    BT.Absent => throw new InvalidOperationException("Type was Absent."),
-    BT.Placeholder => throw new InvalidOperationException("Type was Placeholder."),
-    BT.Document => new DocumentEntity() { Content = match.Value, Origin = match.Value },
-    BT.LooseContent => GetContent(match),
-    BT.Element when match.HasValidGroup("name") => new ElementEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
-    BT.Attribute when context.Key is string key => new AttributeEntity() { Origin = match.Value, Key = key, Value = match.Value, },
-    BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
-    BT.Property when context.Key is string key => new PropertyEntity() { Origin = match.Value, Key = key, Value = GetString(match) },
-    BT.Operator => GetSymbol(match),
-    _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
-  };
+      Debug.Log(MsgClass.Warning, ive.Message, this);
+      return null;
+    }
 }
 
 public static class DefaultParsingSets
@@ -279,17 +293,13 @@ public struct GlobalParsingOptions : IEquatable<GlobalParsingOptions>
   public static bool operator == (GlobalParsingOptions left, GlobalParsingOptions right) => left.Equals(right);
   public static bool operator != (GlobalParsingOptions left, GlobalParsingOptions right) => !(left == right);
 }
-public struct TokenParsingOptions
-{
-  public BT MakeType { get; set; }
-}
 
 /// <summary>Represents matching criteria for an indicated item, including an optional token type, a required capture group, an
 /// optional exact value, and whether exact-value comparison ignores case.</summary>
 /// <remarks>TokenType may be null if unspecified. Group must be present and have length > 0 for a match.
 /// ExactValue may be null; when specified, the capture's value must equal ExactValue. IgnoreCase controls case
 /// sensitivity when ExactValue is compared.</remarks>
-public struct IndicationRule
+public struct IndicationRule : IEquatable<IndicationRule>
 {
   /// <summary>Gets or sets the token type, for example 'Bearer'.</summary>
   /// <remarks>May be null if the token type is unspecified.</remarks>
@@ -301,14 +311,14 @@ public struct IndicationRule
   /// <summary>if <see langword="true"/>, it ignores case on the exact value matching.</summary>
   public bool IgnoreCase { get; set; }
 
-  public override readonly bool Equals (object? obj) => obj is IndicatedItem item && Equals(item);
-  public readonly bool Equals (IndicatedItem other) => TokenType == other.TokenType && Group == other.Group && ExactValue == other.ExactValue && IgnoreCase == other.IgnoreCase;
-  public readonly override int GetHashCode () => HashCode.Combine(TokenType, Group, ExactValue, IgnoreCase);
+  public override readonly bool Equals (object? obj) => obj is IndicationRule item && Equals(item);
+  public readonly bool Equals (IndicationRule other) => TokenType == other.TokenType && Group == other.Group && ExactValue == other.ExactValue && IgnoreCase == other.IgnoreCase;
+  public override readonly int GetHashCode () => HashCode.Combine(TokenType, Group, ExactValue, IgnoreCase);
   public readonly bool Matches (Match match) =>
     (Group is null || match.Groups[Group].Success) &&
     (ExactValue is null || match.Value.Is(ExactValue));
-  public static bool operator == (IndicatedItem left, IndicatedItem right) => left.Equals(right);
-  public static bool operator != (IndicatedItem left, IndicatedItem right) => !(left == right);
+  public static bool operator == (IndicationRule left, IndicationRule right) => left.Equals(right);
+  public static bool operator != (IndicationRule left, IndicationRule right) => !(left == right);
 }
 
 public class EntityParsingOptions
@@ -376,7 +386,7 @@ public class EntityParsingOptions
   public override int GetHashCode () => HashCode.Combine(Type, IndicatedItem, DepthChange, SetPropKey, SetAsNextLevelParent, CreateEmptyAtStart, ConstantValue, StorePieceTypes, HashCode.Combine(StoresData, DefinesStructure, OnlyAtTopLevel));
   public static bool operator == (EntityParsingOptions left, EntityParsingOptions right) => left.Equals(right);
   public static bool operator != (EntityParsingOptions left, EntityParsingOptions right) => !(left == right);
-  public readonly bool Equals (EntityParsingOptions other) => GetHashCode() == other.GetHashCode();
+  public bool Equals (EntityParsingOptions other) => GetHashCode() == other.GetHashCode();
   #endregion
 }
 

@@ -16,7 +16,7 @@ public sealed class CaseInsensitiveEqualityComparer : IEqualityComparer<string>,
     x is string sx && y is string sy
       ? Equals(sx, sy)
       : x is null && y is null;
-  public int GetHashCode (string obj) => obj.ToLowerInvariant().GetHashCode();
+  public int GetHashCode (string obj) => obj.GetHashCode(ComparisonType);
   public int GetHashCode (object obj) =>
     obj is null
     ? 0

@@ -16,13 +16,13 @@ public abstract class ParsedEntity : IParsedEntity, IEquatable<IParsedEntity>, I
   /// <remarks>This determines the class of the entity.</remarks>
   public abstract BT Type { get; }
   /// <summary>Gets the property collections.</summary>
-  public virtual IDictionary<string, IList<IParsedEntity>> PropertyCollections { get; } = new Dictionary<string, IList<IParsedEntity>>();
+  public virtual Dictionary<string, IList<IParsedEntity>> PropertyCollections { get; } = [];
   /// <summary>Gets the child entities.</summary>
   public virtual IList<IParsedEntity> Children { get; } = [];
   /// <summary>Gets the property values.</summary>
-  public virtual IDictionary<string, IParsedEntity> PropertyValues { get; } = new Dictionary<string, IParsedEntity>();
+  public virtual Dictionary<string, IParsedEntity> PropertyValues { get; } = [];
   /// <summary>Gets the data values.</summary>
-  public virtual IDictionary<string, object?> DataValues { get; } = new Dictionary<string, object?>();
+  public virtual Dictionary<string, object?> DataValues { get; } = [];
 
   public abstract bool Equals (IParsedEntity? other);
   public abstract override string? ToString ();
