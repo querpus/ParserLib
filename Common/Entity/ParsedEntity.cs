@@ -98,7 +98,7 @@ public class NumberEntity : ParsedEntity, IPrimitiveEntity
   public required decimal Value
   {
     get => (decimal) DataValues["Value"]!;
-    init => DataValues["Value"] = value;
+    set => DataValues["Value"] = value;
   }
   public override BT Type => BT.Number;
 
@@ -123,7 +123,7 @@ public class BooleanEntity : ParsedEntity, IPrimitiveEntity
   public required bool Value
   {
     get => (bool) DataValues["Value"]!;
-    init => DataValues["Value"] = value;
+    set => DataValues["Value"] = value;
   }
   public override BT Type => BT.Boolean;
   public string Content => Value ? bool.TrueString : bool.FalseString;
@@ -136,17 +136,17 @@ public class AttributeEntity : ParsedEntity
   public string? Namespace
   {
     get => (string?) DataValues["Namespace"];
-    init => DataValues["Namespace"] = value;
+    set => DataValues["Namespace"] = value;
   }
   public required string Key
   {
     get => (string) DataValues["Key"]!;
-    init => DataValues["Key"] = value;
+    set => DataValues["Key"] = value;
   }
   public required string Value
   {
     get => (string) DataValues["Value"]!;
-    init => DataValues["Value"] = value;
+    set => DataValues["Value"] = value;
   }
 
   public override bool Equals (IParsedEntity? other) =>
@@ -159,8 +159,8 @@ public class AttributeEntity : ParsedEntity
 public class PropertyEntity : ParsedEntity
 {
   public override BT Type => BT.Property;
-  public required string Key { get; init; }
-  public required IParsedEntity Value { get; init; }
+  public required string Key { get; set; }
+  public required IParsedEntity Value { get; set; }
 
   public override bool Equals (IParsedEntity? other) =>
     other is PropertyEntity pe &&
@@ -170,7 +170,7 @@ public class PropertyEntity : ParsedEntity
 }
 public class ElementEntity : ElementOpenPlaceholder
 {
-  public bool IsHeader { get; init; }
+  public bool IsHeader { get; set; }
   public override BT Type => BT.Element;
 
   public override string ToString ()
@@ -201,8 +201,12 @@ public class ElementEntity : ElementOpenPlaceholder
 }
 public class ElementClosePlaceholder : ParsedEntity
 {
-  public required string Name { get; init; }
-  public string? Namespace { get; init; }
+  public required string Name { get; set; }
+  public string? Namespace
+  {
+    get => (string?) DataValues["Namespace"];
+    set => DataValues["Namespace"] = value;
+  }
   public override BT Type => BT.Placeholder;
 
   public override bool Equals (IParsedEntity? other) =>
@@ -224,7 +228,11 @@ public class ElementOpenPlaceholder : ParsedEntity
     get => (Collection<IParsedEntity>) PropertyCollections["Attributes"];
     init => AddAttributes(value);
   }
-  public string? Namespace { get; init; }
+  public string? Namespace
+  {
+    get => (string?) DataValues["Namespace"];
+    set => DataValues["Namespace"] = value;
+  }
   public override BT Type => BT.Placeholder;
   public void AddAttribute (IParsedEntity attribute)
   {
@@ -264,7 +272,7 @@ public class ObjectEntity : ParsedEntity
   public Collection<IParsedEntity> Properties
   {
     get => (Collection<IParsedEntity>) PropertyCollections["Properties"];
-    init => AddProperties(value);
+    set => AddProperties(value);
   }
   public override BT Type => BT.Object;
 
@@ -286,12 +294,11 @@ public class ArrayEntity : ParsedEntity
     child.SetParent(this);
     PropertyCollections["Values"].Add(child);
   }
-
   public void AddValues (IEnumerable<IParsedEntity> children) => children.Foreach(AddValue);
   public Collection<IParsedEntity> Values
   {
     get => (Collection<IParsedEntity>) PropertyCollections["Values"];
-    init => AddValues(value);
+    set => AddValues(value);
   }
   public override BT Type => BT.Array;
 
@@ -304,7 +311,7 @@ public class SymbolEntity : ParsedEntity
   public required string Content
   {
     get => (string) DataValues["Content"]!;
-    init => DataValues["Content"] = value;
+    set => DataValues["Content"] = value;
   }
   public override BT Type => BT.Placeholder;
 
@@ -334,7 +341,7 @@ public class WhitespaceEntity : ParsedEntity
   public required string Content
   {
     get => (string) DataValues["Content"]!;
-    init => DataValues["Content"] = value;
+    set => DataValues["Content"] = value;
   }
   public override BT Type => BT.IgnoredWhitespace;
 
@@ -347,7 +354,7 @@ public class SectionEntity : ParsedEntity
   public required string Name
   {
     get => (string) DataValues["Name"]!;
-    init => DataValues["Name"] = value;
+    set => DataValues["Name"] = value;
   }
   public override BT Type => BT.Section;
 
