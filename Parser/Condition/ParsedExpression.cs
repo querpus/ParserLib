@@ -328,7 +328,7 @@ public class ParsedExpression (string expr, ParsedExpression? parent = null) : I
           right_index = i;
         }
 
-        if (left is not null && right is not null && op is Undefined)
+        if (right is not null && op is Undefined)
         {
           clearRight();
           clearLeft();

@@ -618,9 +618,6 @@ public static partial class EntityFactory
 
     foreach (EntityParsingOptions opts in DefaultParsingSets.XML.EntityOptions)
     {
-      
-        return GetEntity(match, opts, new());
-
       if (opts.IndicatedItem.Matches(match))
         return GetEntity(match, opts, new());
     }

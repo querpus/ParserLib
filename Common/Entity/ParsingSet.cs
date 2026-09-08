@@ -14,7 +14,6 @@ public class ParsingSet
   };
   public IImmutableList<TokenParsingOptions> TokenOptions { get; set; } = [];
   public IImmutableList<EntityParsingOptions> EntityOptions { get; init; } = [];
-  public 
 }
 
 public static class DefaultParsingSets
@@ -66,7 +65,7 @@ public sealed class ParserContext
   public string? Key { get; set; }
   public int Depth { get; set; }
   public int Pass { get; set; }
-  public T? GetParent<T> () where T : IParsedEntity
+  public T? CastParent<T> () where T : IParsedEntity
   {
     dynamic? parent = Parent;
     return (T?) parent;
@@ -113,29 +112,28 @@ public class JSONParsingOptions
       IndicatedItem = new() { Group = "key" },
       StoresData = true,
       Type = BT.Property,
-      StoreAsPieceType = "name",
+      StoreAsPieceTypes = [new() { GroupName = "keyname", PropertyKey = "Value" }],
       SetAsNextLevelParent = true,
       SetPropKey = true
     }, new() {
       IndicatedItem = new() { Group = "strvalue" },
       StoresData = true,
       Type = BT.String,
-      StoreAsPieceType = "value"
+      StoreAsPieceTypes = [new() { GroupName = "value", PropertyKey = "Value" }],
     }, new() {
       IndicatedItem = new() { Group = "boolvalue" },
       StoresData = true,
       Type = BT.Boolean,
-      StoreAsPieceType = "value"
+      StoreAsPieceTypes = [new() { GroupName = "value", PropertyKey = "Value" }],
     }, new () {
       IndicatedItem = new() { Group = "numvalue" },
       StoresData = true,
       Type = BT.Number,
-      StoreAsPieceType = "value"
+      StoreAsPieceTypes = [new() { GroupName = "value", PropertyKey = "Value" }],
     }, new() {
       IndicatedItem = new() { Group = "nullvalue" },
-      StoresData = true,
       Type = BT.Null,
-      StoreAsPieceType = "value"
+      StoreAsPieceTypes = [new() { GroupName = "value", PropertyKey = "Value" }],
     }, new() {
       IndicatedItem = new() { Group = "comment" },
       StoresData = false,
@@ -175,7 +173,6 @@ public class JSONParsingOptions
       ConstantValue = "]",
     }];
 }
-
 public struct TokenParsingOptions
 {
   public BT MakeType { get; set; }
@@ -186,7 +183,7 @@ public struct TokenParsingOptions
 /// <remarks>TokenType may be null if unspecified. Group must be present and have length > 0 for a match.
 /// ExactValue may be null; when specified, the capture's value must equal ExactValue. IgnoreCase controls case
 /// sensitivity when ExactValue is compared.</remarks>
-public struct IndicatedItem
+public struct IndicatedItem : IEquatable<IndicatedItem>
 {
   /// <summary>Gets or sets the token type, for example 'Bearer'.</summary>
   /// <remarks>May be null if the token type is unspecified.</remarks>
@@ -198,12 +195,17 @@ public struct IndicatedItem
   /// <summary>if <see langword="true"/>, it ignores case on the exact value matching.</summary>
   public bool IgnoreCase { get; set; }
 
+  public override readonly bool Equals (object? obj) => obj is IndicatedItem item && Equals(item);
+  public readonly bool Equals (IndicatedItem other) => TokenType == other.TokenType && Group == other.Group && ExactValue == other.ExactValue && IgnoreCase == other.IgnoreCase;
+  public readonly override int GetHashCode () => HashCode.Combine(TokenType, Group, ExactValue, IgnoreCase);
   public readonly bool Matches (Match match) =>
     (Group is null || match.Groups[Group].Success) &&
     (ExactValue is null || match.Value.Is(ExactValue));
+  public static bool operator == (IndicatedItem left, IndicatedItem right) => left.Equals(right);
+  public static bool operator != (IndicatedItem left, IndicatedItem right) => !(left == right);
 }
 
-public struct EntityParsingOptions
+public struct EntityParsingOptions : IEquatable<EntityParsingOptions>
 {
 
   #region Functional Properties
@@ -247,19 +249,14 @@ public struct EntityParsingOptions
   /// <summary>Only allow this entity at top-level, not as a child.</summary>
   public bool OnlyAtTopLevel { get; set; }
 
-  public override bool Equals (object obj)
-  {
-    throw new NotImplementedException();
-  }
+  public override bool Equals (object? obj) => obj is EntityParsingOptions other && Equals(other);
+  public override readonly int GetHashCode () => HashCode.Combine(Type, IndicatedItem, DepthChange, SetPropKey, SetAsNextLevelParent, CreateEmptyAtStart, ConstantValue, StoreAsPieceTypes, HashCode.Combine(StoresData, DefinesStructure, OnlyAtTopLevel));
 
-  public override int GetHashCode () => HashCode.Combine(Type, IndicatedItem, DepthChange, SetPropKey, SetAsNextLevelParent, CreateEmptyAtStart, ConstantValue, StoreAsPieceTypes, HashCode.Combine(StoresData, DefinesStructure, OnlyAtTopLevel));
-
-  public static bool operator == (EntityParsingOptions left, EntityParsingOptions right)
-  {
-    return left.Equals(right);
-  }
+  public static bool operator == (EntityParsingOptions left, EntityParsingOptions right) =>
+    left.Equals(right);
 
   public static bool operator != (EntityParsingOptions left, EntityParsingOptions right) => !(left == right);
+  public readonly bool Equals (EntityParsingOptions other) => GetHashCode() == other.GetHashCode();
   #endregion
 }
 

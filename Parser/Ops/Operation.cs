@@ -44,7 +44,7 @@ public abstract class Operation : IOperation
   #region Operation Flags
   public bool ContinueOnFail { get; set; }
   public bool SkipOperation { get; set; }
-  public virtual bool NoExecution => SkipOperation;
+  public virtual bool NoExecution { get; init; }
   #endregion
   #region Reference Properties
   /// <summary>The reference to the parser.</summary>
