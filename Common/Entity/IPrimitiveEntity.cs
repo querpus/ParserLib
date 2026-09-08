@@ -7,3 +7,8 @@ public interface IPrimitiveEntity : IParsedEntity
   /// <summary>Gets the content of the primitive entity, as it should be serialized.</summary>
   string Content { get; }
 }
+
+public interface IValueEntity : IParsedEntity
+{
+  string Value { get; }
+}

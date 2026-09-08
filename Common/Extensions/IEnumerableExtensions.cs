@@ -10,6 +10,22 @@ public static class IEnumerableExtensions
   /// <typeparam name="T">The object type</typeparam>
   extension<T> (IEnumerable<T> list)
   {
+    public IEnumerable<T> OfTypes<TAllowedType1, TAllowedType2> ()
+    {
+      foreach (T? item in list)
+      {
+        if (item is TAllowedType1 or TAllowedType2)
+          yield return item;
+      }
+    }
+    public IEnumerable<T> NotOfType<TDisallowedType> ()
+    {
+      foreach (T? item in list)
+      {
+        if (item is not TDisallowedType)
+          yield return item;
+      }
+    }
     /// <summary>Allows indexing for ienumerable types.</summary>
     /// <param name="list">The list.</param>
     /// <param name="index">The index to retrieve.</param>
@@ -57,7 +73,7 @@ public static class IEnumerableExtensions
 
   extension<T> (IEnumerable<IEnumerable<T>> listlist)
   {
-    public Collection<T> Condensed =>
+    public Collection<T> Flatten () =>
       [.. listlist.Aggregate((list1, list2) => list1.Concat(list2))];
   }
 

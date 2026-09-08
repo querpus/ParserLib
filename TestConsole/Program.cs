@@ -20,6 +20,7 @@ internal static class Program
   internal const string CheckPath = @"C:\Users\johntay4\Work";
   internal const string DesktopPath = @"D:\Git";
   internal const int LogLine = 10;
+  internal const string This = nameof(Program);
   #endregion
   #region Fields
   internal static string? UserInput;
@@ -72,7 +73,7 @@ internal static class Program
     try { TestSelectionLoop(); }
     catch (QuitException)
     {
-      Log(MsgClass.Warning, "QuitException caught by outer parser.", nameof(Program));
+      Log(MsgClass.Warning, "QuitException caught by outer parser.", This);
     }
 
     Log(MsgClass.Prompt, "Press enter to exit.", nameof(Program));
@@ -83,14 +84,14 @@ internal static class Program
   {
   Start:
     Console.Clear();
-    Log(MsgClass.Prompt, "Select a test. (wad/xml/mapinfo/acs/ini)", nameof(Program));
+    Log(MsgClass.Prompt, "Select a test. (wad/xml/mapinfo/acs/ini)", This);
     switch (GetInput())
     {
       case "NEWXML":
         string newxml_data = File.ReadAllText(FinishPath(Paths.xml_operation));
-        XMLDocumentEntity parsed = (XMLDocumentEntity) EntityFactory.FromString(newxml_data, BasicType.Element);
+        DocumentEntity parsed = (DocumentEntity) EntityFactory.FromString(newxml_data, BasicType.Element);
         XElement x_elem = XElement.Load(FinishPath(Paths.xml_operation));
-        XMLDocumentEntity parsedxelem = (XMLDocumentEntity) EntityFactory.FromXElement(x_elem, null);
+        DocumentEntity parsedxelem = (DocumentEntity) EntityFactory.FromXElement(x_elem, null);
         Log(MsgClass.Debug, parsed.RootNode?.ToString() ?? SE, "Program");
         Log(MsgClass.Debug, parsedxelem.RootNode?.ToString() ?? SE, "Program");
         _ = GetInput();
@@ -140,13 +141,13 @@ internal static class Program
         InitialTest(SpecJSON.Spec, Paths.json_error);
         break;
       case "":
-        Log(MsgClass.Warning, "Nothing selected, enter a test, or type exit or quit to exit the program.", nameof(Program));
+        Log(MsgClass.Warning, "Nothing selected, enter a test, or type exit or quit to exit the program.", This);
         break;
       default:
-        Log(MsgClass.Warning, "Unknown test.", nameof(Program));
+        Log(MsgClass.Warning, "Unknown test.", This);
         break;
     }
-    Log(MsgClass.Prompt, "Press enter to return to the test selection.", nameof(Program));
+    Log(MsgClass.Prompt, "Press enter to return to the test selection.", This);
     _ = GetInput();
     goto Start;
   }
@@ -160,17 +161,17 @@ internal static class Program
 
       while (spec is null)
       {
-        Log(MsgClass.Warning, $"Spec {specName} not found. Enter a valid Spec name", nameof(Program));
+        Log(MsgClass.Warning, $"Spec {specName} not found. Enter a valid Spec name", This);
         specName = GetInput();
         spec = LibRef.Lookup(specName);
       }
 
       Status = Parser.ParseFile(spec, path);
 
-      Log(MsgClass.Debug, "OpStatus is " + Status, nameof(Program));
+      Log(MsgClass.Debug, "OpStatus is " + Status, This);
 
-      Log(MsgClass.Debug, "Result is " + Parser.Result, nameof(Program));
-      Log(MsgClass.Debug, "Result count = " + Parser.Result.AsCollection().Count, nameof(Program));
+      Log(MsgClass.Debug, "Result is " + Parser.Result, This);
+      Log(MsgClass.Debug, "Result count = " + Parser.Result.AsCollection().Count, This);
       if (Parser.Result is IPrintable ip)
         ip.Print();
     }
@@ -182,7 +183,7 @@ internal static class Program
     DebugIn("Program", "InitialTest");
     if (!LibRef.TryLookup(spec, out Spec? lookup_spec))
     {
-      Log(MsgClass.Error, $"Cannot start test of '{Path.GetFileName(file)}' with '{spec}', the spec was not found.", nameof(Program));
+      Log(MsgClass.Error, $"Cannot start test of '{Path.GetFileName(file)}' with '{spec}', the spec was not found.", This);
     }
     else
     {
@@ -194,7 +195,7 @@ internal static class Program
   {
     DebugIn("Program", "InitialTest");
     ClearLog();
-    Log(MsgClass.Warning, $"Starting test of '{Path.GetFileName(file)}' with '{spec.Name}'.", nameof(Program));
+    Log(MsgClass.Warning, $"Starting test of '{Path.GetFileName(file)}' with '{spec.Name}'.", This);
     Parser = new(spec);
     OpStatus status;
 
@@ -207,7 +208,7 @@ internal static class Program
       }
       catch (IOException)
       {
-        Log(MsgClass.Error, "The path at \"" + FinishPath(file) + "\" is not valid.", "Program");
+        Log(MsgClass.Error, "The path at \"" + FinishPath(file) + "\" is not valid.", This);
         data = "";
       }
       status = Parser.StepThrough(data);
@@ -218,7 +219,7 @@ internal static class Program
       byte[] data = File.ReadAllBytes(FinishPath(file));
       status = Parser.StepThrough(data);
     }
-    Log(MsgClass.Warning, $"Operations have concluded with status {status}.", nameof(Program));
+    Log(MsgClass.Warning, $"Operations have concluded with status {status}.", This);
     DebugOut();
   }
 
@@ -238,7 +239,7 @@ internal static class Program
       Status = Parser.StepThrough(bytes);
     }
 
-    Log(MsgClass.BlueInfo, $"The {spec.Name} test resulted in {Status}.", nameof(Program));
+    Log(MsgClass.BlueInfo, $"The {spec.Name} test resulted in {Status}.", This);
     DebugOut();
     return Parser;
   }

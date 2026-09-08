@@ -40,7 +40,7 @@ public static class SpecInstructionParser
 
     XDocument doc = XDocument.Load(path);
     XElement root = doc.Root ?? throw Err.ThrowNoSpec("Spec XML is not good.");
-    XMLDocumentEntity aRoot = (XMLDocumentEntity) EntityFactory.FromXElement(root, null);
+    DocumentEntity aRoot = (DocumentEntity) EntityFactory.FromXElement(root, null);
     ElementEntity bRoot = (ElementEntity) (aRoot.RootNode ?? throw new InvalidDataException("Root node should not be null."));
     ElementEntity prefabs = bRoot.Children.OfType<ElementEntity>().Where(i => i.Name == "Prefabs").At(0);
 

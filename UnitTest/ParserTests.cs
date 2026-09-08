@@ -28,7 +28,7 @@ public class ParserTests
     Assert.True(content.Length > 10);
     XElement xml_data = XElement.Parse(content);
     IParsedEntity parsedEntity = EntityFactory.FromXElement(xml_data, null);
-    XMLDocumentEntity xMLDocumentEntity = Assert.IsType<XMLDocumentEntity>(parsedEntity);
+    DocumentEntity xMLDocumentEntity = Assert.IsType<DocumentEntity>(parsedEntity);
     Assert.NotNull(xMLDocumentEntity.RootNode);
     Assert.Equal(BasicType.Element, xMLDocumentEntity.RootNode.Type);
   }

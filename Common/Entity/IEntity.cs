@@ -2,7 +2,7 @@
 #pragma warning disable format // Formatting
 
 namespace Common.Entity;
-public interface IEntity : IParsedEntity
+public interface IEntity
 {
   IDictionary<string, IList<IParsedEntity>> PropertyCollections { get; }
   IList<IParsedEntity> Children { get; }

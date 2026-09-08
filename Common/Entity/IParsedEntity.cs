@@ -9,7 +9,7 @@ public interface IParsedEntity
 {
   /// <summary>Gets the origin of the parsed entity.</summary>
   /// <remarks>This is null for entities that are not derived from a single source.</remarks>
-  string? Origin { get; }
+  string? Origin { get; set; }
   /// <summary>Gets the BT type.</summary>
   BT Type { get; }
   /// <summary>The parent entity.</summary>
