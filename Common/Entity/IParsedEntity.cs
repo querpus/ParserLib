@@ -7,6 +7,10 @@ namespace Common.Entity;
 
 public interface IParsedEntity
 {
+  Dictionary<string, IList<IParsedEntity>> PropertyCollections { get; }
+  IList<IParsedEntity> Children { get; }
+  Dictionary<string, IParsedEntity> PropertyValues { get; }
+  Dictionary<string, object?> DataValues { get; }
   /// <summary>Gets the origin of the parsed entity.</summary>
   /// <remarks>This is null for entities that are not derived from a single source.</remarks>
   string? Origin { get; set; }

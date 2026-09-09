@@ -6,7 +6,8 @@ using System.Data;
 using BT = Common.Entity.BasicType;
 
 namespace Common.Entity;
-public abstract class ParsedEntity : IParsedEntity, IEquatable<IParsedEntity>, IEntity
+/// <summary>Base class for entities.</summary>
+public abstract class ParsedEntity : IParsedEntity, IEquatable<IParsedEntity>, IEntity, ITextSerializer
 {
   /// <summary>Gets or sets the parent entity.</summary>
   /// <remarks>This is <see langword="null"/> if the current entity is a root entity.</remarks>
@@ -22,10 +23,17 @@ public abstract class ParsedEntity : IParsedEntity, IEquatable<IParsedEntity>, I
   /// <summary>Gets the property values.</summary>
   public virtual Dictionary<string, IParsedEntity> PropertyValues { get; } = [];
   /// <summary>Gets the data values.</summary>
+  /// <remarks>These are the values that are stored in the regular expression groups.</remarks>
   public virtual Dictionary<string, object?> DataValues { get; } = [];
-
-  public abstract bool Equals (IParsedEntity? other);
-  public abstract override string? ToString ();
+  public bool Equals (IParsedEntity? other) =>
+    other is CustomEntity cust &&
+    PropertyCollections.SequenceEqual(cust.PropertyCollections) &&
+    PropertyValues.SequenceEqual(cust.PropertyValues) &&
+    DataValues.SequenceEqual(cust.DataValues) &&
+    Children.SequenceEqual(cust.Children);
+  /// <summary>The serialized representation of this entity.</summary>
+  /// <returns>Returns the serialized entity by default.</returns>
+  public virtual string? ToString () => Serialize();
   public void SetParent (IParsedEntity parent) => Parent = parent;
 }
 public class ErrorEntity : ParsedEntity
@@ -366,12 +374,5 @@ public class SectionEntity : ParsedEntity
 public class CustomEntity : ParsedEntity
 {
   public override BT Type => BT.Custom;
-
-  public override bool Equals (IParsedEntity? other) =>
-    other is CustomEntity cust &&
-    PropertyCollections.SequenceEqual(cust.PropertyCollections) &&
-    PropertyValues.SequenceEqual(cust.PropertyValues) &&
-    DataValues.SequenceEqual(cust.DataValues) &&
-    Children.SequenceEqual(cust.Children);
   public override string? ToString () => "CustomEntity Data:" + DataValues.TextJoin(",") + " | Children: " + Children.TextJoin(",");
 }

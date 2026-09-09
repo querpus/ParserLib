@@ -177,9 +177,9 @@ public static partial class EntityFactory
     Content = match.Value,
     Origin = match.Value
   };
-  private static IParsedEntity GetEntity (Match match, ParserContext context)
+  private static IParsedEntity GetEntity (Match match, ParsingContext context)
   {
-    if (context.ParsingSet?.TryGetOptions(match, context, out EntityParsingOptions? options) is null or false)
+    if (context.ParsingSet?.TryGetOptions(match, context, out EntityInfo? options) is null or false)
     {
       return new ErrorEntity()
       {
@@ -255,11 +255,11 @@ public static partial class EntityFactory
 
     throw new InvalidOperationException("The internal value group needed to process this item is missing.");
   }
-  private static IParsedEntity CheckXMLMatch (Match match, ParserContext context)
+  private static IParsedEntity CheckXMLMatch (Match match, ParsingContext context)
   {
     if (!match.Success) throw new InvalidOperationException("Match was not a success.");
 
-    if (context.ParsingSet is not null && context.ParsingSet.TryGetOptions(match, context, out EntityParsingOptions? options))
+    if (context.ParsingSet is not null && context.ParsingSet.TryGetOptions(match, context, out EntityInfo? options))
     {
       return GetEntity(match, context);
     }
@@ -298,7 +298,7 @@ public static partial class EntityFactory
     throw new InvalidOperationException("The groups needed to process this item are missing.");
   }
 
-  public static IParsedEntity FromXElement (XElement root, ParserContext? context)
+  public static IParsedEntity FromXElement (XElement root, ParsingContext? context)
   {
     context ??= new() { OriginText = root.Value };
     DocumentEntity document = new()
@@ -434,7 +434,7 @@ public static partial class EntityFactory
     IParsedEntity? parent = null;
     Collection<IParsedEntity> inside = [];
     MatchCollection matches = XML_PreCompiled.Matches(content);
-    ParserContext context = new();
+    ParsingContext context = new();
 
     document = new DocumentEntity()
     {
