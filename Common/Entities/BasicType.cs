@@ -1,7 +1,7 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-namespace Common.Entity;
+namespace Common.Entities;
 /// <summary>The type of object.</summary>
 public enum BasicType
 {
@@ -25,7 +25,7 @@ public enum BasicType
   /// <summary>Non-quoted numeric data.</summary>
   /// <remarks>JSON numeric values, not enclosed in quotes.</remarks>
   Number,
-  /// <summary>An array of <see cref="IParsedEntity"/> items.</summary>
+  /// <summary>An array of <see cref="IEntity"/> items.</summary>
   /// <remarks>A JSON array object, or a list of items.</remarks>
   Array,
   /// <summary>A basic dictionary.</summary>
@@ -52,8 +52,11 @@ public enum BasicType
   /// <summary>A key\value pair in which the value is an entity.</summary>
   Property,
   #endregion INI / REG
-  /// <summary>The type of a custom type, for a different style structure than what has been defined already.</summary>
-  Custom = 0x7fff,
+  /// <summary>A custom type, for a different style structure than what has been defined already.</summary>
+  Raw = 0x7fff,
+  /// <summary>A custom class, for a different style structure than what has been defined already.</summary>
+  /// <remarks>This class must inherit from <see cref="Entity"/>.</remarks>
+  External = 0x8000,
   /// <summary>A constant character or set of characters.</summary>
-  Operator = 0x8000
+  Operator = 0x8001
 }

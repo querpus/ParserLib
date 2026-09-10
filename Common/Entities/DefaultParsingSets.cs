@@ -1,9 +1,9 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-using BT = Common.Entity.BasicType;
+using BT = Common.Entities.BasicType;
 
-namespace Common.Entity;
+namespace Common.Entities;
 
 public static class DefaultParsingSets
 {
@@ -41,7 +41,10 @@ public static class DefaultParsingSets
        IndicatedItem = new() { Group = "ws" },
        Type = BT.IgnoredWhitespace,
     }, new() {
-    }]
+    }],
+    Comments = [
+      new() {Open = "<!==", Close = "-->", Expression = ""}
+    ]
   };
   public static ParsingSet JSON { get; } = new ParsingSet()
   {

@@ -1,7 +1,7 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-namespace Common.Entity;
+namespace Common.Entities;
 /// <summary>Represents matching criteria for an indicated item, including an optional token type, a required capture group, an
 /// optional exact value, and whether exact-value comparison ignores case.</summary>
 /// <remarks>TokenType may be null if unspecified. Group must be present and have length > 0 for a match.

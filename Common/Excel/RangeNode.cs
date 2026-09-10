@@ -1,6 +1,4 @@
 #if HAS_OFFICE
-using Common.Regexp;
-
 using XlRange = Microsoft.Office.Interop.Excel.Range;
 
 namespace Common.Excel;
@@ -50,7 +48,7 @@ public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>, IGenerat
 
   protected XlRange? Rng { get; set; }
 
-  public RangeNode () => ParseData = new MatchDataSet();
+  public RangeNode () => ParseData = new Match();
   public static RangeNode Generate (MatchDataSet mdd)
   {
     ANEx.ThrowIfNull(mdd);

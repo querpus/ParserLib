@@ -1,19 +1,21 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-using BT = Common.Entity.BasicType;
+using BT = Common.Entities.BasicType;
 
-namespace Common.Entity;
+namespace Common.Entities;
 
+/// <summary>This is common data to describe variations of entity properties.</summary>
 public class EntityInfo
 {
-
   #region Functional Properties
   /// <summary>
-  /// Can be any predefined type, or it can be the special value <see cref="BT.Custom"/>.
+  /// Can be any predefined type, or it can be the special value <see cref="BT.Raw"/>.
   /// This determines the class of entity that is produced.
   /// </summary>
   public BT Type { get; set; }
+  /// <summary>If <see cref="Type"/> is <see cref="BT.External"/> </summary>
+  public Type? Class { get; set; }
   /// <summary>The conditions that must be present for this entity to be produced.</summary>
   public IndicationRule IndicatedItem { get; set; }
   /// <summary>The change in depth this token indicates.</summary>
@@ -66,10 +68,16 @@ public class EntityInfo
   #endregion
 
   #region Overrides and Equality
-  public override bool Equals (object? obj) => obj is EntityInfo rules && GetHashCode() == rules.GetHashCode();
+  /// <summary>Basic equality, quick method.</summary>
+  /// <param name="obj">The other object.</param>
+  /// <returns><see langword="true"/> if the object is an <see cref="EntityInfo"/> and the properties are the same. Otherwise <see langword="false"/>.</returns>
+  public override bool Equals (object? obj) => obj is EntityInfo info && Equals(info);
   public override int GetHashCode () => HashCode.Combine(Type, IndicatedItem, DepthChange, SetPropKey, SetAsNextLevelParent, CreateEmptyAtStart, ConstantValue, StorePieceTypes, HashCode.Combine(StoresData, DefinesStructure, OnlyAtTopLevel));
   public static bool operator == (EntityInfo left, EntityInfo right) => left.Equals(right);
   public static bool operator != (EntityInfo left, EntityInfo right) => !(left == right);
+  /// <summary>Simplified equality.</summary>
+  /// <param name="other">The other <see cref="EntityInfo"/> object.</param>
+  /// <returns><see langword="true"/> if the hashcode of this object and  the other <see cref="EntityInfo"/>  are the same. Otherwise <see langword="false"/>.</returns>
   public bool Equals (EntityInfo other) => GetHashCode() == other.GetHashCode();
   #endregion
 }

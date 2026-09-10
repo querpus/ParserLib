@@ -1,7 +1,8 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-namespace Common.Entity;
+namespace Common.Entities;
+
 public enum PassType
 {
   /// <summary>Do nothing.</summary>
