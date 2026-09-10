@@ -76,7 +76,8 @@ public class ParsingSet
 
   public IEntity? Generate (Match match, EntityParsingOptions options)
   {
-    try {
+    try
+    {
       return options.Type switch
       {
         BT.Operator when options.ConstantValue is not null => new SymbolEntity()
@@ -101,17 +102,34 @@ public class ParsingSet
           : throw new InvalidValueException(match.Groups[options.StorePieceTypes["Value"]].Value),
           Origin = match.Value,
         },
-        BT.Boolean => GetBoolean(match),
-        BT.Null => GetNull(match),
-        BT.Comment => GetComment(match),
-        BT.IgnoredWhitespace => GetWhitespace(match),
+        BT.Boolean => new BooleanEntity()
+        {
+          Value = bool.TryParse(match.Groups[options.StorePieceTypes["Value"]].Value, out bool result)
+          ? result
+          : throw new InvalidValueException(match.Groups[options.StorePieceTypes["Value"]].Value),
+          Origin = match.Value,
+        },
+        BT.Null => new NullEntity()
+        {
+          Origin = match.Value,
+        },
+        BT.Comment => new CommentEntity()
+        {
+          Content = match.Value,
+          Origin = match.Value
+        },
+        BT.IgnoredWhitespace => new WhitespaceEntity()
+        {
+          Content = match.Value,
+          Origin = match.Value,
+        },
         BT.Array => new ArrayEntity()
         {
-          Origin = match.Value
+          Origin = null,
         },
         BT.Object => new ObjectEntity()
         {
-          Origin = match.Value
+          Origin = null,
         },
         BT.Custom => new CustomEntity()
         {
@@ -126,7 +144,11 @@ public class ParsingSet
         BT.Attribute when context.Key is string key => new AttributeEntity() { Origin = match.Value, Key = key, Value = match.Value, },
         BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
         BT.Property when context.Key is string key => new PropertyEntity() { Origin = match.Value, Key = key, Value = GetString(match) },
-        BT.Operator => GetSymbol(match),
+        BT.Operator => new SymbolEntity()
+        {
+          Content = match.Value,
+          Origin = match.Value
+        },
         _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
       };
     }
@@ -135,6 +157,7 @@ public class ParsingSet
       Debug.Log(MsgClass.Warning, ive.Message, this);
       return null;
     }
+  }
 }
 
 public static class DefaultParsingSets
