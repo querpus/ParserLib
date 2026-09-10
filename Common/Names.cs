@@ -33,6 +33,10 @@ public static class Names
   public const StringComparison SCO = StringComparison.Ordinal;
   /// <summary>Ordinal (Case-Insensitive).</summary>
   public const StringComparison SCOIC = StringComparison.OrdinalIgnoreCase;
+  /// <summary>Invariant (Case-Sensitive).</summary>
+  public const StringComparison SCI = StringComparison.InvariantCulture;
+  /// <summary>Invariant (Case-Insensitive).</summary>
+  public const StringComparison SCIIC = StringComparison.InvariantCultureIgnoreCase;
 
   /// <summary>Number styles.</summary>
   public const NumberStyles

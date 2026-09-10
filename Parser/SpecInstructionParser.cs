@@ -2,7 +2,7 @@
 
 using System.Xml.Linq;
 
-using Common.Entity;
+using Common.Entities;
 
 using Parser.Inference;
 

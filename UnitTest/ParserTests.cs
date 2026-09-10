@@ -1,7 +1,7 @@
 using System;
 using System.Xml.Linq;
 
-using Common.Entity;
+using Common.Entities;
 using Common.Extensions;
 
 using static Common.Names;
@@ -27,7 +27,7 @@ public class ParserTests
     string content = File.ReadAllText(Helper.GitDir + file);
     Assert.True(content.Length > 10);
     XElement xml_data = XElement.Parse(content);
-    IParsedEntity parsedEntity = EntityFactory.FromXElement(xml_data, null);
+    IEntity parsedEntity = EntityFactory.FromXElement(xml_data, null);
     DocumentEntity xMLDocumentEntity = Assert.IsType<DocumentEntity>(parsedEntity);
     Assert.NotNull(xMLDocumentEntity.RootNode);
     Assert.Equal(BasicType.Element, xMLDocumentEntity.RootNode.Type);

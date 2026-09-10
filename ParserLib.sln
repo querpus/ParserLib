@@ -80,6 +80,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TokenFinder", "TokenFinder\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magna.ECMWasher.DTFEM", "SerialSenderApp\Magna.ECMWasher.DTFEM.csproj", "{E4ED8E1F-9189-4E12-4484-500C35BA15E4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Drafts", "Drafts", "{2124EC92-B74E-4079-9B84-86302612CB3E}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\iCloud Drive\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntax\xml.json = ..\..\iCloud Drive\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntax\xml.json
+	EndProjectSection
+	ProjectSection(FolderGlobals) = preProject
+		D_5_4iCloud Drive_4iCloudDrive_4iCloud~com~agiletortoise~Drafts5_4Library_4Syntax_4xml_1json__JsonSchema = https://alec016.github.io/Custom-Machinery/Json%20Schema/src/main/resources/schemas/custom_machinery_recipe.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

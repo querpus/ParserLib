@@ -4,9 +4,9 @@
 using System.Data;
 using System.Xml.Linq;
 
-using BT = Common.Entity.BasicType;
+using BT = Common.Entities.BasicType;
 
-namespace Common.Entity;
+namespace Common.Entities;
 
 public static partial class EntityFactory
 {
@@ -77,7 +77,76 @@ public static partial class EntityFactory
     """;
   #endregion
 
-  private static Collection<IParsedEntity> ParseAttributes (Match match)
+  private static IEntity Generate (Match match, ParsingContext context)
+  {
+    if (!match.Success)
+    {
+      return new ErrorEntity() { Message = "Match was not a success: " + match.Value };
+    }
+
+    if (!context.ParsingSet!.TryGetOptions(match, context, out var options))
+    {
+      return new ErrorEntity() { Message = "No entity match: " + match.Value };
+    }
+
+    return options.Type switch
+    {
+      _ when options.ConstantValue is not null => new SymbolEntity()
+      {
+        Content = options.ConstantValue,
+        Origin = match.Value
+      },
+      BT.String => new StringEntity()
+      {
+        Value = match.Groups["value"].Value,
+        Origin = match.Value
+      },
+      BT.Placeholder when match.HasValidGroup("element") && match.HasValidGroup("element") => new()
+      {
+        Name = match.Groups["name"].Value,
+        Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
+        Origin = match.Value,
+      };
+      BT.Number => GetNumber(match),
+      BT.Boolean => GetBoolean(match),
+      BT.Null => GetNull(match),
+      BT.Comment => GetComment(match),
+      BT.IgnoredWhitespace => GetWhitespace(match),
+      BT.Array => new ArrayEntity()
+      {
+        Origin = match.Value
+      },
+      BT.Object => new ObjectEntity()
+      {
+        Origin = match.Value
+      },
+      BT.Raw => new RawEntity()
+      {
+        Origin = match.Value,
+      },
+      BT.Invalid => throw new InvalidOperationException("Type was Invalid."),
+      BT.Absent => throw new InvalidOperationException("Type was Absent."),
+      BT.Placeholder => throw new InvalidOperationException("Type was Placeholder."),
+      BT.Document => new DocumentEntity()
+      {
+        Content = match.Value,
+        Origin = match.Value
+      },
+      BT.LooseContent => new ContentEntity()
+      {
+        Content = match.Value,
+        Origin = match.Value
+      },
+      BT.Element when match.HasValidGroup("name") => new ElementEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
+      BT.Attribute when context.Key is string key => new AttributeEntity() { Origin = match.Value, Key = key, Value = match.Value, },
+      BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
+      BT.Property when context.Key is string key => new PropertyEntity() { Origin = match.Value, Key = key },
+      BT.Operator => GetSymbol(match),
+      _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
+    };
+  }
+
+  private static Collection<IEntity> ParseAttributes (Match match)
   {
     Collection<string> origins = [.. match.Groups["attributes"].Captures.Select(c => c.Value)];
     Collection<string> namespaces = [..
@@ -96,9 +165,9 @@ public static partial class EntityFactory
       throw new InvalidOperationException($"Keys ({keys.Count}) and Values ({values.Count}) do not match Origin Count ({origins.Count}).");
     }
   }
-  private static Collection<IParsedEntity> ParseAttributes (XElement element)
+  private static Collection<IEntity> ParseAttributes (XElement element)
   {
-    Collection<IParsedEntity> result = [];
+    Collection<IEntity> result = [];
     foreach (XAttribute attr in element.Attributes())
     {
       result.Add(new AttributeEntity()
@@ -118,11 +187,6 @@ public static partial class EntityFactory
     Origin = match.Value,
     Attributes = [.. ParseAttributes(match)],
   };
-  private static ContentEntity GetContent (Match match) => new()
-  {
-    Content = match.Value,
-    Origin = match.Value
-  };
   private static CommentEntity GetComment (Match match) => new()
   {
     Content = match.Value,
@@ -132,12 +196,6 @@ public static partial class EntityFactory
   {
     Content = match.Value,
     Origin = match.Value
-  };
-  private static ElementClosePlaceholder GetClose (Match match) => new()
-  {
-    Name = match.Groups["name"].Value,
-    Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
-    Origin = match.Value,
   };
   private static ElementOpenPlaceholder GetOpen (Match match) => new()
   {
@@ -152,11 +210,6 @@ public static partial class EntityFactory
     Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
     Origin = match.Value,
     Attributes = [.. ParseAttributes(match)]
-  };
-  private static StringEntity GetString (Match match) => new()
-  {
-    Value = match.Groups["value"].Value,
-    Origin = match.Value
   };
   private static NumberEntity GetNumber (Match match) => new()
   {
@@ -177,89 +230,17 @@ public static partial class EntityFactory
     Content = match.Value,
     Origin = match.Value
   };
-  private static IParsedEntity GetEntity (Match match, ParserContext context)
+  private static IEntity ValueSelector (Match match, ParsingContext context)
   {
-    if (context.ParsingSet?.TryGetOptions(match, context, out EntityParsingOptions? options) is null or false)
-    {
-      return new ErrorEntity()
-      {
-        Message = $"The match did not meet the requirements for any entity. ({match.Value})",
-        Origin = match.Value
-      };
-    }
-
-    IParsedEntity generated = options.Type switch
-    {
-      _ when options.ConstantValue is not null => new SymbolEntity()
-      {
-        Content = options.ConstantValue,
-        Origin = match.Value
-      },
-      BT.String => GetString(match),
-      BT.Number => GetNumber(match),
-      BT.Boolean => GetBoolean(match),
-      BT.Null => GetNull(match),
-      BT.Comment => GetComment(match),
-      BT.IgnoredWhitespace => GetWhitespace(match),
-      BT.Array => new ArrayEntity()
-      {
-        Origin = match.Value
-      },
-      BT.Object => new ObjectEntity()
-      {
-        Origin = match.Value
-      },
-      BT.Custom => new CustomEntity()
-      {
-        Origin = match.Value,
-      },
-      BT.Invalid => throw new InvalidOperationException("Type was Invalid."),
-      BT.Absent => throw new InvalidOperationException("Type was Absent."),
-      BT.Placeholder => throw new InvalidOperationException("Type was Placeholder."),
-      BT.Document => new DocumentEntity()
-      {
-        Content = match.Value,
-        Origin = match.Value
-      },
-      BT.LooseContent => GetContent(match),
-      BT.Element when match.HasValidGroup("name") => new ElementEntity()   { Origin = match.Value, Name = match.Groups["name"].Value },
-      BT.Attribute when context.Key is string key => new AttributeEntity() { Origin = match.Value, Key = key, Value = match.Value, },
-      BT.Section when match.HasValidGroup("name") => new SectionEntity()   { Origin = match.Value, Name = match.Groups["name"].Value },
-      BT.Property when context.Key is string key  => new PropertyEntity()  { Origin = match.Value, Key = key, Value = GetString(match) },
-      BT.Operator => GetSymbol(match),
-      _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
-    };
-
-    if (options.AddToPropKey)
-    {
-      var prop = context.GetPropKey<IParsedEntity>();
-      (prop as PropertyEntity)?.Value = prop;
-    }
-
-    return generated;
-  }
-
-  private static IParsedEntity ValueSelector (Match match)
-  {
-    if (match.HasValidGroup("strvalue"))
-      return GetString(match);
-
-    if (match.HasValidGroup("numvalue"))
-      return GetNumber(match);
-
-    if (match.HasValidGroup("boolvalue"))
-      return GetBoolean(match);
-
-    if (match.HasValidGroup("nullvalue"))
-      return GetNull(match);
+    return Generate(match, context);
 
     throw new InvalidOperationException("The internal value group needed to process this item is missing.");
   }
-  private static IParsedEntity CheckXMLMatch (Match match, ParserContext context)
+  private static IEntity CheckXMLMatch (Match match, ParsingContext context)
   {
     if (!match.Success) throw new InvalidOperationException("Match was not a success.");
 
-    if (context.ParsingSet is not null && context.ParsingSet.TryGetOptions(match, context, out EntityParsingOptions? options))
+    if (context.ParsingSet is not null && context.ParsingSet.TryGetOptions(match, context, out EntityInfo? options))
     {
       return GetEntity(match, context);
     }
@@ -276,29 +257,16 @@ public static partial class EntityFactory
   // if (match.HasValidGroup("comment")) return GetComment (match);
   // if (match.HasValidGroup("ws")) return GetWhitespace (match);
 
-  private static IParsedEntity CheckJSONMatch (Match match)
+  private static IEntity CheckJSONMatch (Match match, ParsingContext context)
   {
     if (!match.Success) throw new InvalidOperationException("Match was not a success.");
 
-    if (match.HasValidGroup("value"))
-      return ValueSelector(match);
+    IEntity gen = Generate(match, context);
 
-    if (match.HasValidGroup("key"))
-      return GetContent(match);
-
-    if (match.HasValidGroup("comment"))
-      return GetComment(match);
-
-    if (match.HasValidGroup("op"))
-      return GetSymbol(match);
-
-    if (match.HasValidGroup("ws"))
-      return GetWhitespace(match);
-
-    throw new InvalidOperationException("The groups needed to process this item are missing.");
+    return gen is ErrorEntity ee ? throw new InvalidOperationException(ee.Message) : gen;
   }
 
-  public static IParsedEntity FromXElement (XElement root, ParserContext? context)
+  public static IEntity FromXElement (XElement root, ParsingContext? context)
   {
     context ??= new() { OriginText = root.Value };
     DocumentEntity document = new()
@@ -323,60 +291,43 @@ public static partial class EntityFactory
 
     return document;
   }
-  public static IParsedEntity JSONFromString (string content)
+  public static IEntity JSONFromString (string content)
   {
-    Collection<IParsedEntity> inside = [];
-    Collection<string?> keys = [];
-    IParsedEntity? parent = null;
+    ParsingContext context = new ParsingContext();
+    IEntity? parent = null;
     MatchCollection matches = JSON_PreCompiled.Matches(content);
-    IParsedEntity? document = new DocumentEntity()
+    context.Document = new DocumentEntity()
     {
       Origin = content,
       Content = content,
     };
 
-    int get_depth () => inside.Count - 1;
 
-    IParsedEntity obj_create (IParsedEntity? inside_entity, IParsedEntity child_obj)
-    {
-      if (inside_entity is null)
-        (document as DocumentEntity)?.SetRoot(child_obj);
-      else if (inside_entity is ObjectEntity oe)
-        oe.AddProperty(child_obj);
-      else if (inside_entity is ArrayEntity ae)
-        ae.AddValue(child_obj);
-      else
-        throw new InvalidOperationException($"Cannot create an object inside a {inside_entity.Type}.");
-
-      inside.Add(child_obj);
-      keys.Add(null);
-      return child_obj;
-    }
-    IParsedEntity? obj_exit () => keys[get_depth()] is null ? inside.Pop() :
-      throw new InvalidOperationException($"Key {keys[get_depth()]} ws not popped.");
+    IEntity? obj_exit () => keys[context.Depth] is null ? inside.Pop() :
+      throw new InvalidOperationException($"Key {keys[context.Depth]} ws not popped.");
     void obj_set_key (string key)
     {
-      keys[get_depth()] = keys[get_depth()] is null ? key
-        : throw new InvalidOperationException($"Key is already set for this object. ({keys[get_depth()]})");
+      keys[context.Depth] = keys[context.Depth] is null ? key
+        : throw new InvalidOperationException($"Key is already set for this object. ({keys[context.Depth]})");
     }
     string obj_pop_key ()
     {
-      if (keys[get_depth()] is null)
+      if (keys[context.Depth] is null)
       {
-        throw new InvalidOperationException($"Key is not set for this object at depth {get_depth()}.");
+        throw new InvalidOperationException($"Key is not set for this object at depth {context.Depth}.");
       }
       else
       {
-        string result = keys[get_depth()]!;
-        keys[get_depth()] = null;
+        string result = keys[context.Depth]!;
+        keys[context.Depth] = null;
         return result;
       }
     }
-    bool obj_chk_key () => keys[get_depth()] is not null;
+    bool obj_chk_key () => keys[context.Depth] is not null;
 
     foreach (Match match in matches)
     {
-      IParsedEntity item = CheckJSONMatch(match);
+      IEntity item = CheckJSONMatch(match, context);
 
       switch (item)
       {
@@ -385,7 +336,11 @@ public static partial class EntityFactory
           continue;
         // Object start
         case SymbolEntity se when se == "{":
-          parent = obj_create(parent, new ObjectEntity());
+          ObjectEntity child_obj = new ObjectEntity();
+          if (parent is ObjectEntity oe)
+            oe.AddProperty(child_obj);
+          else if (parent is ArrayEntity ae)
+            ae.AddValue(child_obj);
           continue;
         case SymbolEntity se when se == "}":
           parent = obj_exit();
@@ -408,33 +363,33 @@ public static partial class EntityFactory
           obj_set_key(se.Value);
           continue;
         // The keyname is not empty, and we have a primitive entity, so this is the value for the current property.
-        case IPrimitiveEntity ipe when parent is ObjectEntity oe && obj_chk_key():
+        case StringEntity or NumberEntity or NullEntity or BooleanEntity when parent is ObjectEntity oe && obj_chk_key():
           string keyname = obj_pop_key();
           PropertyEntity prop = new()
           {
             Key = keyname,
-            Origin = $"\"{keyname}\":{ipe.Origin}",
-            Value = ipe,
+            Origin = $"\"{keyname}\":{item.Origin}",
+            Value = item,
           };
           oe.AddProperty(prop);
           continue;
         // We are in an array and we have a primitive entity
-        case IPrimitiveEntity ipe when parent is ArrayEntity ae:
-          ae.AddValue(ipe);
+        case StringEntity or NumberEntity or NullEntity or BooleanEntity when parent is ArrayEntity ae:
+          ae.AddValue(item);
           continue;
         default:
           throw new InvalidOperationException($"Unhandled Entity \"{item.Origin}\" sent to EntityFactory.");
       }
     }
-    return document;
+    return context.Document;
   }
-  public static IParsedEntity XMLFromString (string content)
+  public static IEntity XMLFromString (string content)
   {
-    IParsedEntity? document;
-    IParsedEntity? parent = null;
-    Collection<IParsedEntity> inside = [];
+    IEntity? document;
+    IEntity? parent = null;
+    Collection<IEntity> inside = [];
     MatchCollection matches = XML_PreCompiled.Matches(content);
-    ParserContext context = new();
+    ParsingContext context = new();
 
     document = new DocumentEntity()
     {
@@ -444,7 +399,7 @@ public static partial class EntityFactory
 
     foreach (Match match in matches)
     {
-      IParsedEntity item = CheckXMLMatch(match, context);
+      IEntity item = CheckXMLMatch(match, context);
 
       switch (item)
       {
@@ -502,7 +457,7 @@ public static partial class EntityFactory
     }
     return document;
   }
-  public static IParsedEntity FromString (string content, BT type) => type switch
+  public static IEntity FromString (string content, BT type) => type switch
   {
     BT.Null => new NullEntity(),
     BT.Element => XMLFromString(content),
