@@ -1,14 +1,16 @@
 #if HAS_OFFICE
+using Common.RegExp;
+
 using XlRange = Microsoft.Office.Interop.Excel.Range;
 
 namespace Common.Excel;
 /// <summary>A node within a range.</summary>
-public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>, IGeneratable
+public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>
 {
   #region Static Members
   public static RangeNode Empty => new();
-  private static void Log (string msg) =>
-    Debug.Log(MsgClass.Debug, msg);
+  private void Log (string msg) =>
+    Debug.Log(MsgClass.Debug, msg, this);
   #endregion
 
   #region Public Properties
@@ -48,7 +50,7 @@ public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>, IGenerat
 
   protected XlRange? Rng { get; set; }
 
-  public RangeNode () => ParseData = new Match();
+  public RangeNode () => ParseData = GroupDataSet.Null;
   public static RangeNode Generate (MatchDataSet mdd)
   {
     ANEx.ThrowIfNull(mdd);

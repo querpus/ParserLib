@@ -137,6 +137,11 @@ public static partial class EntityFactory
         Content = match.Value,
         Origin = match.Value
       },
+      BT.Element when match.HasValidGroup("name") && match.HasValidGroup("single") => new ElementEntity() {
+        Origin = match.Value,
+        Name = match.Groups["name"].Value,
+        Attributes = ParseAttributes(match),
+      },
       BT.Element when match.HasValidGroup("name") => new ElementEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
       BT.Attribute when context.Key is string key => new AttributeEntity() { Origin = match.Value, Key = key, Value = match.Value, },
       BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
@@ -317,8 +322,12 @@ public static partial class EntityFactory
     //    return result;
     //  }
     //}
-    for (int i = 0; i < WorkingSet.Count; i++) Match match in matches)
+
+    int max = context.WorkingSet.Count;
+
+    for (int i = 0; i < max; i++)
     {
+      Match match = context.CurrentItem;
       IEntity item = CheckJSONMatch(match, context);
 
       switch (item)
@@ -328,7 +337,7 @@ public static partial class EntityFactory
           continue;
         // Object start
         case SymbolEntity se when se == "{":
-          ObjectEntity child_obj = new ObjectEntity();
+          ObjectEntity child_obj = new();
           if (parent is ObjectEntity oe)
             oe.AddProperty(child_obj);
           else if (parent is ArrayEntity ae)

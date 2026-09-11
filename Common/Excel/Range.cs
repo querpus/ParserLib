@@ -1,7 +1,7 @@
 #if HAS_OFFICE
-using Common.Regexp;
+using Common.RegExp;
 
-using static Common.Regex.RegexStaticFunctions;
+using static Common.RegExp.RegexStaticFunctions;
 
 using SysRegex = System.Text.RegularExpressions.Regex;
 

@@ -40,7 +40,7 @@ public static class DefaultParsingSets
       IndicatedItem = new() { Group = "content" },
       Type = BT.LooseContent,
       StoresData = true,
-      
+
     }, new() {
       IndicatedItem = new() { Group = "ws" },
       Type = BT.IgnoredWhitespace,
