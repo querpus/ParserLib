@@ -15,7 +15,7 @@ public class ElementOpenPlaceholder : Entity
 
   public Collection<AttributeEntity> Attributes
   {
-    get => (Collection<IEntity>) PropertyCollections["Attributes"];
+    get => (Collection<AttributeEntity>) PropertyCollections["Attributes"];
     init => AddAttributes(value);
   }
   public string? Namespace
@@ -26,8 +26,11 @@ public class ElementOpenPlaceholder : Entity
   public override BT Type => BT.Placeholder;
   public void AddAttribute (IEntity attribute)
   {
-    attribute.SetParent(this);
-    Attributes.Add(attribute);
+    if (attribute is AttributeEntity ae)
+    {
+      ae.SetParent(this);
+      Attributes.Add(ae);
+    }
   }
   public void AddAttributes (IEnumerable<IEntity> attributes) => attributes.Foreach(AddAttribute);
   public override bool Equals (IEntity? other) =>

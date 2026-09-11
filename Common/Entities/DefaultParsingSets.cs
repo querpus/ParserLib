@@ -7,20 +7,27 @@ namespace Common.Entities;
 
 public static class DefaultParsingSets
 {
-  public static ParsingSet XML { get; } = new ParsingSet()
+  public static ParsingInfo XML { get; } = new ParsingInfo()
   {
-    Global = new() {
-      GeneratesSingleObject = true,
-      IgnoreCase = false,
-      TotalPasses = 2
-    },
+    GeneratesSingleObject = true,
+    IgnoreCase = false,
+    TotalPasses = 2,
     EntityOptions = [
     new() {
       IndicatedItem = new() { Group = "header" },
       Type = BT.Element,
     }, new() {
-      IndicatedItem = new() { Group = "header" },
+      IndicatedItem = new() { Group = "close" },
       Type = BT.Element,
+      DepthChange = -1,
+    }, new() {
+      IndicatedItem = new() { Group = "single" },
+      Type = BT.Element,
+    }, new() {
+      IndicatedItem = new() { Group = "element" },
+      Type = BT.Element,
+      DepthChange = 1,
+      SetAsNextLevelParent = true,
     }, new() {
       CreateEmptyAtStart = true,
       Type = BT.Document,
@@ -30,30 +37,27 @@ public static class DefaultParsingSets
       IndicatedItem = new() { Group = "ws" },
       Type = BT.IgnoredWhitespace,
     }, new() {
-       IndicatedItem = new() { Group = "content" },
-       Type = BT.LooseContent,
-       StoresData = true,
-
+      IndicatedItem = new() { Group = "content" },
+      Type = BT.LooseContent,
+      StoresData = true,
+      
     }, new() {
-       IndicatedItem = new() { Group = "ws" },
-       Type = BT.IgnoredWhitespace,
+      IndicatedItem = new() { Group = "ws" },
+      Type = BT.IgnoredWhitespace,
     }, new() {
-       IndicatedItem = new() { Group = "ws" },
-       Type = BT.IgnoredWhitespace,
+      IndicatedItem = new() { Group = "ws" },
+      Type = BT.IgnoredWhitespace,
     }, new() {
     }],
     Comments = [
       new() {Open = "<!==", Close = "-->", Expression = ""}
     ]
   };
-  public static ParsingSet JSON { get; } = new ParsingSet()
+  public static ParsingInfo JSON { get; } = new ParsingInfo()
   {
-    Global = new() {
-      GeneratesSingleObject = true,
-      IgnoreCase = false,
-      TotalPasses = 2,
-      PropertyByDepth = true
-    },
+    GeneratesSingleObject = true,
+    IgnoreCase = false,
+    TotalPasses = 2,
     EntityOptions = [
     new() {
       IndicatedItem = new() { Group = "key" },
@@ -62,25 +66,25 @@ public static class DefaultParsingSets
       StorePieceTypes = new() { ["Name"] = "name" },
       SetPropKey = true
     }, new() {
-      IndicatedItem = new() { Group = "strvalue" },
+      IndicatedItem = new() { Group = "str_value" },
       StoresData = true,
       AddToPropKey = true,
       Type = BT.String,
       StorePieceTypes = new() { ["Value"] = "value" },
     }, new() {
-      IndicatedItem = new() { Group = "boolvalue" },
+      IndicatedItem = new() { Group = "bool_value" },
       StoresData = true,
       Type = BT.Boolean,
       AddToPropKey = true,
       StorePieceTypes = new() { ["Value"] = "value" },
     }, new () {
-      IndicatedItem = new() { Group = "numvalue" },
+      IndicatedItem = new() { Group = "num_value" },
       StoresData = true,
       Type = BT.Number,
       AddToPropKey = true,
       StorePieceTypes = new() { ["Value"] = "value" },
     }, new() {
-      IndicatedItem = new() { Group = "nullvalue" },
+      IndicatedItem = new() { Group = "null_value" },
       AddToPropKey = true,
       Type = BT.Null,
     }, new() {

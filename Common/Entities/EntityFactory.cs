@@ -21,17 +21,17 @@ public static partial class EntityFactory
   private const string JSONRegex =
     $$$"""
     (?#primitives)
-    (?'key'        " (?'keyname'\w+) " (?=\s*[:=])) |
-    (?'strvalue'   {{{AfterKey}}} " (?'value'([^\\"]|\\.)*) " ) |
-    (?'numvalue'   {{{AfterKey}}}   (?'value'[0-9.eExXbB]+ )  ) |
-    (?'boolvalue'  {{{AfterKey}}}   (?'value'true|false)      ) |
-    (?'nullvalue'  {{{AfterKey}}}   (?'value'null)            ) |
+    (?'key'        " (?'key_name'\w+) " (?=\s*[:=])) |
+    (?'str_value'   {{{AfterKey}}} " (?'value'([^\\"]|\\.)*) " ) |
+    (?'num_value'   {{{AfterKey}}}   (?'value'[0-9.eExXbB]+ )  ) |
+    (?'bool_value'  {{{AfterKey}}}   (?'value'true|false)      ) |
+    (?'null_value'  {{{AfterKey}}}   (?'value'null)            ) |
     (?#operators)
     (?'Op'            [[\]{},=:]) |
-    (?#commments)
+    (?#comments)
     (?'comment'        \/\/.* ) |
     (?'comment'        \/\*([^*]|\*[^/])*\*\/ ) |
-    (?# Other Whitespace)
+    (?#whitespace)
     (?'ws'             \s+)
     """;
   #endregion
@@ -44,26 +44,26 @@ public static partial class EntityFactory
     """
     (?# Element Piece)
     (?'element'
-      <
+      <   \s*
       (?# '?' for header definition)
       (?'header'\?)?  \s*
-      (?'close'\/)?   \s*
+      (?'close' \/)?   \s*
       (?# optional namespace)
-      ((?'ns'\w+):)?
+      ((?'ns'\w+)  \s* :)?
       (?'name'\w+)
 
       (?# attributes)
       (   \s+ 
           (?'attribute'
-          ((?'attrns'\w+)     \s*     :     \s*)?
-          (?'attrname'\w+)    \s*     =     \s*
-         "(?'attrval'(  [^\n"\\]  |  \\[^\n]  )*  )"
+          ((?'a_ns'  \w+)     \s*     :     \s*)?
+           (?'a_name'\w+)    \s*     =     \s*
+         " (?'a_value'(  [^\n"\\]  |  \\[^\n]  )*  )"
         ))*
 
       (?'single'\s*\/)?
       \s*
       (?# '?' for ending the header definition)
-      (\k'header')?
+      \? ?
       >
     ) |
 
@@ -84,7 +84,7 @@ public static partial class EntityFactory
       return new ErrorEntity() { Message = "Match was not a success: " + match.Value };
     }
 
-    if (!context.ParsingSet!.TryGetOptions(match, context, out var options))
+    if (!context.ParsingSet!.TryGetOptions(match, context, out EntityInfo? options))
     {
       return new ErrorEntity() { Message = "No entity match: " + match.Value };
     }
@@ -106,7 +106,7 @@ public static partial class EntityFactory
         Name = match.Groups["name"].Value,
         Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
         Origin = match.Value,
-      };
+      },
       BT.Number => GetNumber(match),
       BT.Boolean => GetBoolean(match),
       BT.Null => GetNull(match),
@@ -142,11 +142,12 @@ public static partial class EntityFactory
       BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
       BT.Property when context.Key is string key => new PropertyEntity() { Origin = match.Value, Key = key },
       BT.Operator => GetSymbol(match),
+      BT.External => throw new NotImplementedException(),
       _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
     };
   }
 
-  private static Collection<IEntity> ParseAttributes (Match match)
+  private static Collection<AttributeEntity> ParseAttributes (Match match)
   {
     Collection<string> origins = [.. match.Groups["attributes"].Captures.Select(c => c.Value)];
     Collection<string> namespaces = [..
@@ -240,14 +241,9 @@ public static partial class EntityFactory
   {
     if (!match.Success) throw new InvalidOperationException("Match was not a success.");
 
-    if (context.ParsingSet is not null && context.ParsingSet.TryGetOptions(match, context, out EntityInfo? options))
-    {
-      return GetEntity(match, context);
-    }
-    else
-    {
-      throw new InvalidOperationException("The groups needed to process this item are missing.");
-    }
+    IEntity gen = Generate(match, context);
+
+    return gen is ErrorEntity ee ? throw new InvalidOperationException(ee.Message) : gen;
   }
   // if (match.HasValidGroup("header")) return GetHeader (match);
   // if (match.HasValidGroup("close")) return GetClose (match);
@@ -293,39 +289,35 @@ public static partial class EntityFactory
   }
   public static IEntity JSONFromString (string content)
   {
-    ParsingContext context = new ParsingContext();
-    IEntity? parent = null;
-    MatchCollection matches = JSON_PreCompiled.Matches(content);
-    context.Document = new DocumentEntity()
+    DocumentEntity top_doc = new()
     {
       Origin = content,
       Content = content,
     };
-
-
-    IEntity? obj_exit () => keys[context.Depth] is null ? inside.Pop() :
-      throw new InvalidOperationException($"Key {keys[context.Depth]} ws not popped.");
-    void obj_set_key (string key)
+    ParsingContext context = new()
     {
-      keys[context.Depth] = keys[context.Depth] is null ? key
-        : throw new InvalidOperationException($"Key is already set for this object. ({keys[context.Depth]})");
-    }
-    string obj_pop_key ()
-    {
-      if (keys[context.Depth] is null)
-      {
-        throw new InvalidOperationException($"Key is not set for this object at depth {context.Depth}.");
-      }
-      else
-      {
-        string result = keys[context.Depth]!;
-        keys[context.Depth] = null;
-        return result;
-      }
-    }
-    bool obj_chk_key () => keys[context.Depth] is not null;
+      WorkingSet = [.. JSON_PreCompiled.Matches(content)],
+      Document = top_doc,
+      OriginText = content,
+      CurrentIndex = 0,
+      ParsingSet = DefaultParsingSets.JSON,
+      Parent = top_doc
+    };
 
-    foreach (Match match in matches)
+    //string obj_pop_key ()
+    //{
+    //  if (keys[context._depth] is null)
+    //  {
+    //    throw new InvalidOperationException($"Key is not set for this object at depth {context._depth}.");
+    //  }
+    //  else
+    //  {
+    //    string result = keys[context._depth]!;
+    //    keys[context._depth] = null;
+    //    return result;
+    //  }
+    //}
+    for (int i = 0; i < WorkingSet.Count; i++) Match match in matches)
     {
       IEntity item = CheckJSONMatch(match, context);
 
@@ -359,7 +351,7 @@ public static partial class EntityFactory
         case ElementEntity or ContentEntity or AttributeEntity:
           throw new InvalidDataException($"Cannot have an entity of this type ({item.TypeName}) in a JSON factory.");
         // The keyname is empty, and we have a string entity, so this is the key for the next property.
-        case StringEntity se when parent is ObjectEntity oe && !obj_chk_key():
+        case StringEntity se when parent is ObjectEntity oe && keys[context._depth] is null:
           obj_set_key(se.Value);
           continue;
         // The keyname is not empty, and we have a primitive entity, so this is the value for the current property.
@@ -371,7 +363,7 @@ public static partial class EntityFactory
             Origin = $"\"{keyname}\":{item.Origin}",
             Value = item,
           };
-          oe.AddProperty(prop);
+          prop.AddProperty(prop);
           continue;
         // We are in an array and we have a primitive entity
         case StringEntity or NumberEntity or NullEntity or BooleanEntity when parent is ArrayEntity ae:
