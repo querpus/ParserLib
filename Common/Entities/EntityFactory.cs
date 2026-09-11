@@ -91,18 +91,15 @@ public static partial class EntityFactory
 
     return options.Type switch
     {
-      _ when options.ConstantValue is not null => new SymbolEntity()
-      {
-        Content = options.ConstantValue,
+      BT.Operator => new SymbolEntity() {
+        Content = options.ConstantValue ?? match.Value,
         Origin = match.Value
       },
-      BT.String => new StringEntity()
-      {
+      BT.String => new StringEntity() {
         Value = match.Groups["value"].Value,
         Origin = match.Value
       },
-      BT.Placeholder when match.HasValidGroup("element") && match.HasValidGroup("element") => new()
-      {
+      BT.Placeholder when match.HasValidGroup("element") && match.HasValidGroup("element") => new() {
         Name = match.Groups["name"].Value,
         Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
         Origin = match.Value,
@@ -110,37 +107,38 @@ public static partial class EntityFactory
       BT.Number => GetNumber(match),
       BT.Boolean => GetBoolean(match),
       BT.Null => GetNull(match),
-      BT.Comment => GetComment(match),
-      BT.IgnoredWhitespace => GetWhitespace(match),
-      BT.Array => new ArrayEntity()
-      {
+      BT.Comment => new CommentEntity() {
+        Content = match.Value,
         Origin = match.Value
       },
-      BT.Object => new ObjectEntity()
-      {
+      BT.IgnoredWhitespace => new WhitespaceEntity() {
+        Content = match.Value,
         Origin = match.Value
       },
-      BT.Raw => new RawEntity()
-      {
+      BT.Array => new ArrayEntity() {
+        Origin = match.Value
+      },
+      BT.Object => new ObjectEntity() {
+        Origin = match.Value
+      },
+      BT.Raw => new RawEntity() {
         Origin = match.Value,
       },
       BT.Invalid => throw new InvalidOperationException("Type was Invalid."),
       BT.Absent => throw new InvalidOperationException("Type was Absent."),
       BT.Placeholder => throw new InvalidOperationException("Type was Placeholder."),
-      BT.Document => new DocumentEntity()
-      {
+      BT.Document => new DocumentEntity() {
         Content = match.Value,
         Origin = match.Value
       },
-      BT.LooseContent => new ContentEntity()
-      {
+      BT.LooseContent => new ContentEntity() {
         Content = match.Value,
         Origin = match.Value
       },
       BT.Element when match.HasValidGroup("name") => new ElementEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
       BT.Attribute when context.Key is string key => new AttributeEntity() { Origin = match.Value, Key = key, Value = match.Value, },
       BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
-      BT.Property when context.Key is string key => new PropertyEntity() { Origin = match.Value, Key = key },
+      BT.Property when context.GetDepthProperty() => new PropertyEntity() { Origin = match.Value, Key = key },
       BT.Operator => GetSymbol(match),
       BT.External => throw new NotImplementedException(),
       _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
@@ -187,16 +185,6 @@ public static partial class EntityFactory
     Name = "xml",
     Origin = match.Value,
     Attributes = [.. ParseAttributes(match)],
-  };
-  private static CommentEntity GetComment (Match match) => new()
-  {
-    Content = match.Value,
-    Origin = match.Value
-  };
-  private static WhitespaceEntity GetWhitespace (Match match) => new()
-  {
-    Content = match.Value,
-    Origin = match.Value
   };
   private static ElementOpenPlaceholder GetOpen (Match match) => new()
   {

@@ -82,6 +82,8 @@ public sealed class ParsingContext
         child.SetParent(Document);
     }
   }
+  /// <summary>Changes the depth to move outward.</summary>
+  /// <param name="amt"></param>
   public void Ascend (int amt)
   {
     int adj = _depth - amt;
@@ -92,8 +94,6 @@ public sealed class ParsingContext
     }
 
     _depth = Math.Clamp(adj, 0, 0x7fff);
-    Parent = Parent?.Parent;
-
   }
   public T? GetParentAs<T> () where T : IEntity
   {
