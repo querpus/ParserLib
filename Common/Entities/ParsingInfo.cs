@@ -21,11 +21,11 @@ public class ParsingInfo
   public Collection<CommentStyle> Comments { get; init; } = [];
   public Collection<QuoteStyle> Quotes { get; init; } = [];
   public IImmutableList<EntityInfo> EntityOptions { get; init; } = [];
-  /// <summary></summary>
-  /// <param name="match"></param>
-  /// <param name="context"></param>
-  /// <param name="options"></param>
-  /// <returns></returns>
+  /// <summary>Tries to get the <see cref=EntityInfo"/> for the given <see cref="Match"/>.</summary>
+  /// <param name="match">The regex match.</param>
+  /// <param name="context">The parser context of the previous matches.</param>
+  /// <param name="options">The output of the <see cref=EntityInfo"/> if the info is located.</param>
+  /// <returns><see langword="true"/> if the match is able to select an <see cref="EntityInfo"/> that meets the requirements, <see langword="false"/> otherwise.</returns>
   public bool TryGetOptions (Match match, ParsingContext context, [NotNullWhen(true)] out EntityInfo? options)
   {
     options = EntityOptions.FirstOrDefault(item => {

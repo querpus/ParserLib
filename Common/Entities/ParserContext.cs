@@ -18,7 +18,7 @@ public sealed class ParsingContext
   #endregion
   /// <summary>The collection of objects to operate on.</summary>
   [AllowNull]
-  public IList<dynamic> WorkingSet { get; set; }
+  public IReadOnlyList<dynamic> WorkingSet { get; set; }
   public ParsingInfo? ParsingSet { get; set; }
   public string? OriginText { get; set; }
   public DocumentEntity? Document { get; set; }
@@ -29,7 +29,7 @@ public sealed class ParsingContext
   [AllowNull]
   public dynamic CurrentItem => WorkingSet[CurrentIndex];
   /// <summary>Gets or sets the "Parent" depth property, which is used on most entities in some way.</summary>
-  public Entity? Parent
+  public IEntity? Parent
   {
     get => GetDepthProperty("Parent");
     set
@@ -45,13 +45,15 @@ public sealed class ParsingContext
   /// <remarks>Predefined keys:<br/>
   /// * <c>Parent</c> - The current item's parent object, or <see langword="null"/> if top-level.<br/>
   /// * <c>Property</c> - The current item's property object, which stores a key/value pair.<br/>
+  /// * <c>Child</c> - The newly created object that will become the new parent when descending.<br/>
+  /// ^ <c>ChildType</c> - The type of child to create if the child is <see langword="null"/>
   /// </remarks>
   public dynamic? GetDepthProperty (string name) =>
-    _depthProperties.ContainsKey(name) ? _depthProperties[name][_depth] : null;
+    _depthProperties.TryGetValue(name, out Dictionary<int, object?>? value) ? value[_depth] : null;
   public TValue? GetDepthProperty<TValue> (string name) where TValue : class =>
-    _depthProperties.ContainsKey(name) ? _depthProperties[name][_depth] as TValue : null;
+    _depthProperties.TryGetValue(name, out Dictionary<int, object?>? value) ? value[_depth] as TValue : null;
   public TValue GetDepthProperty<TValue> (string name, TValue if_not_found) where TValue : struct =>
-    _depthProperties.ContainsKey(name) ? (TValue?) _depthProperties[name][_depth] ?? if_not_found : if_not_found;
+    _depthProperties.TryGetValue(name, out Dictionary<int, object?>? value) ? (TValue?) value[_depth] ?? if_not_found : if_not_found;
   public void SetDepthProperty (string name, dynamic? value) => _depthProperties[name][_depth] = value;
   /// <summary>Increase the current depth by the specified amount, store the provided values in DepthProperties at the new depth,
   /// and if a child is specified set its parent (to Document when no current Parent, otherwise to Parent) and update Parent
@@ -61,7 +63,8 @@ public sealed class ParsingContext
   /// if Parent is null.</remarks>
   /// <param name="amt">Number of depth levels to increase.</param>
   /// <param name="set_depth_values">Dictionary mapping property names to values to assign in DepthProperties for the new depth.</param>
-  public void Descend<TChild> (int amt, Dictionary<string, object> set_depth_values, IEntity? child = null)
+  /// <param name="child">The new child if one is needed.</param>
+  public void Descend (int amt, Dictionary<string, object> set_depth_values, IEntity child)
   {
     int adj = _depth + amt;
 
@@ -70,16 +73,40 @@ public sealed class ParsingContext
       Debug.Log(Warning, $"Depth was {adj}, clamping at {0x7fff}.", this);
     }
 
+    IEntity? previous_parent = Parent;
+
+    _depth = Math.Clamp(adj, 0, 0x7fff);
+
     foreach (KeyValuePair<string, object> kvp in set_depth_values)
     {
-      _depthProperties[kvp.Key][_depth] = kvp.Value;
+      if (_depthProperties.TryGetValue(kvp.Key, out Dictionary<int, object?>? keyed_data))
+      {
+        keyed_data[_depth] = kvp.Value;
+      }
+      else
+      {
+        _depthProperties[kvp.Key] = new()
+        {
+          [_depth] = kvp.Value
+        };
+      }
     }
-    if (child is not null)
+
+    Parent = child;
+
+    if (previous_parent is not null)
     {
-      if (Parent is not null)
-        child.SetParent(Parent);
-      else if (Document is not null)
-        child.SetParent(Document);
+      Parent.SetParent(previous_parent);
+      previous_parent.Children.Add(child);
+    }
+    else if (Document is not null)
+    {
+      Parent.SetParent(Document);
+      Document.SetRoot(child);
+    }
+    else
+    {
+      Debug.Log(Warning, $"No parent of child {child} when descending.", this);
     }
   }
   /// <summary>Changes the depth to move outward.</summary>
@@ -94,6 +121,7 @@ public sealed class ParsingContext
     }
 
     _depth = Math.Clamp(adj, 0, 0x7fff);
+
   }
   public T? GetParentAs<T> () where T : IEntity
   {
