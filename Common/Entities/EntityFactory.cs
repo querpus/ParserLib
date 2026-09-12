@@ -186,13 +186,6 @@ public static partial class EntityFactory
     }
     return result;
   }
-  private static ElementEntity GetHeader (Match match) => new()
-  {
-    IsHeader = true,
-    Name = "xml",
-    Origin = match.Value,
-    Attributes = [.. ParseAttributes(match)],
-  };
   private static CommentEntity GetComment (Match match) => new()
   {
     Content = match.Value,
@@ -202,13 +195,6 @@ public static partial class EntityFactory
   {
     Content = match.Value,
     Origin = match.Value
-  };
-  private static ElementOpenPlaceholder GetOpen (Match match) => new()
-  {
-    Name = match.Groups["name"].Value,
-    Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
-    Origin = match.Value,
-    Attributes = [.. ParseAttributes(match)]
   };
   private static ElementEntity GetElement (Match match) => new()
   {
@@ -236,12 +222,6 @@ public static partial class EntityFactory
     Content = match.Value,
     Origin = match.Value
   };
-  private static IEntity ValueSelector (Match match, ParsingContext context)
-  {
-    return Generate(match, context);
-
-    throw new InvalidOperationException("The internal value group needed to process this item is missing.");
-  }
   private static IEntity CheckXMLMatch (Match match, ParsingContext context)
   {
     if (!match.Success) throw new InvalidOperationException("Match was not a success.");

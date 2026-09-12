@@ -67,8 +67,7 @@ public sealed class ExcelWorkbook
           DataRow dr = dt.NewRow();
           foreach (XlRange cell in row.Range.Cells)
           {
-            object value = cell.Value;
-            dr[cIndex++] = value;
+            dr[cIndex++] = cell.Value;
           }
           dt.Rows.Add(dr);
         }
