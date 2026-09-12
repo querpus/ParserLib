@@ -33,16 +33,14 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
   public override string? ToString () => Serialize();
   public void SetParent (IEntity parent) => Parent = parent;
   public void StoreData (string piece_type, dynamic data) => DataValues[piece_type] = data;
-  public void StoreEntity (string piece_type, IEntity ent) => PropertyValues[piece_type] = ent;
-  public void StoreEntities (string piece_type, IEnumerable<IEntity> ents) => PropertyCollections[piece_type] = [.. ents];
-}
-/// <summary>This is returned if a method must return an <see cref="Entity"/> but one could not be created.</summary>
-public class ErrorEntity : Entity
-{
-  public required string Message { get; init; }
-  public override BasicType Type => BasicType.Invalid;
-  public override bool Equals (IEntity? other) => false; // Error entities are never equal to anything else, even other error entities.
-  public override string Serialize () => $"Error: {Message}";
+  public void StoreProperty (string piece_type, IEntity ent) => PropertyValues[piece_type] = ent;
+  public void StoreCollection (string piece_type, IEnumerable<IEntity> ents) => PropertyCollections[piece_type] = [.. ents];
+  public void AddChild (IEntity child)
+  {
+    child.SetParent(this);
+    Children.Add(child);
+  }
+  public void AddChildren (IEnumerable<IEntity> children) => children.Foreach(AddChild);
 }
 
 public static class SerializerExt

@@ -28,7 +28,9 @@ public interface IEntity
   bool Equals (object? obj);
   int GetHashCode ();
   string? ToString ();
-  /// <summary>Sets the parent property after the type has been contructed.</summary>
+  /// <summary>Sets the parent property after the type has been constructed.</summary>
   /// <param name="parent">The parent or encompassing object.</param>
   void SetParent (IEntity parent);
+  void AddChild (IEntity child);
+  void AddChildren (IEnumerable<IEntity> children);
 }

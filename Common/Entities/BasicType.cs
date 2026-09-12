@@ -58,5 +58,6 @@ public enum BasicType
   /// <remarks>This class must inherit from <see cref="Entity"/>.</remarks>
   External = 0x8000,
   /// <summary>A constant character or set of characters.</summary>
-  Operator = 0x8001
+  Operator = 0x8001,
+  Omit = 0x8002
 }

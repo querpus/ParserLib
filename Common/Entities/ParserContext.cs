@@ -110,7 +110,7 @@ public sealed class ParsingContext
     }
   }
   /// <summary>Changes the depth to move outward.</summary>
-  /// <param name="amt"></param>
+  /// <param name="amt">The number change to depth.</param>
   public void Ascend (int amt)
   {
     int adj = _depth - amt;
@@ -128,10 +128,10 @@ public sealed class ParsingContext
     dynamic? parent = Parent;
     return (T?) parent;
   }
-  public T? GetPropKeyAs<T> () where T : IEntity
+  public T? GetPropertyAs<T> () where T : IEntity
   {
-    dynamic? propKey = PropKeys[_depth];
-    return (T?) propKey;
+    dynamic? property = GetDepthProperty("Property");
+    return (T?) property;
   } 
   #endregion
 }

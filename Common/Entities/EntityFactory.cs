@@ -8,7 +8,7 @@ using BT = Common.Entities.BasicType;
 
 namespace Common.Entities;
 
-public static partial class EntityFactory
+public partial class EntityFactory
 {
   #region JSON Regex
   /// <summary>JSON Tokenizing Regex</summary>
@@ -91,15 +91,19 @@ public static partial class EntityFactory
 
     return options.Type switch
     {
-      BT.Operator => new SymbolEntity() {
+      BT.Omit => null,
+      BT.Operator => new SymbolEntity()
+      {
         Content = options.ConstantValue ?? match.Value,
         Origin = match.Value
       },
-      BT.String => new StringEntity() {
+      BT.String => new StringEntity()
+      {
         Value = match.Groups["value"].Value,
         Origin = match.Value
       },
-      BT.Placeholder when match.HasValidGroup("element") && match.HasValidGroup("element") => new() {
+      BT.Placeholder when match.HasValidGroup("element") && match.HasValidGroup("element") => new()
+      {
         Name = match.Groups["name"].Value,
         Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
         Origin = match.Value,
@@ -107,43 +111,52 @@ public static partial class EntityFactory
       BT.Number => GetNumber(match),
       BT.Boolean => GetBoolean(match),
       BT.Null => GetNull(match),
-      BT.Comment => new CommentEntity() {
+      BT.Comment => new CommentEntity()
+      {
         Content = match.Value,
         Origin = match.Value
       },
-      BT.IgnoredWhitespace => new WhitespaceEntity() {
+      BT.IgnoredWhitespace => new WhitespaceEntity()
+      {
         Content = match.Value,
         Origin = match.Value
       },
-      BT.Array => new ArrayEntity() {
+      BT.Array => new ArrayEntity()
+      {
         Origin = match.Value
       },
-      BT.Object => new ObjectEntity() {
+      BT.Object => new ObjectEntity()
+      {
         Origin = match.Value
       },
-      BT.Raw => new RawEntity() {
+      BT.Raw => new RawEntity()
+      {
         Origin = match.Value,
       },
       BT.Invalid => throw new InvalidOperationException("Type was Invalid."),
       BT.Absent => throw new InvalidOperationException("Type was Absent."),
       BT.Placeholder => throw new InvalidOperationException("Type was Placeholder."),
-      BT.Document => new DocumentEntity() {
+      BT.Document => new DocumentEntity()
+      {
         Content = match.Value,
         Origin = match.Value
       },
-      BT.LooseContent => new ContentEntity() {
+      BT.LooseContent => new ContentEntity()
+      {
         Content = match.Value,
         Origin = match.Value
       },
-      BT.Element when match.HasValidGroup("name") && match.HasValidGroup("single") => new ElementEntity() {
+      BT.Element when match.HasValidGroup("name") && match.HasValidGroup("single") => new ElementEntity()
+      {
         Origin = match.Value,
         Name = match.Groups["name"].Value,
         Attributes = ParseAttributes(match),
       },
       BT.Element when match.HasValidGroup("name") => new ElementEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
-      BT.Attribute when context.Key is string key => new AttributeEntity() { Origin = match.Value, Key = key, Value = match.Value, },
+      BT.Element when match.HasValidGroup("close") => null,
+      BT.Attribute when match.HasValidGroup("Key") => new AttributeEntity() { Origin = match.Value, Key = Get, Value = match.Value, },
       BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
-      BT.Property when context.GetDepthProperty() => new PropertyEntity() { Origin = match.Value, Key = key },
+      BT.Property when match.HasValidGroup("Key") => new PropertyEntity() { Origin = match.Value, Key = key },
       BT.Operator => GetSymbol(match),
       BT.External => throw new NotImplementedException(),
       _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
@@ -169,9 +182,9 @@ public static partial class EntityFactory
       throw new InvalidOperationException($"Keys ({keys.Count}) and Values ({values.Count}) do not match Origin Count ({origins.Count}).");
     }
   }
-  private static Collection<IEntity> ParseAttributes (XElement element)
+  private static Collection<AttributeEntity> ParseAttributes (XElement element)
   {
-    Collection<IEntity> result = [];
+    Collection<AttributeEntity> result = [];
     foreach (XAttribute attr in element.Attributes())
     {
       result.Add(new AttributeEntity()
@@ -190,13 +203,6 @@ public static partial class EntityFactory
     Name = "xml",
     Origin = match.Value,
     Attributes = [.. ParseAttributes(match)],
-  };
-  private static ElementOpenPlaceholder GetOpen (Match match) => new()
-  {
-    Name = match.Groups["name"].Value,
-    Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
-    Origin = match.Value,
-    Attributes = [.. ParseAttributes(match)]
   };
   private static ElementEntity GetElement (Match match) => new()
   {
@@ -224,12 +230,6 @@ public static partial class EntityFactory
     Content = match.Value,
     Origin = match.Value
   };
-  private static IEntity ValueSelector (Match match, ParsingContext context)
-  {
-    return Generate(match, context);
-
-    throw new InvalidOperationException("The internal value group needed to process this item is missing.");
-  }
   private static IEntity CheckXMLMatch (Match match, ParsingContext context)
   {
     if (!match.Success) throw new InvalidOperationException("Match was not a success.");
@@ -246,16 +246,16 @@ public static partial class EntityFactory
   // if (match.HasValidGroup("comment")) return GetComment (match);
   // if (match.HasValidGroup("ws")) return GetWhitespace (match);
 
-  private static IEntity CheckJSONMatch (Match match, ParsingContext context)
+  private static DocumentEntity CheckJSONMatch (Match match, ParsingContext context)
   {
     if (!match.Success) throw new InvalidOperationException("Match was not a success.");
 
     IEntity gen = Generate(match, context);
 
-    return gen is ErrorEntity ee ? throw new InvalidOperationException(ee.Message) : gen;
+    return gen is ErrorEntity ee ? throw new InvalidOperationException(ee.Message) : (DocumentEntity) gen;
   }
 
-  public static IEntity FromXElement (XElement root, ParsingContext? context)
+  public static DocumentEntity FromXElement (XElement root, ParsingContext? context)
   {
     context ??= new() { OriginText = root.Value };
     DocumentEntity document = new()
@@ -280,7 +280,7 @@ public static partial class EntityFactory
 
     return document;
   }
-  public static IEntity JSONFromString (string content)
+  public static DocumentEntity JSONFromString (string content)
   {
     DocumentEntity top_doc = new()
     {
@@ -372,9 +372,15 @@ public static partial class EntityFactory
     }
     return context.Document;
   }
-  public static IEntity XMLFromString (string content)
+  public IEntity? Document { get; private set; }
+  public ParsingContext Context { get; private set; }
+  public void Initialize ()
   {
-    IEntity? document;
+    
+  }
+  public static DocumentEntity XMLFromString (string content)
+  {
+    DocumentEntity? document;
     IEntity? parent = null;
     Collection<IEntity> inside = [];
     MatchCollection matches = XML_PreCompiled.Matches(content);
@@ -393,7 +399,7 @@ public static partial class EntityFactory
       switch (item)
       {
         case ElementEntity ee when ee.IsHeader:
-          ((DocumentEntity) document).SetHeader(item);
+          document.SetHeader(item);
           continue;
         case ElementOpenPlaceholder eop when parent is null:
           parent = new ElementEntity()
@@ -404,7 +410,7 @@ public static partial class EntityFactory
             Parent = document,
             Attributes = eop.Attributes,
           };
-          ((DocumentEntity) document).SetRoot(parent);
+          document.SetRoot(parent);
           inside.Add(parent);
           continue;
         case WhitespaceEntity when parent is null:
@@ -446,7 +452,7 @@ public static partial class EntityFactory
     }
     return document;
   }
-  public static IEntity FromString (string content, BT type) => type switch
+  public static DocumentEntity FromString (string content, BT type) => type switch
   {
     BT.Null => new NullEntity(),
     BT.Element => XMLFromString(content),

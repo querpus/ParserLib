@@ -5,8 +5,39 @@ using BT = Common.Entities.BasicType;
 
 namespace Common.Entities;
 
+public enum SpecialReqType
+{
+  None, // Always pass
+  GroupExists,
+  GroupValue,
+  MatchValue,
+  MatchLength,
+  GroupLength,
+
+  Invert      = 0x00010000,
+  GreaterThan = 0x00020000,
+  LessThan    = 0x00040000,
+  EqualTo     = 0x00080000,
+  EqualToIC   = 0x00100000
+}
+
+public readonly struct SpecialReq
+{
+  public SpecialReqType Requirements { get; init; }
+  public dynamic? Value { get; init; }
+
+  public static implicit operator SpecialReq ((SpecialReqType Requirements, dynamic? Value) tuple) =>
+    new() { Value = tuple.Value, Requirements = tuple.Requirements };
+}
+
+public readonly struct SpecialValue
+{
+  public dynamic Value { get; init; }
+  public ReadOnlyCollection<SpecialReq> SpecialReqs { get; init; }
+}
+
 /// <summary>This is common data to describe variations of entity properties.</summary>
-public class EntityInfo
+public class EntityInfo : IEquatable<Match>
 {
   #region Functional Properties
   /// <summary>
@@ -14,7 +45,7 @@ public class EntityInfo
   /// This determines the class of entity that is produced.
   /// </summary>
   public BT Type { get; set; }
-  /// <summary>If <see cref="Type"/> is <see cref="BT.External"/> </summary>
+  /// <summary>If <see cref="Type"/> is <see cref="BT.External"/>, this is the class that is created.</summary>
   public Type? Class { get; set; }
   /// <summary>The conditions that must be present for this entity to be produced.</summary>
   public IndicationRule IndicatedItem { get; set; }
@@ -37,7 +68,7 @@ public class EntityInfo
   /// </remarks>
   public bool SetPropKey { get; init; }
   /// <summary>
-  /// Adds this entity to the parent stack, meaning it will recieve all tokens that are passed as data once the depth descends.<br/>
+  /// Adds this entity to the parent stack, meaning it will receive all tokens that are passed as data once the depth descends.<br/>
   /// This does not have to be the depth changing token.
   /// </summary>
   public bool SetAsNextLevelParent { get; init; }
@@ -55,6 +86,8 @@ public class EntityInfo
   /// Multiple Captures on the group mean a <see cref="Collection{T}"/> is made with an entry for each capture.
   /// </remarks>
   public Dictionary<string, string> StorePieceTypes { get; init; } = [];
+  /// <summary>These are conditional assignments to an entity.</summary>
+  public Collection<SpecialValue> SpecialValues { get; init; } = [];
   #endregion Data Properties
   #region Informative Properties
   /// <summary>Whether or not the entity stores data into its parent.</summary>
@@ -66,18 +99,26 @@ public class EntityInfo
   /// <summary>Only allow this entity at top-level, not as a child.</summary>
   public bool OnlyAtTopLevel { get; set; }
   #endregion
-
   #region Overrides and Equality
+  /// <summary>Checks to see if a match will satisfy the entity</summary>
+  /// <param name="match">The regex match that is being analyzed.</param>
+  /// <returns><see langword="true"/> if the match satisfies the requirements, <see langword="false"/> if the match is <see langword="null"/> or does not meet them.</returns>
+  public bool Equals (Match? match)
+  {
+    if (match is null)
+      return false;
+
+    Collection<bool> checks = [];
+    checks.Add(IndicatedItem.Group is null || match.Groups.Cast<Group>().Any(g => g.Name.Like(IndicatedItem.Group)));
+    checks.Add(IndicatedItem.ExactValue is null || match.Value.Equals(IndicatedItem.ExactValue, IndicatedItem.IgnoreCase ? SCOIC : SCO));
+    return checks.All(b => b);
+  }
   /// <summary>Basic equality, quick method.</summary>
   /// <param name="obj">The other object.</param>
   /// <returns><see langword="true"/> if the object is an <see cref="EntityInfo"/> and the properties are the same. Otherwise <see langword="false"/>.</returns>
   public override bool Equals (object? obj) => obj is EntityInfo info && Equals(info);
   public override int GetHashCode () => HashCode.Combine(Type, IndicatedItem, DepthChange, SetPropKey, SetAsNextLevelParent, CreateEmptyAtStart, ConstantValue, StorePieceTypes, HashCode.Combine(StoresData, DefinesStructure, OnlyAtTopLevel));
-  public static bool operator == (EntityInfo left, EntityInfo right) => left.Equals(right);
-  public static bool operator != (EntityInfo left, EntityInfo right) => !(left == right);
-  /// <summary>Simplified equality.</summary>
-  /// <param name="other">The other <see cref="EntityInfo"/> object.</param>
-  /// <returns><see langword="true"/> if the hashcode of this object and  the other <see cref="EntityInfo"/>  are the same. Otherwise <see langword="false"/>.</returns>
-  public bool Equals (EntityInfo other) => GetHashCode() == other.GetHashCode();
+  public static bool operator == (EntityInfo left, Match right) => left.Equals(right);
+  public static bool operator != (EntityInfo left, Match right) => !(left == right);
   #endregion
 }

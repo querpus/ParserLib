@@ -9,15 +9,14 @@ public class ParsingInfo
   /// <remarks> This is for validation purposes.</remarks><value><br/>
   /// * <see langword="true"/>,The parser should make a single <see cref="IEntity"/> object from the data.<br/>
   /// * <see langword="false"/>, the parser should make a <see cref="Collection{T}"/> of <see cref="IEntity"/> objects.</value>
-  public bool GeneratesSingleObject { get; set; }
+  public bool GeneratesSingleObject { get; init; }
+  public EntityInfo? SingleObject { get; init; }
   /// <summary>The number of iterative loops the parser must go through.</summary>
   public int TotalPasses { get; init; }
   /// <summary>Whether to ignore case on non-regex matches.</summary>
   public bool IgnoreCase { get; init; }
-  public bool Equals (ParsingInfo other) =>
-    GeneratesSingleObject == other.GeneratesSingleObject &&
-    TotalPasses == other.TotalPasses &&
-    IgnoreCase == other.IgnoreCase;
+
+  public string Regex { get; init; }
   public Collection<CommentStyle> Comments { get; init; } = [];
   public Collection<QuoteStyle> Quotes { get; init; } = [];
   public IImmutableList<EntityInfo> EntityOptions { get; init; } = [];

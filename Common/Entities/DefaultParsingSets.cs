@@ -26,6 +26,7 @@ public static class DefaultParsingSets
     }, new() {
       IndicatedItem = new() { Group = "element" },
       Type = BT.Element,
+      
       DepthChange = 1,
       SetAsNextLevelParent = true,
     }, new() {
@@ -40,7 +41,6 @@ public static class DefaultParsingSets
       IndicatedItem = new() { Group = "content" },
       Type = BT.LooseContent,
       StoresData = true,
-
     }, new() {
       IndicatedItem = new() { Group = "ws" },
       Type = BT.IgnoredWhitespace,
@@ -56,6 +56,12 @@ public static class DefaultParsingSets
   public static ParsingInfo JSON { get; } = new ParsingInfo()
   {
     GeneratesSingleObject = true,
+    SingleObject = new() {
+      OnlyAtTopLevel = true,
+      CreateEmptyAtStart = true,
+      DefinesStructure = true,
+      Type = BT.Document,
+    },
     IgnoreCase = false,
     TotalPasses = 2,
     EntityOptions = [
@@ -77,7 +83,7 @@ public static class DefaultParsingSets
       Type = BT.Boolean,
       AddToPropKey = true,
       StorePieceTypes = new() { ["Value"] = "value" },
-    }, new () {
+    }, new() {
       IndicatedItem = new() { Group = "num_value" },
       StoresData = true,
       Type = BT.Number,
@@ -101,7 +107,7 @@ public static class DefaultParsingSets
     }, new() {
       IndicatedItem = new() { Group = "Op", ExactValue = "}" },
       DepthChange = -1,
-      Type = BT.Operator,
+      Type = BT.Omit,
       ConstantValue = "}",
     }, new() {
       IndicatedItem = new() { Group = "Op", ExactValue = "[" },
@@ -110,16 +116,16 @@ public static class DefaultParsingSets
       Type = BT.Array,
     }, new() {
       IndicatedItem = new() { Group = "Op", ExactValue = ":" },
-      Type = BT.Operator,
+      Type = BT.Omit,
       ConstantValue = ":",
     }, new() {
       IndicatedItem = new() { Group = "Op", ExactValue = "," },
-      Type = BT.Operator,
+      Type = BT.Omit,
       ConstantValue = ",",
     }, new() {
       IndicatedItem = new() { Group = "Op", ExactValue = "]" },
       DepthChange = -1,
-      Type = BT.Operator,
+      Type = BT.Omit,
       ConstantValue = "]",
     }]
   };

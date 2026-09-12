@@ -7,9 +7,33 @@ using BT = Common.Entities.BasicType;
 
 namespace Common.Entities;
 
-public class ElementEntity : ElementOpenPlaceholder
+public class ElementEntity : Entity
 {
-  public bool IsHeader { get; set; }
+  public bool IsHeader
+  {
+    get => (bool) DataValues["IsHeader"]!;
+    init => DataValues["IsHeader"] = value;
+  }
+  public bool IsSingle
+  {
+    get => (bool) DataValues["IsSingle"]!;
+    init => DataValues["IsSingle"] = value;
+  }
+  public required string Name
+  {
+    get => (string) DataValues["Name"]!;
+    init => DataValues["Name"] = value;
+  }
+  public string? Namespace
+  {
+    get => (string?) DataValues["Namespace"];
+    set => DataValues["Namespace"] = value;
+  }
+  public Collection<AttributeEntity> Attributes
+  {
+    get => (Collection<AttributeEntity>) PropertyCollections["Attributes"];
+    init => AddAttributes(value);
+  }
   public override BT Type => BT.Element;
 
   public override string Serialize ()
@@ -26,15 +50,19 @@ public class ElementEntity : ElementOpenPlaceholder
     ? elem + " />"
     : elem + ">" + children + $"</{Name}>";
   }
-  public void AddChild (IEntity child)
-  {
-    child.SetParent(this);
-    Children.Add(child);
-  }
-  public void AddChildren (IEnumerable<IEntity> children) => children.Foreach(AddChild);
   public override bool Equals (IEntity? other) =>
     other is ElementEntity ee &&
     Attributes.SequenceEqual(ee.Attributes) &&
     Children.SequenceEqual(ee.Children) &&
     Name.Equals(ee.Name, SCO);
+  public void AddAttribute (IEntity attribute)
+  {
+    if (attribute is AttributeEntity ae)
+    {
+      ae.SetParent(this);
+      Attributes.Add(ae);
+    }
+  }
+  public void AddAttributes (IEnumerable<IEntity> attributes) => attributes.Foreach(AddAttribute);
+
 }
