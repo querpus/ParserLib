@@ -197,12 +197,10 @@ public partial class EntityFactory
     }
     return result;
   }
-  private static ElementEntity GetHeader (Match match) => new()
+  private static CommentEntity GetComment (Match match) => new()
   {
-    IsHeader = true,
-    Name = "xml",
-    Origin = match.Value,
-    Attributes = [.. ParseAttributes(match)],
+    Content = match.Value,
+    Origin = match.Value
   };
   private static ElementEntity GetElement (Match match) => new()
   {

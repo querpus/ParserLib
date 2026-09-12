@@ -10,7 +10,10 @@ public class RawEntity : Entity, IPrintable
   public override BT Type => BT.Raw;
   public void Print (int indent)
   {
-    LogPart(Debug);
+
+
+    Debug.LogPart(MsgClass.Debug, "RawEntity Data: ");
+    Debug.LogPart(MsgClass.BlueInfo, )
   }
   public override string Serialize () => "RawEntity Data:" + DataValues.TextJoin(",") + " | Children: " + Children.TextJoin(",");
 
