@@ -109,6 +109,8 @@ public sealed class ParsingContext
       Debug.Log(Warning, $"No parent of child {child} when descending.", this);
     }
   }
+  /// <summary>Changes the depth to move outward.</summary>
+  /// <param name="amt"></param>
   public void Ascend (int amt)
   {
     int adj = _depth - amt;
