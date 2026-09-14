@@ -12,6 +12,41 @@ public static class DefaultParsingSets
     GeneratesSingleObject = true,
     IgnoreCase = false,
     TotalPasses = 2,
+    RegexString =
+    """
+    (?# Element Piece)
+    (?'element'
+      <   \s*
+      (?# '?' for header definition)
+      (?'header'\?)?  \s*
+      (?'close' \/)?   \s*
+      (?# optional namespace)
+      ((?'ns'\w+)  \s* :)?
+      (?'name'\w+)
+
+      (?# attributes)
+      (   \s+ 
+          (?'attribute'
+          ((?'a_ns'  \w+)     \s*     :     \s*)?
+           (?'a_name'\w+)     \s*     =     \s*
+         " (?'a_value'(  [^\n"\\]  |  \\[^\n]  )*  )"
+        ))*
+
+      (?'single'\s*\/)?
+      \s*
+      (?# Optional '?' for ending the header definition)
+      \? ?
+      >
+    ) |
+
+    (?# Leading or Trailing Whitespace)
+    (?'ws'(?<=\>)\s+) |
+    (?'ws'(?<=[^\s>])\s+) |
+    (?# XML Content)
+    (?'content'(?<=\>\s*)[^<]+?(?=\s*<)) |
+    (?# XML Comment)
+    (?'comment'<!-- ([^-]| -[^-])* -->)
+    """,
     EntityOptions = [
     new() {
       IndicatedItem = new() { Group = "header" },
@@ -62,6 +97,22 @@ public static class DefaultParsingSets
       DefinesStructure = true,
       Type = BT.Document,
     },
+    RegexString =
+    """
+    (?#primitives)
+    (?'key'        " (?'key_name'\w+) " (?=\s*[:=])) |
+    (?'str_value'   (?<=[:=]\s*) " (?'value'([^\\"]|\\.)*) " ) |
+    (?'num_value'   (?<=[:=]\s*)   (?'value'[0-9.eExXbB]+ )  ) |
+    (?'bool_value'  (?<=[:=]\s*)   (?'value'true|false)      ) |
+    (?'null_value'  (?<=[:=]\s*)   (?'value'null)            ) |
+    (?#operators)
+    (?'Op'            [[\]{},=:]) |
+    (?#comments)
+    (?'comment'        \/\/.* ) |
+    (?'comment'        \/\*([^*]|\*[^/])*\*\/ ) |
+    (?#whitespace)
+    (?'ws'             \s+)
+    """,
     IgnoreCase = false,
     TotalPasses = 2,
     EntityOptions = [

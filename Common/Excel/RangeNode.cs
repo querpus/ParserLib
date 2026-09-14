@@ -43,7 +43,7 @@ public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>
   public string? TColumn { get; set; }
   public bool ThisRow { get; set; }
 
-  public bool IsEmpty => Address.IsEmpty();
+  public bool IsEmpty => Address.IsEmpty;
   public bool IsError => Equals(Empty) && !IsEmpty;
   public IMatchItem ParseData { get; protected set; }
   #endregion
@@ -83,9 +83,9 @@ public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>
     temp.ThisRow = mdd.HasGroup("thisrow");
 
     if (temp.IsError)
-      Log("ERROR: " + mdd.Content);
+      Debug.Log(MsgClass.Error, "ERROR: " + mdd.Content, "RangeNode");
     else
-      Log(mdd.Content);
+      Debug.Log(MsgClass.Debug, mdd.Content, "RangeNode");
 
     return temp;
   }

@@ -26,6 +26,7 @@ public sealed class ParsingContext
   /// <value>An index between 0 and the count of <see cref="WorkingSet"/>.</value>
   /// <remarks>This returns <see cref="DNE"/> if the index is not specified or the <see cref="WorkingSet"/> not defined.</remarks>
   public int CurrentIndex { get; set; } = DNE;
+  public bool DoneWorking { get; set; }
   [AllowNull]
   public dynamic CurrentItem => WorkingSet[CurrentIndex];
   /// <summary>Gets or sets the "Parent" depth property, which is used on most entities in some way.</summary>
@@ -46,7 +47,7 @@ public sealed class ParsingContext
   /// * <c>Parent</c> - The current item's parent object, or <see langword="null"/> if top-level.<br/>
   /// * <c>Property</c> - The current item's property object, which stores a key/value pair.<br/>
   /// * <c>Child</c> - The newly created object that will become the new parent when descending.<br/>
-  /// ^ <c>ChildType</c> - The type of child to create if the child is <see langword="null"/>
+  /// * <c>ChildType</c> - The type of child to create if the child is <see langword="null"/>
   /// </remarks>
   public dynamic? GetDepthProperty (string name) =>
     _depthProperties.TryGetValue(name, out Dictionary<int, object?>? value) ? value[_depth] : null;

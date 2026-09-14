@@ -7,6 +7,9 @@ public class ErrorEntity : Entity
 {
   public required string Message { get; init; }
   public override BasicType Type => BasicType.Invalid;
+  public ErrorEntity () { }
+  [SetsRequiredMembers]
+  public ErrorEntity (string message) => Message = message;
   public override bool Equals (IEntity? other) => false; // Error entities are never equal to anything else, even other error entities.
   public override string Serialize () => $"Error: {Message}";
 }

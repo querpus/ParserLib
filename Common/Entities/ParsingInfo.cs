@@ -15,8 +15,25 @@ public class ParsingInfo
   public int TotalPasses { get; init; }
   /// <summary>Whether to ignore case on non-regex matches.</summary>
   public bool IgnoreCase { get; init; }
-
-  public string Regex { get; init; }
+  [SS("regex")]
+  public string? RegexString { get; init; }
+  public RegexOptions RegexOptions { get; init; }
+  [MaybeNull]
+  public Regex Regex
+  {
+    get
+    {
+      if (field is null && RegexString is not null)
+      {
+        field = new Regex(RegexString, RegexOptions, new(3000));
+        return field;
+      }
+      else
+      {
+        return null;
+      }
+    }
+  }
   public Collection<CommentStyle> Comments { get; init; } = [];
   public Collection<QuoteStyle> Quotes { get; init; } = [];
   public IImmutableList<EntityInfo> EntityOptions { get; init; } = [];

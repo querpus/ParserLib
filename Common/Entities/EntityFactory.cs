@@ -8,76 +8,44 @@ using BT = Common.Entities.BasicType;
 
 namespace Common.Entities;
 
-public partial class EntityFactory
+public class EntityFactory
 {
-  #region JSON Regex
-  /// <summary>JSON Tokenizing Regex</summary>
-  [GeneratedRegex(JSONRegex, ROIPW | ROML | ROEC, 3000)]
-  [AllowNull]
-  private static partial Regex JSON_PreCompiled { get; }
-  [SS("regex")]
-  private const string AfterKey = @"(?<=[:=]\s*)";
-  [SS("regex")]
-  private const string JSONRegex =
-    $$$"""
-    (?#primitives)
-    (?'key'        " (?'key_name'\w+) " (?=\s*[:=])) |
-    (?'str_value'   {{{AfterKey}}} " (?'value'([^\\"]|\\.)*) " ) |
-    (?'num_value'   {{{AfterKey}}}   (?'value'[0-9.eExXbB]+ )  ) |
-    (?'bool_value'  {{{AfterKey}}}   (?'value'true|false)      ) |
-    (?'null_value'  {{{AfterKey}}}   (?'value'null)            ) |
-    (?#operators)
-    (?'Op'            [[\]{},=:]) |
-    (?#comments)
-    (?'comment'        \/\/.* ) |
-    (?'comment'        \/\*([^*]|\*[^/])*\*\/ ) |
-    (?#whitespace)
-    (?'ws'             \s+)
-    """;
-  #endregion
-  #region XML Regex
-  [GeneratedRegex(XMLRegex, ROIPW | ROML | ROEC, 3000)]
-  [AllowNull]
-  private static partial Regex XML_PreCompiled { get; }
-  [SS("regex")]
-  private const string XMLRegex =
-    """
-    (?# Element Piece)
-    (?'element'
-      <   \s*
-      (?# '?' for header definition)
-      (?'header'\?)?  \s*
-      (?'close' \/)?   \s*
-      (?# optional namespace)
-      ((?'ns'\w+)  \s* :)?
-      (?'name'\w+)
+  private static Collection<AttributeEntity> ParseAttributes (Match match)
+  {
+    Collection<string> origins = [.. match.Groups["attribute"].Captures.Select(c => c.Value)];
+    Collection<string> namespaces = [..
+      from o in origins
+      let colon = o.IndexOf(':', SCO)
+      select colon != DNE ? o[..colon] : SE];
+    Collection<string> keys = [.. match.Groups["a_name"].Captures.Select(c => c.Value)];
+    Collection<string> values = [.. match.Groups["a_val"].Captures.Select(c => c.Value)];
+    if (keys.Count == origins.Count && values.Count == origins.Count)
+    {
+      IEnumerable<((string Key, string Value, string Origin) First, string Namespace)> zip = keys.Zip(values, origins).Zip(namespaces);
+      return [.. zip.Select(t => new AttributeEntity() { Key = t.First.Key, Value = t.First.Value, Origin = t.First.Origin, Namespace = t.Namespace })];
+    }
+    else
+    {
+      throw new InvalidOperationException($"Keys ({keys.Count}) and Values ({values.Count}) do not match Origin Count ({origins.Count}).");
+    }
+  }
+  private static Collection<AttributeEntity> ParseAttributes (XElement element)
+  {
+    Collection<AttributeEntity> result = [];
+    foreach (XAttribute attr in element.Attributes())
+    {
+      result.Add(new AttributeEntity()
+      {
+        Key = attr.Name.LocalName,
+        Value = attr.Value,
+        Origin = attr.ToString(),
+        Namespace = attr.Name.NamespaceName.IsEmpty ? null : attr.Name.NamespaceName
+      });
+    }
+    return result;
+  }
 
-      (?# attributes)
-      (   \s+ 
-          (?'attribute'
-          ((?'a_ns'  \w+)     \s*     :     \s*)?
-           (?'a_name'\w+)    \s*     =     \s*
-         " (?'a_value'(  [^\n"\\]  |  \\[^\n]  )*  )"
-        ))*
-
-      (?'single'\s*\/)?
-      \s*
-      (?# '?' for ending the header definition)
-      \? ?
-      >
-    ) |
-
-    (?# Leading or Trailing Whitespace)
-    (?'ws'(?<=\>)\s+) |
-    (?'ws'(?<=[^\s>])\s+) |
-    (?# Leading or Trailing Whitespace)
-    (?'content'(?<=\>\s*)[^<]+?(?=\s*<)) |
-    (?# XML Comment)
-    (?'comment'<!-- ([^-]| -[^-])* -->)
-    """;
-  #endregion
-
-  private static IEntity Generate (Match match, ParsingContext context)
+  private static IEntity? Generate (Match match, ParsingContext context)
   {
     if (!match.Success)
     {
@@ -108,7 +76,10 @@ public partial class EntityFactory
         Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
         Origin = match.Value,
       },
-      BT.Number => GetNumber(match),
+      BT.Number => new NumberEntity {
+        Value = decimal.Parse(match.Groups["name"].Value),
+        Origin = match.Value,
+      },
       BT.Boolean => GetBoolean(match),
       BT.Null => GetNull(match),
       BT.Comment => new CommentEntity()
@@ -157,77 +128,16 @@ public partial class EntityFactory
       BT.Attribute when match.HasValidGroup("Key") => new AttributeEntity() { Origin = match.Value, Key = Get, Value = match.Value, },
       BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
       BT.Property when match.HasValidGroup("Key") => new PropertyEntity() { Origin = match.Value, Key = key },
-      BT.Operator => GetSymbol(match),
+      BT.Operator => new SymbolEntity()
+      {
+        Content = match.Value,
+        Origin = match.Value
+      },
       BT.External => throw new NotImplementedException(),
       _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
     };
   }
-
-  private static Collection<AttributeEntity> ParseAttributes (Match match)
-  {
-    Collection<string> origins = [.. match.Groups["attributes"].Captures.Select(c => c.Value)];
-    Collection<string> namespaces = [..
-      from o in origins
-      let colon = o.IndexOf(':', SCO)
-      select colon != DNE ? o[..colon] : SE];
-    Collection<string> keys = [.. match.Groups["attrname"] .Captures.Select(c => c.Value)];
-    Collection<string> values = [.. match.Groups["attrval"].Captures.Select(c => c.Value)];
-    if (keys.Count == origins.Count && values.Count == origins.Count)
-    {
-      IEnumerable<((string Key, string Value, string Origin) First, string Namespace)> zip = keys.Zip(values, origins).Zip(namespaces);
-      return [.. zip.Select(t => new AttributeEntity() { Key = t.First.Key, Value = t.First.Value, Origin = t.First.Origin, Namespace = t.Namespace })];
-    }
-    else
-    {
-      throw new InvalidOperationException($"Keys ({keys.Count}) and Values ({values.Count}) do not match Origin Count ({origins.Count}).");
-    }
-  }
-  private static Collection<AttributeEntity> ParseAttributes (XElement element)
-  {
-    Collection<AttributeEntity> result = [];
-    foreach (XAttribute attr in element.Attributes())
-    {
-      result.Add(new AttributeEntity()
-      {
-        Key = attr.Name.LocalName,
-        Value = attr.Value,
-        Origin = attr.ToString(),
-        Namespace = attr.Name.NamespaceName.IsEmpty ? null : attr.Name.NamespaceName
-      });
-    }
-    return result;
-  }
-  private static CommentEntity GetComment (Match match) => new()
-  {
-    Content = match.Value,
-    Origin = match.Value
-  };
-  private static ElementEntity GetElement (Match match) => new()
-  {
-    Name = match.Groups["name"].Value,
-    Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
-    Origin = match.Value,
-    Attributes = [.. ParseAttributes(match)]
-  };
-  private static NumberEntity GetNumber (Match match) => new()
-  {
-    Value = decimal.TryParse(match.Groups["value"].Value, out decimal dec) ? dec : throw new InvalidValueException(match.Groups["value"].Value),
-    Origin = match.Value
-  };
-  private static BooleanEntity GetBoolean (Match match) => new()
-  {
-    Value = bool.Parse(match.Groups["value"].Value),
-    Origin = match.Value
-  };
-  private static NullEntity GetNull (Match match) => new()
-  {
-    Origin = match.Value
-  };
-  private static SymbolEntity GetSymbol (Match match) => new()
-  {
-    Content = match.Value,
-    Origin = match.Value
-  };
+               
   private static IEntity CheckXMLMatch (Match match, ParsingContext context)
   {
     if (!match.Success) throw new InvalidOperationException("Match was not a success.");
@@ -378,81 +288,88 @@ public partial class EntityFactory
   }
   public static DocumentEntity XMLFromString (string content)
   {
-    DocumentEntity? document;
-    IEntity? parent = null;
-    Collection<IEntity> inside = [];
-    MatchCollection matches = XML_PreCompiled.Matches(content);
-    ParsingContext context = new();
-
-    document = new DocumentEntity()
+    ParsingInfo info = DefaultParsingSets.XML;
+    ParsingContext context = new()
     {
-      Origin = content,
-      Content = content,
+      ParsingSet = info,
+      OriginText = content,
+      WorkingSet = info.Regex!.Matches(content),
+      Document = new DocumentEntity()
+      {
+        Origin = content,
+        Content = content,
+      },
     };
 
-    foreach (Match match in matches)
+    while (!context.DoneWorking)
     {
-      IEntity item = CheckXMLMatch(match, context);
-
-      switch (item)
+      if (context.CurrentItem is Match match)
       {
-        case ElementEntity ee when ee.IsHeader:
-          document.SetHeader(item);
-          continue;
-        case ElementOpenPlaceholder eop when parent is null:
-          parent = new ElementEntity()
-          {
-            Name = eop.Name,
-            Origin = eop.Origin,
-            Namespace = eop.Namespace,
-            Parent = document,
-            Attributes = eop.Attributes,
-          };
-          document.SetRoot(parent);
-          inside.Add(parent);
-          continue;
-        case WhitespaceEntity when parent is null:
-          continue;
-        case ContentEntity when parent is null:
-          throw new InvalidDataException("Cannot have loose content outside the root element.");
-        case ElementOpenPlaceholder inner_eop when parent is not null:
-          ElementEntity inner = new()
-          {
-            Name = inner_eop.Name,
-            Origin = inner_eop.Origin,
-            Namespace = inner_eop.Namespace,
-            Parent = parent,
-            Attributes = inner_eop.Attributes,
-          };
-          ((ElementEntity) parent).AddChild(inner);
-          inside.Add(inner);
-          parent = inner;
-          continue;
-        case ElementClosePlaceholder inner_ecp when parent is ElementEntity ee:
-          if (!ee.Name.Is(inner_ecp.Name))
-            throw new InvalidDataException($"Mismatched elements, or you missed a closing tag somewhere. ({ee.Name}) != ({inner_ecp.Name})");
-          inside.Drop();
-          parent = inside.Peek();
-          continue;
-        case ContentEntity inner_ce when parent is not null:
-          inner_ce.SetParent(parent);
-          (parent as ElementEntity)?.AddChild(inner_ce);
-          continue;
-        case ElementEntity inner_ee when parent is not null:
-          inner_ee.SetParent(parent);
-          (parent as ElementEntity)?.AddChild(inner_ee);
-          continue;
-        case NumberEntity or StringEntity or NullEntity or AttributeEntity:
-          throw new InvalidDataException($"Cannot have an entity of this type ({item.TypeName}) in an XML factory.");
-        default:
-          throw new InvalidOperationException($"Item was not handled. ({item.Type}, {item.Origin}) ");
+        IEntity item = CheckXMLMatch(match, context);
+
+        switch (item)
+        {
+          case ElementEntity ee when ee.IsHeader:
+            document.SetHeader(item);
+            continue;
+          case ElementOpenPlaceholder eop when parent is null:
+            parent = new ElementEntity()
+            {
+              Name = eop.Name,
+              Origin = eop.Origin,
+              Namespace = eop.Namespace,
+              Parent = document,
+              Attributes = eop.Attributes,
+            };
+            document.SetRoot(parent);
+            inside.Add(parent);
+            continue;
+          case WhitespaceEntity when parent is null:
+            continue;
+          case ContentEntity when parent is null:
+            throw new InvalidDataException("Cannot have loose content outside the root element.");
+          case ElementOpenPlaceholder inner_eop when parent is not null:
+            ElementEntity inner = new()
+            {
+              Name = inner_eop.Name,
+              Origin = inner_eop.Origin,
+              Namespace = inner_eop.Namespace,
+              Parent = parent,
+              Attributes = inner_eop.Attributes,
+            };
+            ((ElementEntity) parent).AddChild(inner);
+            inside.Add(inner);
+            parent = inner;
+            continue;
+          case ElementClosePlaceholder inner_ecp when parent is ElementEntity ee:
+            if (!ee.Name.Is(inner_ecp.Name))
+              throw new InvalidDataException($"Mismatched elements, or you missed a closing tag somewhere. ({ee.Name}) != ({inner_ecp.Name})");
+            inside.Drop();
+            parent = inside.Peek();
+            continue;
+          case ContentEntity inner_ce when parent is not null:
+            inner_ce.SetParent(parent);
+            (parent as ElementEntity)?.AddChild(inner_ce);
+            continue;
+          case ElementEntity inner_ee when parent is not null:
+            inner_ee.SetParent(parent);
+            (parent as ElementEntity)?.AddChild(inner_ee);
+            continue;
+          case NumberEntity or StringEntity or NullEntity or AttributeEntity:
+            throw new InvalidDataException($"Cannot have an entity of this type ({item.TypeName}) in an XML factory.");
+          default:
+            throw new InvalidOperationException($"Item was not handled. ({item.Type}, {item.Origin}) ");
+        }
+      }
+      else if (context.CurrentItem is IEntity)
+      {
+
       }
     }
     return document;
   }
   public static DocumentEntity FromString (string content, BT type) => type switch
   {
-    BT.Null => new NullEntity(),
     BT.Element => XMLFromString(content),
     BT.Object => JSONFromString(content),
     _ => throw new InvalidOperationException($"Invalid BasicType ({type}) sent to EntityFactory."),

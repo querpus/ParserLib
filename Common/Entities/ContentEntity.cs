@@ -5,9 +5,15 @@ using BT = Common.Entities.BasicType;
 
 namespace Common.Entities;
 
-public class ContentEntity : Entity
+public interface IContentEntity
 {
-  public required string Content
+  string Content { get; init; }
+  string Serialize ();
+}
+
+public class ContentEntity : Entity, IContentEntity
+{
+  public virtual required string Content
   {
     get => (string) DataValues["Content"]!;
     init => DataValues["Content"] = value;
@@ -15,6 +21,6 @@ public class ContentEntity : Entity
   public override BT Type => BT.LooseContent;
 
   public override bool Equals (IEntity? other) =>
-    other is ContentEntity ce && Content.Is(ce.Content);
+    other is IContentEntity ce && Content.Is(ce.Content);
   public override string Serialize () => Content;
 }
