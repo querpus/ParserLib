@@ -30,7 +30,7 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
   /// <remarks>These are the values that are stored in the regular expression groups.</remarks>
   public virtual Dictionary<string, object?> DataValues { get; } = [];
   public virtual bool Equals (IEntity? other) =>
-    other is RawEntity cust &&
+    other is Entity cust &&
     PropertyCollections.SequenceEqual(cust.PropertyCollections) &&
     PropertyValues.SequenceEqual(cust.PropertyValues) &&
     DataValues.SequenceEqual(cust.DataValues) &&

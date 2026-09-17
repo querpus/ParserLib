@@ -8,7 +8,7 @@ using BT = Common.Entities.BasicType;
 
 namespace Common.Entities;
 
-public class EntityFactory
+public static class EntityFactory
 {
   private static Collection<AttributeEntity> ParseAttributes (Match match)
   {
@@ -57,7 +57,7 @@ public class EntityFactory
       return new ErrorEntity() { Message = "No entity match: " + match.Value };
     }
 
-    return options.Type switch
+    IEntity? entity = options.Type switch
     {
       BT.Omit => null,
       BT.Operator => new SymbolEntity()
@@ -70,18 +70,18 @@ public class EntityFactory
         Value = match.Groups["value"].Value,
         Origin = match.Value
       },
-      BT.Placeholder when match.HasValidGroup("element") && match.HasValidGroup("element") => new()
-      {
-        Name = match.Groups["name"].Value,
-        Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
-        Origin = match.Value,
-      },
       BT.Number => new NumberEntity {
         Value = decimal.Parse(match.Groups["name"].Value),
         Origin = match.Value,
       },
-      BT.Boolean => GetBoolean(match),
-      BT.Null => GetNull(match),
+      BT.Boolean => new BooleanEntity
+      {
+        Value = bool.Parse(match.Groups["value"].Value),
+        Origin = match.Value,
+      },
+      BT.Null => new NullEntity {
+        Origin = match.Value
+      },
       BT.Comment => new CommentEntity()
       {
         Content = match.Value,
@@ -125,42 +125,26 @@ public class EntityFactory
       },
       BT.Element when match.HasValidGroup("name") => new ElementEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
       BT.Element when match.HasValidGroup("close") => null,
-      BT.Attribute when match.HasValidGroup("Key") => new AttributeEntity() { Origin = match.Value, Key = Get, Value = match.Value, },
+      BT.Attribute when match.HasValidGroup("Key") => new AttributeEntity() {
+        Origin = match.Value,
+        Key = match.Groups["Key"].Value,
+        Value = match.Value, },
       BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
-      BT.Property when match.HasValidGroup("Key") => new PropertyEntity() { Origin = match.Value, Key = key },
-      BT.Operator => new SymbolEntity()
-      {
-        Content = match.Value,
-        Origin = match.Value
-      },
+      BT.Property when match.HasValidGroup("Key") => new PropertyEntity() { Origin = match.Value, Key = match.Groups["Key"].Value },
       BT.External => throw new NotImplementedException(),
       _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
     };
-  }
-               
-  private static IEntity CheckXMLMatch (Match match, ParsingContext context)
-  {
-    if (!match.Success) throw new InvalidOperationException("Match was not a success.");
 
-    IEntity gen = Generate(match, context);
+    if (options.SetAsNextLevelParent)
+    {
+      context.SetNextDepthProperty("Parent", entity);
+    }
+    if (options.DepthChange > 0)
+    {
+      context.Descend(options.DepthChange, [], new ObjectEntity());
+    }
 
-    return gen is ErrorEntity ee ? throw new InvalidOperationException(ee.Message) : gen;
-  }
-  // if (match.HasValidGroup("header")) return GetHeader (match);
-  // if (match.HasValidGroup("close")) return GetClose (match);
-  // if (match.HasValidGroup("single")) return GetElement (match);
-  // if (match.HasValidGroup("element")) return GetOpen (match);
-  // if (match.HasValidGroup("content")) return GetContent (match);
-  // if (match.HasValidGroup("comment")) return GetComment (match);
-  // if (match.HasValidGroup("ws")) return GetWhitespace (match);
-
-  private static DocumentEntity CheckJSONMatch (Match match, ParsingContext context)
-  {
-    if (!match.Success) throw new InvalidOperationException("Match was not a success.");
-
-    IEntity gen = Generate(match, context);
-
-    return gen is ErrorEntity ee ? throw new InvalidOperationException(ee.Message) : (DocumentEntity) gen;
+    return entity;
   }
 
   public static DocumentEntity FromXElement (XElement root, ParsingContext? context)
@@ -205,26 +189,12 @@ public class EntityFactory
       Parent = top_doc
     };
 
-    //string obj_pop_key ()
-    //{
-    //  if (keys[context._depth] is null)
-    //  {
-    //    throw new InvalidOperationException($"Key is not set for this object at depth {context._depth}.");
-    //  }
-    //  else
-    //  {
-    //    string result = keys[context._depth]!;
-    //    keys[context._depth] = null;
-    //    return result;
-    //  }
-    //}
-
     int max = context.WorkingSet.Count;
 
     for (int i = 0; i < max; i++)
     {
       Match match = context.CurrentItem;
-      IEntity item = CheckJSONMatch(match, context);
+      IEntity? item = CheckJSONMatch(match, context);
 
       switch (item)
       {
@@ -280,15 +250,17 @@ public class EntityFactory
     }
     return context.Document;
   }
-  public IEntity? Document { get; private set; }
-  public ParsingContext Context { get; private set; }
-  public void Initialize ()
-  {
-    
-  }
   public static DocumentEntity XMLFromString (string content)
   {
-    ParsingInfo info = DefaultParsingSets.XML;
+    return FromString(content, DefaultParsingSets.XML);
+  }
+  public static DocumentEntity FromString (string content, ParsingInfo info)
+  {
+    if (info.SingleObject is null)
+    {
+
+    }
+
     ParsingContext context = new()
     {
       ParsingSet = info,
@@ -305,10 +277,12 @@ public class EntityFactory
     {
       if (context.CurrentItem is Match match)
       {
-        IEntity item = CheckXMLMatch(match, context);
+        IEntity? item = Generate(match, context);
+
 
         switch (item)
         {
+          case nu
           case ElementEntity ee when ee.IsHeader:
             document.SetHeader(item);
             continue;

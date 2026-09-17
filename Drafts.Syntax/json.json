@@ -51,29 +51,11 @@
       }
     },
     {
-      "match": "\\b(true|false)\\b",
+      "match": "\\b(true|false|null|undefined)\\b",
       "exclusive": true,
-      "comment": "Boolean literal",
+      "comment": "JSON Keyword",
       "captures": {
-        "0": { "scope": "code.literal" }
-      }
-    },
-    {
-      "match": "\\b-?(?:0x[\\da-f]+|\\d*\\.?\\d+(?:e[+-]?\\d+)?)\\b",
-      "exclusive": true,
-      "comment": "Number",
-      "captures": {
-        "0": {
-          "scope": "code.literal"
-        }
-      }
-    },
-    {
-      "match": "--?|\\+\\+?|!=?=?|<=?|>=?|==?=?|&&?|\\|\\|?|\\?|\\*|\\/|~|\\^|%",
-      "exclusive": true,
-      "comment": "Operator",
-      "captures": {
-        "0": { "scope": "code.operator" }
+        "0": { "scope": "code.keyword" }
       }
     },
     {
@@ -83,32 +65,7 @@
       "captures": {
         "1": { "scope": "code.punctuation" }
       }
-    },
-    {
-      "match": "(?<!\\w|\\$|\\%|\\@|>)(and|or|xor|for|do|while|foreach|as|return|die|exit|if|then|else|elseif|new|delete|try|throw|catch|finally|class|function|string|array|object|resource|var|bool|boolean|int|integer|float|double|real|string|array|global|const|let|static|public|private|protected|published|extends|switch|true|false|null|void|this|self|struct|char|signed|unsigned|short|long)(?!\\w|=\")",
-      "exclusive": true,
-      "comment": "Javascript keyword",
-      "captures": {
-        "1": { "scope": "code.keyword" }
-      }
     }
   ],
-  "navigationPatterns": [
-    {
-      "match": "^\\/\\/ ?#region ?(.*)$",
-      "comment": "Region comments",
-      "rangeCapture": "0",
-      "labelCapture": "1",
-      "prefix": "#region",
-      "level": 0
-    },
-    {
-      "match": "function (.*) \\{",
-      "comment": "Function",
-      "rangeCapture": "0",
-      "labelCapture": "1",
-      "prefix": "function",
-      "level": 1
-    }
-  ]
+  "navigationPatterns": []
 }

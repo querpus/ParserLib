@@ -10,10 +10,11 @@ public class ArrayEntity : Entity
   public void AddValue (IEntity child)
   {
     child.SetParent(this);
-    PropertyCollections["Values"].Add(child);
+    Values.Add(child);
+    Children.Add(child);
   }
   public void AddValues (IEnumerable<IEntity> children) => children.Foreach(AddValue);
-  public Collection<IEntity> Values => (Collection<IEntity>) PropertyCollections["Values"];
+  public Collection<IEntity> Values => (Collection<IEntity>) DataValues["Values"];
   public override BT Type => BT.Array;
 
   public override bool Equals (IEntity? other) =>
