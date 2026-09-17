@@ -60,28 +60,30 @@ public class EntityFactory
     return options.Type switch
     {
       BT.Omit => null,
-      BT.Operator => new SymbolEntity()
+      BT.Operator => new SymbolEntity
       {
         Content = options.ConstantValue ?? match.Value,
         Origin = match.Value
       },
-      BT.String => new StringEntity()
+      BT.String => new StringEntity
       {
         Value = match.Groups["value"].Value,
         Origin = match.Value
       },
-      BT.Placeholder when match.HasValidGroup("element") && match.HasValidGroup("element") => new()
+      BT.Number => new NumberEntity
       {
-        Name = match.Groups["name"].Value,
-        Namespace = match.HasValidGroup("ns") ? match.Groups["ns"].Value : null,
-        Origin = match.Value,
-      },
-      BT.Number => new NumberEntity {
         Value = decimal.Parse(match.Groups["name"].Value),
         Origin = match.Value,
       },
-      BT.Boolean => GetBoolean(match),
-      BT.Null => GetNull(match),
+      BT.Boolean => new BooleanEntity
+      {
+        Value = bool.Parse(match.Groups["value"].Value),
+        Origin = match.Value,
+      },
+      BT.Null => new NullEntity
+      {
+        Origin = match.Value,
+      },
       BT.Comment => new CommentEntity()
       {
         Content = match.Value,
@@ -125,15 +127,11 @@ public class EntityFactory
       },
       BT.Element when match.HasValidGroup("name") => new ElementEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
       BT.Element when match.HasValidGroup("close") => null,
-      BT.Attribute when match.HasValidGroup("Key") => new AttributeEntity() { Origin = match.Value, Key = Get, Value = match.Value, },
+      //BT.Attribute when match.HasValidGroup("Key") => new AttributeEntity() { Origin = match.Value, Key = match.Groups["key"].Value },
       BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
-      BT.Property when match.HasValidGroup("Key") => new PropertyEntity() { Origin = match.Value, Key = key },
-      BT.Operator => new SymbolEntity()
-      {
-        Content = match.Value,
-        Origin = match.Value
-      },
-      BT.External => throw new NotImplementedException(),
+      BT.Property when match.HasValidGroup("Key") => new PropertyEntity() { Origin = match.Value, Key = match.Groups["key"].Value },
+      BT.External when options.Class is not null => options.Class.InvokeMember(SE, BFCI, null, null, []) as IEntity,
+      BT.Attribute => throw new InvalidOperationException($"Attributes are handled in ParseAttributes."),
       _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
     };
   }
@@ -158,9 +156,9 @@ public class EntityFactory
   {
     if (!match.Success) throw new InvalidOperationException("Match was not a success.");
 
-    IEntity gen = Generate(match, context);
+    IEntity? gen = Generate(match, context);
 
-    return gen is ErrorEntity ee ? throw new InvalidOperationException(ee.Message) : (DocumentEntity) gen;
+    return gen is null ? throw new InvalidOperationException("wtf happened") : (DocumentEntity) gen;
   }
 
   public static DocumentEntity FromXElement (XElement root, ParsingContext? context)
@@ -197,7 +195,7 @@ public class EntityFactory
     };
     ParsingContext context = new()
     {
-      WorkingSet = [.. JSON_PreCompiled.Matches(content)],
+      WorkingSet = DefaultParsingSets.JSON.Regex?.Matches(content),
       Document = top_doc,
       OriginText = content,
       CurrentIndex = 0,
@@ -219,7 +217,7 @@ public class EntityFactory
     //  }
     //}
 
-    int max = context.WorkingSet.Count;
+    int max = context.WorkingSet?.Count ?? 0;
 
     for (int i = 0; i < max; i++)
     {
@@ -229,7 +227,7 @@ public class EntityFactory
       switch (item)
       {
         // Ignore comments
-        case CommentEntity ce:
+        case CommentEntity:
           continue;
         // Object start
         case SymbolEntity se when se == "{":
@@ -281,12 +279,30 @@ public class EntityFactory
     return context.Document;
   }
   public IEntity? Document { get; private set; }
-  public ParsingContext Context { get; private set; }
-  public void Initialize ()
+  public ParsingContext? Context { get; private set; }
+  [MemberNotNull(nameof(Context))]
+  public void Initialize (string content, ParsingInfo info)
   {
-    
+    if (info.SingleObject?.CreateEmptyAtStart is true)
+    {
+      Document = info.SingleObject.Type switch
+      {
+        BT.Element or BT.Object => new DocumentEntity
+        {
+          Content = content,
+          Origin = content,
+        },
+        BT when info.SingleObject.Class is not null => info.SingleObject.Class.InvokeMember(SE, BFCI, null, null, null) as IEntity,
+        _ => throw new InvalidOperationException("No class defined for parent object."),
+      };
+    }
+    Context = new()
+    {
+      ParsingSet = info,
+      OriginText = content,
+    };
   }
-  public static DocumentEntity XMLFromString (string content)
+  public dynamic FromString (string content, ParsingInfo info)
   {
     ParsingInfo info = DefaultParsingSets.XML;
     ParsingContext context = new()

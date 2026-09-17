@@ -20,9 +20,9 @@ public class AttributeEntity : Entity
     get => (string) DataValues["Key"]!;
     set => DataValues["Key"] = value;
   }
-  public required string Value
+  public string? Value
   {
-    get => (string) DataValues["Value"]!;
+    get => (string?) DataValues.GetValueOrDefault("Value");
     set => DataValues["Value"] = value;
   }
   public string? Quote
@@ -30,11 +30,12 @@ public class AttributeEntity : Entity
     get => (string) DataValues["Quote"]!;
     set => DataValues["Quote"] = value;
   }
+  public void SetValue (string value) => Value = value;
 
   public override bool Equals (IEntity? other) =>
     other is AttributeEntity ae &&
     Key.Equals(ae.Key, SCO) &&
-    Value.Equals(ae.Value, SCO) &&
+    (Value?.Equals(ae.Value, SCO) ?? (ae.Value is null)) &&
     ((Namespace.IsEmpty && ae.Namespace.IsEmpty) || (Namespace?.Equals(ae.Namespace, SCO) == true));
   public override string Serialize () => $"{(Namespace is not null ? $"{Namespace}:" : "")}{Key}={Quote}{Value}{Quote}";
 }

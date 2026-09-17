@@ -12,6 +12,13 @@ public static class DefaultParsingSets
     GeneratesSingleObject = true,
     IgnoreCase = false,
     TotalPasses = 2,
+    SingleObject = new()
+    {
+      CreateEmptyAtStart = true,
+      Type = BT.Document,
+      OnlyAtTopLevel = true,
+      SetAsNextLevelParent = true,
+    },
     RegexString =
     """
     (?# Element Piece)
@@ -53,7 +60,7 @@ public static class DefaultParsingSets
       Type = BT.Element,
     }, new() {
       IndicatedItem = new() { Group = "close" },
-      Type = BT.Element,
+      Type = BT.Omit,
       DepthChange = -1,
     }, new() {
       IndicatedItem = new() { Group = "single" },
@@ -63,11 +70,6 @@ public static class DefaultParsingSets
       Type = BT.Element,
       
       DepthChange = 1,
-      SetAsNextLevelParent = true,
-    }, new() {
-      CreateEmptyAtStart = true,
-      Type = BT.Document,
-      OnlyAtTopLevel = true,
       SetAsNextLevelParent = true,
     },new() {
       IndicatedItem = new() { Group = "ws" },
@@ -85,7 +87,7 @@ public static class DefaultParsingSets
     }, new() {
     }],
     Comments = [
-      new() {Open = "<!==", Close = "-->", Expression = ""}
+      new() {Open = "<!==", Close = "-->", Expression = "<!-- ([^-]| -[^-])* -->"}
     ]
   };
   public static ParsingInfo JSON { get; } = new ParsingInfo()
