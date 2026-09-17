@@ -5,6 +5,7 @@ using BT = Common.Entities.BasicType;
 
 namespace Common.Entities;
 
+[Flags]
 public enum SpecialReqType
 {
   None, // Always pass

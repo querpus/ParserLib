@@ -56,6 +56,7 @@ public sealed class ParsingContext
   public TValue GetDepthProperty<TValue> (string name, TValue if_not_found) where TValue : struct =>
     _depthProperties.TryGetValue(name, out Dictionary<int, object?>? value) ? (TValue?) value[_depth] ?? if_not_found : if_not_found;
   public void SetDepthProperty (string name, dynamic? value) => _depthProperties[name][_depth] = value;
+  public void SetNextDepthProperty (string name, dynamic? value) => _depthProperties[name][_depth + 1] = value;
   /// <summary>Increase the current depth by the specified amount, store the provided values in DepthProperties at the new depth,
   /// and if a child is specified set its parent (to Document when no current Parent, otherwise to Parent) and update Parent
   /// to the child.</summary>

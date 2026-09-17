@@ -68,7 +68,6 @@ public static class DefaultParsingSets
     }, new() {
       IndicatedItem = new() { Group = "element" },
       Type = BT.Element,
-      
       DepthChange = 1,
       SetAsNextLevelParent = true,
     },new() {
@@ -104,7 +103,7 @@ public static class DefaultParsingSets
     (?#primitives)
     (?'key'        " (?'key_name'\w+) " (?=\s*[:=])) |
     (?'str_value'   (?<=[:=]\s*) " (?'value'([^\\"]|\\.)*) " ) |
-    (?'num_value'   (?<=[:=]\s*)   (?'value'[0-9.eExXbB]+ )  ) |
+    (?'num_value'   (?<=[:=]\s*)   (?'value'[0-9.eExXbB-]+ )  ) |
     (?'bool_value'  (?<=[:=]\s*)   (?'value'true|false)      ) |
     (?'null_value'  (?<=[:=]\s*)   (?'value'null)            ) |
     (?#operators)

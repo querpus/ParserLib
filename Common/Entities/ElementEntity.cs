@@ -14,8 +14,7 @@ public class ElementEntity : Entity
     get => (bool) DataValues["IsHeader"]!;
     init => DataValues["IsHeader"] = value;
   }
-  public bool IsSingle
-  {
+  public bool IsSingle {
     get => (bool) DataValues["IsSingle"]!;
     init => DataValues["IsSingle"] = value;
   }

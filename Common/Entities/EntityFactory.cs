@@ -8,7 +8,7 @@ using BT = Common.Entities.BasicType;
 
 namespace Common.Entities;
 
-public class EntityFactory
+public static class EntityFactory
 {
   private static Collection<AttributeEntity> ParseAttributes (Match match)
   {
@@ -57,7 +57,7 @@ public class EntityFactory
       return new ErrorEntity() { Message = "No entity match: " + match.Value };
     }
 
-    return options.Type switch
+    IEntity? entity = options.Type switch
     {
       BT.Omit => null,
       BT.Operator => new SymbolEntity
@@ -134,31 +134,17 @@ public class EntityFactory
       BT.Attribute => throw new InvalidOperationException($"Attributes are handled in ParseAttributes."),
       _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
     };
-  }
-               
-  private static IEntity CheckXMLMatch (Match match, ParsingContext context)
-  {
-    if (!match.Success) throw new InvalidOperationException("Match was not a success.");
 
-    IEntity gen = Generate(match, context);
+    if (options.SetAsNextLevelParent)
+    {
+      context.SetNextDepthProperty("Parent", entity);
+    }
+    if (options.DepthChange > 0)
+    {
+      context.Descend(options.DepthChange, [], new ObjectEntity());
+    }
 
-    return gen is ErrorEntity ee ? throw new InvalidOperationException(ee.Message) : gen;
-  }
-  // if (match.HasValidGroup("header")) return GetHeader (match);
-  // if (match.HasValidGroup("close")) return GetClose (match);
-  // if (match.HasValidGroup("single")) return GetElement (match);
-  // if (match.HasValidGroup("element")) return GetOpen (match);
-  // if (match.HasValidGroup("content")) return GetContent (match);
-  // if (match.HasValidGroup("comment")) return GetComment (match);
-  // if (match.HasValidGroup("ws")) return GetWhitespace (match);
-
-  private static DocumentEntity CheckJSONMatch (Match match, ParsingContext context)
-  {
-    if (!match.Success) throw new InvalidOperationException("Match was not a success.");
-
-    IEntity? gen = Generate(match, context);
-
-    return gen is null ? throw new InvalidOperationException("wtf happened") : (DocumentEntity) gen;
+    return entity;
   }
 
   public static DocumentEntity FromXElement (XElement root, ParsingContext? context)
@@ -203,26 +189,12 @@ public class EntityFactory
       Parent = top_doc
     };
 
-    //string obj_pop_key ()
-    //{
-    //  if (keys[context._depth] is null)
-    //  {
-    //    throw new InvalidOperationException($"Key is not set for this object at depth {context._depth}.");
-    //  }
-    //  else
-    //  {
-    //    string result = keys[context._depth]!;
-    //    keys[context._depth] = null;
-    //    return result;
-    //  }
-    //}
-
-    int max = context.WorkingSet?.Count ?? 0;
+    int max = context.WorkingSet.Count;
 
     for (int i = 0; i < max; i++)
     {
       Match match = context.CurrentItem;
-      IEntity item = CheckJSONMatch(match, context);
+      IEntity? item = CheckJSONMatch(match, context);
 
       switch (item)
       {
@@ -278,33 +250,17 @@ public class EntityFactory
     }
     return context.Document;
   }
-  public IEntity? Document { get; private set; }
-  public ParsingContext? Context { get; private set; }
-  [MemberNotNull(nameof(Context))]
-  public void Initialize (string content, ParsingInfo info)
+  public static DocumentEntity XMLFromString (string content)
   {
-    if (info.SingleObject?.CreateEmptyAtStart is true)
-    {
-      Document = info.SingleObject.Type switch
-      {
-        BT.Element or BT.Object => new DocumentEntity
-        {
-          Content = content,
-          Origin = content,
-        },
-        BT when info.SingleObject.Class is not null => info.SingleObject.Class.InvokeMember(SE, BFCI, null, null, null) as IEntity,
-        _ => throw new InvalidOperationException("No class defined for parent object."),
-      };
-    }
-    Context = new()
-    {
-      ParsingSet = info,
-      OriginText = content,
-    };
+    return FromString(content, DefaultParsingSets.XML);
   }
-  public dynamic FromString (string content, ParsingInfo info)
+  public static DocumentEntity FromString (string content, ParsingInfo info)
   {
-    ParsingInfo info = DefaultParsingSets.XML;
+    if (info.SingleObject is null)
+    {
+
+    }
+
     ParsingContext context = new()
     {
       ParsingSet = info,
@@ -321,10 +277,12 @@ public class EntityFactory
     {
       if (context.CurrentItem is Match match)
       {
-        IEntity item = CheckXMLMatch(match, context);
+        IEntity? item = Generate(match, context);
+
 
         switch (item)
         {
+          case nu
           case ElementEntity ee when ee.IsHeader:
             document.SetHeader(item);
             continue;

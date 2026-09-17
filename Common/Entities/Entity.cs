@@ -13,8 +13,16 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
   /// <remarks>This determines the class of the entity.</remarks>
   public abstract BasicType Type { get; }
   /// <summary>Gets the property collections.</summary>
+  /// <remarks>
+  /// These are the properties of an <see cref="ObjectEntity"/>, or the attributes of an <see cref="ElementEntity"/>.
+  /// </remarks>
   public virtual Dictionary<string, IList<IEntity>> PropertyCollections { get; } = [];
-  /// <summary>Gets the child entities.</summary>
+  /// <summary>
+  /// Gets the child entities.
+  /// </summary>
+  /// <remarks>
+  /// These are the values of an <see cref="ArrayEntity"/>.
+  /// </remarks>
   public virtual IList<IEntity> Children { get; } = [];
   /// <summary>Gets the property values.</summary>
   public virtual Dictionary<string, IEntity> PropertyValues { get; } = [];
@@ -22,7 +30,7 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
   /// <remarks>These are the values that are stored in the regular expression groups.</remarks>
   public virtual Dictionary<string, object?> DataValues { get; } = [];
   public virtual bool Equals (IEntity? other) =>
-    other is RawEntity cust &&
+    other is Entity cust &&
     PropertyCollections.SequenceEqual(cust.PropertyCollections) &&
     PropertyValues.SequenceEqual(cust.PropertyValues) &&
     DataValues.SequenceEqual(cust.DataValues) &&
@@ -33,6 +41,9 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
   public override string? ToString () => Serialize();
   public void SetParent (IEntity parent) => Parent = parent;
   public void StoreData (string piece_type, dynamic data) => DataValues[piece_type] = data;
+  /// <summary></summary>
+  /// <param name="piece_type"></param>
+  /// <param name="ent"></param>
   public void StoreProperty (string piece_type, IEntity ent) => PropertyValues[piece_type] = ent;
   public void StoreCollection (string piece_type, IEnumerable<IEntity> ents) => PropertyCollections[piece_type] = [.. ents];
   public void AddChild (IEntity child)
