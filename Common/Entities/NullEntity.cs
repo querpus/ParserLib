@@ -9,9 +9,7 @@ namespace Common.Entities;
 public class NullEntity : Entity
 {
   private const string NullString = "null";
-
   public override BT Type => BT.Null;
-
   public override bool Equals (IEntity? other) => other is NullEntity;
   public override string Serialize () => NullString;
 }

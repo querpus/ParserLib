@@ -7,27 +7,31 @@ namespace Common.Entities;
 
 public class ObjectEntity : Entity
 {
-  public IReadOnlyList<PropertyEntity> Properties => (IReadOnlyList<PropertyEntity>) Children.OfType<PropertyEntity>();
   public override BT Type => BT.Object;
 
   public int Count => Children.Count;
 
   public IEntity this[string key]
   {
-    get => (IEntity?) Properties.SingleOrDefault(e => e.Key == key) ?? new ErrorEntity($"Key '{key}' not found in ObjectEntity.");
+    get => Properties[key];
     set
     {
-      if (this[key] is PropertyEntity pe)
-        pe.Value = value;
+      if (Properties.ContainsKey(key) && value is PropertyEntity pe)
+        Properties[key] = pe.Value!;
+      else if (Properties.ContainsKey(key) && value is IEntity ent)
+        Properties[key] = ent;
+      else if (value is PropertyEntity pe2)
+        Properties.Add(key, pe2.Value!);
       else
-        AddProperty(new() { Key = key, Value = value });
+        Properties.Add(key, value);
     }
   }
-  public void AddProperty (PropertyEntity property) => Children.Add(property);
+  public IList<PropertyEntity> GetPropertyEntities () => [.. Properties.Select(i => new PropertyEntity() { Key = i.Key, Value = i.Value, Origin = Origin, Parent = Parent })];
+  public void AddProperty (PropertyEntity property) => Properties.Add(property.Key, property.Value ?? new NullEntity());
   public void AddProperties (IEnumerable<PropertyEntity> properties) => properties.Foreach(AddProperty);
   public override bool Equals (IEntity? other) =>
     other is ObjectEntity oe && Properties.SequenceEqual(oe.Properties);
-  public override string Serialize () => Properties.TextJoin(",");
-  public bool Contains (string key) => Properties.Any(prop => prop.Key.Equals(key, SCO));
-  public IEnumerator<IEntity> GetEnumerator () => Children.GetEnumerator();
+  public override string Serialize () => GetPropertyEntities().TextJoin(",");
+  public bool Contains (string key) => Properties.ContainsKey(key);
+  public IEnumerator<IEntity> GetEnumerator () => .GetEnumerator();
 }
