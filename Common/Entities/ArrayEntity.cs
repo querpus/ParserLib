@@ -14,7 +14,7 @@ public class ArrayEntity : Entity
     Children.Add(child);
   }
   public void AddValues (IEnumerable<IEntity> children) => children.Foreach(AddValue);
-  public Collection<IEntity> Values => (Collection<IEntity>) DataValues["Values"];
+  public Collection<IEntity> Values => [.. Children];
   public override BT Type => BT.Array;
 
   public override bool Equals (IEntity? other) =>

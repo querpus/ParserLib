@@ -79,7 +79,7 @@ public class Range : IEquatable<Range>, IComparable<Range>, IEnumerable<RangeNod
   public Collection<RangeNode> Nodes { get; init; }
   public int Count => Nodes.Aggregate(0, (total, node) => total += node.Count);
 
-  public int CompareTo (Range? other) => throw new NotImplementedException();
+  public int CompareTo (Range? other) => Nodes[0].CompareTo(other?.Nodes[0]);
   public bool Equals (Range? other) => GetHashCode() == other?.GetHashCode();
   public IEnumerator<RangeNode> GetEnumerator () => Nodes.GetEnumerator();
   IEnumerator IEnumerable.GetEnumerator () => GetEnumerator();

@@ -20,7 +20,7 @@ public class JSONTests
   }
 
   [Theory]
-  [InlineData("{\"key\":\"value\",\"key2\":\"value2\"}")]
+  [InlineData(/*lang=json,strict*/ @"{""key"":""value"",""key2"":""value2""}")]
   public void JSON_FunctionalTest2 (string content)
   {
     XParser parser = new();

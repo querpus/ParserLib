@@ -42,7 +42,7 @@ public static class EntityFactory
         Namespace = attr.Name.NamespaceName.IsEmpty ? null : attr.Name.NamespaceName
       });
     }
-    return result;
+    return [.. result];
   }
 
   private static IEntity? Generate (Match match, ParsingContext context)
@@ -52,7 +52,7 @@ public static class EntityFactory
       return new ErrorEntity() { Message = "Match was not a success: " + match.Value };
     }
 
-    if (!context.ParsingSet!.TryGetOptions(match, context, out EntityInfo? options))
+    if (!context.ParsingSet!.TryGetOptions(match, out EntityInfo? options))
     {
       return new ErrorEntity() { Message = "No entity match: " + match.Value };
     }
@@ -72,7 +72,7 @@ public static class EntityFactory
       },
       BT.Number => new NumberEntity
       {
-        Value = decimal.Parse(match.Groups["name"].Value),
+        Value = decimal.Parse(match.Groups["name"].Value, CIIC),
         Origin = match.Value,
       },
       BT.Boolean => new BooleanEntity
@@ -130,20 +130,43 @@ public static class EntityFactory
       //BT.Attribute when match.HasValidGroup("Key") => new AttributeEntity() { Origin = match.Value, Key = match.Groups["key"].Value },
       BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
       BT.Property when match.HasValidGroup("Key") => new PropertyEntity() { Origin = match.Value, Key = match.Groups["key"].Value },
-      BT.External when options.Class is not null => options.Class.InvokeMember(SE, BFCI, null, null, []) as IEntity,
-      BT.Attribute => throw new InvalidOperationException($"Attributes are handled in ParseAttributes."),
+      BT.External when options.Class is not null => options.Class.InvokeMember(SE, BFCI, null, null, [], CIIC) as IEntity,
+      BT.Attribute => throw new InvalidOperationException("Attributes are handled in ParseAttributes."),
       _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
     };
 
+    if (options.SetPropKey)
+    {
+      context.SetDepthProperty("Property", entity);
+    }
     if (options.SetAsNextLevelParent)
     {
-      context.SetNextDepthProperty("Parent", entity);
+      context.SetDepthProperty("NextParent", entity);
     }
-    if (options.DepthChange > 0)
+    if (options.AddToPropKey)
     {
-      context.Descend(options.DepthChange, [], new ObjectEntity());
+      context.GetDepthProperty<PropertyEntity>("Property")?.Value = entity;
     }
 
+    if (entity is not null)
+    {
+      if (context.Parent is not null)
+        entity.SetParent(context.Parent);
+      context.Parent?.AddChild(entity);
+    }
+
+    if (options.DepthChange > 0)
+    {
+      IEntity? new_parent = context.HasDepthProperty("NextParent")
+        ? context.GetDepthProperty<IEntity>("NextParent")
+        : entity ?? options.ChildType?.InvokeMember(SE, BFCI, null, null, null, CIIC) as IEntity;
+      context.Descend(options.DepthChange, [], new_parent!);
+      context.Parent = new_parent;
+    }
+    if (options.DepthChange < 0)
+    {
+      context.Ascend(options.DepthChange);
+    }
     return entity;
   }
 
@@ -172,88 +195,8 @@ public static class EntityFactory
 
     return document;
   }
-  public static DocumentEntity JSONFromString (string content)
-  {
-    DocumentEntity top_doc = new()
-    {
-      Origin = content,
-      Content = content,
-    };
-    ParsingContext context = new()
-    {
-      WorkingSet = DefaultParsingSets.JSON.Regex?.Matches(content),
-      Document = top_doc,
-      OriginText = content,
-      CurrentIndex = 0,
-      ParsingSet = DefaultParsingSets.JSON,
-      Parent = top_doc
-    };
-
-    int max = context.WorkingSet.Count;
-
-    for (int i = 0; i < max; i++)
-    {
-      Match match = context.CurrentItem;
-      IEntity? item = CheckJSONMatch(match, context);
-
-      switch (item)
-      {
-        // Ignore comments
-        case CommentEntity:
-          continue;
-        // Object start
-        case SymbolEntity se when se == "{":
-          ObjectEntity child_obj = new();
-          if (parent is ObjectEntity oe)
-            oe.AddProperty(child_obj);
-          else if (parent is ArrayEntity ae)
-            ae.AddValue(child_obj);
-          continue;
-        case SymbolEntity se when se == "}":
-          parent = obj_exit();
-          continue;
-        case SymbolEntity se when se == "[":
-          parent = obj_create(parent, new ArrayEntity());
-          continue;
-        case SymbolEntity se when se == "]":
-          parent = obj_exit();
-          continue;
-        case SymbolEntity se when se.Content is "," or ":":
-          continue;
-        // Property Entities are built here
-        case PropertyEntity:
-        // Element Entities are not allowed in JSON
-        case ElementEntity or ContentEntity or AttributeEntity:
-          throw new InvalidDataException($"Cannot have an entity of this type ({item.TypeName}) in a JSON factory.");
-        // The keyname is empty, and we have a string entity, so this is the key for the next property.
-        case StringEntity se when parent is ObjectEntity oe && keys[context._depth] is null:
-          obj_set_key(se.Value);
-          continue;
-        // The keyname is not empty, and we have a primitive entity, so this is the value for the current property.
-        case StringEntity or NumberEntity or NullEntity or BooleanEntity when parent is ObjectEntity oe && obj_chk_key():
-          string keyname = obj_pop_key();
-          PropertyEntity prop = new()
-          {
-            Key = keyname,
-            Origin = $"\"{keyname}\":{item.Origin}",
-            Value = item,
-          };
-          prop.AddProperty(prop);
-          continue;
-        // We are in an array and we have a primitive entity
-        case StringEntity or NumberEntity or NullEntity or BooleanEntity when parent is ArrayEntity ae:
-          ae.AddValue(item);
-          continue;
-        default:
-          throw new InvalidOperationException($"Unhandled Entity \"{item.Origin}\" sent to EntityFactory.");
-      }
-    }
-    return context.Document;
-  }
-  public static DocumentEntity XMLFromString (string content)
-  {
-    return FromString(content, DefaultParsingSets.XML);
-  }
+  public static DocumentEntity JSONFromString (string content) => FromString(content, DefaultParsingSets.JSON);
+  public static DocumentEntity XMLFromString (string content) => FromString(content, DefaultParsingSets.XML);
   public static DocumentEntity FromString (string content, ParsingInfo info)
   {
     if (info.SingleObject is null)
@@ -265,87 +208,25 @@ public static class EntityFactory
     {
       ParsingSet = info,
       OriginText = content,
-      WorkingSet = info.Regex!.Matches(content),
       Document = new DocumentEntity()
       {
         Origin = content,
         Content = content,
       },
     };
-
-    while (!context.DoneWorking)
+    MatchCollection matches = info.Regex!.Matches(content);
+    List<IEntity> entities = [];
+    foreach (Match match in matches.Cast<Match>())
     {
-      if (context.CurrentItem is Match match)
-      {
-        IEntity? item = Generate(match, context);
-
-
-        switch (item)
-        {
-          case nu
-          case ElementEntity ee when ee.IsHeader:
-            document.SetHeader(item);
-            continue;
-          case ElementOpenPlaceholder eop when parent is null:
-            parent = new ElementEntity()
-            {
-              Name = eop.Name,
-              Origin = eop.Origin,
-              Namespace = eop.Namespace,
-              Parent = document,
-              Attributes = eop.Attributes,
-            };
-            document.SetRoot(parent);
-            inside.Add(parent);
-            continue;
-          case WhitespaceEntity when parent is null:
-            continue;
-          case ContentEntity when parent is null:
-            throw new InvalidDataException("Cannot have loose content outside the root element.");
-          case ElementOpenPlaceholder inner_eop when parent is not null:
-            ElementEntity inner = new()
-            {
-              Name = inner_eop.Name,
-              Origin = inner_eop.Origin,
-              Namespace = inner_eop.Namespace,
-              Parent = parent,
-              Attributes = inner_eop.Attributes,
-            };
-            ((ElementEntity) parent).AddChild(inner);
-            inside.Add(inner);
-            parent = inner;
-            continue;
-          case ElementClosePlaceholder inner_ecp when parent is ElementEntity ee:
-            if (!ee.Name.Is(inner_ecp.Name))
-              throw new InvalidDataException($"Mismatched elements, or you missed a closing tag somewhere. ({ee.Name}) != ({inner_ecp.Name})");
-            inside.Drop();
-            parent = inside.Peek();
-            continue;
-          case ContentEntity inner_ce when parent is not null:
-            inner_ce.SetParent(parent);
-            (parent as ElementEntity)?.AddChild(inner_ce);
-            continue;
-          case ElementEntity inner_ee when parent is not null:
-            inner_ee.SetParent(parent);
-            (parent as ElementEntity)?.AddChild(inner_ee);
-            continue;
-          case NumberEntity or StringEntity or NullEntity or AttributeEntity:
-            throw new InvalidDataException($"Cannot have an entity of this type ({item.TypeName}) in an XML factory.");
-          default:
-            throw new InvalidOperationException($"Item was not handled. ({item.Type}, {item.Origin}) ");
-        }
-      }
-      else if (context.CurrentItem is IEntity)
-      {
-
-      }
+      IEntity? entity = Generate(match, context);
+      if (entity is not null) entities.Add(entity);
     }
-    return document;
+    return context.Document;
   }
   public static DocumentEntity FromString (string content, BT type) => type switch
   {
-    BT.Element => XMLFromString(content),
-    BT.Object => JSONFromString(content),
+    BT.Element => FromString(content, DefaultParsingSets.XML),
+    BT.Object => FromString(content, DefaultParsingSets.JSON),
     _ => throw new InvalidOperationException($"Invalid BasicType ({type}) sent to EntityFactory."),
   };
 }

@@ -57,7 +57,7 @@ public sealed class XParser
     DebugIn(Area, "OperationLoad");
     Spec.ThrowIfNull();
     Operations.AddRange(Spec.Operations);
-    if (Operations[^1] is not OperationEnd || Operations.IsEmpty)
+    if (Operations.IsEmpty || Operations[^1] is not OperationEnd)
       Operations.Add(new OperationEnd());
 
     // Unpack all operations in main list
@@ -90,7 +90,7 @@ public sealed class XParser
     Data.Initialize(data);
   }
   /// <summary>Sets up the Specification and DataStore for the parser.</summary>
-  /// <param name="spec">The specificiation to use.</param>
+  /// <param name="spec">The specification to use.</param>
   [MemberNotNull(nameof(Data), nameof(Spec))]
   private void InitializeParser (Spec spec)
   {
@@ -238,7 +238,7 @@ public sealed class XParser
 
       do
       {
-        Log(MsgClass.Prompt, "Enter a command to analyse parser state.", this);
+        Log(MsgClass.Prompt, "Enter a command to analyze parser state.", this);
         promptUser();
 
         checkPrompt("quit", "are you sure? (y/n)", user => _ = user.Like("y") ? throw new QuitException() : "no quit");

@@ -12,46 +12,43 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
   /// <summary>This should be overridden by any inherited class.</summary>
   /// <remarks>This determines the class of the entity.</remarks>
   public abstract BasicType Type { get; }
-  /// <summary>Gets the property collections.</summary>
-  /// <remarks>
-  /// These are the properties of an <see cref="ObjectEntity"/>, or the attributes of an <see cref="ElementEntity"/>.
-  /// </remarks>
-  public virtual Dictionary<string, IList<IEntity>> PropertyCollections { get; } = [];
-  /// <summary>
-  /// Gets the child entities.
-  /// </summary>
-  /// <remarks>
-  /// These are the values of an <see cref="ArrayEntity"/>.
-  /// </remarks>
+  /// <summary>Gets the child entities.</summary>
+  /// <remarks>These are the values of an <see cref="ArrayEntity"/>, or any non-keyed objects stored within this entity.</remarks>
   public virtual IList<IEntity> Children { get; } = [];
   /// <summary>Gets the property values.</summary>
-  public virtual Dictionary<string, IEntity> PropertyValues { get; } = [];
+  /// <remarks>These are keyed values, like the properties of a JSON object.</remarks>
+  public virtual Dictionary<string, IEntity> Properties { get; } = [];
   /// <summary>Gets the data values.</summary>
-  /// <remarks>These are the values that are stored in the regular expression groups.</remarks>
+  /// <remarks>These are the values that are stored in the regular expression groups, or any other data that is not stored as a child or property.</remarks>
   public virtual Dictionary<string, object?> DataValues { get; } = [];
   public virtual bool Equals (IEntity? other) =>
-    other is Entity cust &&
-    PropertyCollections.SequenceEqual(cust.PropertyCollections) &&
-    PropertyValues.SequenceEqual(cust.PropertyValues) &&
-    DataValues.SequenceEqual(cust.DataValues) &&
-    Children.SequenceEqual(cust.Children);
+    other is Entity entity &&
+    Properties.SequenceEqual(entity.Properties) &&
+    DataValues.SequenceEqual(entity.DataValues) &&
+    Children.SequenceEqual(entity.Children);
   public abstract string Serialize ();
   /// <summary>The serialized representation of this entity.</summary>
   /// <returns>Returns the serialized entity by default.</returns>
   public override string? ToString () => Serialize();
   public void SetParent (IEntity parent) => Parent = parent;
-  public void StoreData (string piece_type, dynamic data) => DataValues[piece_type] = data;
-  /// <summary></summary>
-  /// <param name="piece_type"></param>
-  /// <param name="ent"></param>
-  public void StoreProperty (string piece_type, IEntity ent) => PropertyValues[piece_type] = ent;
-  public void StoreCollection (string piece_type, IEnumerable<IEntity> ents) => PropertyCollections[piece_type] = [.. ents];
   public void AddChild (IEntity child)
   {
     child.SetParent(this);
     Children.Add(child);
   }
   public void AddChildren (IEnumerable<IEntity> children) => children.Foreach(AddChild);
+  public void AddToDataCollection (string key, object data)
+  {
+    if (!DataValues.ContainsKey(key))
+    {
+      DataValues[key] = new Collection<object>();
+    }
+
+    if (DataValues.ContainsKey(key))
+    {
+      DataValues[key].AsCollection().Add(data);
+    }
+  }
 }
 
 public static class SerializerExt

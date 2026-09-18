@@ -31,7 +31,7 @@ public class TokenRule
     TypeToAssign = typeToAssign?.ToString() ?? SE;
   }
   public TokenRule () => TypeToAssign = SE;
-  /// <summary>Use this constructor to make a basic non-recurrsive group rule.</summary>
+  /// <summary>Use this constructor to make a basic non-recursive group rule.</summary>
   /// <param name="typeToAssign">The type to assign to the assembled token.</param>
   /// <param name="ruleStringData">The assembly definition.</param>
   [SetsRequiredMembers]
@@ -41,7 +41,7 @@ public class TokenRule
     RuleStringData = ruleStringData;
     TypeToAssign = typeToAssign;
   }
-  /// <summary>Use this constructor to make a basic non-recurrsive group rule.</summary>
+  /// <summary>Use this constructor to make a basic non-recursive group rule.</summary>
   /// <param name="typeToAssign">The type to assign to the assembled token.</param>
   /// <param name="ruleStringData">The assembly definition.</param>
   [SetsRequiredMembers]
@@ -75,19 +75,24 @@ public class TokenRule
 
     if (string.IsNullOrEmpty(chars))
       return [.. tokenRules];
-
-    tokenRules = typeToAssign.IsCollection()
-      ? [..
+    tokenRules = typeToAssign switch
+    {
+      string string_type => [..
+        chars.
+        ToArray().
+        AsCollection<char>().
+        Select(i => new TokenRule(type, string_type, i.ToString()))],
+      IEnumerable<object> enumerable => [..
         typeToAssign.
         AsCollection().
         Zip(chars).
-        Select(i => new TokenRule(type, i.First, i.Second.ToString()))]
-      : [..
+        Select(i => new TokenRule(type, i.First, i.Second.ToString()))],
+      _ => [..
         chars.
         ToArray().
         AsCollection().
-        Select(i => new TokenRule(type, typeToAssign, i.ToString() ?? SE))];
-
+        Select(i => new TokenRule(type, typeToAssign, i.ToString() ?? SE))]
+    };
     return [.. tokenRules];
   }
   /// <summary>Creates an array of token rules representing keywords.</summary>

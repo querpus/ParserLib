@@ -89,9 +89,9 @@ internal static class Program
     {
       case "NEWXML":
         string newxml_data = File.ReadAllText(FinishPath(Paths.xml_operation));
-        DocumentEntity parsed = (DocumentEntity) EntityFactory.FromString(newxml_data, BasicType.Element);
+        DocumentEntity parsed = EntityFactory.FromString(newxml_data, DefaultParsingSets.XML);
         XElement x_elem = XElement.Load(FinishPath(Paths.xml_operation));
-        DocumentEntity parsedxelem = (DocumentEntity) EntityFactory.FromXElement(x_elem, null);
+        DocumentEntity parsedxelem = EntityFactory.FromXElement(x_elem, null);
         Log(MsgClass.Debug, parsed.RootNode?.ToString() ?? SE, "Program");
         Log(MsgClass.Debug, parsedxelem.RootNode?.ToString() ?? SE, "Program");
         _ = GetInput();

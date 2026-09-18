@@ -9,8 +9,6 @@ public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>
 {
   #region Static Members
   public static RangeNode Empty => new();
-  private void Log (string msg) =>
-    Debug.Log(MsgClass.Debug, msg, this);
   #endregion
 
   #region Public Properties

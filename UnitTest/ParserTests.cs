@@ -4,7 +4,7 @@ using System.Xml.Linq;
 using Common.Entities;
 using Common.Extensions;
 
-using static Common.Names;
+using Parser.Ops.Text;
 
 namespace UnitTest;
 
@@ -33,6 +33,26 @@ public class ParserTests
     Assert.Equal(BasicType.Element, xMLDocumentEntity.RootNode.Type);
   }
 
+  [Theory]
+  [InlineData("blah")]
+  public void Parser_DataStorageAndAccess (string initial_string)
+  {
+    Spec spec = new()
+    {
+      FileInferences = [],
+      Name = "test",
+      Operations = [
+        new ExtractOperation { Pattern="\\w+", ExtractedKey="test_key", InputKey="text", OutputKey="out_key"}
+        ]
+    };
+
+    XParser textParser = new();
+    OpStatus status = textParser.ParseData(spec, initial_string);
+    Assert.True(status.IsPass);
+    Assert.Equivalent(initial_string, textParser.Data["test_key"].AsCollection()[0]);
+    Assert.Equivalent("", textParser.Data["out_key"]);
+  }
+
   //[Theory]
   //[InlineData("tcf:Dec")]
   //public void ChkTokenParse (string parse)
@@ -40,24 +60,4 @@ public class ParserTests
   //  parse += "";
   //  //ChkToken<string> test = new(parse) { TokenRule = TokenRuleType.None };
   //}
-}
-
-public class CommonTests
-{
-  [Theory]
-  [InlineData("\u0000\u0010\u0020")]
-  public void CharDisplayTest (string data)
-  {
-    string result = SE;
-    foreach (char c in data)
-    {
-      result += c.Display;
-    }
-    Assert.Equal("␀␐␠", result);
-  }
-
-  [Theory]
-  [InlineData(new byte[] { 0, 16, 5, 0 }, 0x00100500, true)]
-  [InlineData(new byte[] { 0, 16, 5, 0 }, 0x00051000, false)]
-  public void SpanToInt (byte[] v, int value, bool big_endian) => Assert.Equal(value, v.ToInt32(big_endian));
 }

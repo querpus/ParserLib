@@ -7,9 +7,8 @@ namespace Common.Entities;
 
 public interface IEntity
 {
-  Dictionary<string, IList<IEntity>> PropertyCollections { get; }
   IList<IEntity> Children { get; }
-  Dictionary<string, IEntity> PropertyValues { get; }
+  Dictionary<string, IEntity> Properties { get; }
   Dictionary<string, object?> DataValues { get; }
   /// <summary>Gets the origin of the parsed entity.</summary>
   /// <remarks>This is null for entities that are not derived from a single source.</remarks>
@@ -33,4 +32,5 @@ public interface IEntity
   void SetParent (IEntity parent);
   void AddChild (IEntity child);
   void AddChildren (IEnumerable<IEntity> children);
+  void AddToDataCollection (string key, object data);
 }

@@ -19,16 +19,57 @@ public enum SpecialReqType
   GreaterThan = 0x00020000,
   LessThan    = 0x00040000,
   EqualTo     = 0x00080000,
-  EqualToIC   = 0x00100000
+  EqualToIC   = 0x00100000,
+  AllFlags    = Invert | GreaterThan | LessThan | EqualTo | EqualToIC,
 }
 
 public readonly struct SpecialReq
 {
   public SpecialReqType Requirements { get; init; }
+  public string? Group { get; init; }
   public dynamic? Value { get; init; }
 
   public static implicit operator SpecialReq ((SpecialReqType Requirements, dynamic? Value) tuple) =>
     new() { Value = tuple.Value, Requirements = tuple.Requirements };
+  public bool RequirementsMet (Match match)
+  {
+    bool invert = Requirements.HasFlag(SpecialReqType.Invert);
+    bool equalic = Requirements.HasFlag(SpecialReqType.EqualToIC);
+
+    bool meets = Requirements.RemoveBit<SpecialReqType>(SpecialReqType.AllFlags) switch
+    {
+      SpecialReqType.GroupExists when Group is not null => match.HasValidGroup(Group),
+      SpecialReqType.GroupValue when Group is not null => match.HasValidGroup(Group) && match.Groups[Group].Value.Equals(Value, equalic ? SCOIC : SCO),
+      SpecialReqType.GroupLength when Group is not null => match.HasValidGroup(Group) && FuncParse(match.Groups[Group].Value.Length),
+      _ => false
+    };
+
+    return invert ? !meets : meets;
+  }
+
+  private bool FuncParse(int len)
+  {
+    bool eq = Requirements.HasFlag(SpecialReqType.EqualTo);
+    bool gr = Requirements.HasFlag(SpecialReqType.GreaterThan);
+    bool ls = Requirements.HasFlag(SpecialReqType.LessThan);
+
+    if (eq && ls)
+    {
+      return len <= Value;
+    }
+    if (eq && gr)
+    {
+      return len >= Value;
+    }
+    if (eq)
+    {
+      return len == Value;
+    }
+    if (ls)
+      return len < Value;
+    else
+      return gr && (len > Value);
+  }
 }
 
 public readonly struct SpecialValue
@@ -58,6 +99,9 @@ public class EntityInfo : IEquatable<Match>
   /// <c>-1</c>: Decrease depth (ascend). For example, a closing bracket '}'.
   /// </remarks>
   public int DepthChange { get; init; }
+  /// <summary>The type to create if the depth increases.</summary>
+  /// <remarks>This should be specified if <see cref="DepthChange"/> is positive.</remarks>
+  public Type? ChildType { get; init; }
   /// <summary>Gets a value indicating whether this item stores itself as a value in the property context variable</summary>
   /// <remarks>When <see langword="true"/>, this entity is added to the currently active property at this depth.
   /// Defaults to <see langword="false"/>.
@@ -117,7 +161,7 @@ public class EntityInfo : IEquatable<Match>
   /// <summary>Basic equality, quick method.</summary>
   /// <param name="obj">The other object.</param>
   /// <returns><see langword="true"/> if the object is an <see cref="EntityInfo"/> and the properties are the same. Otherwise <see langword="false"/>.</returns>
-  public override bool Equals (object? obj) => obj is EntityInfo info && Equals(info);
+  public override bool Equals (object? obj) => obj is EntityInfo info && GetHashCode() == info.GetHashCode();
   public override int GetHashCode () => HashCode.Combine(Type, IndicatedItem, DepthChange, SetPropKey, SetAsNextLevelParent, CreateEmptyAtStart, ConstantValue, StorePieceTypes, HashCode.Combine(StoresData, DefinesStructure, OnlyAtTopLevel));
   public static bool operator == (EntityInfo left, Match right) => left.Equals(right);
   public static bool operator != (EntityInfo left, Match right) => !(left == right);

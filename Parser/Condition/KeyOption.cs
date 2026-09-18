@@ -36,6 +36,7 @@ public static class KOExtension
       OpDiv or OpMul or OpMod => OoOp.Mult,
       OpExp or OpLBs or OpRBs or OpRoot => OoOp.Exp,
       CountOfKey or CheckKeyExists or LoadKey or TypeOfKey => OoOp.Keyword,
+      Undefined or Null or Literal or True or False or Integer or KeyOption.Decimal or Embedded or OpStart => throw new InvalidOperationException("These cannot exist here."),
       _ => OoOp.None,
     };
   }

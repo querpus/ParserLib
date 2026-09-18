@@ -25,14 +25,12 @@ public sealed class ParsingContext
   /// <summary>The index within the <see cref="WorkingSet"/> this item is.</summary>
   /// <value>An index between 0 and the count of <see cref="WorkingSet"/>.</value>
   /// <remarks>This returns <see cref="DNE"/> if the index is not specified or the <see cref="WorkingSet"/> not defined.</remarks>
-  public int CurrentIndex { get; set; } = DNE;
+  public int CurrentIndex { get; set; }
   public bool DoneWorking { get; set; }
-  [AllowNull]
-  public dynamic CurrentItem => WorkingSet[CurrentIndex];
   /// <summary>Gets or sets the "Parent" depth property, which is used on most entities in some way.</summary>
   public IEntity? Parent
   {
-    get => GetDepthProperty("Parent");
+    get => HasDepthProperty("Parent") ? GetDepthProperty("Parent") : null;
     set
     {
       if (value is not null)
@@ -51,12 +49,19 @@ public sealed class ParsingContext
   /// </remarks>
   public dynamic? GetDepthProperty (string name) =>
     _depthProperties.TryGetValue(name, out Dictionary<int, object?>? value) ? value[_depth] : null;
+  public bool HasDepthProperty (string name) => _depthProperties.ContainsKey(name) && _depthProperties[name].ContainsKey(_depth);
   public TValue? GetDepthProperty<TValue> (string name) where TValue : class =>
     _depthProperties.TryGetValue(name, out Dictionary<int, object?>? value) ? value[_depth] as TValue : null;
   public TValue GetDepthProperty<TValue> (string name, TValue if_not_found) where TValue : struct =>
     _depthProperties.TryGetValue(name, out Dictionary<int, object?>? value) ? (TValue?) value[_depth] ?? if_not_found : if_not_found;
-  public void SetDepthProperty (string name, dynamic? value) => _depthProperties[name][_depth] = value;
-  public void SetNextDepthProperty (string name, dynamic? value) => _depthProperties[name][_depth + 1] = value;
+  public void SetDepthProperty (string name, dynamic? value)
+  {
+    if (!_depthProperties.ContainsKey(name))
+    {
+      _depthProperties.Add(name, []);
+    }
+    _depthProperties[name][_depth] = value;
+  }
   /// <summary>Increase the current depth by the specified amount, store the provided values in DepthProperties at the new depth,
   /// and if a child is specified set its parent (to Document when no current Parent, otherwise to Parent) and update Parent
   /// to the child.</summary>
@@ -134,6 +139,6 @@ public sealed class ParsingContext
   {
     dynamic? property = GetDepthProperty("Property");
     return (T?) property;
-  } 
+  }
   #endregion
 }

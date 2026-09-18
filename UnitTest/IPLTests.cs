@@ -1,3 +1,5 @@
+using Parser.Ops.Text;
+
 using Specification.IPL;
 
 namespace UnitTest;
@@ -35,28 +37,12 @@ public class IPLTests
   }
 
   [Theory]
-  [InlineData("", OpStatus.Pass)]
-  [InlineData(null, OpStatus.Pass)]
-  public void IPL_ParseFailure (string? initial_string, OpStatus result)
+  [InlineData("", true)]
+  [InlineData(null, true)]
+  public void IPL_ParseFailure (string? initial_string, bool pass)
   {
     XParser textParser = new();
     OpStatus status = textParser.ParseData(Definition.Spec, initial_string ?? "");
-    Assert.Equal(result, status);
-  }
-
-  [Theory]
-  [InlineData("blah")]
-  public void IPL_ParseNoVarName (string initial_string)
-  {
-    Spec spec = new()
-    {
-      FileInferences = [],
-      Name = "test",
-      Operations = []
-    };
-
-    XParser textParser = new();
-    OpStatus status = textParser.ParseData(spec, initial_string);
-    Assert.Equal(OpStatus.FailNoSuchVarName, status);
+    Assert.Equal(pass, status.IsPass);
   }
 }

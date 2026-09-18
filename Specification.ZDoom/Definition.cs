@@ -318,7 +318,7 @@ public static class Definition
       Tm("ExprName", @"\b[a-z_]\w*\b"),
     ],
     GroupTokenRules = [
-      // Paremeter Expressions
+      // Parameter Expressions
       new(RT.None, "ParamDef",                   "t:Type n:ParamName xo:Cm"),
       new(RT.None, "PrintParameterValue",        "t:Name{s|i} x:Co qa:Value xo:Cm"),
 

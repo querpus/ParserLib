@@ -4,304 +4,6 @@
         <name>Common</name>
     </assembly>
     <members>
-        <member name="P:Common.GlobalParsingOptions.GeneratesSingleObject">
-            <summary>The kind of object the end result of the operations should be.</summary>
-            <remarks> This is for validation purposes.<br/>
-            If <see langword="true"/>,The parser will make a single <see cref="T:Common.IParsedEntity"/> object from the data.<br/>
-            If <see langword="false"/>, the parser will make a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see cref="T:Common.IParsedEntity"/> objects.</remarks>
-        </member>
-        <member name="P:Common.GlobalParsingOptions.TotalPasses">
-            <summary>The number of iteritive loops the parser must go through.</summary>
-        </member>
-        <member name="P:Common.GlobalParsingOptions.IgnoreCase">
-            <summary>Whether to ignore case on non-regex matches.</summary>
-        </member>
-        <member name="P:Common.EntityParsingOptions.Type">
-            <summary>
-            Can be any predefined type, or it can be the special value <see cref="F:Common.BasicType.Custom"/>.
-            This determines the class of entity that is produced.
-            </summary>
-        </member>
-        <member name="P:Common.EntityParsingOptions.TokenTypeToIndicate">
-            <summary>The group that must be present and have a length > 0 for this entity to be produced.</summary>
-            <remarks>Only used when processing a list of tokens.</remarks>
-        </member>
-        <member name="P:Common.EntityParsingOptions.GroupToIndicate">
-            <summary>The group that must be present and have a length > 0 for this entity to be produced.</summary>
-            <remarks>Only used when processing a list of matches.</remarks>
-        </member>
-        <member name="P:Common.EntityParsingOptions.DepthChange">
-            <summary>The change in depth this token indicates.</summary>
-            <remarks>
-            Normally 0, 1, or -1.<br/>
-            <c> 1</c>: Increase depth (descend). For example, an opening bracket '{'.<br/>
-            <c> 0</c>: No change in depth. A comma ',' or a keyword in a statement. This is the default value.<br/>
-            <c>-1</c>: Decrease depth (ascend). For example, a closing bracket '}'.
-            </remarks>
-        </member>
-        <member name="P:Common.EntityParsingOptions.SetAsNextLevelParent">
-            <summary>
-            Adds this token to the parent stack, meaning it will recieve all tokens that are passed as data once the depth descends.<br/>
-            This does not have to be the depth changing token.
-            </summary>
-        </member>
-        <member name="P:Common.EntityParsingOptions.StoresData">
-            <summary>Whether or not the token stores data into its parent.</summary>
-        </member>
-        <member name="P:Common.EntityParsingOptions.ConstantValue">
-            <summary>The constant value if this entity always has the same value.</summary>
-        </member>
-        <member name="P:Common.EntityParsingOptions.DefinesStructure">
-            <summary>Whether or not this token causes an structural change to parsing.</summary>
-        </member>
-        <member name="P:Common.EntityParsingOptions.OnlyAtTopLevel">
-            <summary>Only allow this entity at top-level, not as a child.</summary>
-        </member>
-        <member name="P:Common.EntityParsingOptions.CreateEmptyAtStart">
-            <summary>Creates this entity outside of the parsing loop as the initial container for all other tokens.</summary>
-        </member>
-        <member name="P:Common.EntityParsingOptions.StoreAsPieceType">
-            <summary>The type of piece this entity stores as.</summary>
-        </member>
-        <member name="P:Common.EntityParsingOptions.IsConstant">
-            <summary>Gets a value indicating whether this entity has a constant value.</summary>
-        </member>
-        <member name="T:Common.BasicType">
-            <summary>The type of object.</summary>
-        </member>
-        <member name="F:Common.BasicType.Invalid">
-            <summary>Invalid text. Unable to parse.</summary>
-        </member>
-        <member name="F:Common.BasicType.Absent">
-            <summary>This returns when you try to get a value that doesn't exist.</summary>
-        </member>
-        <member name="F:Common.BasicType.Placeholder">
-            <summary>This gets removed by the second stage parser.</summary>
-        </member>
-        <member name="F:Common.BasicType.Document">
-            <summary>The top level item from a data file, or when <see cref="P:Common.GlobalParsingOptions.GeneratesSingleObject"/> is <see langword="true"/>.</summary>
-        </member>
-        <member name="F:Common.BasicType.Null">
-            <summary>The value 'null'.</summary>
-            <remarks>JSON <see langword="null"/> value.</remarks>
-        </member>
-        <member name="F:Common.BasicType.String">
-            <summary>Quoted text.</summary>
-            <remarks>JSON values, JSON keys, XML Attribute Values, INI </remarks>
-        </member>
-        <member name="F:Common.BasicType.Number">
-            <summary>Non-quoted numeric data.</summary>
-        </member>
-        <member name="F:Common.BasicType.Array">
-            <summary>An array of <see cref="T:Common.IParsedEntity"/> items.</summary>
-        </member>
-        <member name="F:Common.BasicType.Object">
-            <summary>A basic dictionary.</summary>
-        </member>
-        <member name="F:Common.BasicType.Boolean">
-            <summary>A <see langword="true"/> or a <see langword="false"/> stored as 'true' and 'false'.</summary>
-        </member>
-        <member name="F:Common.BasicType.IgnoredWhitespace">
-            <summary>This is the starting and ending whitespace in an element.</summary>
-        </member>
-        <member name="F:Common.BasicType.LooseContent">
-            <summary>This is content within a mixed element.</summary>
-        </member>
-        <member name="F:Common.BasicType.Element">
-            <summary>A complex object that stores attributes, elements, and content.</summary>
-        </member>
-        <member name="F:Common.BasicType.Section">
-            <summary>A named section.</summary>
-        </member>
-        <member name="F:Common.BasicType.Property">
-            <summary>A Key\Value pair.</summary>
-        </member>
-        <member name="F:Common.BasicType.Custom">
-            <summary>The type of a custom type, for a different style structure than what has been defined already.</summary>
-        </member>
-        <member name="P:Common.IParsedEntity.Origin">
-            <summary>Gets the origin of the parsed entity.</summary>
-            <remarks>This is null for entities that are not derived from a single source.</remarks>
-        </member>
-        <member name="M:Common.IParsedEntity.SetParent(Common.IParsedEntity)">
-            <summary>Sets the parent property after the type has been contructed.</summary>
-            <param name="parent">The parent or encompassing object.</param>
-        </member>
-        <member name="P:Common.IPrimitiveEntity.Content">
-            <summary>Gets the content of the primitive entity, as it should be serialized.</summary>
-        </member>
-        <member name="T:Common.XMLDocumentEntity">
-            <summary>An entity representing an xml document.</summary>
-        </member>
-        <member name="P:Common.XMLDocumentEntity.Content">
-            <summary>The entire text contents of the file.</summary>
-        </member>
-        <member name="T:Common.JSONDocumentEntity">
-            <summary>An entity representing a json document.</summary>
-        </member>
-        <member name="P:Common.JSONDocumentEntity.Content">
-            <summary>The entire text contents of the file.</summary>
-        </member>
-        <member name="T:Common.NumberEntity">
-            <summary>An entity representing a number or decimal.</summary>
-        </member>
-        <member name="T:Common.NullEntity">
-            <summary>An entity representing a null value.</summary>
-        </member>
-        <member name="P:Common.EntityFactory.JSON_PreCompiled">
-            <remarks>
-            Pattern:<br/>
-            <code>(?#primitives)\u000A(?'key'     " (?'keyname'\w+) " (?=\s*[:=])) |\u000A(?'strvalue'  (?&lt;=[:=]\s*) " (?'value'([^\\"]|\\.)*) " ) |\u000A(?'numvalue'  (?&lt;=[:=]\s*)   (?'value'[0-9.eExXbB]+ )  ) |\u000A(?'boolvalue' (?&lt;=[:=]\s*)   (?'value'true|false)      ) |\u000A(?'nullvalue' (?&lt;=[:=]\s*)   (?'value'null)            ) |\u000A(?#operators)\u000A(?'Op'        [[\]{},=:]) |\u000A(?#commments)\u000A(?'comment'   \/\/.* ) |\u000A(?'comment'   \/\*([^*]|\*[^/])*\*\/ )\u000A(?# Other Whitespace)\u000A(?'ws'        \s+)</code><br/>
-            Options:<br/>
-            <code>RegexOptions.Multiline | RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace</code><br/>
-            Explanation:<br/>
-            <code>
-            ○ Match with 8 alternative expressions, atomically.<br/>
-                ○ "key" capture group.<br/>
-                    ○ Match '"'.<br/>
-                    ○ "keyname" capture group.<br/>
-                        ○ Match a word character atomically at least once.<br/>
-                    ○ Match '"'.<br/>
-                    ○ Zero-width positive lookahead.<br/>
-                        ○ Match a whitespace character atomically any number of times.<br/>
-                        ○ Match a character in the set [:=].<br/>
-                ○ "strvalue" capture group.<br/>
-                    ○ Zero-width positive lookbehind.<br/>
-                        ○ Match a whitespace character greedily any number of times right-to-left.<br/>
-                        ○ Match a character in the set [:=] right-to-left.<br/>
-                    ○ Match '"'.<br/>
-                    ○ "value" capture group.<br/>
-                        ○ Loop greedily any number of times.<br/>
-                            ○ Match with 2 alternative expressions.<br/>
-                                ○ Match a character in the set [^"\\].<br/>
-                                ○ Match a sequence of expressions.<br/>
-                                    ○ Match '\\'.<br/>
-                                    ○ Match any character other than '\n'.<br/>
-                    ○ Match '"'.<br/>
-                ○ "numvalue" capture group.<br/>
-                    ○ Zero-width positive lookbehind.<br/>
-                        ○ Match a whitespace character greedily any number of times right-to-left.<br/>
-                        ○ Match a character in the set [:=] right-to-left.<br/>
-                    ○ "value" capture group.<br/>
-                        ○ Match a character in the set [.0-9BEXbex] atomically at least once.<br/>
-                ○ "boolvalue" capture group.<br/>
-                    ○ Zero-width positive lookbehind.<br/>
-                        ○ Match a whitespace character greedily any number of times right-to-left.<br/>
-                        ○ Match a character in the set [:=] right-to-left.<br/>
-                    ○ "value" capture group.<br/>
-                        ○ Match with 2 alternative expressions, atomically.<br/>
-                            ○ Match the string "true".<br/>
-                            ○ Match the string "false".<br/>
-                ○ "nullvalue" capture group.<br/>
-                    ○ Zero-width positive lookbehind.<br/>
-                        ○ Match a whitespace character greedily any number of times right-to-left.<br/>
-                        ○ Match a character in the set [:=] right-to-left.<br/>
-                    ○ "value" capture group.<br/>
-                        ○ Match the string "null".<br/>
-                ○ "Op" capture group.<br/>
-                    ○ Match a character in the set [,:=[]{}].<br/>
-                ○ "comment" capture group.<br/>
-                    ○ Match the string "//".<br/>
-                    ○ Match a character other than '\n' atomically any number of times.<br/>
-                ○ Match a sequence of expressions.<br/>
-                    ○ "comment" capture group.<br/>
-                        ○ Match the string "/*".<br/>
-                        ○ Loop greedily any number of times.<br/>
-                            ○ Match with 2 alternative expressions.<br/>
-                                ○ Match any character other than '*'.<br/>
-                                ○ Match a sequence of expressions.<br/>
-                                    ○ Match '*'.<br/>
-                                    ○ Match any character other than '/'.<br/>
-                        ○ Match the string "*/".<br/>
-                    ○ "ws" capture group.<br/>
-                        ○ Match a whitespace character atomically at least once.<br/>
-            </code>
-            </remarks>
-        </member>
-        <member name="P:Common.EntityFactory.XML_PreCompiled">
-            <remarks>
-            Pattern:<br/>
-            <code>(?# Element Piece)\u000A(?'element'\u000A  &lt;\u000A  (?# '?' for header definition)\u000A  (?'header'\?)?\u000A  \s*\u000A  (?'close'\/)?\u000A  \s*\u000A  (?# optional namespace)\u000A  ((?'ns'\w+):)?\u000A  (?'name'\w+)\u000A\u000A  (?# attributes)\u000A  (\u000A    \s+\u000A    (?'attribute'\u000A      ((?'attrns'\w+)\s*:\s*)?\u000A      (?'attrname'\w+)\u000A      \s*\u000A      =\u000A      \s*\u000A      ""(?'attrval'([^\n""\\]|\\[^\n])*)""\u000A    )\u000A  )*\u000A\u000A  (?'single'\s*\/)?\u000A  \s*\u000A  (?# '?' for ending the header definition)\u000A  (\k'header')?\u000A  &gt;\u000A) |\u000A\u000A(?# Leading or Trailing Whitespace)\u000A(?'ws'(?&lt;=\&gt;)\s+) |\u000A(?'ws'(?&lt;=[^\s&gt;])\s+) |\u000A(?# Leading or Trailing Whitespace)\u000A(?'content'(?&lt;=\&gt;\s*)[^&lt;]+?(?=\s*&lt;)) |\u000A(?# XML Comment)\u000A(?'comment'&lt;!-- ([^-]| -[^-])* --&gt;)</code><br/>
-            Options:<br/>
-            <code>RegexOptions.Multiline | RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace</code><br/>
-            Explanation:<br/>
-            <code>
-            ○ Match with 5 alternative expressions, atomically.<br/>
-                ○ "element" capture group.<br/>
-                    ○ Match '&lt;'.<br/>
-                    ○ Optional (greedy).<br/>
-                        ○ "header" capture group.<br/>
-                            ○ Match '?'.<br/>
-                    ○ Match a whitespace character greedily any number of times.<br/>
-                    ○ Optional (greedy).<br/>
-                        ○ "close" capture group.<br/>
-                            ○ Match '/'.<br/>
-                    ○ Match a whitespace character greedily any number of times.<br/>
-                    ○ Optional (greedy).<br/>
-                        ○ "ns" capture group.<br/>
-                            ○ Match a word character atomically at least once.<br/>
-                        ○ Match ':'.<br/>
-                    ○ "name" capture group.<br/>
-                        ○ Match a word character greedily at least once.<br/>
-                    ○ Loop greedily any number of times.<br/>
-                        ○ Match a whitespace character greedily at least once.<br/>
-                        ○ "attribute" capture group.<br/>
-                            ○ Optional (greedy).<br/>
-                                ○ "attrns" capture group.<br/>
-                                    ○ Match a word character atomically at least once.<br/>
-                                ○ Match a whitespace character atomically any number of times.<br/>
-                                ○ Match ':'.<br/>
-                                ○ Match a whitespace character atomically any number of times.<br/>
-                            ○ "attrname" capture group.<br/>
-                                ○ Match a word character atomically at least once.<br/>
-                            ○ Match a whitespace character atomically any number of times.<br/>
-                            ○ Match '='.<br/>
-                            ○ Match a whitespace character atomically any number of times.<br/>
-                            ○ Match the string "\"\"".<br/>
-                            ○ "attrval" capture group.<br/>
-                                ○ Loop greedily any number of times.<br/>
-                                    ○ Match with 2 alternative expressions.<br/>
-                                        ○ Match a character in the set [^\n"\\].<br/>
-                                        ○ Match a sequence of expressions.<br/>
-                                            ○ Match '\\'.<br/>
-                                            ○ Match any character other than '\n'.<br/>
-                            ○ Match the string "\"\"".<br/>
-                    ○ Optional (greedy).<br/>
-                        ○ "single" capture group.<br/>
-                            ○ Match a whitespace character atomically any number of times.<br/>
-                            ○ Match '/'.<br/>
-                    ○ Match a whitespace character greedily any number of times.<br/>
-                    ○ Optional (greedy).<br/>
-                        ○ Match the same text as matched by the "header" capture group.<br/>
-                    ○ Match '&gt;'.<br/>
-                ○ "ws" capture group.<br/>
-                    ○ Zero-width positive lookbehind.<br/>
-                        ○ Match '&gt;' right-to-left.<br/>
-                    ○ Match a whitespace character atomically at least once.<br/>
-                ○ "ws" capture group.<br/>
-                    ○ Zero-width positive lookbehind.<br/>
-                        ○ Match a character in the set [^&gt;\s] right-to-left.<br/>
-                    ○ Match a whitespace character atomically at least once.<br/>
-                ○ "content" capture group.<br/>
-                    ○ Zero-width positive lookbehind.<br/>
-                        ○ Match a whitespace character greedily any number of times right-to-left.<br/>
-                        ○ Match '&gt;' right-to-left.<br/>
-                    ○ Match a character other than '&lt;' lazily at least once.<br/>
-                    ○ Zero-width positive lookahead.<br/>
-                        ○ Match a whitespace character atomically any number of times.<br/>
-                        ○ Match '&lt;'.<br/>
-                ○ "comment" capture group.<br/>
-                    ○ Match the string "&lt;!--".<br/>
-                    ○ Loop greedily any number of times.<br/>
-                        ○ Match with 2 alternative expressions.<br/>
-                            ○ Match any character other than '-'.<br/>
-                            ○ Match a sequence of expressions.<br/>
-                                ○ Match '-'.<br/>
-                                ○ Match any character other than '-'.<br/>
-                    ○ Match the string "--&gt;".<br/>
-            </code>
-            </remarks>
-        </member>
         <member name="T:Common.Chars">
             <summary>Static class of common character combinations.</summary>
         </member>
@@ -496,11 +198,500 @@
         <member name="F:Common.DictionaryMode.MergeCollection">
             <summary>If the existing value is a collection, and this value is a collection of the same type, merge the two collections.</summary>
         </member>
-        <member name="T:Common.EntryNameEqual`1">
+        <member name="T:Common.Entities.AttributeEntity">
+            <summary>A key/value pair, with an optional namespace. It also stores what quote character was used.</summary>
+            <remarks>Stores all 4 values in data, not as <see cref="T:Common.Entities.IEntity"/> objects.</remarks>
+        </member>
+        <member name="T:Common.Entities.BasicType">
+            <summary>The type of object.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.Invalid">
+            <summary>Invalid text. Unable to parse.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.Absent">
+            <summary>This returns when you try to get a value that doesn't exist.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.Placeholder">
+            <summary>This will get removed by a later pass by the parser..</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.Document">
+            <summary>The single top level item from a data file, when <see cref="P:Common.Entities.ParsingInfo.GeneratesSingleObject"/> is <see langword="true"/>.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.Comment">
+            <summary>A comment item, no need to parse, ignore.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.Null">
+            <summary>The value 'null'.</summary>
+            <remarks>JSON <see langword="null"/> value.</remarks>
+        </member>
+        <member name="F:Common.Entities.BasicType.String">
+            <summary>Quoted text.</summary>
+            <remarks>JSON values, JSON keys, XML Attribute Values, INI </remarks>
+        </member>
+        <member name="F:Common.Entities.BasicType.Number">
+            <summary>Non-quoted numeric data.</summary>
+            <remarks>JSON numeric values, not enclosed in quotes.</remarks>
+        </member>
+        <member name="F:Common.Entities.BasicType.Array">
+            <summary>An array of <see cref="T:Common.Entities.IEntity"/> items.</summary>
+            <remarks>A JSON array object, or a list of items.</remarks>
+        </member>
+        <member name="F:Common.Entities.BasicType.Object">
+            <summary>A basic dictionary.</summary>
+            <remarks>
+            A JSON object which can store named properties in an <see cref="T:System.Collections.Generic.IDictionary`2"/>.
+            </remarks>
+        </member>
+        <member name="F:Common.Entities.BasicType.Boolean">
+            <summary>A <see langword="true"/> or a <see langword="false"/> stored as 'true' and 'false'.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.IgnoredWhitespace">
+            <summary>This is the starting and ending whitespace in an element, or whitespace between elements.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.LooseContent">
+            <summary>This is content within a mixed element.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.Element">
+            <summary>A complex object that stores attributes, elements, and content.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.Attribute">
+            <summary>A key/value pair that can be qualified with a namespace.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.Section">
+            <summary>A named section.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.Property">
+            <summary>A key\value pair in which the value is an entity.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.Raw">
+            <summary>A custom type, for a different style structure than what has been defined already.</summary>
+        </member>
+        <member name="F:Common.Entities.BasicType.External">
+            <summary>A custom class, for a different style structure than what has been defined already.</summary>
+            <remarks>This class must inherit from <see cref="T:Common.Entities.Entity"/>.</remarks>
+        </member>
+        <member name="F:Common.Entities.BasicType.Operator">
+            <summary>A constant character or set of characters.</summary>
+        </member>
+        <member name="P:Common.Entities.CommentStyle.Open">
+            <summary>The character or character sequence that begins this comment.</summary>
+        </member>
+        <member name="P:Common.Entities.CommentStyle.Close">
+            <summary>The character or character sequence that ends this comment.</summary>
+            <remarks>Leave <see langword="null"/> for linefeed or EOF terminated.</remarks>
+        </member>
+        <member name="P:Common.Entities.CommentStyle.Expression">
+            <summary>The regular expression that captures this comment.</summary>
+        </member>
+        <member name="T:Common.Entities.DocumentEntity">
+            <summary>An entity representing a document.</summary>
+            <remarks>
+            Uses DataValues:<br/>
+            * <c>RootNode</c> - The root node of the document.<br/>
+            * <c>Header</c> - The header of the document (if present).<br/>
+            </remarks>
+        </member>
+        <member name="T:Common.Entities.Entity">
+            <summary>Base class for entities.</summary>
+        </member>
+        <member name="P:Common.Entities.Entity.Parent">
+            <summary>Gets or sets the parent entity.</summary>
+            <remarks>This is <see langword="null"/> if the current entity is a root entity.</remarks>
+        </member>
+        <member name="P:Common.Entities.Entity.Type">
+            <summary>This should be overridden by any inherited class.</summary>
+            <remarks>This determines the class of the entity.</remarks>
+        </member>
+        <member name="P:Common.Entities.Entity.Children">
+            <summary>Gets the child entities.</summary>
+            <remarks>These are the values of an <see cref="T:Common.Entities.ArrayEntity"/>, or any non-keyed objects stored within this entity.</remarks>
+        </member>
+        <member name="P:Common.Entities.Entity.Properties">
+            <summary>Gets the property values.</summary>
+            <remarks>These are keyed values, like the properties of a JSON object.</remarks>
+        </member>
+        <member name="P:Common.Entities.Entity.DataValues">
+            <summary>Gets the data values.</summary>
+            <remarks>These are the values that are stored in the regular expression groups, or any other data that is not stored as a child or property.</remarks>
+        </member>
+        <member name="M:Common.Entities.Entity.ToString">
+            <summary>The serialized representation of this entity.</summary>
+            <returns>Returns the serialized entity by default.</returns>
+        </member>
+        <member name="T:Common.Entities.EntityInfo">
+            <summary>This is common data to describe variations of entity properties.</summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.Type">
+            <summary>
+            Can be any predefined type, or it can be the special value <see cref="F:Common.Entities.BasicType.Raw"/>.
+            This determines the class of entity that is produced.
+            </summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.Class">
+            <summary>If <see cref="P:Common.Entities.EntityInfo.Type"/> is <see cref="F:Common.Entities.BasicType.External"/>, this is the class that is created.</summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.IndicatedItem">
+            <summary>The conditions that must be present for this entity to be produced.</summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.DepthChange">
+            <summary>The change in depth this token indicates.</summary>
+            <remarks>
+            Normally 0, 1, or -1.<br/>
+            <c> 1</c>: Increase depth (descend). For example, an opening bracket '{'.<br/>
+            <c> 0</c>: No change in depth. A comma ',' or a keyword in a statement. This is the default value.<br/>
+            <c>-1</c>: Decrease depth (ascend). For example, a closing bracket '}'.
+            </remarks>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.ChildType">
+            <summary>The type to create if the depth increases.</summary>
+            <remarks>This should be specified if <see cref="P:Common.Entities.EntityInfo.DepthChange"/> is positive.</remarks>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.AddToPropKey">
+            <summary>Gets a value indicating whether this item stores itself as a value in the property context variable</summary>
+            <remarks>When <see langword="true"/>, this entity is added to the currently active property at this depth.
+            Defaults to <see langword="false"/>.
+            </remarks>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.SetPropKey">
+            <summary>Gets a value indicating whether the property context variable should be set.</summary>
+            <remarks>When <see langword="true"/>, this entity is set to be the currently active property at this depth.
+            Defaults to <see langword="false"/>.
+            </remarks>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.SetAsNextLevelParent">
+            <summary>
+            Adds this entity to the parent stack, meaning it will receive all tokens that are passed as data once the depth descends.<br/>
+            This does not have to be the depth changing token.
+            </summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.CreateEmptyAtStart">
+            <summary>Creates this entity outside of the parsing loop as the initial container for all other tokens.</summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.ConstantValue">
+            <summary>The constant value if this entity always has the same value.</summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.StorePieceTypes">
+            <summary>The type of piece this entity stores as.</summary>
+            <remarks>
+            Format:<br/>
+            Key is PieceType <see langword="string"/>.<br/>
+            Value is GroupName <see langword="string"/>.<br/>
+            Multiple Captures on the group mean a <see cref="T:System.Collections.ObjectModel.Collection`1"/> is made with an entry for each capture.
+            </remarks>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.SpecialValues">
+            <summary>These are conditional assignments to an entity.</summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.StoresData">
+            <summary>Whether or not the entity stores data into its parent.</summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.DefinesStructure">
+            <summary>Whether or not this entity causes an structural change to parsing.</summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.OnlyAtTopLevel">
+            <summary>Only allow this entity at top-level, not as a child.</summary>
+        </member>
+        <member name="M:Common.Entities.EntityInfo.Equals(System.Text.RegularExpressions.Match)">
+            <summary>Checks to see if a match will satisfy the entity</summary>
+            <param name="match">The regex match that is being analyzed.</param>
+            <returns><see langword="true"/> if the match satisfies the requirements, <see langword="false"/> if the match is <see langword="null"/> or does not meet them.</returns>
+        </member>
+        <member name="M:Common.Entities.EntityInfo.Equals(System.Object)">
+            <summary>Basic equality, quick method.</summary>
+            <param name="obj">The other object.</param>
+            <returns><see langword="true"/> if the object is an <see cref="T:Common.Entities.EntityInfo"/> and the properties are the same. Otherwise <see langword="false"/>.</returns>
+        </member>
+        <member name="T:Common.Entities.ErrorEntity">
+            <summary>This is returned if a method must return an <see cref="T:Common.Entities.Entity"/> but one could not be created.</summary>
+        </member>
+        <member name="P:Common.Entities.IEntity.Origin">
+            <summary>Gets the origin of the parsed entity.</summary>
+            <remarks>This is null for entities that are not derived from a single source.</remarks>
+        </member>
+        <member name="P:Common.Entities.IEntity.Type">
+            <summary>Gets the BT type.</summary>
+        </member>
+        <member name="P:Common.Entities.IEntity.Parent">
+            <summary>The parent entity.</summary>
+        </member>
+        <member name="M:Common.Entities.IEntity.Equals(Common.Entities.IEntity,Common.Entities.IEntity)">
+            <summary>Static equality method.</summary>
+            <param name="obj_a">Entity 'A'.</param>
+            <param name="obj_b">Entity 'B'.</param>
+            <returns><see langword="true"/> if 'A' is equal to 'B', <see langword="false"/> otherwise.</returns>
+        </member>
+        <member name="M:Common.Entities.IEntity.SetParent(Common.Entities.IEntity)">
+            <summary>Sets the parent property after the type has been constructed.</summary>
+            <param name="parent">The parent or encompassing object.</param>
+        </member>
+        <member name="T:Common.Entities.IndicationRule">
+            <summary>Represents matching criteria for an indicated item, including an optional token type, a required capture group, an
+            optional exact value, and whether exact-value comparison ignores case.</summary>
+            <remarks>TokenType may be null if unspecified. Group must be present and have length > 0 for a match.
+            ExactValue may be null; when specified, the capture's value must equal ExactValue. IgnoreCase controls case
+            sensitivity when ExactValue is compared.</remarks>
+        </member>
+        <member name="P:Common.Entities.IndicationRule.Group">
+            <summary>The group that must be present and have a length > 0.</summary>
+        </member>
+        <member name="P:Common.Entities.IndicationRule.ExactValue">
+            <summary>Exact string value to match.</summary>
+        </member>
+        <member name="P:Common.Entities.IndicationRule.IgnoreCase">
+            <summary>if <see langword="true"/>, it ignores case on the exact value matching.</summary>
+        </member>
+        <member name="T:Common.Entities.NullEntity">
+            <summary>An entity representing a null value.</summary>
+        </member>
+        <member name="T:Common.Entities.NumberEntity">
+            <summary>An entity representing a number or decimal.</summary>
+        </member>
+        <member name="F:Common.Entities.ParsingContext._depth">
+            <summary>The number of objects this is within.</summary>
+            <remarks>
+            A depth of zero could still mean you are within a document object (if one is used).
+            There are no more potentially recursive objects to exit, you are at the surface.
+            </remarks>
+            <value>This value is clamped to be within 0 and 32767.</value>
+        </member>
+        <member name="P:Common.Entities.ParsingContext.WorkingSet">
+            <summary>The collection of objects to operate on.</summary>
+        </member>
+        <member name="P:Common.Entities.ParsingContext.CurrentIndex">
+            <summary>The index within the <see cref="P:Common.Entities.ParsingContext.WorkingSet"/> this item is.</summary>
+            <value>An index between 0 and the count of <see cref="P:Common.Entities.ParsingContext.WorkingSet"/>.</value>
+            <remarks>This returns <see cref="F:Common.Names.DNE"/> if the index is not specified or the <see cref="P:Common.Entities.ParsingContext.WorkingSet"/> not defined.</remarks>
+        </member>
+        <member name="P:Common.Entities.ParsingContext.Parent">
+            <summary>Gets or sets the "Parent" depth property, which is used on most entities in some way.</summary>
+        </member>
+        <member name="M:Common.Entities.ParsingContext.GetDepthProperty(System.String)">
+            <summary>Gets a depth specific property by key name.</summary>
+            <param name="name">The name of the property.</param>
+            <returns>The object stored at this depth and key.</returns>
+            <remarks>Predefined keys:<br/>
+            * <c>Parent</c> - The current item's parent object, or <see langword="null"/> if top-level.<br/>
+            * <c>Property</c> - The current item's property object, which stores a key/value pair.<br/>
+            * <c>Child</c> - The newly created object that will become the new parent when descending.<br/>
+            * <c>ChildType</c> - The type of child to create if the child is <see langword="null"/>
+            </remarks>
+        </member>
+        <member name="M:Common.Entities.ParsingContext.Descend(System.Int32,System.Collections.Generic.Dictionary{System.String,System.Object},Common.Entities.IEntity)">
+            <summary>Increase the current depth by the specified amount, store the provided values in DepthProperties at the new depth,
+            and if a child is specified set its parent (to Document when no current Parent, otherwise to Parent) and update Parent
+            to the child.</summary>
+            <remarks>Mutates Depth, updates DepthProperties entries at the incremented depth, and updates Parent and
+            the child's parent reference. Document is used with a null-forgiving assertion when assigning the child's parent
+            if Parent is null.</remarks>
+            <param name="amt">Number of depth levels to increase.</param>
+            <param name="set_depth_values">Dictionary mapping property names to values to assign in DepthProperties for the new depth.</param>
+            <param name="child">The new child if one is needed.</param>
+        </member>
+        <member name="M:Common.Entities.ParsingContext.Ascend(System.Int32)">
+            <summary>Changes the depth to move outward.</summary>
+            <param name="amt">The number change to depth.</param>
+        </member>
+        <member name="P:Common.Entities.ParsingInfo.GeneratesSingleObject">
+            <summary>The kind of object the end result of the operations should be.</summary>
+            <remarks> This is for validation purposes.</remarks><value><br/>
+            * <see langword="true"/>,The parser should make a single <see cref="T:Common.Entities.IEntity"/> object from the data.<br/>
+            * <see langword="false"/>, the parser should make a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see cref="T:Common.Entities.IEntity"/> objects.</value>
+        </member>
+        <member name="P:Common.Entities.ParsingInfo.TotalPasses">
+            <summary>The number of iterative loops the parser must go through.</summary>
+        </member>
+        <member name="P:Common.Entities.ParsingInfo.IgnoreCase">
+            <summary>Whether to ignore case on non-regex matches.</summary>
+        </member>
+        <member name="M:Common.Entities.ParsingInfo.TryGetOptions(System.Text.RegularExpressions.Match,Common.Entities.EntityInfo@)">
+            <summary>Tries to get the <see cref="T:Common.Entities.EntityInfo"/> for the given <see cref="T:System.Text.RegularExpressions.Match"/>.</summary>
+            <param name="match">The regex match.</param>
+            <param name="context">The parser context of the previous matches.</param>
+            <param name="options">The output of the <see cref="T:Common.Entities.EntityInfo"/> if the info is located.</param>
+            <returns><see langword="true"/> if the match is able to select an <see cref="T:Common.Entities.EntityInfo"/> that meets the requirements, <see langword="false"/> otherwise.</returns>
+        </member>
+        <member name="F:Common.Entities.PassType.None">
+            <summary>Do nothing.</summary>
+        </member>
+        <member name="F:Common.Entities.PassType.RegexMatching">
+            <summary>Converting a <see langword="string"/> or strings into regex <see cref="T:System.Text.RegularExpressions.Match"/> objects.</summary>
+        </member>
+        <member name="F:Common.Entities.PassType.MatchToEntity">
+            <summary>Converting a <see cref="T:System.Text.RegularExpressions.Match"/> into <see cref="T:Common.Entities.IEntity"/> objects.</summary>
+        </member>
+        <member name="F:Common.Entities.PassType.EntityManipulation">
+            <summary>Operating on the <see cref="T:Common.Entities.IEntity"/> objects to make defined structures.</summary>
+        </member>
+        <member name="P:Common.Entities.QuoteStyle.Open">
+            <summary>The character or character sequence that begins this <see langword="string"/> or <see langword="char"/>.</summary>
+        </member>
+        <member name="P:Common.Entities.QuoteStyle.Close">
+            <summary>The character or character sequence that ends this <see langword="string"/> or <see langword="char"/>.</summary>
+            <remarks>Leave this as <see langword="null"/> if it is the same as open.</remarks>
+        </member>
+        <member name="P:Common.Entities.QuoteStyle.Escape">
+            <summary>The character or character sequence that prevents this <see langword="string"/> or <see langword="char"/> from ending.</summary>
+            <remarks>Leave this as <see langword="null"/> if there is no escape character.</remarks>
+        </member>
+        <member name="P:Common.Entities.QuoteStyle.Expression">
+            <summary>The regular expression that captures this <see langword="string"/> or <see langword="char"/>.</summary>
+        </member>
+        <member name="M:Common.Entities.StringEntity.Serialize">
+            <summary>Gets the serialized representation of the string value.</summary>
+            <remarks>This contains quotes.</remarks>
+        </member>
+        <member name="P:Common.Entities.StringEntity.Value">
+            <summary>Gets or sets the string value.</summary>
+        </member>
+        <member name="T:Common.EntryNameEqual">
             <summary>An <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> comparer to determine if the name of the <see cref="T:Common.IProperty`1"/> is the same as another.</summary>
         </member>
-        <member name="M:Common.EntryNameEqual`1.#ctor">
-            <summary>An <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> comparer to determine if the name of the <see cref="T:Common.IProperty`1"/> is the same as another.</summary>
+        <member name="T:Common.Excel.ExcelWorkbook">
+            <summary>Repesents an Excel workbook and provides access to its sheets, tables, queries, styles, and named ranges.</summary>
+        </member>
+        <member name="P:Common.Excel.ExcelWorkbook.Path">
+            <summary>The file path of the workbook, if it was opened from a file.</summary>
+        </member>
+        <member name="P:Common.Excel.ExcelWorkbook.Workbook">
+            <summary>A reference to the underlying Excel Workbook object.</summary>
+        </member>
+        <member name="M:Common.Excel.ExcelWorkbook.#ctor(System.String)">
+            <summary>Creates an <see cref="T:Common.Excel.ExcelWorkbook"/> by opening the specified file path.</summary>
+            <param name="path">The path to the workbook.</param>
+        </member>
+        <member name="T:Common.Excel.Range">
+            <summary>A class representing a range of cells in Excel, which can include standard cell references, table references, and named ranges.</summary>
+        </member>
+        <member name="M:Common.Excel.Range.ColumnRx(System.String)">
+            <summary><c>[inside]</c></summary>
+            <param name="inside">Regex inside braces.</param>
+            <returns>A string Regex of a column structure.</returns>
+        </member>
+        <member name="F:Common.Excel.Range.InnerCol">
+            <summary>
+            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
+            <c>NoRangeOp</c> - No colon follows.<br/>
+            <c>TableRx</c> - Table or named range.<br/>
+            <c>CommaSep</c> - Optional comma.<br/>
+            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
+            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
+            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
+            <c>ExcelRef</c> - A standard excel range reference.<br/>
+            </summary>
+        </member>
+        <member name="F:Common.Excel.Range.NoRangeOp">
+            <summary>
+            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
+            <c>NoRangeOp</c> - No colon follows.<br/>
+            <c>TableRx</c> - Table or named range.<br/>
+            <c>CommaSep</c> - Optional comma.<br/>
+            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
+            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
+            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
+            <c>ExcelRef</c> - A standard excel range reference.<br/>
+            </summary>
+        </member>
+        <member name="F:Common.Excel.Range.TableRx">
+            <summary>
+            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
+            <c>NoRangeOp</c> - No colon follows.<br/>
+            <c>TableRx</c> - Table or named range.<br/>
+            <c>CommaSep</c> - Optional comma.<br/>
+            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
+            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
+            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
+            <c>ExcelRef</c> - A standard excel range reference.<br/>
+            </summary>
+        </member>
+        <member name="F:Common.Excel.Range.CommaSep">
+            <summary>
+            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
+            <c>NoRangeOp</c> - No colon follows.<br/>
+            <c>TableRx</c> - Table or named range.<br/>
+            <c>CommaSep</c> - Optional comma.<br/>
+            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
+            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
+            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
+            <c>ExcelRef</c> - A standard excel range reference.<br/>
+            </summary>
+        </member>
+        <member name="F:Common.Excel.Range.TableRef">
+            <summary>
+            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
+            <c>NoRangeOp</c> - No colon follows.<br/>
+            <c>TableRx</c> - Table or named range.<br/>
+            <c>CommaSep</c> - Optional comma.<br/>
+            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
+            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
+            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
+            <c>ExcelRef</c> - A standard excel range reference.<br/>
+            </summary>
+        </member>
+        <member name="F:Common.Excel.Range.TableCol">
+            <summary>
+            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
+            <c>NoRangeOp</c> - No colon follows.<br/>
+            <c>TableRx</c> - Table or named range.<br/>
+            <c>CommaSep</c> - Optional comma.<br/>
+            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
+            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
+            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
+            <c>ExcelRef</c> - A standard excel range reference.<br/>
+            </summary>
+        </member>
+        <member name="F:Common.Excel.Range.TableCell">
+            <summary>
+            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
+            <c>NoRangeOp</c> - No colon follows.<br/>
+            <c>TableRx</c> - Table or named range.<br/>
+            <c>CommaSep</c> - Optional comma.<br/>
+            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
+            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
+            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
+            <c>ExcelRef</c> - A standard excel range reference.<br/>
+            </summary>
+        </member>
+        <member name="F:Common.Excel.Range.ExcelRef">
+            <summary>
+            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
+            <c>NoRangeOp</c> - No colon follows.<br/>
+            <c>TableRx</c> - Table or named range.<br/>
+            <c>CommaSep</c> - Optional comma.<br/>
+            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
+            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
+            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
+            <c>ExcelRef</c> - A standard excel range reference.<br/>
+            </summary>
+        </member>
+        <member name="T:Common.Excel.RangeNode">
+            <summary>A node within a range.</summary>
+        </member>
+        <member name="P:Common.Excel.RangeNode.Sheet">
+            <summary>The containing worksheet.</summary>
+        </member>
+        <member name="P:Common.Excel.RangeNode.Row">
+            <summary>The row index.</summary>
+        </member>
+        <member name="P:Common.Excel.RangeNode.Col">
+            <summary>The column index;</summary>
+        </member>
+        <member name="P:Common.Excel.RangeNode.WholeRow">
+            <summary>Whether or not this is the whole row or not.</summary>
+        </member>
+        <member name="M:Common.Excel.RangeNode.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Common.Excel.RangeNode.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:Common.Excel.RangeNode.CompareTo(Common.Excel.RangeNode)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Common.Excel.RangeNode.Equals(Common.Excel.RangeNode)">
+            <inheritdoc/>
+        </member>
+        <member name="T:Common.Excel.TableExt">
+            <summary>An abstract base class that implements the ITableExt interface, providing a foundation for table-like data structures.</summary>
         </member>
         <member name="T:Common.Extensions.CharExtensions">
             <summary>Extension methods for the <see cref="T:System.Char"/> type.</summary>
@@ -598,8 +789,8 @@
         <member name="T:Common.Extensions.IListExtensions">
             <summary><see cref="T:System.Collections.Generic.IList`1"/> extensions.</summary>
         </member>
-        <member name="M:Common.Extensions.IListExtensions.get_IsEmpty``1(System.Collections.Generic.IList{``0})">
-            <inheritdoc cref="P:Common.Extensions.IListExtensions.&lt;G&gt;$4DB8CF06A2C0C864308343016A26ABD8`1.IsEmpty"/>
+        <member name="M:Common.Extensions.IListExtensions.get_IsEmpty``1(System.Collections.Generic.ICollection{``0})">
+            <inheritdoc cref="P:Common.Extensions.IListExtensions.&lt;G&gt;$847CB318C385471B1F4E7BD0A197DBCA`1.IsEmpty"/>
         </member>
         <member name="M:Common.Extensions.IListExtensions.Enqueue``1(System.Collections.Generic.IList{``0},``0)">
             <inheritdoc cref="M:Common.Extensions.IListExtensions.&lt;G&gt;$4DB8CF06A2C0C864308343016A26ABD8`1.Enqueue(`0)"/>
@@ -613,12 +804,12 @@
         <member name="M:Common.Extensions.IListExtensions.Pop``1(System.Collections.Generic.IList{``0})">
             <inheritdoc cref="M:Common.Extensions.IListExtensions.&lt;G&gt;$4DB8CF06A2C0C864308343016A26ABD8`1.Pop"/>
         </member>
-        <member name="T:Common.Extensions.IListExtensions.&lt;G&gt;$4DB8CF06A2C0C864308343016A26ABD8`1.&lt;M&gt;$B56C0C9A2D34322FFC8FAAFA1DC86B5D">
+        <member name="T:Common.Extensions.IListExtensions.&lt;G&gt;$847CB318C385471B1F4E7BD0A197DBCA`1.&lt;M&gt;$38BA46E6A268578C4123516EF2752C73">
             <summary>List extensions with <typeparamref name="T"/> as the item type.</summary>
             <typeparam name="T">The type of items in the <see cref="T:System.Collections.Generic.IList`1"/>.</typeparam>
             <param name="list">The list that the methods are executing from.</param>
         </member>
-        <member name="P:Common.Extensions.IListExtensions.&lt;G&gt;$4DB8CF06A2C0C864308343016A26ABD8`1.IsEmpty">
+        <member name="P:Common.Extensions.IListExtensions.&lt;G&gt;$847CB318C385471B1F4E7BD0A197DBCA`1.IsEmpty">
             <summary>Checks if an <see cref="T:System.Collections.Generic.IList`1"/> is <see langword="null"/> or empty.</summary>
             <returns><see langword="true"/> if the list is empty or null, <see langword="false"/> otherwise.</returns>
         </member>
@@ -1032,6 +1223,12 @@
         <member name="F:Common.Names.SCOIC">
             <summary>Ordinal (Case-Insensitive).</summary>
         </member>
+        <member name="F:Common.Names.SCI">
+            <summary>Invariant (Case-Sensitive).</summary>
+        </member>
+        <member name="F:Common.Names.SCIIC">
+            <summary>Invariant (Case-Insensitive).</summary>
+        </member>
         <member name="F:Common.Names.NSN">
             <summary>Number styles.</summary>
         </member>
@@ -1124,6 +1321,10 @@
             <summary>A lightweight variant of section that holds a start position and a length for operating on a <see cref="T:System.Span`1"/>, <see cref="T:System.Memory`1"/> or <see langword="string"/>.</summary>
             <param name="start">The start position.</param>
             <param name="length">The length.</param>
+        </member>
+        <member name="T:Common.PropertyBase`1">
+            <summary>Case sensitive property class.</summary>
+            <typeparam name="T">The type of the value of the property.</typeparam>
         </member>
         <member name="T:Common.RegExp.AbsentGroupException">
             <summary>The exception thrown when a regex group is not found.</summary>
@@ -1521,6 +1722,9 @@
             <param name="sc"><see cref="T:System.StringComparison"/> properties.</param>
             <returns>A <see cref="T:System.String"/> with the text replaced as directed.</returns>
         </member>
+        <member name="T:Common.Section">
+            <summary>A section of string content.</summary>
+        </member>
         <member name="T:Common.SectionCollection">
             <summary>Now uses Pos struct for speed.</summary>
         </member>
@@ -1535,100 +1739,6 @@
         </member>
         <member name="T:Common.Types.FileClass">
             <summary>A definition for an object class.</summary>
-        </member>
-        <member name="T:System.Text.RegularExpressions.Generated.JSON_PreCompiled_0">
-            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the JSON_PreCompiled method.</summary>
-        </member>
-        <member name="F:System.Text.RegularExpressions.Generated.JSON_PreCompiled_0.Instance">
-            <summary>Cached, thread-safe singleton instance.</summary>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.JSON_PreCompiled_0.#ctor">
-            <summary>Initializes the instance.</summary>
-        </member>
-        <member name="T:System.Text.RegularExpressions.Generated.JSON_PreCompiled_0.RunnerFactory">
-            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.JSON_PreCompiled_0.RunnerFactory.CreateInstance">
-            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
-        </member>
-        <member name="T:System.Text.RegularExpressions.Generated.JSON_PreCompiled_0.RunnerFactory.Runner">
-            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.JSON_PreCompiled_0.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
-            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
-            <param name="inputSpan">The text being scanned by the regular expression.</param>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.JSON_PreCompiled_0.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
-            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
-            <param name="inputSpan">The text being scanned by the regular expression.</param>
-            <returns>true if a possible match was found; false if no more matches are possible.</returns>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.JSON_PreCompiled_0.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
-            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
-            <param name="inputSpan">The text being scanned by the regular expression.</param>
-            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
-        </member>
-        <member name="T:System.Text.RegularExpressions.Generated.XML_PreCompiled_1">
-            <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the XML_PreCompiled method.</summary>
-        </member>
-        <member name="F:System.Text.RegularExpressions.Generated.XML_PreCompiled_1.Instance">
-            <summary>Cached, thread-safe singleton instance.</summary>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.XML_PreCompiled_1.#ctor">
-            <summary>Initializes the instance.</summary>
-        </member>
-        <member name="T:System.Text.RegularExpressions.Generated.XML_PreCompiled_1.RunnerFactory">
-            <summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner"/> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.XML_PreCompiled_1.RunnerFactory.CreateInstance">
-            <summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner"/> used by methods on <see cref="T:System.Text.RegularExpressions.Regex"/>.</summary>
-        </member>
-        <member name="T:System.Text.RegularExpressions.Generated.XML_PreCompiled_1.RunnerFactory.Runner">
-            <summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.XML_PreCompiled_1.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
-            <summary>Scan the <paramref name="inputSpan"/> starting from base.runtextstart for the next match.</summary>
-            <param name="inputSpan">The text being scanned by the regular expression.</param>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.XML_PreCompiled_1.RunnerFactory.Runner.TryFindNextPossibleStartingPosition(System.ReadOnlySpan{System.Char})">
-            <summary>Search <paramref name="inputSpan"/> starting from base.runtextpos for the next location a match could possibly start.</summary>
-            <param name="inputSpan">The text being scanned by the regular expression.</param>
-            <returns>true if a possible match was found; false if no more matches are possible.</returns>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.XML_PreCompiled_1.RunnerFactory.Runner.TryMatchAtCurrentPosition(System.ReadOnlySpan{System.Char})">
-            <summary>Determine whether <paramref name="inputSpan"/> at base.runtextpos is a match for the regular expression.</summary>
-            <param name="inputSpan">The text being scanned by the regular expression.</param>
-            <returns>true if the regular expression matches at the current position; otherwise, false.</returns>
-        </member>
-        <member name="T:System.Text.RegularExpressions.Generated.Utilities">
-            <summary>Helper methods used by generated <see cref="T:System.Text.RegularExpressions.Regex"/>-derived implementations.</summary>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.Utilities.IsWordChar(System.Char)">
-            <summary>Determines whether the character is part of the [\w] set.</summary>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.Utilities.StackPop(System.Int32[],System.Int32@,System.Int32@,System.Int32@)">
-            <summary>Pops 2 values from the backtracking stack.</summary>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.Utilities.StackPush(System.Int32[]@,System.Int32@,System.Int32)">
-            <summary>Pushes 1 value onto the backtracking stack.</summary>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.Utilities.StackPush(System.Int32[]@,System.Int32@,System.Int32,System.Int32)">
-            <summary>Pushes 2 values onto the backtracking stack.</summary>
-        </member>
-        <member name="M:System.Text.RegularExpressions.Generated.Utilities.StackPush(System.Int32[]@,System.Int32@,System.Int32,System.Int32,System.Int32)">
-            <summary>Pushes 3 values onto the backtracking stack.</summary>
-        </member>
-        <member name="F:System.Text.RegularExpressions.Generated.Utilities.WordCategoriesMask">
-            <summary>Provides a mask of Unicode categories that combine to form [\w].</summary>
-        </member>
-        <member name="P:System.Text.RegularExpressions.Generated.Utilities.WordCharBitmap">
-            <summary>Gets a bitmap for whether each character 0 through 127 is in [\w]</summary>
-        </member>
-        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_ascii_40FF032400000124000001">
-            <summary>Supports searching for characters in or not in ".0123456789BEXbex".</summary>
-        </member>
-        <member name="F:System.Text.RegularExpressions.Generated.Utilities.s_ascii_4D0FF272400002964401029">
-            <summary>Supports searching for characters in or not in "\",./0123456789:=BEX[]befntx{}".</summary>
         </member>
     </members>
 </doc>

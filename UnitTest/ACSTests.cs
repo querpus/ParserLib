@@ -2,7 +2,7 @@ namespace UnitTest;
 
 public class ACSTests
 {
-  internal const string Expression1 = "var_name * 34";
+  internal const string Expression1 = "var_name + 34";
   internal const string Expression2 = "var_name != true";
   internal const string Expression3 = "!var_name";
 

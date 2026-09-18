@@ -19,6 +19,7 @@ public static class DefaultParsingSets
       OnlyAtTopLevel = true,
       SetAsNextLevelParent = true,
     },
+    RegexOptions = ROIPW | ROML | ROEC,
     RegexString =
     """
     (?# Element Piece)
@@ -36,7 +37,7 @@ public static class DefaultParsingSets
           (?'attribute'
           ((?'a_ns'  \w+)     \s*     :     \s*)?
            (?'a_name'\w+)     \s*     =     \s*
-         " (?'a_value'(  [^\n"\\]  |  \\[^\n]  )*  )"
+         " (?'a_val'(  [^\n"\\]  |  \\[^\n]  )*  )"
         ))*
 
       (?'single'\s*\/)?
@@ -70,6 +71,7 @@ public static class DefaultParsingSets
       Type = BT.Element,
       DepthChange = 1,
       SetAsNextLevelParent = true,
+      ChildType = typeof(ElementEntity),
     },new() {
       IndicatedItem = new() { Group = "ws" },
       Type = BT.IgnoredWhitespace,
@@ -98,6 +100,7 @@ public static class DefaultParsingSets
       DefinesStructure = true,
       Type = BT.Document,
     },
+    RegexOptions = ROIPW | ROML | ROEC,
     RegexString =
     """
     (?#primitives)
@@ -121,7 +124,7 @@ public static class DefaultParsingSets
       IndicatedItem = new() { Group = "key" },
       StoresData = true,
       Type = BT.Property,
-      StorePieceTypes = new() { ["Name"] = "name" },
+      StorePieceTypes = new() { ["Key"] = "key" },
       SetPropKey = true
     }, new() {
       IndicatedItem = new() { Group = "str_value" },
@@ -156,6 +159,7 @@ public static class DefaultParsingSets
       DepthChange = 1,
       AddToPropKey = true,
       Type = BT.Object,
+      ChildType = typeof(ObjectEntity),
     }, new() {
       IndicatedItem = new() { Group = "Op", ExactValue = "}" },
       DepthChange = -1,
@@ -165,6 +169,7 @@ public static class DefaultParsingSets
       IndicatedItem = new() { Group = "Op", ExactValue = "[" },
       DepthChange = 1,
       AddToPropKey = true,
+      ChildType = typeof(ArrayEntity),
       Type = BT.Array,
     }, new() {
       IndicatedItem = new() { Group = "Op", ExactValue = ":" },

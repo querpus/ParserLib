@@ -24,6 +24,33 @@
             Any unlisted object returns <see langword="true"/>
             </example>
         </member>
+        <member name="P:Parser.Condition.IfBlockConditional.Condition">
+            <summary>The if condition string. This is <see langword="null"/> for the <see langword="else"/> block.</summary>
+        </member>
+        <member name="M:Parser.Condition.KOExtension.get_IsOperator(Parser.Condition.KeyOption)">
+            <inheritdoc cref="P:Parser.Condition.KOExtension.&lt;G&gt;$D307DF55685F88C11946897FBB54FCD2.IsOperator"/>
+        </member>
+        <member name="M:Parser.Condition.KOExtension.get_UsesObjectInput(Parser.Condition.KeyOption)">
+            <inheritdoc cref="P:Parser.Condition.KOExtension.&lt;G&gt;$D307DF55685F88C11946897FBB54FCD2.UsesObjectInput"/>
+        </member>
+        <member name="P:Parser.Condition.KOExtension.&lt;G&gt;$D307DF55685F88C11946897FBB54FCD2.IsOperator">
+            <summary>This item is an operator.</summary>
+        </member>
+        <member name="P:Parser.Condition.KOExtension.&lt;G&gt;$D307DF55685F88C11946897FBB54FCD2.UsesObjectInput">
+            <summary>This item takes an object as input.</summary>
+        </member>
+        <member name="F:Parser.Condition.KeyOption.Undefined">
+            <summary>Undefined. This is the initial value.</summary>
+        </member>
+        <member name="F:Parser.Condition.KeyOption.Null">
+            <summary>The value 'null'.</summary>
+        </member>
+        <member name="F:Parser.Condition.KeyOption.True">
+            <summary>The boolean value 'true'.</summary>
+        </member>
+        <member name="F:Parser.Condition.KeyOption.OpStart">
+            <summary>Represents the start operation.</summary>
+        </member>
         <member name="M:Parser.Condition.ParsedExpression.Evaluate(Parser.DataStore)">
             <summary>
             Evaluate the expression.
@@ -336,9 +363,6 @@
         <member name="T:Parser.Ops.ForEachOperation">
             <summary>Iterates over the specified key, storing the current item in another key to be accessed.</summary>
         </member>
-        <member name="P:Parser.Ops.IfBlockConditional.Condition">
-            <summary>The if condition string. This is <see langword="null"/> for the <see langword="else"/> block.</summary>
-        </member>
         <member name="T:Parser.Ops.IOperation">
             <summary>The interface for all operations in the parser.</summary>
         </member>
@@ -457,14 +481,14 @@
             <param name="cursor_key">The key for the cursor.</param>
             <param name="break_target">The target index to break to.</param>
         </member>
-        <member name="T:Parser.Ops.OperationCollection">
-            <summary>A collection of operations that are executed in the given order.</summary>
-        </member>
         <member name="T:Parser.Ops.OperationEnd">
             <summary>This operation ends the operation sequence with a success.</summary>
         </member>
         <member name="M:Parser.Ops.OperationEnd.#ctor(System.Boolean)">
             <summary>This operation ends the operation sequence with a success.</summary>
+        </member>
+        <member name="T:Parser.Ops.OperationLabel">
+            <summary>A label that can be referenced from a jump statement.</summary>
         </member>
         <member name="P:Parser.Ops.OperationLabel.Name">
             <summary>The name of this label.</summary>
@@ -894,12 +918,12 @@
             </remarks>
         </member>
         <member name="M:Parser.Tokens.TokenRule.#ctor(System.String,System.String)">
-            <summary>Use this constructor to make a basic non-recurrsive group rule.</summary>
+            <summary>Use this constructor to make a basic non-recursive group rule.</summary>
             <param name="typeToAssign">The type to assign to the assembled token.</param>
             <param name="ruleStringData">The assembly definition.</param>
         </member>
         <member name="M:Parser.Tokens.TokenRule.#ctor(System.Object,System.String)">
-            <summary>Use this constructor to make a basic non-recurrsive group rule.</summary>
+            <summary>Use this constructor to make a basic non-recursive group rule.</summary>
             <param name="typeToAssign">The type to assign to the assembled token.</param>
             <param name="ruleStringData">The assembly definition.</param>
         </member>
@@ -1019,7 +1043,7 @@
         </member>
         <member name="M:Parser.XParser.InitializeParser(Parser.Spec)">
             <summary>Sets up the Specification and DataStore for the parser.</summary>
-            <param name="spec">The specificiation to use.</param>
+            <param name="spec">The specification to use.</param>
         </member>
         <member name="M:Parser.XParser.ParseLoop">
             <summary>Performs all the operations, ending on a fail or a completion of the sequence.</summary>

@@ -9,3 +9,5 @@
 [assembly: SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "<Pending>", Scope = "member", Target = "~M:Parser.Tokens.ComplexToken.GetListID(Parser.Tokens.TokenRef)~Parser.Tokens.TokenRef")]
 [assembly: SuppressMessage("Style", "IDE0290:Use primary constructor", Justification = "<Pending>", Scope = "member", Target = "~M:Parser.Ops.SampleOperation.#ctor(System.String,System.String,System.String,System.String)")]
 [assembly: SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "<Pending>", Scope = "member", Target = "~M:Parser.Condition.ParsedExpression.Operate(Parser.Condition.KeyOption,System.Object,System.Object)~System.Object")]
+[assembly: SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "<Pending>", Scope = "member", Target = "~P:Parser.Tokens.TokenFactory.RuleAction")]
+[assembly: SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "<Pending>", Scope = "member", Target = "~M:Parser.Condition.ParsedExpression.GetValue(Parser.Condition.ConditionValue)~System.Object")]

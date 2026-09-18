@@ -14,6 +14,6 @@ public class PropertyEntity : Entity
   public override bool Equals (IEntity? other) =>
     other is PropertyEntity pe &&
     Key.Equals(pe.Key, SCO) &&
-    (Value?.Equals(pe.Value) ?? pe.Value is null);
+    (Value?.Equals(pe.Value) ?? (pe.Value is null));
   public override string Serialize () => $"\"{Key}\":{Value}";
 }

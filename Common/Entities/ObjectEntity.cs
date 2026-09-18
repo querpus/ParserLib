@@ -5,14 +5,13 @@ using BT = Common.Entities.BasicType;
 
 namespace Common.Entities;
 
-public class ObjectEntity : Entity, ILookup<string, IEntity>
+public class ObjectEntity : Entity
 {
   public IReadOnlyList<PropertyEntity> Properties => (IReadOnlyList<PropertyEntity>) Children.OfType<PropertyEntity>();
   public override BT Type => BT.Object;
 
   public int Count => Children.Count;
 
-  IEnumerable<IEntity> ILookup<string, IEntity>.this[string key] => [ this[key] ];
   public IEntity this[string key]
   {
     get => (IEntity?) Properties.SingleOrDefault(e => e.Key == key) ?? new ErrorEntity($"Key '{key}' not found in ObjectEntity.");
@@ -29,7 +28,6 @@ public class ObjectEntity : Entity, ILookup<string, IEntity>
   public override bool Equals (IEntity? other) =>
     other is ObjectEntity oe && Properties.SequenceEqual(oe.Properties);
   public override string Serialize () => Properties.TextJoin(",");
-  public bool Contains (string key) => throw new NotImplementedException();
-  public IEnumerator<IGrouping<string, IEntity>> GetEnumerator () => throw new NotImplementedException();
-  IEnumerator IEnumerable.GetEnumerator () => GetEnumerator();
+  public bool Contains (string key) => Properties.Any(prop => prop.Key.Equals(key, SCO));
+  public IEnumerator<IEntity> GetEnumerator () => Children.GetEnumerator();
 }

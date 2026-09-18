@@ -25,44 +25,34 @@ public class ParsingInfo
     {
       if (field is null && RegexString is not null)
       {
-        field = new Regex(RegexString, RegexOptions, new(3000));
+        field = new Regex(RegexString, RegexOptions, new(9000));
         return field;
       }
       else
       {
-        return null;
+        return field;
       }
     }
   }
   public Collection<CommentStyle> Comments { get; init; } = [];
   public Collection<QuoteStyle> Quotes { get; init; } = [];
   public IImmutableList<EntityInfo> EntityOptions { get; init; } = [];
-  /// <summary>Tries to get the <see cref=EntityInfo"/> for the given <see cref="Match"/>.</summary>
+  /// <summary>Tries to get the <see cref="EntityInfo"/> for the given <see cref="Match"/>.</summary>
   /// <param name="match">The regex match.</param>
   /// <param name="context">The parser context of the previous matches.</param>
-  /// <param name="options">The output of the <see cref=EntityInfo"/> if the info is located.</param>
+  /// <param name="options">The output of the <see cref="EntityInfo"/> if the info is located.</param>
   /// <returns><see langword="true"/> if the match is able to select an <see cref="EntityInfo"/> that meets the requirements, <see langword="false"/> otherwise.</returns>
-  public bool TryGetOptions (Match match, ParsingContext context, [NotNullWhen(true)] out EntityInfo? options)
+  public bool TryGetOptions (Match match, [NotNullWhen(true)] out EntityInfo? options)
   {
-    options = EntityOptions.FirstOrDefault(item => {
-      string[] groups = [.. match.Groups.OfType<Group>().Select(g => g.Value)];
-      IndicationRule rule = item!.IndicatedItem;
-      StringComparison sc = rule.IgnoreCase ? SCOIC : SCO;
-      IEqualityComparer<string>? iec = rule.IgnoreCase ? CaseInsensitiveEqualityComparer.Ordinal : null;
-      bool use_exact = rule.ExactValue is not null;
-      bool use_group = rule.Group.IsNotEmpty;
-      bool exact_pass = use_exact && rule.ExactValue!.Equals(match.Value, sc);
-      bool group_pass = use_group && groups.Contains(rule.Group!, iec);
-      if (!use_group && !use_exact)
+    foreach (EntityInfo info in EntityOptions)
+    {
+      if (info.IndicatedItem.Matches(match))
       {
-        string msg = !item.CreateEmptyAtStart
-        ? $"Unused rule [{EntityOptions.IndexOf(item)}]"
-        : $"Skipping Initial Container rule [{EntityOptions.IndexOf(item)}]";
-        Debug.Log(MsgClass.Warning, msg, this);
-        return false;
+        options = info;
+        return true;
       }
-      return (!use_group || group_pass) && (!use_exact || exact_pass);
-    }, null);
-    return options is not null;
+    }
+    options = null;
+    return false;
   }
 }

@@ -30,15 +30,21 @@ public class ElementEntity : Entity
   }
   public Collection<AttributeEntity> Attributes
   {
-    get => (Collection<AttributeEntity>) PropertyCollections["Attributes"];
+    get
+    {
+      if (!DataValues.ContainsKey("Attributes"))
+        DataValues["Attributes"] = new Collection<AttributeEntity>();
+
+      return (Collection<AttributeEntity>) DataValues["Attributes"]!;
+    }
     init => AddAttributes(value);
   }
   public override BT Type => BT.Element;
 
   public override string Serialize ()
   {
-    string attrs = Attributes.Select(child => child.ToString()).TextJoin(" ");
-    string children = Children.Select(child => child.ToString()).TextJoin(Chars.LFs);
+    string attrs = Attributes.Select(static child => child.ToString()).TextJoin(" ");
+    string children = Children.Select(static child => child.ToString()).TextJoin(Chars.LFs);
 
     if (IsHeader)
       return $"<?xml {attrs}?>";
