@@ -1,0 +1,84 @@
+{
+  "name": "XML",
+  "description": "Basic XML highlighting",
+  "sampleText": "<!-- XML Syntax -->\n<root attr=\"Val\">\n  <single />\n</root>",
+  "author": "Querpus",
+  "scopeName": "text.xml",
+  "rangeExtensionType": {
+    "default": "lookAround1000"
+  },
+  "listCompletionDefinitions": [{
+    "comment": "",
+    "enabled": true,
+    "match": "(^[  |\\t]+)()(.*)",
+    "sequencePadding": "0",
+    "captures": {
+      "indent": "1",
+      "prefix": "2",
+      "line": "3",
+      "sequence": ""
+    },
+    "replacements": {}
+  }],
+  "fileExtensions": [
+    "xml",
+    "xaml",
+    "csproj",
+    "xsd"
+  ],
+  "patterns": [{
+    "match": "(<!--[\\s\\S]*?-->)",
+    "exclusive": true,
+    "comment": "Comment",
+    "captures": {
+      "1": {
+        "scope": "code.comment"
+      }
+    }
+  }, {
+    "match": "(<\\/?)\\s*(\\w+)(?:\\s+(\\w+)\\s*(=)\\s*\".*\")*\\s*(\\/?>)",
+    "exclusive": true,
+    "comment": "element",
+    "captures": {
+      "1": {
+        "scope": "code.operator"
+      },
+      "2": {
+        "scope": "code.keyword"
+      }
+    }
+  }, {
+    "match": "(<\\?)(xml)(?:\\s+(\\w+)\\s*(=)\\s*(\".*\"))*\\s*(\\?>)",
+    "exclusive": true,
+    "comment": "XML header",
+    "captures": {
+      "0": {
+        "scope": "code.dunno"
+      }
+    }
+  }, {
+    "match": "(['\"])(?:(?!(?:\\\\|\\1)).|\\\\.)*\\1",
+    "exclusive": true,
+    "comment": "String literal",
+    "captures": {
+      "0": {
+        "scope": "code.literal"
+      }
+    }
+  }],
+  "navigationPatterns": [{
+    "match": "^\\/\\/ ?#region ?(.*)$",
+    "comment": "Region comments",
+    "rangeCapture": "0",
+    "labelCapture": "1",
+    "prefix": "#region",
+    "level": 0
+  }, {
+    "match": "function (.*) \\{",
+    "comment": "Function",
+    "rangeCapture": "0",
+    "labelCapture": "1",
+    "prefix": "function",
+    "level": 1
+  }]
+}
