@@ -8,6 +8,7 @@ namespace Common.Entities;
 /// <summary>An entity representing a number or decimal.</summary>
 public class NumberEntity : Entity
 {
+  public bool IsInteger => Value % 1 == 0;
   public required decimal Value
   {
     get => (decimal) DataValues["Value"]!;

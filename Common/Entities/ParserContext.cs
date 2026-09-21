@@ -16,17 +16,9 @@ public sealed class ParsingContext
   private int _depth;
   private readonly Dictionary<string, Dictionary<int, object?>> _depthProperties = [];
   #endregion
-  /// <summary>The collection of objects to operate on.</summary>
-  [AllowNull]
-  public IReadOnlyList<dynamic> WorkingSet { get; set; }
   public ParsingInfo? ParsingSet { get; set; }
   public string? OriginText { get; set; }
   public DocumentEntity? Document { get; set; }
-  /// <summary>The index within the <see cref="WorkingSet"/> this item is.</summary>
-  /// <value>An index between 0 and the count of <see cref="WorkingSet"/>.</value>
-  /// <remarks>This returns <see cref="DNE"/> if the index is not specified or the <see cref="WorkingSet"/> not defined.</remarks>
-  public int CurrentIndex { get; set; }
-  public bool DoneWorking { get; set; }
   /// <summary>Gets or sets the "Parent" depth property, which is used on most entities in some way.</summary>
   public IEntity? Parent
   {

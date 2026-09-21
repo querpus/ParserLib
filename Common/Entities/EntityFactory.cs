@@ -195,8 +195,6 @@ public static class EntityFactory
 
     return document;
   }
-  public static DocumentEntity JSONFromString (string content) => FromString(content, DefaultParsingSets.JSON);
-  public static DocumentEntity XMLFromString (string content) => FromString(content, DefaultParsingSets.XML);
   public static DocumentEntity FromString (string content, ParsingInfo info)
   {
     if (info.SingleObject is null)
@@ -223,10 +221,4 @@ public static class EntityFactory
     }
     return context.Document;
   }
-  public static DocumentEntity FromString (string content, BT type) => type switch
-  {
-    BT.Element => FromString(content, DefaultParsingSets.XML),
-    BT.Object => FromString(content, DefaultParsingSets.JSON),
-    _ => throw new InvalidOperationException($"Invalid BasicType ({type}) sent to EntityFactory."),
-  };
 }
