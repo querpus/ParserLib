@@ -1,8 +1,6 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-using BT = Common.Entities.BasicType;
-
 namespace Common.Entities;
 
 [Flags]
@@ -79,18 +77,15 @@ public readonly struct SpecialValue
 }
 
 /// <summary>This is common data to describe variations of entity properties.</summary>
-public class EntityInfo : IEquatable<Match>
+public class EntityInfo
 {
   #region Functional Properties
-  /// <summary>
-  /// Can be any predefined type, or it can be the special value <see cref="BT.Raw"/>.
-  /// This determines the class of entity that is produced.
-  /// </summary>
-  public BT Type { get; set; }
-  /// <summary>If <see cref="Type"/> is <see cref="BT.External"/>, this is the class that is created.</summary>
+  /// <summary>This is the class that is created.</summary>
   public Type? Class { get; set; }
-  /// <summary>The conditions that must be present for this entity to be produced.</summary>
-  public IndicationRule IndicatedItem { get; set; }
+  /// <summary>The group that must be present for this entity to be produced.</summary>
+  public string? GroupRequired { get; set; }
+  public string? ExactTextRequired { get; set; }
+  public bool IgnoreCaseWhenMatching { get; set; }
   /// <summary>The change in depth this token indicates.</summary>
   /// <remarks>
   /// Normally 0, 1, or -1.<br/>
@@ -145,24 +140,23 @@ public class EntityInfo : IEquatable<Match>
   public bool OnlyAtTopLevel { get; set; }
   #endregion
   #region Overrides and Equality
+
   /// <summary>Checks to see if a match will satisfy the entity</summary>
   /// <param name="match">The regex match that is being analyzed.</param>
   /// <returns><see langword="true"/> if the match satisfies the requirements, <see langword="false"/> if the match is <see langword="null"/> or does not meet them.</returns>
-  public bool Equals (Match? match)
+  public bool Matches (Match match)
   {
-    if (match is null)
-      return false;
-
-    Collection<bool> checks = [];
-    checks.Add(IndicatedItem.Group is null || match.Groups.Cast<Group>().Any(g => g.Name.Like(IndicatedItem.Group)));
-    checks.Add(IndicatedItem.ExactValue is null || match.Value.Equals(IndicatedItem.ExactValue, IndicatedItem.IgnoreCase ? SCOIC : SCO));
-    return checks.All(b => b);
+    bool exact_compare = ExactTextRequired is not null && (IgnoreCaseWhenMatching ? match.Value.Like(ExactTextRequired) : match.Value.Is(ExactTextRequired));
+    return
+      (GroupRequired is null || match.HasValidGroup(GroupRequired)) &&
+      (ExactTextRequired is null || exact_compare);
   }
+
   /// <summary>Basic equality, quick method.</summary>
   /// <param name="obj">The other object.</param>
   /// <returns><see langword="true"/> if the object is an <see cref="EntityInfo"/> and the properties are the same. Otherwise <see langword="false"/>.</returns>
   public override bool Equals (object? obj) => obj is EntityInfo info && GetHashCode() == info.GetHashCode();
-  public override int GetHashCode () => HashCode.Combine(Type, IndicatedItem, DepthChange, SetPropKey, SetAsNextLevelParent, CreateEmptyAtStart, ConstantValue, StorePieceTypes, HashCode.Combine(StoresData, DefinesStructure, OnlyAtTopLevel));
+  public override int GetHashCode () => HashCode.Combine(IndicatedItem, DepthChange, SetPropKey, SetAsNextLevelParent, CreateEmptyAtStart, ConstantValue, StorePieceTypes, HashCode.Combine(StoresData, DefinesStructure, OnlyAtTopLevel));
   public static bool operator == (EntityInfo left, Match right) => left.Equals(right);
   public static bool operator != (EntityInfo left, Match right) => !(left == right);
   #endregion

@@ -3,8 +3,6 @@
 
 using System.Data;
 
-using BT = Common.Entities.BasicType;
-
 namespace Common.Entities;
 
 public class ElementEntity : Entity
@@ -39,7 +37,6 @@ public class ElementEntity : Entity
     }
     init => AddAttributes(value);
   }
-  public override BT Type => BT.Element;
 
   public override string Serialize ()
   {

@@ -46,7 +46,7 @@ public class ParsingInfo
   {
     foreach (EntityInfo info in EntityOptions)
     {
-      if (info.IndicatedItem.Matches(match))
+      if (info.Matches(match))
       {
         options = info;
         return true;

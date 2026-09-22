@@ -7,8 +7,6 @@ namespace Common.Entities;
 
 public class ObjectEntity : Entity
 {
-  public override BT Type => BT.Object;
-
   public int Count => Children.Count;
 
   public IEntity this[string key]

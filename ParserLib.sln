@@ -90,6 +90,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Drafts", "Drafts", "{2124EC
 		D_5_4iCloud Drive_4iCloudDrive_4iCloud~com~agiletortoise~Drafts5_4Library_4Syntax_4xml_1json__JsonSchema = https://alec016.github.io/Custom-Machinery/Json%20Schema/src/main/resources/schemas/custom_machinery_recipe.json
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFormsControls", "WinFormsControls\WinFormsControls.csproj", "{877C5452-FB25-46EE-ADA0-1504BFBE13F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -165,6 +167,10 @@ Global
 		{E4ED8E1F-9189-4E12-4484-500C35BA15E4}.Debug|x64.Build.0 = Debug|x64
 		{E4ED8E1F-9189-4E12-4484-500C35BA15E4}.Release|x64.ActiveCfg = Release|x64
 		{E4ED8E1F-9189-4E12-4484-500C35BA15E4}.Release|x64.Build.0 = Release|x64
+		{877C5452-FB25-46EE-ADA0-1504BFBE13F3}.Debug|x64.ActiveCfg = Debug|x64
+		{877C5452-FB25-46EE-ADA0-1504BFBE13F3}.Debug|x64.Build.0 = Debug|x64
+		{877C5452-FB25-46EE-ADA0-1504BFBE13F3}.Release|x64.ActiveCfg = Release|x64
+		{877C5452-FB25-46EE-ADA0-1504BFBE13F3}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
