@@ -4,8 +4,6 @@
 using System.Data;
 using System.Xml.Linq;
 
-using BT = Common.Entities.BasicType;
-
 namespace Common.Entities;
 
 public static class EntityFactory
@@ -57,83 +55,89 @@ public static class EntityFactory
       return new ErrorEntity() { Message = "No entity match: " + match.Value };
     }
 
-    IEntity? entity = options.Type switch
+    IEntity? entity = null;
+
+    if (options.Class is null)
+      goto Logic;
+
+    entity = options.Class.InvokeMember(SE, BFCI, null, null, []) as IEntity;
+    entity = entity switch
     {
-      BT.Omit => null,
-      BT.Operator => new SymbolEntity
+      null => null,
+      SymbolEntity => new SymbolEntity
       {
         Content = options.ConstantValue ?? match.Value,
         Origin = match.Value
       },
-      BT.String => new StringEntity
+      StringEntity => new StringEntity
       {
         Value = match.Groups["value"].Value,
         Origin = match.Value
       },
-      BT.Number => new NumberEntity
+      NumberEntity => new NumberEntity
       {
         Value = decimal.Parse(match.Groups["name"].Value, CIIC),
         Origin = match.Value,
       },
-      BT.Boolean => new BooleanEntity
+      BooleanEntity => new BooleanEntity
       {
         Value = bool.Parse(match.Groups["value"].Value),
         Origin = match.Value,
       },
-      BT.Null => new NullEntity
+      NullEntity => new NullEntity
       {
         Origin = match.Value,
       },
-      BT.Comment => new CommentEntity()
+      CommentEntity => new CommentEntity()
       {
         Content = match.Value,
         Origin = match.Value
       },
-      BT.IgnoredWhitespace => new WhitespaceEntity()
+      WhitespaceEntity => new WhitespaceEntity()
       {
         Content = match.Value,
         Origin = match.Value
       },
-      BT.Array => new ArrayEntity()
+      ArrayEntity => new ArrayEntity()
       {
         Origin = match.Value
       },
-      BT.Object => new ObjectEntity()
+      ObjectEntity => new ObjectEntity()
       {
         Origin = match.Value
       },
-      BT.Raw => new RawEntity()
+      RawEntity => new RawEntity()
       {
         Origin = match.Value,
       },
-      BT.Invalid => throw new InvalidOperationException("Type was Invalid."),
-      BT.Absent => throw new InvalidOperationException("Type was Absent."),
-      BT.Placeholder => throw new InvalidOperationException("Type was Placeholder."),
-      BT.Document => new DocumentEntity()
+      ErrorEntity => throw new InvalidOperationException("Type was Invalid."),
+      DocumentEntity => new DocumentEntity()
       {
         Content = match.Value,
         Origin = match.Value
       },
-      BT.LooseContent => new ContentEntity()
+      ContentEntity => new ContentEntity()
       {
         Content = match.Value,
         Origin = match.Value
       },
-      BT.Element when match.HasValidGroup("name") && match.HasValidGroup("single") => new ElementEntity()
+      ElementEntity when match.HasValidGroup("name") && match.HasValidGroup("single") => new ElementEntity()
       {
         Origin = match.Value,
         Name = match.Groups["name"].Value,
         Attributes = ParseAttributes(match),
       },
-      BT.Element when match.HasValidGroup("name") => new ElementEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
-      BT.Element when match.HasValidGroup("close") => null,
+      ElementEntity when match.HasValidGroup("name") => new ElementEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
+      ElementEntity when match.HasValidGroup("close") => null,
       //BT.Attribute when match.HasValidGroup("Key") => new AttributeEntity() { Origin = match.Value, Key = match.Groups["key"].Value },
-      BT.Section when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
-      BT.Property when match.HasValidGroup("Key") => new PropertyEntity() { Origin = match.Value, Key = match.Groups["key"].Value },
-      BT.External when options.Class is not null => options.Class.InvokeMember(SE, BFCI, null, null, [], CIIC) as IEntity,
-      BT.Attribute => throw new InvalidOperationException("Attributes are handled in ParseAttributes."),
-      _ => throw new InvalidOperationException($"The entity type {options.Type} is not supported."),
+      SectionEntity when match.HasValidGroup("name") => new SectionEntity() { Origin = match.Value, Name = match.Groups["name"].Value },
+      PropertyEntity when match.HasValidGroup("Key") => new PropertyEntity() { Origin = match.Value, Key = match.Groups["key"].Value },
+      AttributeEntity => throw new InvalidOperationException("Attributes are handled in ParseAttributes."),
+      IEntity => options.Class.InvokeMember(SE, BFCI, null, null, [], CIIC) as IEntity,
+      _ => throw new InvalidOperationException($"The entity type {options.TypeName} is not supported."),
     };
+
+  Logic:
 
     if (options.SetPropKey)
     {

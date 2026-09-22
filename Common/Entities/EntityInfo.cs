@@ -156,7 +156,7 @@ public class EntityInfo
   /// <param name="obj">The other object.</param>
   /// <returns><see langword="true"/> if the object is an <see cref="EntityInfo"/> and the properties are the same. Otherwise <see langword="false"/>.</returns>
   public override bool Equals (object? obj) => obj is EntityInfo info && GetHashCode() == info.GetHashCode();
-  public override int GetHashCode () => HashCode.Combine(IndicatedItem, DepthChange, SetPropKey, SetAsNextLevelParent, CreateEmptyAtStart, ConstantValue, StorePieceTypes, HashCode.Combine(StoresData, DefinesStructure, OnlyAtTopLevel));
+  public override int GetHashCode () => HashCode.Combine(DepthChange, SetPropKey, SetAsNextLevelParent, CreateEmptyAtStart, ConstantValue, StorePieceTypes, HashCode.Combine(StoresData, DefinesStructure, OnlyAtTopLevel));
   public static bool operator == (EntityInfo left, Match right) => left.Equals(right);
   public static bool operator != (EntityInfo left, Match right) => !(left == right);
   #endregion

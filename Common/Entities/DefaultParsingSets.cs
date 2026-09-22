@@ -154,12 +154,12 @@ public static class DefaultParsingSets
       GroupRequired = "Op",
       ExactTextRequired = ":",
     }, new() {
-      IndicatedItem = new() { Group = "Op", ExactValue = "," },
-      ConstantValue = ",",
+      GroupRequired = "Op",
+      ExactTextRequired = ",",
     }, new() {
-      IndicatedItem = new() { Group = "Op", ExactValue = "]" },
+      GroupRequired = "Op",
+      ExactTextRequired = "]",
       DepthChange = -1,
-      ConstantValue = "]",
     }]
   };
   public static bool OnlyAtTopLevel { get; private set; }
