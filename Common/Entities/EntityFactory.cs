@@ -134,7 +134,6 @@ public static class EntityFactory
       PropertyEntity when match.HasValidGroup("Key") => new PropertyEntity() { Origin = match.Value, Key = match.Groups["key"].Value },
       AttributeEntity => throw new InvalidOperationException("Attributes are handled in ParseAttributes."),
       IEntity => options.Class.InvokeMember(SE, BFCI, null, null, [], CIIC) as IEntity,
-      _ => throw new InvalidOperationException($"The entity type {options.TypeName} is not supported."),
     };
 
   Logic:

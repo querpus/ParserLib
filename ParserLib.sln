@@ -66,8 +66,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Specifications", "Specifica
 	ProjectSection(SolutionItems) = preProject
 		Parser\ByteOperations.md = Parser\ByteOperations.md
 		Parser\Naming Groups.md = Parser\Naming Groups.md
-		Common\Regex\Naming Groups.md = Common\Regex\Naming Groups.md
-	EndProjectSection
+		EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormObjectViewer", "FormObjectViewer\FormObjectViewer.csproj", "{A956E431-070B-45D6-8776-1A1D1ED793AE}"
 EndProject

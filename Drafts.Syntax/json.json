@@ -28,43 +28,32 @@
   ],
   "patterns": [
     {
-      "match": "([\"'])((?>[^\\\\\"]|\\\\.)*)\\1",
+      "match": "(\"(?:\\\\.|[^\\\"])*\")\\s*(:)\\s*",
+      "exclusive": true,
+      "comment": "Key",
+      "captures": {
+        "1": { "scope": "code.literal" },
+        "2": { "scope": "code.punctuation" } }
+    },{
+      "match": "([\"'])((?>\\.|[^\\\"])*)\\1",
       "exclusive": true,
       "comment": "String value",
-      "captures": {
-        "0": { "scope": "code.literal" }
-      }
-    },
-    {
+      "captures": { "0": { "scope": "code.literal" } }
+    },{
       "match": "-?\\d*\\.\\d+|-?\\d+\\.?\\d*|-?0[xX][a-fA-F0-9]{1,16}",
-      "comment": "Number literal",
-      "captures": {
-        "0": { "scope": "code.literal" }
-      }
-    },
-    {
-      "match": "([\\/])(?:(?!(?:\\\\|\\1)).|\\\\.)*\\1([gmi]*)",
       "exclusive": true,
-      "comment": "Regex literal",
-      "captures": {
-        "0": { "scope": "code.literal" }
-      }
-    },
-    {
+      "comment": "Number literal",
+      "captures": { "0": { "scope": "code.literal" } }
+    },{
       "match": "\\b(true|false|null|undefined)\\b",
       "exclusive": true,
       "comment": "JSON Keyword",
-      "captures": {
-        "0": { "scope": "code.keyword" }
-      }
-    },
-    {
+      "captures": { "0": { "scope": "code.keyword" } }
+    },{
       "match": "[{}\\[\\];(),:]",
       "exclusive": true,
       "comment": "Punctuation",
-      "captures": {
-        "0": { "scope": "code.punctuation" }
-      }
+      "captures": { "0": { "scope": "code.punctuation" } }
     }
   ],
   "navigationPatterns": []
