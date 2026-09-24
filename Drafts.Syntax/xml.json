@@ -39,59 +39,26 @@
       }
     },
     {
-      "match": "(?:^|\\s)(\\/\\/\\s*(.+?))$",
-      "exclusive": true,
+      "match": "(<\\s*\/?\\s*)(\\S+)(?:\\s+(\\S+)\\s*(=)\\s*(\"(?:\\.|[^\"\\])*\"))*\\s*(\/?\\s*>)",
+      "exclusive": false,
       "comment": "Inline comment",
       "captures": {
-        "1": { "scope": "code.comment" },
-        "2": { "scope": "code.comment.text" }
+        "1": { "scope": "code.punctuation" },
+        "2": { "scope": "code.keyword" },
+        "3": { "scope": "code.keyword" },
+        "4": { "scope": "code.operator" },
+        "5": { "scope": "code.literal" },
+        "6": { "scope": "code.punctuation" }
       }
     },
     {
-      "match": "([\"'])((?:[^\\\\]|\\\\.)*)\\1",
+      "match": "(\\S+)\\s*(=)\\s*(([\"'])((?:[^\\\"]|\\\\.)*)\\4)",
       "exclusive": true,
       "comment": "Attribute value",
       "captures": {
-        "0": { "scope": "code.literal" }
-      }
-    },
-    {
-      "match": " -?\\d*\\.\\d+ | -?\\d+\\.?\\d* | -?0[xX] [a-fA-F0-9]{1,16}",
-      "comment": "Number literal",
-      "captures": {
-        "0": {
-          "scope": "code.literal"
-        }
-      }
-    },
-    {
-      "match": "([\\/])(?:(?!(?:\\\\|\\1)).|\\\\.)*\\1([gmi]*)",
-      "exclusive": true,
-      "comment": "Regex literal",
-      "captures": {
-        "0": {
-          "scope": "code.literal"
-        }
-      }
-    },
-    {
-      "match": "\\b(true|false)\\b",
-      "exclusive": true,
-      "comment": "Boolean literal",
-      "captures": {
-        "0": {
-          "scope": "code.literal"
-        }
-      }
-    },
-    {
-      "match": "\\b-?(?:0x[\\da-f]+|\\d*\\.?\\d+(?:e[+-]?\\d+)?)\\b",
-      "exclusive": true,
-      "comment": "Number",
-      "captures": {
-        "0": {
-          "scope": "code.literal"
-        }
+        "1": { "scope": "code.keyword" },
+        "2": { "scope": "code.operator" },
+        "3": { "scope": "code.literal" }
       }
     },
     {
@@ -105,42 +72,13 @@
       }
     },
     {
-      "match": "([{}\\[\\];(),.:])",
-      "exclusive": true,
-      "comment": "Punctuation",
-      "captures": {
-        "1": {
-          "scope": "code.punctuation"
-        }
-      }
-    },
-    {
       "match": "(?<!\\w|\\$|\\%|\\@|>)(and|or|xor|for|do|while|foreach|as|return|die|exit|if|then|else|elseif|new|delete|try|throw|catch|finally|class|function|string|array|object|resource|var|bool|boolean|int|integer|float|double|real|string|array|global|const|let|static|public|private|protected|published|extends|switch|true|false|null|void|this|self|struct|char|signed|unsigned|short|long)(?!\\w|=\")",
       "exclusive": true,
       "comment": "Javascript keyword",
       "captures": {
-        "1": {
-          "scope": "code.keyword"
-        }
+        "1": { "scope": "code.keyword" }
       }
     }
   ],
-  "navigationPatterns": [
-    {
-      "match": "^\\/\\/ ?#region ?(.*)$",
-      "comment": "Region comments",
-      "rangeCapture": "0",
-      "labelCapture": "1",
-      "prefix": "#region",
-      "level": 0
-    },
-    {
-      "match": "function (.*) \\{",
-      "comment": "Function",
-      "rangeCapture": "0",
-      "labelCapture": "1",
-      "prefix": "function",
-      "level": 1
-    }
-  ]
+  "navigationPatterns": []
 }

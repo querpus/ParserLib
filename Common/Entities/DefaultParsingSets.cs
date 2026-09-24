@@ -1,8 +1,6 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-using BT = Common.Entities.BasicType;
-
 namespace Common.Entities;
 
 public static class DefaultParsingSets
@@ -15,7 +13,7 @@ public static class DefaultParsingSets
     SingleObject = new()
     {
       CreateEmptyAtStart = true,
-      Type = BT.Document,
+      Class = typeof(DocumentEntity),
       OnlyAtTopLevel = true,
       SetAsNextLevelParent = true,
     },
@@ -26,7 +24,7 @@ public static class DefaultParsingSets
     (?'element'
       <   \s*
       (?# '?' for header definition)
-      (?'header'\?)?  \s*
+      (?'header'\?)?   \s*
       (?'close' \/)?   \s*
       (?# optional namespace)
       ((?'ns'\w+)  \s* :)?
@@ -57,36 +55,26 @@ public static class DefaultParsingSets
     """,
     EntityOptions = [
     new() {
-      IndicatedItem = new() { Group = "header" },
-      Type = BT.Element,
+      GroupRequired = "header",
+      Class = typeof(ElementEntity),
     }, new() {
-      IndicatedItem = new() { Group = "close" },
-      Type = BT.Omit,
+      GroupRequired = "close",
       DepthChange = -1,
     }, new() {
-      IndicatedItem = new() { Group = "single" },
-      Type = BT.Element,
+      GroupRequired = "single",
     }, new() {
-      IndicatedItem = new() { Group = "element" },
-      Type = BT.Element,
+      GroupRequired = "element",
       DepthChange = 1,
       SetAsNextLevelParent = true,
       ChildType = typeof(ElementEntity),
     },new() {
-      IndicatedItem = new() { Group = "ws" },
-      Type = BT.IgnoredWhitespace,
+      GroupRequired = "ws",
     }, new() {
-      IndicatedItem = new() { Group = "content" },
-      Type = BT.LooseContent,
+      GroupRequired = "content",
       StoresData = true,
     }, new() {
-      IndicatedItem = new() { Group = "ws" },
-      Type = BT.IgnoredWhitespace,
-    }, new() {
-      IndicatedItem = new() { Group = "ws" },
-      Type = BT.IgnoredWhitespace,
-    }, new() {
-    }],
+      GroupRequired = "comment",
+    },],
     Comments = [
       new() {Open = "<!==", Close = "-->", Expression = "<!-- ([^-]| -[^-])* -->"}
     ]
@@ -98,7 +86,6 @@ public static class DefaultParsingSets
       OnlyAtTopLevel = true,
       CreateEmptyAtStart = true,
       DefinesStructure = true,
-      Type = BT.Document,
     },
     RegexOptions = ROIPW | ROML | ROEC,
     RegexString =
@@ -121,69 +108,59 @@ public static class DefaultParsingSets
     TotalPasses = 2,
     EntityOptions = [
     new() {
-      IndicatedItem = new() { Group = "key" },
+      GroupRequired = "key",
       StoresData = true,
-      Type = BT.Property,
       StorePieceTypes = new() { ["Key"] = "key" },
       SetPropKey = true
     }, new() {
-      IndicatedItem = new() { Group = "str_value" },
+      GroupRequired = "str_value",
       StoresData = true,
-      AddToPropKey = true,
-      Type = BT.String,
-      StorePieceTypes = new() { ["Value"] = "value" },
-    }, new() {
-      IndicatedItem = new() { Group = "bool_value" },
-      StoresData = true,
-      Type = BT.Boolean,
       AddToPropKey = true,
       StorePieceTypes = new() { ["Value"] = "value" },
     }, new() {
-      IndicatedItem = new() { Group = "num_value" },
+      GroupRequired = "bool_value",
       StoresData = true,
-      Type = BT.Number,
       AddToPropKey = true,
       StorePieceTypes = new() { ["Value"] = "value" },
     }, new() {
-      IndicatedItem = new() { Group = "null_value" },
+      GroupRequired = "num_value",
+      StoresData = true,
       AddToPropKey = true,
-      Type = BT.Null,
+      StorePieceTypes = new() { ["Value"] = "value" },
     }, new() {
-      IndicatedItem = new() { Group = "comment" },
-      Type = BT.Comment,
+      GroupRequired = "null_value",
+      AddToPropKey = true,
     }, new() {
-      IndicatedItem = new() { Group = "ws" },
-      Type = BT.IgnoredWhitespace,
+      GroupRequired = "comment",
     }, new() {
-      IndicatedItem = new() { Group = "Op", ExactValue = "{" },
+      GroupRequired = "ws",
+    }, new() {
+      GroupRequired = "Op",
+      ExactTextRequired = "{",
       DepthChange = 1,
       AddToPropKey = true,
-      Type = BT.Object,
       ChildType = typeof(ObjectEntity),
     }, new() {
-      IndicatedItem = new() { Group = "Op", ExactValue = "}" },
+      GroupRequired = "Op",
+      ExactTextRequired = "}",
       DepthChange = -1,
-      Type = BT.Omit,
-      ConstantValue = "}",
     }, new() {
-      IndicatedItem = new() { Group = "Op", ExactValue = "[" },
+      GroupRequired = "Op",
+      ExactTextRequired = "[",
       DepthChange = 1,
       AddToPropKey = true,
       ChildType = typeof(ArrayEntity),
-      Type = BT.Array,
     }, new() {
-      IndicatedItem = new() { Group = "Op", ExactValue = ":" },
-      Type = BT.Omit,
-      ConstantValue = ":",
+      GroupRequired = "Op",
+      ExactTextRequired = ":",
     }, new() {
-      IndicatedItem = new() { Group = "Op", ExactValue = "," },
-      Type = BT.Omit,
-      ConstantValue = ",",
+      GroupRequired = "Op",
+      ExactTextRequired = ",",
     }, new() {
-      IndicatedItem = new() { Group = "Op", ExactValue = "]" },
+      GroupRequired = "Op",
+      ExactTextRequired = "]",
       DepthChange = -1,
-      Type = BT.Omit,
-      ConstantValue = "]",
     }]
   };
+  public static bool OnlyAtTopLevel { get; private set; }
 }

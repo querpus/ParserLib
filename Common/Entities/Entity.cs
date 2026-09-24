@@ -13,6 +13,7 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
   /// <remarks>These are the values of a JSON object or <see cref="ArrayEntity"/>, or any non-keyed objects stored within this entity.
   /// This would also be the content between the open and closing XML tags.</remarks>
   public virtual IList<IEntity> Children { get; } = [];
+  public virtual bool Omit { get; set; }
   /// <summary>Gets the property values.</summary>
   /// <remarks>These are keyed values, like the properties of a JSON object, or the attributes of an XML Element.</remarks>
   public virtual Dictionary<string, IEntity> Properties { get; } = [];
@@ -37,16 +38,18 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
   public void AddChildren (IEnumerable<IEntity> children) => children.Foreach(AddChild);
   public void AddToDataCollection (string key, object data)
   {
-    if (!DataValues.ContainsKey(key))
+    if (!DataValues.TryGetValue(key, out dynamic? value))
     {
-      DataValues[key] = new Collection<object>();
+      value = new Collection<object>();
+      DataValues[key] = value;
     }
 
     if (DataValues.ContainsKey(key))
     {
-      DataValues[key].AsCollection().Add(data);
+      value!.Add(data);
     }
   }
+  public virtual Entity ToEntity () => this;
 }
 
 public static class SerializerExt

@@ -6,7 +6,6 @@ namespace Common.Entities;
 public class ErrorEntity : Entity
 {
   public required string Message { get; init; }
-  public override BasicType Type => BasicType.Invalid;
   public ErrorEntity () { }
   [SetsRequiredMembers]
   public ErrorEntity (string message) => Message = message;

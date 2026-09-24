@@ -1,14 +1,10 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-using BT = Common.Entities.BasicType;
-
 namespace Common.Entities;
 
-public class ObjectEntity : Entity
+public class ObjectEntity : Entity, IEnumerable<IEntity>
 {
-  public override BT Type => BT.Object;
-
   public int Count => Children.Count;
 
   public IEntity this[string key]
@@ -33,5 +29,6 @@ public class ObjectEntity : Entity
     other is ObjectEntity oe && Properties.SequenceEqual(oe.Properties);
   public override string Serialize () => GetPropertyEntities().TextJoin(",");
   public bool Contains (string key) => Properties.ContainsKey(key);
-  public IEnumerator<IEntity> GetEnumerator () => .GetEnumerator();
+  public IEnumerator<IEntity> GetEnumerator () => GetPropertyEntities().GetEnumerator();
+  IEnumerator IEnumerable.GetEnumerator () => GetEnumerator();
 }

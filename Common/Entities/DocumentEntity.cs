@@ -1,8 +1,6 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-using BT = Common.Entities.BasicType;
-
 namespace Common.Entities;
 
 /// <summary>An entity representing a document.</summary>
@@ -23,7 +21,6 @@ public class DocumentEntity : ContentEntity
     get => DataValues.TryGetValue("Header", out object? value) ? value as IEntity : null;
     set => DataValues["Header"] = value;
   }
-  public override BT Type => BT.Document;
   public override string Serialize () => Content;
   public void SetRoot (IEntity? root)
   {

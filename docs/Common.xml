@@ -298,10 +298,6 @@
             <summary>Gets or sets the parent entity.</summary>
             <remarks>This is <see langword="null"/> if the current entity is a root entity.</remarks>
         </member>
-        <member name="P:Common.Entities.Entity.Type">
-            <summary>This should be overridden by any inherited class.</summary>
-            <remarks>This determines the class of the entity.</remarks>
-        </member>
         <member name="P:Common.Entities.Entity.Children">
             <summary>Gets the child entities.</summary>
             <remarks>These are the values of an <see cref="T:Common.Entities.ArrayEntity"/>, or any non-keyed objects stored within this entity.</remarks>
@@ -321,17 +317,11 @@
         <member name="T:Common.Entities.EntityInfo">
             <summary>This is common data to describe variations of entity properties.</summary>
         </member>
-        <member name="P:Common.Entities.EntityInfo.Type">
-            <summary>
-            Can be any predefined type, or it can be the special value <see cref="F:Common.Entities.BasicType.Raw"/>.
-            This determines the class of entity that is produced.
-            </summary>
-        </member>
         <member name="P:Common.Entities.EntityInfo.Class">
-            <summary>If <see cref="P:Common.Entities.EntityInfo.Type"/> is <see cref="F:Common.Entities.BasicType.External"/>, this is the class that is created.</summary>
+            <summary>This is the class that is created.</summary>
         </member>
-        <member name="P:Common.Entities.EntityInfo.IndicatedItem">
-            <summary>The conditions that must be present for this entity to be produced.</summary>
+        <member name="P:Common.Entities.EntityInfo.GroupRequired">
+            <summary>The group that must be present for this entity to be produced.</summary>
         </member>
         <member name="P:Common.Entities.EntityInfo.DepthChange">
             <summary>The change in depth this token indicates.</summary>
@@ -391,7 +381,7 @@
         <member name="P:Common.Entities.EntityInfo.OnlyAtTopLevel">
             <summary>Only allow this entity at top-level, not as a child.</summary>
         </member>
-        <member name="M:Common.Entities.EntityInfo.Equals(System.Text.RegularExpressions.Match)">
+        <member name="M:Common.Entities.EntityInfo.Matches(System.Text.RegularExpressions.Match)">
             <summary>Checks to see if a match will satisfy the entity</summary>
             <param name="match">The regex match that is being analyzed.</param>
             <returns><see langword="true"/> if the match satisfies the requirements, <see langword="false"/> if the match is <see langword="null"/> or does not meet them.</returns>
@@ -407,9 +397,6 @@
         <member name="P:Common.Entities.IEntity.Origin">
             <summary>Gets the origin of the parsed entity.</summary>
             <remarks>This is null for entities that are not derived from a single source.</remarks>
-        </member>
-        <member name="P:Common.Entities.IEntity.Type">
-            <summary>Gets the BT type.</summary>
         </member>
         <member name="P:Common.Entities.IEntity.Parent">
             <summary>The parent entity.</summary>
@@ -453,14 +440,6 @@
             There are no more potentially recursive objects to exit, you are at the surface.
             </remarks>
             <value>This value is clamped to be within 0 and 32767.</value>
-        </member>
-        <member name="P:Common.Entities.ParsingContext.WorkingSet">
-            <summary>The collection of objects to operate on.</summary>
-        </member>
-        <member name="P:Common.Entities.ParsingContext.CurrentIndex">
-            <summary>The index within the <see cref="P:Common.Entities.ParsingContext.WorkingSet"/> this item is.</summary>
-            <value>An index between 0 and the count of <see cref="P:Common.Entities.ParsingContext.WorkingSet"/>.</value>
-            <remarks>This returns <see cref="F:Common.Names.DNE"/> if the index is not specified or the <see cref="P:Common.Entities.ParsingContext.WorkingSet"/> not defined.</remarks>
         </member>
         <member name="P:Common.Entities.ParsingContext.Parent">
             <summary>Gets or sets the "Parent" depth property, which is used on most entities in some way.</summary>
@@ -545,153 +524,6 @@
         </member>
         <member name="T:Common.EntryNameEqual">
             <summary>An <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> comparer to determine if the name of the <see cref="T:Common.IProperty`1"/> is the same as another.</summary>
-        </member>
-        <member name="T:Common.Excel.ExcelWorkbook">
-            <summary>Repesents an Excel workbook and provides access to its sheets, tables, queries, styles, and named ranges.</summary>
-        </member>
-        <member name="P:Common.Excel.ExcelWorkbook.Path">
-            <summary>The file path of the workbook, if it was opened from a file.</summary>
-        </member>
-        <member name="P:Common.Excel.ExcelWorkbook.Workbook">
-            <summary>A reference to the underlying Excel Workbook object.</summary>
-        </member>
-        <member name="M:Common.Excel.ExcelWorkbook.#ctor(System.String)">
-            <summary>Creates an <see cref="T:Common.Excel.ExcelWorkbook"/> by opening the specified file path.</summary>
-            <param name="path">The path to the workbook.</param>
-        </member>
-        <member name="T:Common.Excel.Range">
-            <summary>A class representing a range of cells in Excel, which can include standard cell references, table references, and named ranges.</summary>
-        </member>
-        <member name="M:Common.Excel.Range.ColumnRx(System.String)">
-            <summary><c>[inside]</c></summary>
-            <param name="inside">Regex inside braces.</param>
-            <returns>A string Regex of a column structure.</returns>
-        </member>
-        <member name="F:Common.Excel.Range.InnerCol">
-            <summary>
-            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
-            <c>NoRangeOp</c> - No colon follows.<br/>
-            <c>TableRx</c> - Table or named range.<br/>
-            <c>CommaSep</c> - Optional comma.<br/>
-            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
-            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
-            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
-            <c>ExcelRef</c> - A standard excel range reference.<br/>
-            </summary>
-        </member>
-        <member name="F:Common.Excel.Range.NoRangeOp">
-            <summary>
-            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
-            <c>NoRangeOp</c> - No colon follows.<br/>
-            <c>TableRx</c> - Table or named range.<br/>
-            <c>CommaSep</c> - Optional comma.<br/>
-            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
-            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
-            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
-            <c>ExcelRef</c> - A standard excel range reference.<br/>
-            </summary>
-        </member>
-        <member name="F:Common.Excel.Range.TableRx">
-            <summary>
-            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
-            <c>NoRangeOp</c> - No colon follows.<br/>
-            <c>TableRx</c> - Table or named range.<br/>
-            <c>CommaSep</c> - Optional comma.<br/>
-            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
-            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
-            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
-            <c>ExcelRef</c> - A standard excel range reference.<br/>
-            </summary>
-        </member>
-        <member name="F:Common.Excel.Range.CommaSep">
-            <summary>
-            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
-            <c>NoRangeOp</c> - No colon follows.<br/>
-            <c>TableRx</c> - Table or named range.<br/>
-            <c>CommaSep</c> - Optional comma.<br/>
-            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
-            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
-            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
-            <c>ExcelRef</c> - A standard excel range reference.<br/>
-            </summary>
-        </member>
-        <member name="F:Common.Excel.Range.TableRef">
-            <summary>
-            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
-            <c>NoRangeOp</c> - No colon follows.<br/>
-            <c>TableRx</c> - Table or named range.<br/>
-            <c>CommaSep</c> - Optional comma.<br/>
-            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
-            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
-            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
-            <c>ExcelRef</c> - A standard excel range reference.<br/>
-            </summary>
-        </member>
-        <member name="F:Common.Excel.Range.TableCol">
-            <summary>
-            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
-            <c>NoRangeOp</c> - No colon follows.<br/>
-            <c>TableRx</c> - Table or named range.<br/>
-            <c>CommaSep</c> - Optional comma.<br/>
-            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
-            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
-            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
-            <c>ExcelRef</c> - A standard excel range reference.<br/>
-            </summary>
-        </member>
-        <member name="F:Common.Excel.Range.TableCell">
-            <summary>
-            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
-            <c>NoRangeOp</c> - No colon follows.<br/>
-            <c>TableRx</c> - Table or named range.<br/>
-            <c>CommaSep</c> - Optional comma.<br/>
-            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
-            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
-            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
-            <c>ExcelRef</c> - A standard excel range reference.<br/>
-            </summary>
-        </member>
-        <member name="F:Common.Excel.Range.ExcelRef">
-            <summary>
-            <para>Regex Development: <seealso href="https://regex101.com/r/I9S9Yi/7"/></para>
-            <c>NoRangeOp</c> - No colon follows.<br/>
-            <c>TableRx</c> - Table or named range.<br/>
-            <c>CommaSep</c> - Optional comma.<br/>
-            <c>TableRef</c> - Optional comma &amp; table or named range.<br/>
-            <c>TableCol</c> - Optional comma &amp; table or named range &amp; column.<br/>
-            <c>TableCell</c> - Optional comma &amp; table or named range &amp; this row, column.<br/>
-            <c>ExcelRef</c> - A standard excel range reference.<br/>
-            </summary>
-        </member>
-        <member name="T:Common.Excel.RangeNode">
-            <summary>A node within a range.</summary>
-        </member>
-        <member name="P:Common.Excel.RangeNode.Sheet">
-            <summary>The containing worksheet.</summary>
-        </member>
-        <member name="P:Common.Excel.RangeNode.Row">
-            <summary>The row index.</summary>
-        </member>
-        <member name="P:Common.Excel.RangeNode.Col">
-            <summary>The column index;</summary>
-        </member>
-        <member name="P:Common.Excel.RangeNode.WholeRow">
-            <summary>Whether or not this is the whole row or not.</summary>
-        </member>
-        <member name="M:Common.Excel.RangeNode.Equals(System.Object)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Common.Excel.RangeNode.GetHashCode">
-            <inheritdoc/>
-        </member>
-        <member name="M:Common.Excel.RangeNode.CompareTo(Common.Excel.RangeNode)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Common.Excel.RangeNode.Equals(Common.Excel.RangeNode)">
-            <inheritdoc/>
-        </member>
-        <member name="T:Common.Excel.TableExt">
-            <summary>An abstract base class that implements the ITableExt interface, providing a foundation for table-like data structures.</summary>
         </member>
         <member name="T:Common.Extensions.CharExtensions">
             <summary>Extension methods for the <see cref="T:System.Char"/> type.</summary>

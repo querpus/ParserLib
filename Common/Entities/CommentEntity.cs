@@ -5,5 +5,5 @@ namespace Common.Entities;
 
 public class CommentEntity : ContentEntity
 {
-  public override BasicType Type => BasicType.Comment;
+
 }

@@ -1,8 +1,6 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-using BT = Common.Entities.BasicType;
-
 namespace Common.Entities;
 
 public interface IEntity
@@ -13,8 +11,6 @@ public interface IEntity
   /// <summary>Gets the origin of the parsed entity.</summary>
   /// <remarks>This is null for entities that are not derived from a single source.</remarks>
   string? Origin { get; set; }
-  /// <summary>Gets the BT type.</summary>
-  BT Type { get; }
   /// <summary>The parent entity.</summary>
   IEntity? Parent { get; }
   /// <summary>Static equality method.</summary>

@@ -1,5 +1,3 @@
-using Parser.Ops.Text;
-
 using Specification.IPL;
 
 namespace UnitTest;

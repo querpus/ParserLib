@@ -30,7 +30,7 @@ public class ParserTests
     IEntity parsedEntity = EntityFactory.FromXElement(xml_data, null);
     DocumentEntity xMLDocumentEntity = Assert.IsType<DocumentEntity>(parsedEntity);
     Assert.NotNull(xMLDocumentEntity.RootNode);
-    Assert.Equal(BasicType.Element, xMLDocumentEntity.RootNode.Type);
+    ElementEntity e = Assert.IsType<ElementEntity>(xMLDocumentEntity.RootNode, exactMatch: false);
   }
 
   [Theory]
