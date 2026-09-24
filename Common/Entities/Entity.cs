@@ -9,14 +9,12 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
   /// <remarks>This is <see langword="null"/> if the current entity is a root entity.</remarks>
   public IEntity? Parent { get; set; }
   public virtual string? Origin { get; set; }
-  /// <summary>This should be overridden by any inherited class.</summary>
-  /// <remarks>This determines the class of the entity.</remarks>
-  public abstract BasicType Type { get; }
   /// <summary>Gets the child entities.</summary>
-  /// <remarks>These are the values of an <see cref="ArrayEntity"/>, or any non-keyed objects stored within this entity.</remarks>
+  /// <remarks>These are the values of a JSON object or <see cref="ArrayEntity"/>, or any non-keyed objects stored within this entity.
+  /// This would also be the content between the open and closing XML tags.</remarks>
   public virtual IList<IEntity> Children { get; } = [];
   /// <summary>Gets the property values.</summary>
-  /// <remarks>These are keyed values, like the properties of a JSON object.</remarks>
+  /// <remarks>These are keyed values, like the properties of a JSON object, or the attributes of an XML Element.</remarks>
   public virtual Dictionary<string, IEntity> Properties { get; } = [];
   /// <summary>Gets the data values.</summary>
   /// <remarks>These are the values that are stored in the regular expression groups, or any other data that is not stored as a child or property.</remarks>

@@ -33,6 +33,12 @@ public class CommonTests
     DocumentEntity result = EntityFactory.FromString(content, DefaultParsingSets.XML);
 
     Assert.NotNull(result);
+
+    foreach (KeyValuePair<string, object?> item in result.DataValues)
+    {
+      if (item.Value is null)
+        Assert.Fail("Null value stored in DataValues");
+    }
   }
 
   [Fact]
