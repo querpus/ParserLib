@@ -76,7 +76,7 @@ public static class EntityFactory
       },
       NumberEntity => new NumberEntity
       {
-        Value = decimal.Parse(match.Groups["name"].Value, CIIC),
+        Content = match.Groups["name"].Value,
         Origin = match.Value,
       },
       BooleanEntity => new BooleanEntity
