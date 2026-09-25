@@ -20,7 +20,7 @@ public readonly struct Pos (int start, int length) : IEquatable<Pos>, IIndexSort
     }
   }
   public readonly bool IsNull => Start == DNE;
-  public static Pos Null { get; } = new(DNE, DNE);
+  public static Pos Null { get; } = new(DNE, 0);
   readonly int IIndexSortable.Index => Start;
 
   public readonly Section ToSection (string full_text) => new(Start, Length, full_text);

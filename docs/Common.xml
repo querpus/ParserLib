@@ -300,11 +300,12 @@
         </member>
         <member name="P:Common.Entities.Entity.Children">
             <summary>Gets the child entities.</summary>
-            <remarks>These are the values of an <see cref="T:Common.Entities.ArrayEntity"/>, or any non-keyed objects stored within this entity.</remarks>
+            <remarks>These are the values of a JSON object or <see cref="T:Common.Entities.ArrayEntity"/>, or any non-keyed objects stored within this entity.
+            This would also be the content between the open and closing XML tags.</remarks>
         </member>
         <member name="P:Common.Entities.Entity.Properties">
             <summary>Gets the property values.</summary>
-            <remarks>These are keyed values, like the properties of a JSON object.</remarks>
+            <remarks>These are keyed values, like the properties of a JSON object, or the attributes of an XML Element.</remarks>
         </member>
         <member name="P:Common.Entities.Entity.DataValues">
             <summary>Gets the data values.</summary>

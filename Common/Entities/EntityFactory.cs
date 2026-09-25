@@ -60,7 +60,7 @@ public static class EntityFactory
     if (options.Class is null)
       goto Logic;
 
-    entity = options.Class.InvokeMember(SE, BFCI, null, null, []) as IEntity;
+    entity = options.Class.InvokeMember(SE, BFCI, null, null, [], CIIC) as IEntity;
     entity = entity switch
     {
       null => null,
@@ -162,7 +162,7 @@ public static class EntityFactory
     {
       IEntity? new_parent = context.HasDepthProperty("NextParent")
         ? context.GetDepthProperty<IEntity>("NextParent")
-        : entity ?? options.ChildType?.InvokeMember(SE, BFCI, null, null, null, CIIC) as IEntity;
+        : (entity ?? options.ChildType?.InvokeMember(SE, BFCI, null, null, null, CIIC)) as IEntity;
       context.Descend(options.DepthChange, [], new_parent!);
       context.Parent = new_parent;
     }
