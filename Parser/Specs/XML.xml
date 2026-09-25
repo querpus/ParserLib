@@ -4,14 +4,34 @@
     <Name>xml</Name>
     <TextFile>true</TextFile>
     <CaseInsensitive>false</CaseInsensitive>
-    <TokenRules></TokenRules>
+    <EntityInfo>
+      <EntityDef>
+        <MatchRule group="element"/>
+        <Structure>
+          <Property name="Name" class="string"/>
+          <PropertyList name="Attributes" class="IEntity" collection="true">
+            <Item class="AttibuteEntity">
+              <Property name="Key" class="string"/>
+              <Property name="Value" class="string"/>
+            </Item>
+          </PropertyList>
+          <PropertyList name="Children" class="IEntity" collection="true">
+            <Content>
+              <Value class="string"/>
+            </Content>
+            <Comment>
+              <Value class="string" ignored="true"/>
+            </Comment>
+            <Element recurse="true"/>
+          </PropertyList>
+        </Structure>
+      </EntityDef>
+    </EntityInfo>
     <GroupTokenRules>
       <Rule>
         <Type>None</Type>
         <TypeToAssign>Attribute</TypeToAssign>
-        <Data>
-          n:AttrKey x:Eq v:String
-        </Data>
+        <Data> n:AttrKey x:Eq v:String </Data>
       </Rule>
       <Rule>
         <Type>None</Type>
@@ -23,72 +43,52 @@
       <Rule>
         <Type>None</Type>
         <TypeToAssign>DocumentNamespace</TypeToAssign>
-        <Data>
-          t:NamespaceAttr x:Co d:Attribute
-        </Data>
+        <Data> t:NamespaceAttr x:Co d:Attribute </Data>
       </Rule>
       <Rule>
         <Type>None</Type>
         <TypeToAssign>DocumentNamespace</TypeToAssign>
-        <Data>
-          t:NamespaceAttr x:Eq v:String
-        </Data>
+        <Data> t:NamespaceAttr x:Eq v:String </Data>
       </Rule>
       <Rule>
         <Type>None</Type>
         <TypeToAssign>AttributeWithNamespace</TypeToAssign>
-        <Data>
-          t:Namespace x:Co n:AttrKey x:Eq v:String
-        </Data>
+        <Data> t:Namespace x:Co n:AttrKey x:Eq v:String </Data>
       </Rule>
       <Rule>
         <Type>None</Type>
         <TypeToAssign>ElementEndWithNamespace</TypeToAssign>
-        <Data>
-          x:Ao x:Sl t:Namespace x:Co n:ElementName x:Ac
-        </Data>
+        <Data> x:Ao x:Sl t:Namespace x:Co n:ElementName x:Ac </Data>
       </Rule>
       <Rule>
         <Type>None</Type>
         <TypeToAssign>ElementEnd</TypeToAssign>
-        <Data>
-          x:Ao x:Sl n:ElementName x:Ac
-        </Data>
+        <Data> x:Ao x:Sl n:ElementName x:Ac </Data>
       </Rule>
       <Rule>
         <Type>None</Type>
         <TypeToAssign>ElementSingleWithNamespace</TypeToAssign>
-        <Data>
-          x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Sl x:Ac
-        </Data>
+        <Data> x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Sl x:Ac </Data>
       </Rule>
       <Rule>
         <Type>None</Type>
         <TypeToAssign>ElementSingle</TypeToAssign>
-        <Data>
-          x:Ao n:ElementName pa:Attribute x:Sl x:Ac
-        </Data>
+        <Data> x:Ao n:ElementName pa:Attribute x:Sl x:Ac </Data>
       </Rule>
       <Rule>
         <Type>None</Type>
         <TypeToAssign>ElementStartWithNamespace</TypeToAssign>
-        <Data>
-          x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Ac
-        </Data>
+        <Data> x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Ac </Data>
       </Rule>
       <Rule>
         <Type>None</Type>
         <TypeToAssign>ElementStart</TypeToAssign>
-        <Data>
-          x:Ao n:ElementName pa:Attribute x:Ac
-        </Data>
+        <Data> x:Ao n:ElementName pa:Attribute x:Ac </Data>
       </Rule>
       <Rule>
         <Type>Recursive</Type>
         <TypeToAssign>ElementPair</TypeToAssign>
-        <Data>
-          d:ElementStart va:ValidContent x:ElementEnd
-        </Data>
+        <Data> d:ElementStart va:ValidContent x:ElementEnd </Data>
       </Rule>
       <Rule>
         <Type>Recursive</Type>
@@ -106,15 +106,6 @@
       <Print check_var="token_groups"></Print>
       <Terminate success="true"></Terminate>
     </Instructions>
-    <TokenConstructs allow_unlisted="false">
-      <Construct tokentype="ElementPair" class="ElementEntity">
-        <PropertyList tokentype="Property" class="PropertyObj">
-          <Name tokentype="Key" class="string"></Name>
-          <Value tokentype="Value" class="string"></Value>
-        </PropertyList>
-      </Construct>
-      <Construct></Construct>
-    </TokenConstructs>
     <FileInferences initial="or">
       <Extension>ini</Extension>
       <Extension>vnc</Extension>

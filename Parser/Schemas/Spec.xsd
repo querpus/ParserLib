@@ -34,6 +34,40 @@
               <xs:element name="TokenRules" type="RuleList" minOccurs="0" maxOccurs="1"/>
               <xs:element name="GroupTokenRules" type="RuleList" minOccurs="0" maxOccurs="1"/>
               <xs:element name="TokenLookups" type="TokenLookupsType" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="EntityInfo">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="EntityDef" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:choice minOccurs="1" maxOccurs="unbounded">
+                            <xs:element name="MatchRule" minOccurs="1" maxOccurs="unbounded">
+                              <xs:complexType>
+                                <xs:attribute name="group" type="NonEmptyTokenType" use="optional"/>
+                                <xs:attribute name="exact" type="xs:string" use="optional"/>
+                              </xs:complexType>
+                            </xs:element>
+                            <xs:element name="Structure" minOccurs="1" maxOccurs="1">
+                              <xs:complexType>
+                                <xs:sequence>
+                                  <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                    <xs:element name="Property"></xs:element>
+                                    <xs:element name="PropertyList"></xs:element>
+                                    <xs:element name="El"></xs:element>
+                                  </xs:choice>
+                                </xs:sequence>
+                              </xs:complexType>
+                            </xs:element>
+                            <xs:element name="TokenLookup" type="NamedTokenLookupType" minOccurs="1" maxOccurs="unbounded"/>
+                            <xs:element name="GroupTokenRule" type="NamedRuleDef" minOccurs="1" maxOccurs="unbounded"/>
+                            <xs:element name="CmdSequence" type="InnerInstructionSet" minOccurs="1" maxOccurs="unbounded"/>
+                          </xs:choice>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
               <xs:element name="TokenConstructs" minOccurs="0" maxOccurs="1">
                 <xs:complexType>
                   <xs:sequence>
@@ -46,27 +80,22 @@
               <xs:element name="FileInferences" minOccurs="0" type="FileInferencesType" maxOccurs="1"/>
             </xs:all>
           </xs:complexType>
-
           <xs:key name="OpLabelKey">
             <xs:selector xpath=".//Label"/>
             <xs:field xpath="@name"/>
           </xs:key>
-
           <xs:key name="TokenCompatKey">
             <xs:selector xpath="TokenLookups/TokenLookup"/>
             <xs:field xpath="@alias"/>
           </xs:key>
-
           <xs:key name="SpecKey">
             <xs:selector xpath="Name"/>
             <xs:field xpath="value"/>
           </xs:key>
-
           <xs:keyref refer="OpLabelKey" name="GotoLabelConstraint">
             <xs:selector xpath=".//GotoLabel"/>
             <xs:field xpath="@name"/>
           </xs:keyref>
-
         </xs:element>
       </xs:sequence>
     </xs:complexType>
