@@ -66,33 +66,22 @@ public sealed class ParsingContext
   /// <param name="child">The new object to set as the current parent.</param>
   public void Descend (IEntity child)
   {
-    int adj = _depth + amt;
+    _depth++;
 
-    if (adj > 0x7fff)
+    if (Parent is not null)
     {
-      Debug.Log(Warning, $"Depth was {adj}, clamping at {0x7fff}.", this);
-    }
-
-    IEntity? previous_parent = Parent;
-
-    _depth = Math.Clamp(adj, 0, 0x7fff);
-
-    Parent = child;
-
-    if (previous_parent is not null)
-    {
-      Parent.SetParent(previous_parent);
-      previous_parent.Children.Add(child);
+      Parent.AddChild(child);
     }
     else if (Document is not null)
     {
-      Parent.SetParent(Document);
       Document.SetRoot(child);
     }
     else
     {
       Debug.Log(Warning, $"No parent of child {child} when descending.", this);
     }
+
+    GetDepthProperty<Stack<object>>("Parent");
   }
   /// <summary>Changes the depth to move outward.</summary>
   /// <param name="amt">The number change to depth.</param>
@@ -100,16 +89,6 @@ public sealed class ParsingContext
   {
     Stack<object>? parents = GetDepthProperty<Stack<object>>("Parent");
     _ = parents?.Pop();
-  }
-  public T? GetParentAs<T> () where T : IEntity
-  {
-    dynamic? parent = Parent;
-    return (T?) parent;
-  }
-  public T? GetPropertyAs<T> () where T : IEntity
-  {
-    dynamic? property = GetDepthProperty("Property");
-    return (T?) property;
   }
   #endregion
 }

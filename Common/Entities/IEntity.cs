@@ -3,6 +3,7 @@
 
 namespace Common.Entities;
 
+/// <summary>An interface for storing entities.</summary>
 public interface IEntity
 {
   IList<IEntity> Children { get; }
@@ -26,6 +27,8 @@ public interface IEntity
   /// <summary>Sets the parent property after the type has been constructed.</summary>
   /// <param name="parent">The parent or encompassing object.</param>
   void SetParent (IEntity parent);
+  /// <summary>Adds a child to the children list.</summary>
+  /// <param name="child">The chikd to add.</param>
   void AddChild (IEntity child);
   void AddChildren (IEnumerable<IEntity> children);
   void AddToDataCollection (string key, object data);

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="Parser/Spec">
+<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="unqualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="Parser/Spec">
   <xs:include schemaLocation="Types.xsd"/>
   <xs:element name="Definition">
     <xs:complexType>
@@ -48,15 +48,7 @@
                               </xs:complexType>
                             </xs:element>
                             <xs:element name="Structure" minOccurs="1" maxOccurs="1">
-                              <xs:complexType>
-                                <xs:sequence>
-                                  <xs:choice minOccurs="0" maxOccurs="unbounded">
-                                    <xs:element name="Property"></xs:element>
-                                    <xs:element name="PropertyList"></xs:element>
-                                    <xs:element name="El"></xs:element>
-                                  </xs:choice>
-                                </xs:sequence>
-                              </xs:complexType>
+                              
                             </xs:element>
                             <xs:element name="TokenLookup" type="NamedTokenLookupType" minOccurs="1" maxOccurs="unbounded"/>
                             <xs:element name="GroupTokenRule" type="NamedRuleDef" minOccurs="1" maxOccurs="unbounded"/>

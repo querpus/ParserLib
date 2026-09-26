@@ -52,17 +52,11 @@ public readonly struct SpecialReq
     bool ls = Requirements.HasFlag(SpecialReqType.LessThan);
 
     if (eq && ls)
-    {
       return len <= Value;
-    }
     if (eq && gr)
-    {
       return len >= Value;
-    }
     if (eq)
-    {
       return len == Value;
-    }
     if (ls)
       return len < Value;
     else

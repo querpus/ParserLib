@@ -7,13 +7,19 @@ namespace Common.Entities;
 public class NumberEntity : Entity
 {
   public bool IsInteger => Value % 1 == 0;
+  /// <summary>Gets or sets the value as a decimal.</summary>
   public required decimal Value
   {
     get => (decimal) DataValues["Value"]!;
     set => DataValues["Value"] = value;
   }
 
-  public string Content => $"{Value}";
+  /// <summary>Gets or sets the value as a string.</summary>
+  public string Content
+  {
+    get => $"{Value}";
+    set => Value = decimal.Parse(value, CIIC);
+  }
 
   public override bool Equals (IEntity? other) => other is NumberEntity ne && ne.Value == Value;
   public override string Serialize () => $"{Value}";
