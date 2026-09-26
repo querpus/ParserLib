@@ -9,8 +9,8 @@
         <MatchRule group="element"/>
         <Structure>
           <Property name="Name" class="string"/>
-          <PropertyList name="Attributes" class="IEntity" collection="true">
-            <Item class="AttibuteEntity">
+          <PropertyList name="Properties" class="IEntity" collection="true">
+            <Item class="AttributeEntity">
               <Property name="Key" class="string"/>
               <Property name="Value" class="string"/>
             </Item>

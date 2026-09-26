@@ -3,24 +3,33 @@
 
 namespace Common.Entities;
 
-/// <summary>An entity representing a number or decimal.</summary>
+/// <summary>An entity representing an <see langword="int"/> or <see langword="decimal"/>.<br/>
+/// <br/>
+/// Data Stored:<br/>
+/// <c>* Value</c> - Decimal value.<br/>
+/// <c>* Content</c> - Assigns to <c>Value</c> as a <see langword="string"/>.
+/// </summary>
 public class NumberEntity : Entity
 {
-  public bool IsInteger => Value % 1 == 0;
-  /// <summary>Gets or sets the value as a decimal.</summary>
-  public required decimal Value
+  public bool IsInteger => Value % 1m == 0m;
+  /// <summary>Gets or sets the decimal value of the entity.</summary>
+  public decimal Value
   {
     get => (decimal) DataValues["Value"]!;
     set => DataValues["Value"] = value;
   }
-
-  /// <summary>Gets or sets the value as a string.</summary>
+  /// <summary>Gets or sets the decimal value as a <see langword="string"/>.</summary>
   public string Content
   {
-    get => $"{Value}";
-    set => Value = decimal.Parse(value, CIIC);
+    get => $"{DataValues["Value"]}";
+    set => DataValues["Value"] = bool.Parse(value);
   }
 
   public override bool Equals (IEntity? other) => other is NumberEntity ne && ne.Value == Value;
   public override string Serialize () => $"{Value}";
+  protected override void Assign (Match match)
+  {
+    Content = match.Groups["value"].Value;
+    Origin = match.Value;
+  }
 }

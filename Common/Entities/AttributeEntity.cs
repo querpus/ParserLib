@@ -35,4 +35,7 @@ public class AttributeEntity : Entity
     (Value?.Equals(ae.Value, SCO) ?? (ae.Value is null)) &&
     ((Namespace.IsEmpty && ae.Namespace.IsEmpty) || (Namespace?.Equals(ae.Namespace, SCO) == true));
   public override string Serialize () => $"{(Namespace is not null ? $"{Namespace}:" : "")}{Key}={Quote}{Value}{Quote}";
+  protected override void Assign (Match match) => throw new InvalidOperationException("Tried to create an attribute entity with an element match.");
+  //protected void Assign (Match match, int index) { }
+  //TODO: Assign with index.
 }

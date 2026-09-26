@@ -11,4 +11,5 @@ public class ErrorEntity : Entity
   public ErrorEntity (string message) => Message = message;
   public override bool Equals (IEntity? other) => false; // Error entities are never equal to anything else, even other error entities.
   public override string Serialize () => $"Error: {Message}";
+  protected override void Assign (Match match) { }
 }

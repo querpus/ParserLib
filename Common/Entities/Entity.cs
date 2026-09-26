@@ -13,6 +13,7 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
   /// <remarks>These are the values of a JSON object or <see cref="ArrayEntity"/>, or any non-keyed objects stored within this entity.
   /// This would also be the content between the open and closing XML tags.</remarks>
   public virtual IList<IEntity> Children { get; } = [];
+  /// <summary>Whether or not this item is omitted and ignored when reading data.</summary>
   public virtual bool Omit { get; set; }
   /// <summary>Gets the property values.</summary>
   /// <remarks>These are keyed values, like the properties of a JSON object, or the attributes of an XML Element.</remarks>
@@ -29,6 +30,8 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
   /// <summary>The serialized representation of this entity.</summary>
   /// <returns>Returns the serialized entity by default.</returns>
   public override string? ToString () => Serialize();
+  /// <summary>Sets this object's Parent property.</summary>
+  /// <param name="parent"></param>
   public void SetParent (IEntity parent) => Parent = parent;
   public void AddChild (IEntity child)
   {
@@ -50,6 +53,7 @@ public abstract class Entity : IEntity, IEquatable<IEntity>, ITextSerializer
     }
   }
   public virtual Entity ToEntity () => this;
+  protected abstract void Assign (Match match);
 }
 
 public static class SerializerExt

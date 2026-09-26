@@ -3,26 +3,38 @@
 
 namespace Common.Entities;
 
+/// <summary>An entity representing a json style object.<br/><br/>
+/// Uses only standard DataValues.<br/>
+/// Uses Properties Dictionary for children.
+/// </summary>
 public class ObjectEntity : Entity, IEnumerable<IEntity>
 {
   public int Count => Children.Count;
 
-  public IEntity this[string key]
+  public IEntity? this[string key]
   {
-    get => Properties[key];
+    get => Properties.TryGetValue(key, out IEntity? value) ? value : null;
     set
     {
-      if (Properties.ContainsKey(key) && value is PropertyEntity pe)
+      if (value is PropertyEntity pe)
+      {
         Properties[key] = pe.Value!;
-      else if (Properties.ContainsKey(key) && value is IEntity ent)
-        Properties[key] = ent;
-      else if (value is PropertyEntity pe2)
-        Properties.Add(key, pe2.Value!);
+      }
       else
-        Properties.Add(key, value);
+      {
+        Properties[key] = value is IEntity ent
+          ? ent
+          : throw new InvalidOperationException("Tried to assign a null entity to ObjectEntity Property.");
+      }
     }
   }
-  public IList<PropertyEntity> GetPropertyEntities () => [.. Properties.Select(i => new PropertyEntity() { Key = i.Key, Value = i.Value, Origin = Origin, Parent = Parent })];
+  public IList<PropertyEntity> GetPropertyEntities () => [.. Properties.Select(i => new PropertyEntity
+  {
+    Key = i.Key,
+    Value = i.Value,
+    Origin = Origin,
+    Parent = Parent
+  })];
   public void AddProperty (PropertyEntity property) => Properties.Add(property.Key, property.Value ?? new NullEntity());
   public void AddProperties (IEnumerable<PropertyEntity> properties) => properties.Foreach(AddProperty);
   public override bool Equals (IEntity? other) =>
@@ -31,4 +43,5 @@ public class ObjectEntity : Entity, IEnumerable<IEntity>
   public bool Contains (string key) => Properties.ContainsKey(key);
   public IEnumerator<IEntity> GetEnumerator () => GetPropertyEntities().GetEnumerator();
   IEnumerator IEnumerable.GetEnumerator () => GetEnumerator();
+  protected override void Assign (Match match) { }
 }

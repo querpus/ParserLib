@@ -9,12 +9,8 @@ public static class DefaultParsingSets
   {
     GeneratesSingleObject = true,
     IgnoreCase = false,
-    TotalPasses = 2,
-    SingleObject = new()
-    {
-      CreateEmptyAtStart = true,
+    SingleObject = new() {
       Class = typeof(DocumentEntity),
-      OnlyAtTopLevel = true,
       SetAsNextLevelParent = true,
     },
     RegexOptions = ROIPW | ROML | ROEC,
@@ -71,21 +67,16 @@ public static class DefaultParsingSets
       GroupRequired = "ws",
     }, new() {
       GroupRequired = "content",
-      StoresData = true,
     }, new() {
       GroupRequired = "comment",
     },],
-    Comments = [
-      new() {Open = "<!==", Close = "-->", Expression = "<!-- ([^-]| -[^-])* -->"}
-    ]
   };
   public static ParsingInfo JSON { get; } = new ParsingInfo()
   {
     GeneratesSingleObject = true,
     SingleObject = new() {
-      OnlyAtTopLevel = true,
-      CreateEmptyAtStart = true,
-      DefinesStructure = true,
+      Class = typeof(DocumentEntity),
+      SetAsNextLevelParent = true,
     },
     RegexOptions = ROIPW | ROML | ROEC,
     RegexString =
@@ -105,26 +96,21 @@ public static class DefaultParsingSets
     (?'ws'             \s+)
     """,
     IgnoreCase = false,
-    TotalPasses = 2,
     EntityOptions = [
     new() {
       GroupRequired = "key",
-      StoresData = true,
       StorePieceTypes = new() { ["Key"] = "key" },
       SetPropKey = true
     }, new() {
       GroupRequired = "str_value",
-      StoresData = true,
       AddToPropKey = true,
       StorePieceTypes = new() { ["Value"] = "value" },
     }, new() {
       GroupRequired = "bool_value",
-      StoresData = true,
       AddToPropKey = true,
       StorePieceTypes = new() { ["Value"] = "value" },
     }, new() {
       GroupRequired = "num_value",
-      StoresData = true,
       AddToPropKey = true,
       StorePieceTypes = new() { ["Value"] = "value" },
     }, new() {
@@ -162,5 +148,4 @@ public static class DefaultParsingSets
       DepthChange = -1,
     }]
   };
-  public static bool OnlyAtTopLevel { get; private set; }
 }

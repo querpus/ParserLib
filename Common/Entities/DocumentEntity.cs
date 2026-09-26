@@ -3,12 +3,12 @@
 
 namespace Common.Entities;
 
-/// <summary>An entity representing a document.</summary>
-/// <remarks>
+/// <summary>An entity representing a document.<br/><br/>
 /// Uses DataValues:<br/>
 /// * <c>RootNode</c> - The root node of the document.<br/>
 /// * <c>Header</c> - The header of the document (if present).<br/>
-/// </remarks>
+/// * <c>Content</c> - The entire contents of the document as text.
+/// </summary>
 public class DocumentEntity : ContentEntity
 {
   public IEntity? RootNode

@@ -39,6 +39,9 @@ public readonly struct SpecialReq
       SpecialReqType.GroupExists when Group is not null => match.HasValidGroup(Group),
       SpecialReqType.GroupValue when Group is not null => match.HasValidGroup(Group) && match.Groups[Group].Value.Equals(Value, equalic ? SCOIC : SCO),
       SpecialReqType.GroupLength when Group is not null => match.HasValidGroup(Group) && FuncParse(match.Groups[Group].Value.Length),
+      SpecialReqType.None => true,
+      SpecialReqType.MatchValue => match.Value.Contains(Value),
+      SpecialReqType.MatchLength => FuncParse(match.Value.Length),
       _ => false
     };
 
@@ -73,6 +76,12 @@ public readonly struct SpecialValue
 /// <summary>This is common data to describe variations of entity properties.</summary>
 public class EntityInfo
 {
+  #region Constants
+  /// <summary>Specifies an ascending sort order.</summary>
+  /// <remarks>Use to indicate ascending order in sorting or comparison operations.</remarks>
+  public const int Ascend = -1;
+  public const int Descend = 1;
+  #endregion
   #region Functional Properties
   /// <summary>This is the class that is created.</summary>
   public Type? Class { get; set; }
@@ -102,20 +111,16 @@ public class EntityInfo
   /// </remarks>
   public bool SetPropKey { get; init; }
   /// <summary>
-  /// Adds this entity to the parent stack, meaning it will receive all tokens that are passed as data once the depth descends.<br/>
+  /// Adds this entity to the 'NextParent' static property, meaning it will become the next parent when we descend,<br/>
   /// This does not have to be the depth changing token.
   /// </summary>
   public bool SetAsNextLevelParent { get; init; }
-  /// <summary>Creates this entity outside of the parsing loop as the initial container for all other tokens.</summary>
-  public bool CreateEmptyAtStart { get; init; }
   #endregion
   #region Data Properties
-  /// <summary>The constant value if this entity always has the same value.</summary>
-  public string? ConstantValue { get; init; }
   /// <summary>The type of piece this entity stores as.</summary>
   /// <remarks>
   /// Format:<br/>
-  /// Key is PieceType <see langword="string"/>.<br/>
+  /// Key is value <see langword="string"/>.<br/>
   /// Value is GroupName <see langword="string"/>.<br/>
   /// Multiple Captures on the group mean a <see cref="Collection{T}"/> is made with an entry for each capture.
   /// </remarks>
@@ -123,16 +128,6 @@ public class EntityInfo
   /// <summary>These are conditional assignments to an entity.</summary>
   public Collection<SpecialValue> SpecialValues { get; init; } = [];
   #endregion Data Properties
-  #region Informative Properties
-  /// <summary>Whether or not the entity stores data into its parent.</summary>
-  public bool StoresData { get; set; }
-  /// <summary>Whether or not this entity causes an structural change to parsing.</summary>
-  public bool DefinesStructure { get; set; }
-  #endregion
-  #region Validation Properties
-  /// <summary>Only allow this entity at top-level, not as a child.</summary>
-  public bool OnlyAtTopLevel { get; set; }
-  #endregion
   #region Overrides and Equality
 
   /// <summary>Checks to see if a match will satisfy the entity</summary>
@@ -150,7 +145,7 @@ public class EntityInfo
   /// <param name="obj">The other object.</param>
   /// <returns><see langword="true"/> if the object is an <see cref="EntityInfo"/> and the properties are the same. Otherwise <see langword="false"/>.</returns>
   public override bool Equals (object? obj) => obj is EntityInfo info && GetHashCode() == info.GetHashCode();
-  public override int GetHashCode () => HashCode.Combine(DepthChange, SetPropKey, SetAsNextLevelParent, CreateEmptyAtStart, ConstantValue, StorePieceTypes, HashCode.Combine(StoresData, DefinesStructure, OnlyAtTopLevel));
+  public override int GetHashCode () => HashCode.Combine(DepthChange, SetPropKey, SetAsNextLevelParent, StorePieceTypes);
   public static bool operator == (EntityInfo left, Match right) => left.Equals(right);
   public static bool operator != (EntityInfo left, Match right) => !(left == right);
   #endregion

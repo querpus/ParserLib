@@ -10,16 +10,16 @@ public class ElementEntity : Entity
   public bool IsHeader
   {
     get => (bool) DataValues["IsHeader"]!;
-    init => DataValues["IsHeader"] = value;
+    set => DataValues["IsHeader"] = value;
   }
   public bool IsSingle {
     get => (bool) DataValues["IsSingle"]!;
-    init => DataValues["IsSingle"] = value;
+    set => DataValues["IsSingle"] = value;
   }
   public required string Name
   {
     get => (string) DataValues["Name"]!;
-    init => DataValues["Name"] = value;
+    set => DataValues["Name"] = value;
   }
   public string? Namespace
   {
@@ -35,7 +35,7 @@ public class ElementEntity : Entity
 
       return (Collection<AttributeEntity>) DataValues["Attributes"]!;
     }
-    init => AddAttributes(value);
+    set => AddAttributes(value);
   }
 
   public override string Serialize ()
@@ -66,5 +66,12 @@ public class ElementEntity : Entity
     }
   }
   public void AddAttributes (IEnumerable<IEntity> attributes) => attributes.Foreach(AddAttribute);
-
+  protected override void Assign (Match match)
+  {
+    IsHeader = match.HasValidGroup("header");
+    Origin = match.Value;
+    Name = match.Groups["name"].Value;
+    //Attributes = ParseAttributes(match);
+    //TODO: Figure out what to do about ParseAttributes.
+  }
 }

@@ -10,6 +10,8 @@
 [assembly: SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "<Pending>", Scope = "member", Target = "~M:Common.Extensions.MatchExtensions.<G>$D6B04C75D74BF86D0F6D307C4FF829EA.GetCaptures(System.String)~System.String[]")]
 [assembly: SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "<Pending>", Scope = "member", Target = "~M:Common.Debug.GetTextColor(Common.MsgClass)~System.ConsoleColor")]
 [assembly: SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "<Pending>", Scope = "member", Target = "~M:Common.Debug.GetBackColor(Common.MsgClass)~System.ConsoleColor")]
+[assembly: SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "<Pending>", Scope = "member", Target = "~M:Common.Entities.SpecialReq.RequirementsMet(System.Text.RegularExpressions.Match)~System.Boolean")]
+[assembly: SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "<Pending>", Scope = "member", Target = "~M:Common.Entities.SpecialReq.FuncParse(System.Int32)~System.Boolean")]
 //[assembly: SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "<Pending>", Scope = "member", Target = "~M:Common.Entities.EntityFactory.FromString(System.String,Common.Entities.BasicType)~Common.Entities.DocumentEntity")]
 //[assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "member", Target = "~P:Common.Entities.DocumentEntity._both_set")]
 //[assembly: SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "<Pending>", Scope = "member", Target = "~M:Common.EntityFactory.CheckJSONMatch(System.Text.RegularExpressions.Match)~Common.IParsedEntity")]

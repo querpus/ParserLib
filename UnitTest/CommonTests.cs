@@ -44,7 +44,7 @@ public class CommonTests
   [Fact]
   public void EntityDataTest ()
   {
-    IEntity entity = new RawEntity();
+    RawEntity entity = new();
 
     entity.AddToDataCollection("test", new object());
 
