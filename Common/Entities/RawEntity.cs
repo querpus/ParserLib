@@ -11,5 +11,5 @@ public class RawEntity : Entity, IPrintable
     Debug.LogPart(MsgClass.BlueInfo, DataValues.Keys.TextJoin(", "));
   }
   public override string Serialize () => "RawEntity Data:" + DataValues.TextJoin(",") + " | Children: " + Children.TextJoin(",");
-
+  protected override void Assign (Match match) { }
 }

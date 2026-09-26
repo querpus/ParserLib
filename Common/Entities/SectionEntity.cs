@@ -14,4 +14,5 @@ public class SectionEntity : Entity
   public override bool Equals (IEntity? other) =>
     other is SectionEntity ce && Name.Is(ce.Name) && Properties.SequenceEqual(ce.Properties);
   public override string Serialize () => $"[{Name}]" + '\n' + Properties.TextJoin("\n");
+  protected override void Assign (Match match) { } //TODO: Implement
 }

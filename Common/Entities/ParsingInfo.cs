@@ -34,8 +34,6 @@ public class ParsingInfo
       }
     }
   }
-  public Collection<CommentStyle> Comments { get; init; } = [];
-  public Collection<QuoteStyle> Quotes { get; init; } = [];
   public IImmutableList<EntityInfo> EntityOptions { get; init; } = [];
   /// <summary>Tries to get the <see cref="EntityInfo"/> for the given <see cref="Match"/>.</summary>
   /// <param name="match">The regex match.</param>

@@ -14,7 +14,8 @@ public sealed class ParsingContext
   /// </remarks>
   /// <value>This value is clamped to be within 0 and 32767.</value>
   private int _depth;
-  private readonly Dictionary<string, Stack<object>> _depthProperties = [];
+  private readonly Dictionary<string, Stack<dynamic>> _depthProperties = [];
+  private readonly Dictionary<string, dynamic?> _staticProperties = [];
   #endregion
   public ParsingInfo? ParsingSet { get; set; }
   public string? OriginText { get; set; }
@@ -22,39 +23,32 @@ public sealed class ParsingContext
   /// <summary>Gets or sets the "Parent" depth property, which is used on most entities in some way.</summary>
   public IEntity? Parent
   {
-    get => HasDepthProperty("Parent") ? GetDepthProperty("Parent") : null;
+    get => GetProperty("Parent");
     set
     {
       if (value is not null)
-        SetDepthProperty("Parent", value);
+        SetProperty("Parent", value);
     }
   }
   #region Public Methods
+  public dynamic? GetStatic (string name) =>
+    _staticProperties.TryGetValue(name, out dynamic? value) ? value : null;
+  public void SetStatic (string name, dynamic? value) => _staticProperties[name] = value;
   /// <summary>Gets a depth specific property by key name.</summary>
   /// <param name="name">The name of the property.</param>
   /// <returns>The object stored at this depth and key.</returns>
   /// <remarks>Predefined keys:<br/>
   /// * <c>Parent</c> - The current item's parent object, or <see langword="null"/> if top-level.<br/>
   /// * <c>Property</c> - The current item's property object, which stores a key/value pair.<br/>
-  /// * <c>Child</c> - The newly created object that will become the new parent when descending.<br/>
-  /// * <c>ChildType</c> - The type of child to create if the child is <see langword="null"/>
   /// </remarks>
-  public dynamic? GetDepthProperty (string name) =>
-    _depthProperties.TryGetValue(name, out Stack<object>? value) ? value.Peek() : null;
-  public bool HasDepthProperty (string name) => _depthProperties.ContainsKey(name) && _depthProperties[name].Count > 0;
-  public TValue? GetDepthProperty<TValue> (string name) where TValue : class =>
-    _depthProperties.TryGetValue(name, out Stack<object>? value) ? value.TryPeek(out object? result) ? result as TValue : null : null;
-  public TValue GetDepthProperty<TValue> (string name, TValue if_not_found) where TValue : struct =>
-    _depthProperties.TryGetValue(name, out Stack<object>? value) ? value.TryPeek(out object? result) ? result is TValue actual_value ? actual_value : if_not_found : if_not_found : if_not_found;
-  public void SetDepthProperty (string name, dynamic? value)
+  public dynamic? GetProperty (string name) =>
+    _depthProperties.TryGetValue(name, out Stack<object>? value) && value.Count > 0 ? value.Peek() : null;
+  public Stack<dynamic>? GetStack (string name) =>
+    _depthProperties.TryGetValue(name, out Stack<dynamic>? value) ? value : null;
+  public void SetProperty (string name, dynamic? value)
   {
-    if (!_depthProperties.TryGetValue(name, out Stack<object>? prop))
-    {
-      prop = [];
-      _depthProperties.Add(name, prop);
-    }
-
-    prop.Push(value);
+    Stack<dynamic> stack = GetStack(name) ?? [];
+    stack.Push(value);
   }
   /// <summary>Increase the current depth by the specified amount, store the provided values in DepthProperties at the new depth,
   /// and if a child is specified set its parent (to Document when no current Parent, otherwise to Parent) and update Parent
@@ -66,50 +60,29 @@ public sealed class ParsingContext
   /// <param name="child">The new object to set as the current parent.</param>
   public void Descend (IEntity child)
   {
-    int adj = _depth + amt;
+    _depth++;
 
-    if (adj > 0x7fff)
+    if (Parent is not null)
     {
-      Debug.Log(Warning, $"Depth was {adj}, clamping at {0x7fff}.", this);
-    }
-
-    IEntity? previous_parent = Parent;
-
-    _depth = Math.Clamp(adj, 0, 0x7fff);
-
-    Parent = child;
-
-    if (previous_parent is not null)
-    {
-      Parent.SetParent(previous_parent);
-      previous_parent.Children.Add(child);
+      Parent.AddChild(child);
     }
     else if (Document is not null)
     {
-      Parent.SetParent(Document);
       Document.SetRoot(child);
     }
     else
     {
       Debug.Log(Warning, $"No parent of child {child} when descending.", this);
     }
+
+    Parent = child;
   }
   /// <summary>Changes the depth to move outward.</summary>
   /// <param name="amt">The number change to depth.</param>
   public void Ascend ()
   {
-    Stack<object>? parents = GetDepthProperty<Stack<object>>("Parent");
-    _ = parents?.Pop();
-  }
-  public T? GetParentAs<T> () where T : IEntity
-  {
-    dynamic? parent = Parent;
-    return (T?) parent;
-  }
-  public T? GetPropertyAs<T> () where T : IEntity
-  {
-    dynamic? property = GetDepthProperty("Property");
-    return (T?) property;
+    _depth--;
+    _ = GetStack("Parent")?.Pop();
   }
   #endregion
 }

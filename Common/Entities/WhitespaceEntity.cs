@@ -3,15 +3,8 @@
 
 namespace Common.Entities;
 
-public class WhitespaceEntity : Entity
+public class WhitespaceEntity : ContentEntity
 {
-  public required string Content
-  {
-    get => (string) DataValues["Content"]!;
-    set => DataValues["Content"] = value;
-  }
-
   public override bool Equals (IEntity? other) =>
-    other is ContentEntity ce && Content.Is(ce.Content);
-  public override string Serialize () => Content;
+    other is WhitespaceEntity we && Content.Is(we.Content);
 }
