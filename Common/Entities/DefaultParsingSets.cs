@@ -5,7 +5,7 @@ namespace Common.Entities;
 
 public static class DefaultParsingSets
 {
-  public static ParsingInfo XML { get; } = new ParsingInfo()
+  public static ParsingInfo XML { get; } = new()
   {
     GeneratesSingleObject = true,
     IgnoreCase = false,
@@ -71,7 +71,7 @@ public static class DefaultParsingSets
       GroupRequired = "comment",
     },],
   };
-  public static ParsingInfo JSON { get; } = new ParsingInfo()
+  public static ParsingInfo JSON { get; } = new()
   {
     GeneratesSingleObject = true,
     SingleObject = new() {
@@ -100,22 +100,22 @@ public static class DefaultParsingSets
     new() {
       GroupRequired = "key",
       StorePieceTypes = new() { ["Key"] = "key" },
-      SetPropKey = true
+      AddToProperty = true
     }, new() {
       GroupRequired = "str_value",
-      AddToPropKey = true,
+      AddToProperty = true,
       StorePieceTypes = new() { ["Value"] = "value" },
     }, new() {
       GroupRequired = "bool_value",
-      AddToPropKey = true,
+      AddToProperty = true,
       StorePieceTypes = new() { ["Value"] = "value" },
     }, new() {
       GroupRequired = "num_value",
-      AddToPropKey = true,
+      AddToProperty = true,
       StorePieceTypes = new() { ["Value"] = "value" },
     }, new() {
       GroupRequired = "null_value",
-      AddToPropKey = true,
+      AddToProperty = true,
     }, new() {
       GroupRequired = "comment",
     }, new() {
@@ -124,7 +124,7 @@ public static class DefaultParsingSets
       GroupRequired = "Op",
       ExactTextRequired = "{",
       DepthChange = 1,
-      AddToPropKey = true,
+      AddToProperty = true,
       ChildType = typeof(ObjectEntity),
     }, new() {
       GroupRequired = "Op",
@@ -134,7 +134,7 @@ public static class DefaultParsingSets
       GroupRequired = "Op",
       ExactTextRequired = "[",
       DepthChange = 1,
-      AddToPropKey = true,
+      AddToProperty = true,
       ChildType = typeof(ArrayEntity),
     }, new() {
       GroupRequired = "Op",
@@ -147,5 +147,11 @@ public static class DefaultParsingSets
       ExactTextRequired = "]",
       DepthChange = -1,
     }]
+  };
+  public static ParsingInfo INI { get; } = new()
+  {
+    RegexOptions = ROEC | ROML | ROIPW,
+    GeneratesSingleObject = false,
+    
   };
 }

@@ -5,6 +5,5 @@ namespace Common.Entities;
 
 public class WhitespaceEntity : ContentEntity
 {
-  public override bool Equals (IEntity? other) =>
-    other is WhitespaceEntity we && Content.Is(we.Content);
+  public override bool Omit => true;
 }

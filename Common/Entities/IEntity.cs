@@ -3,15 +3,17 @@
 
 namespace Common.Entities;
 
-public interface IEntity
+public interface IEntity : ITextSerializer, IEquatable<IEntity>
 {
   IList<IEntity> Children { get; }
   Dictionary<string, IEntity> Properties { get; }
   Dictionary<string, object?> DataValues { get; }
+  /// <summary>Returns <see langword="true"/> if the entity has been initialized successfully, <see langword="false"/> otherwise.</summary>
+  bool IsValid { get; }
   /// <summary>Gets the origin of the parsed entity.</summary>
   /// <remarks>This is null for entities that are not derived from a single source.</remarks>
   string? Origin { get; set; }
-  /// <summary>The parent entity.</summary>
+  /// <summary>The parent of this entity.</summary>
   IEntity? Parent { get; }
   /// <summary>Static equality method.</summary>
   /// <param name="obj_a">Entity 'A'.</param>
@@ -19,10 +21,8 @@ public interface IEntity
   /// <returns><see langword="true"/> if 'A' is equal to 'B', <see langword="false"/> otherwise.</returns>
   static bool Equals (IEntity? obj_a, IEntity? obj_b) =>
     (obj_a is null && obj_b is null) || (obj_a is not null && obj_b is not null && obj_a.Equals(obj_b));
-  bool Equals (IEntity? other);
   bool Equals (object? obj);
   int GetHashCode ();
-  string? ToString ();
   /// <summary>Sets the parent property after the type has been constructed.</summary>
   /// <param name="parent">The parent or encompassing object.</param>
   void SetParent (IEntity parent);

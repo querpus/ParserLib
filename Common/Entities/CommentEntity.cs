@@ -3,4 +3,7 @@
 
 namespace Common.Entities;
 
-public class CommentEntity : ContentEntity;
+public class CommentEntity : ContentEntity
+{
+  public override bool Omit => true;
+}

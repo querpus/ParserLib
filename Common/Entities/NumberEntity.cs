@@ -15,7 +15,7 @@ public class NumberEntity : Entity
   /// <summary>Gets or sets the decimal value of the entity.</summary>
   public decimal Value
   {
-    get => (decimal) DataValues["Value"]!;
+    get => DataValues.TryGetValue("Value", out object? value) ? (decimal) value! : default;
     set => DataValues["Value"] = value;
   }
   /// <summary>Gets or sets the decimal value as a <see langword="string"/>.</summary>
@@ -25,7 +25,6 @@ public class NumberEntity : Entity
     set => DataValues["Value"] = bool.Parse(value);
   }
 
-  public override bool Equals (IEntity? other) => other is NumberEntity ne && ne.Value == Value;
   public override string Serialize () => $"{Value}";
   protected override void Assign (Match match)
   {

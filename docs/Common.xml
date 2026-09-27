@@ -202,94 +202,21 @@
             <summary>A key/value pair, with an optional namespace. It also stores what quote character was used.</summary>
             <remarks>Stores all 4 values in data, not as <see cref="T:Common.Entities.IEntity"/> objects.</remarks>
         </member>
-        <member name="T:Common.Entities.BasicType">
-            <summary>The type of object.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.Invalid">
-            <summary>Invalid text. Unable to parse.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.Absent">
-            <summary>This returns when you try to get a value that doesn't exist.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.Placeholder">
-            <summary>This will get removed by a later pass by the parser..</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.Document">
-            <summary>The single top level item from a data file, when <see cref="P:Common.Entities.ParsingInfo.GeneratesSingleObject"/> is <see langword="true"/>.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.Comment">
-            <summary>A comment item, no need to parse, ignore.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.Null">
-            <summary>The value 'null'.</summary>
-            <remarks>JSON <see langword="null"/> value.</remarks>
-        </member>
-        <member name="F:Common.Entities.BasicType.String">
-            <summary>Quoted text.</summary>
-            <remarks>JSON values, JSON keys, XML Attribute Values, INI </remarks>
-        </member>
-        <member name="F:Common.Entities.BasicType.Number">
-            <summary>Non-quoted numeric data.</summary>
-            <remarks>JSON numeric values, not enclosed in quotes.</remarks>
-        </member>
-        <member name="F:Common.Entities.BasicType.Array">
-            <summary>An array of <see cref="T:Common.Entities.IEntity"/> items.</summary>
-            <remarks>A JSON array object, or a list of items.</remarks>
-        </member>
-        <member name="F:Common.Entities.BasicType.Object">
-            <summary>A basic dictionary.</summary>
-            <remarks>
-            A JSON object which can store named properties in an <see cref="T:System.Collections.Generic.IDictionary`2"/>.
-            </remarks>
-        </member>
-        <member name="F:Common.Entities.BasicType.Boolean">
-            <summary>A <see langword="true"/> or a <see langword="false"/> stored as 'true' and 'false'.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.IgnoredWhitespace">
-            <summary>This is the starting and ending whitespace in an element, or whitespace between elements.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.LooseContent">
-            <summary>This is content within a mixed element.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.Element">
-            <summary>A complex object that stores attributes, elements, and content.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.Attribute">
-            <summary>A key/value pair that can be qualified with a namespace.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.Section">
-            <summary>A named section.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.Property">
-            <summary>A key\value pair in which the value is an entity.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.Raw">
-            <summary>A custom type, for a different style structure than what has been defined already.</summary>
-        </member>
-        <member name="F:Common.Entities.BasicType.External">
-            <summary>A custom class, for a different style structure than what has been defined already.</summary>
-            <remarks>This class must inherit from <see cref="T:Common.Entities.Entity"/>.</remarks>
-        </member>
-        <member name="F:Common.Entities.BasicType.Operator">
-            <summary>A constant character or set of characters.</summary>
-        </member>
-        <member name="P:Common.Entities.CommentStyle.Open">
-            <summary>The character or character sequence that begins this comment.</summary>
-        </member>
-        <member name="P:Common.Entities.CommentStyle.Close">
-            <summary>The character or character sequence that ends this comment.</summary>
-            <remarks>Leave <see langword="null"/> for linefeed or EOF terminated.</remarks>
-        </member>
-        <member name="P:Common.Entities.CommentStyle.Expression">
-            <summary>The regular expression that captures this comment.</summary>
+        <member name="T:Common.Entities.ContentEntity">
+            <summary>An entity representing loose unquoted content.<br/><br/>
+            Uses DataValues:<br/>
+            * <c>Content</c> - The entire contents of the document as text.
+            </summary>
         </member>
         <member name="T:Common.Entities.DocumentEntity">
-            <summary>An entity representing a document.</summary>
-            <remarks>
-            Uses DataValues:<br/>
+            <summary>An entity representing a document.<br/><br/>
+            <b>DataValues:</b><br/>
             * <c>RootNode</c> - The root node of the document.<br/>
             * <c>Header</c> - The header of the document (if present).<br/>
-            </remarks>
+            * <c>Content</c> - The entire contents of the document as text.<br/>
+            <b>Children:</b><br/>
+            Only if the document does not have a root node.
+            </summary>
         </member>
         <member name="T:Common.Entities.Entity">
             <summary>Base class for entities.</summary>
@@ -298,10 +225,16 @@
             <summary>Gets or sets the parent entity.</summary>
             <remarks>This is <see langword="null"/> if the current entity is a root entity.</remarks>
         </member>
+        <member name="P:Common.Entities.Entity.Origin">
+            <summary>Gets or sets the data this entity was formed from.</summary>
+        </member>
         <member name="P:Common.Entities.Entity.Children">
             <summary>Gets the child entities.</summary>
             <remarks>These are the values of a JSON object or <see cref="T:Common.Entities.ArrayEntity"/>, or any non-keyed objects stored within this entity.
             This would also be the content between the open and closing XML tags.</remarks>
+        </member>
+        <member name="P:Common.Entities.Entity.Omit">
+            <summary>Whether or not this item is omitted and ignored when reading data.</summary>
         </member>
         <member name="P:Common.Entities.Entity.Properties">
             <summary>Gets the property values.</summary>
@@ -315,8 +248,16 @@
             <summary>The serialized representation of this entity.</summary>
             <returns>Returns the serialized entity by default.</returns>
         </member>
+        <member name="M:Common.Entities.Entity.SetParent(Common.Entities.IEntity)">
+            <summary>Sets this object's Parent property.</summary>
+            <param name="parent"></param>
+        </member>
         <member name="T:Common.Entities.EntityInfo">
             <summary>This is common data to describe variations of entity properties.</summary>
+        </member>
+        <member name="F:Common.Entities.EntityInfo.Ascend">
+            <summary>Specifies an ascending sort order.</summary>
+            <remarks>Use to indicate ascending order in sorting or comparison operations.</remarks>
         </member>
         <member name="P:Common.Entities.EntityInfo.Class">
             <summary>This is the class that is created.</summary>
@@ -351,36 +292,21 @@
         </member>
         <member name="P:Common.Entities.EntityInfo.SetAsNextLevelParent">
             <summary>
-            Adds this entity to the parent stack, meaning it will receive all tokens that are passed as data once the depth descends.<br/>
+            Adds this entity to the 'NextParent' static property, meaning it will become the next parent when we descend,<br/>
             This does not have to be the depth changing token.
             </summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.CreateEmptyAtStart">
-            <summary>Creates this entity outside of the parsing loop as the initial container for all other tokens.</summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.ConstantValue">
-            <summary>The constant value if this entity always has the same value.</summary>
         </member>
         <member name="P:Common.Entities.EntityInfo.StorePieceTypes">
             <summary>The type of piece this entity stores as.</summary>
             <remarks>
             Format:<br/>
-            Key is PieceType <see langword="string"/>.<br/>
+            Key is value <see langword="string"/>.<br/>
             Value is GroupName <see langword="string"/>.<br/>
             Multiple Captures on the group mean a <see cref="T:System.Collections.ObjectModel.Collection`1"/> is made with an entry for each capture.
             </remarks>
         </member>
         <member name="P:Common.Entities.EntityInfo.SpecialValues">
             <summary>These are conditional assignments to an entity.</summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.StoresData">
-            <summary>Whether or not the entity stores data into its parent.</summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.DefinesStructure">
-            <summary>Whether or not this entity causes an structural change to parsing.</summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.OnlyAtTopLevel">
-            <summary>Only allow this entity at top-level, not as a child.</summary>
         </member>
         <member name="M:Common.Entities.EntityInfo.Matches(System.Text.RegularExpressions.Match)">
             <summary>Checks to see if a match will satisfy the entity</summary>
@@ -400,7 +326,7 @@
             <remarks>This is null for entities that are not derived from a single source.</remarks>
         </member>
         <member name="P:Common.Entities.IEntity.Parent">
-            <summary>The parent entity.</summary>
+            <summary>The parent of this entity.</summary>
         </member>
         <member name="M:Common.Entities.IEntity.Equals(Common.Entities.IEntity,Common.Entities.IEntity)">
             <summary>Static equality method.</summary>
@@ -412,27 +338,28 @@
             <summary>Sets the parent property after the type has been constructed.</summary>
             <param name="parent">The parent or encompassing object.</param>
         </member>
-        <member name="T:Common.Entities.IndicationRule">
-            <summary>Represents matching criteria for an indicated item, including an optional token type, a required capture group, an
-            optional exact value, and whether exact-value comparison ignores case.</summary>
-            <remarks>TokenType may be null if unspecified. Group must be present and have length > 0 for a match.
-            ExactValue may be null; when specified, the capture's value must equal ExactValue. IgnoreCase controls case
-            sensitivity when ExactValue is compared.</remarks>
-        </member>
-        <member name="P:Common.Entities.IndicationRule.Group">
-            <summary>The group that must be present and have a length > 0.</summary>
-        </member>
-        <member name="P:Common.Entities.IndicationRule.ExactValue">
-            <summary>Exact string value to match.</summary>
-        </member>
-        <member name="P:Common.Entities.IndicationRule.IgnoreCase">
-            <summary>if <see langword="true"/>, it ignores case on the exact value matching.</summary>
-        </member>
         <member name="T:Common.Entities.NullEntity">
             <summary>An entity representing a null value.</summary>
         </member>
         <member name="T:Common.Entities.NumberEntity">
-            <summary>An entity representing a number or decimal.</summary>
+            <summary>An entity representing an <see langword="int"/> or <see langword="decimal"/>.<br/>
+            <br/>
+            Data Stored:<br/>
+            <c>* Value</c> - Decimal value.<br/>
+            <c>* Content</c> - Assigns to <c>Value</c> as a <see langword="string"/>.
+            </summary>
+        </member>
+        <member name="P:Common.Entities.NumberEntity.Value">
+            <summary>Gets or sets the decimal value of the entity.</summary>
+        </member>
+        <member name="P:Common.Entities.NumberEntity.Content">
+            <summary>Gets or sets the decimal value as a <see langword="string"/>.</summary>
+        </member>
+        <member name="T:Common.Entities.ObjectEntity">
+            <summary>An entity representing a json style object.<br/><br/>
+            Uses only standard DataValues.<br/>
+            Uses Properties Dictionary for children.
+            </summary>
         </member>
         <member name="F:Common.Entities.ParsingContext._depth">
             <summary>The number of objects this is within.</summary>
@@ -445,18 +372,16 @@
         <member name="P:Common.Entities.ParsingContext.Parent">
             <summary>Gets or sets the "Parent" depth property, which is used on most entities in some way.</summary>
         </member>
-        <member name="M:Common.Entities.ParsingContext.GetDepthProperty(System.String)">
+        <member name="M:Common.Entities.ParsingContext.GetProperty(System.String)">
             <summary>Gets a depth specific property by key name.</summary>
             <param name="name">The name of the property.</param>
             <returns>The object stored at this depth and key.</returns>
             <remarks>Predefined keys:<br/>
             * <c>Parent</c> - The current item's parent object, or <see langword="null"/> if top-level.<br/>
             * <c>Property</c> - The current item's property object, which stores a key/value pair.<br/>
-            * <c>Child</c> - The newly created object that will become the new parent when descending.<br/>
-            * <c>ChildType</c> - The type of child to create if the child is <see langword="null"/>
             </remarks>
         </member>
-        <member name="M:Common.Entities.ParsingContext.Descend(System.Int32,System.Collections.Generic.Dictionary{System.String,System.Object},Common.Entities.IEntity)">
+        <member name="M:Common.Entities.ParsingContext.Descend(Common.Entities.IEntity)">
             <summary>Increase the current depth by the specified amount, store the provided values in DepthProperties at the new depth,
             and if a child is specified set its parent (to Document when no current Parent, otherwise to Parent) and update Parent
             to the child.</summary>
@@ -464,10 +389,9 @@
             the child's parent reference. Document is used with a null-forgiving assertion when assigning the child's parent
             if Parent is null.</remarks>
             <param name="amt">Number of depth levels to increase.</param>
-            <param name="set_depth_values">Dictionary mapping property names to values to assign in DepthProperties for the new depth.</param>
-            <param name="child">The new child if one is needed.</param>
+            <param name="child">The new object to set as the current parent.</param>
         </member>
-        <member name="M:Common.Entities.ParsingContext.Ascend(System.Int32)">
+        <member name="M:Common.Entities.ParsingContext.Ascend">
             <summary>Changes the depth to move outward.</summary>
             <param name="amt">The number change to depth.</param>
         </member>

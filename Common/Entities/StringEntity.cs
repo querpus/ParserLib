@@ -11,7 +11,7 @@ public class StringEntity : Entity
   /// <summary>Gets or sets the string value.</summary>
   public required string Value
   {
-    get => (string) DataValues["Value"]!;
+    get => DataValues.TryGetValue("Value", out object? value) ? (string) value! : null;
     set => DataValues["Value"] = value;
   }
   public string? Content
@@ -43,11 +43,9 @@ public class StringEntity : Entity
   }
   public string? Quote
   {
-    get => (string) DataValues["Quote"]!;
+    get => DataValues.TryGetValue("Quote", out object? value) ? (string) value! : null;
     set => DataValues["Quote"] = value;
   }
-  public override bool Equals (IEntity? other) =>
-    other is StringEntity entity && Value.Equals(entity.Value, SCO);
   protected override void Assign (Match match)
   {
     Value = match.Groups["value"].Value;

@@ -9,31 +9,26 @@ public class AttributeEntity : Entity
 {
   public string? Namespace
   {
-    get => (string?) DataValues["Namespace"];
+    get => (string?) DataValues.GetValueOrDefault("Namespace");
     set => DataValues["Namespace"] = value;
   }
-  public required string Key
+  public string? Key
   {
-    get => (string) DataValues["Key"]!;
+    get => (string?) DataValues.GetValueOrDefault("Key");
     set => DataValues["Key"] = value;
   }
-  public string? Value
+  public string Value
   {
-    get => (string?) DataValues.GetValueOrDefault("Value");
+    get => (string) DataValues.GetValueOrDefault("Value", SE)!;
     set => DataValues["Value"] = value;
   }
-  public string? Quote
+  public string Quote
   {
-    get => (string) DataValues["Quote"]!;
+    get => (string) DataValues.GetValueOrDefault("Quote", "\"")!;
     set => DataValues["Quote"] = value;
   }
-  public void SetValue (string value) => Value = value;
-
-  public override bool Equals (IEntity? other) =>
-    other is AttributeEntity ae &&
-    Key.Equals(ae.Key, SCO) &&
-    (Value?.Equals(ae.Value, SCO) ?? (ae.Value is null)) &&
-    ((Namespace.IsEmpty && ae.Namespace.IsEmpty) || (Namespace?.Equals(ae.Namespace, SCO) == true));
+  [MemberNotNullWhen(true, nameof(Key))]
+  public override bool IsValid => Key is not null;
   public override string Serialize () => $"{(Namespace is not null ? $"{Namespace}:" : "")}{Key}={Quote}{Value}{Quote}";
   protected override void Assign (Match match) => throw new InvalidOperationException("Tried to create an attribute entity with an element match.");
   //protected void Assign (Match match, int index) { }

@@ -7,7 +7,6 @@ namespace Common.Entities;
 public class NullEntity : Entity
 {
   private const string NullString = "null";
-  public override bool Equals (IEntity? other) => other is NullEntity;
   public override string Serialize () => NullString;
   protected override void Assign (Match match) { }
 }

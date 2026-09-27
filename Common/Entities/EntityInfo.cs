@@ -110,7 +110,7 @@ public class EntityInfo
   /// <remarks>When <see langword="true"/>, this entity is added to the currently active property at this depth.
   /// Defaults to <see langword="false"/>.
   /// </remarks>
-  public bool AddToPropKey { get; init; }
+  public bool AddToProperty { get; init; }
   /// <summary>Gets a value indicating whether the property context variable should be set.</summary>
   /// <remarks>When <see langword="true"/>, this entity is set to be the currently active property at this depth.
   /// Defaults to <see langword="false"/>.

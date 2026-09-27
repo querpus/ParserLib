@@ -43,8 +43,19 @@ public sealed class ParsingContext
   /// </remarks>
   public dynamic? GetProperty (string name) =>
     _depthProperties.TryGetValue(name, out Stack<object>? value) && value.Count > 0 ? value.Peek() : null;
-  public Stack<dynamic>? GetStack (string name) =>
-    _depthProperties.TryGetValue(name, out Stack<dynamic>? value) ? value : null;
+  public Stack<dynamic> GetStack (string name)
+  {
+    bool hasStack = _depthProperties.TryGetValue(name, out Stack<object>? stack);
+
+    if (!hasStack || stack is null)
+    {
+      stack = new Stack<object>();
+      _depthProperties[name] = stack;
+    }
+
+    return stack;
+  }
+
   public void SetProperty (string name, dynamic? value)
   {
     Stack<dynamic> stack = GetStack(name) ?? [];

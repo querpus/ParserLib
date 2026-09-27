@@ -9,21 +9,22 @@ public class ElementEntity : Entity
 {
   public bool IsHeader
   {
-    get => (bool) DataValues["IsHeader"]!;
+    get => DataValues.TryGetValue("IsHeader", out object? value) && (bool) value!;
     set => DataValues["IsHeader"] = value;
   }
-  public bool IsSingle {
-    get => (bool) DataValues["IsSingle"]!;
+  public bool IsSingle
+  {
+    get => DataValues.TryGetValue("IsSingle", out object? value) && (bool) value!;
     set => DataValues["IsSingle"] = value;
   }
-  public required string Name
+  public string? Name
   {
-    get => (string) DataValues["Name"]!;
+    get => DataValues.TryGetValue("Name", out object? value) ? (string) value! : null;
     set => DataValues["Name"] = value;
   }
   public string? Namespace
   {
-    get => (string?) DataValues["Namespace"];
+    get => DataValues.TryGetValue("Namespace", out object? value) ? (string?) value! : null;
     set => DataValues["Namespace"] = value;
   }
   public Collection<AttributeEntity> Attributes
@@ -52,11 +53,6 @@ public class ElementEntity : Entity
     ? elem + " />"
     : elem + ">" + children + $"</{Name}>";
   }
-  public override bool Equals (IEntity? other) =>
-    other is ElementEntity ee &&
-    Attributes.SequenceEqual(ee.Attributes) &&
-    Children.SequenceEqual(ee.Children) &&
-    Name.Equals(ee.Name, SCO);
   public void AddAttribute (IEntity attribute)
   {
     if (attribute is AttributeEntity ae)

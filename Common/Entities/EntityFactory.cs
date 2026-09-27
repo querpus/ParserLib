@@ -143,17 +143,45 @@ public static class EntityFactory
 
   Logic:
 
+    // Push 'Property' Stack
     if (options.SetPropKey && entity is not null)
     {
       context.GetStack("Property")?.Push(entity);
     }
+    // Set 'NextParent' Entity
     if (options.SetAsNextLevelParent && entity is not null)
     {
       context.SetStatic("NextParent", entity);
     }
-    if (options.AddToPropKey && entity is not null)
+    // Pops 'Property' Stack and Assigns the Value
+    if (options.AddToProperty && entity is not null)
     {
-      context.GetStack("Property")?.Push(entity);
+      // Check if we can even add the property
+      // A keyed entity list would have 1 property stored minimum from the key definition, a non-keyed collection would have nothing
+      if (context.Parent?.Properties.Count > 0 && context.GetStack("Property").Count > 0)
+      {
+        IEntity property = context.GetStack("Property").Pop();
+
+        foreach (KeyValuePair<string, string> kvp in options.StorePieceTypes)
+        {
+          string prop_name = kvp.Key;
+          string match_group = kvp.Value;
+
+          string[]? caps = match.GetCaptures(match_group)!;
+
+          if (caps is null)
+            throw new InvalidOperationException($"Group name {match_group} not present, cannot assign property.");
+
+          if (caps.Length == 1)
+          {
+
+          }
+        }
+      }
+      else
+      {
+        
+      }
     }
 
     if (entity is not null)

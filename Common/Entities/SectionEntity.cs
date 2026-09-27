@@ -5,14 +5,12 @@ namespace Common.Entities;
 
 public class SectionEntity : Entity
 {
-  public required string Name
+  public string? Name
   {
-    get => (string) DataValues["Name"]!;
+    get => DataValues.TryGetValue("Name", out object? value) ? (string) value! : null;
     set => DataValues["Name"] = value;
   }
-
-  public override bool Equals (IEntity? other) =>
-    other is SectionEntity ce && Name.Is(ce.Name) && Properties.SequenceEqual(ce.Properties);
+  public override bool IsValid => Name is not null;
   public override string Serialize () => $"[{Name}]" + '\n' + Properties.TextJoin("\n");
   protected override void Assign (Match match) { } //TODO: Implement
 }
