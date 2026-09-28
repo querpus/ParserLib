@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="Parser/Spec">
+<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="unqualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="Parser/Spec">
   <xs:include schemaLocation="Types.xsd"/>
-
   <xs:complexType name="StructurePropertyType">
     <xs:sequence>
-      <xs:choice minOccurs="0" maxOccurs="unbounded">
-        
-      </xs:choice>
+      <xs:choice minOccurs="0" maxOccurs="unbounded"></xs:choice>
     </xs:sequence>
   </xs:complexType>
-  
   <xs:complexType name="StructureType">
     <xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -19,8 +15,6 @@
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
-  
-  
   <xs:element name="Definition">
     <xs:complexType>
       <xs:sequence>
