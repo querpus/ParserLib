@@ -26,7 +26,7 @@ public class NumberEntity : Entity
   }
 
   public override string Serialize () => $"{Value}";
-  protected override void Assign (Match match)
+  public override void Assign (Match match)
   {
     Content = match.Groups["value"].Value;
     Origin = match.Value;

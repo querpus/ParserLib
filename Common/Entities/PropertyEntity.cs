@@ -22,7 +22,7 @@ public class PropertyEntity : Entity
   }
   public override bool IsValid => Key is not null && Quote is not null;
   public override string Serialize () => $"{Quote}{Key}{Quote}:{Value}";
-  protected override void Assign (Match match)
+  public override void Assign (Match match)
   {
     Key = match.Groups["key"].Value;
     Quote = match.Groups["quote"].Value;

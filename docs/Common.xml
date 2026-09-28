@@ -198,6 +198,12 @@
         <member name="F:Common.DictionaryMode.MergeCollection">
             <summary>If the existing value is a collection, and this value is a collection of the same type, merge the two collections.</summary>
         </member>
+        <member name="T:Common.Entities.ArrayEntity">
+            <summary>Represents an entity that contains an ordered collection of child entities and serializes them as a comma-separated
+            list.</summary>
+            <remarks>Valid only when it has no properties or data values. Serialization joins the Children collection with
+            commas. Assignment from a regex match is ignored (no-op), <see cref="M:Common.Entities.IEntity.AddChild(Common.Entities.IEntity)"/> should be used to assign children.</remarks>
+        </member>
         <member name="T:Common.Entities.AttributeEntity">
             <summary>A key/value pair, with an optional namespace. It also stores what quote character was used.</summary>
             <remarks>Stores all 4 values in data, not as <see cref="T:Common.Entities.IEntity"/> objects.</remarks>
@@ -252,34 +258,45 @@
             <summary>Sets this object's Parent property.</summary>
             <param name="parent"></param>
         </member>
+        <member name="F:Common.Entities.DepthOperation.Ascend">
+            <summary>Indicates that we are popping the parent stack.</summary>
+        </member>
+        <member name="F:Common.Entities.DepthOperation.Maintain">
+            <summary>Indicates the depth and parent to not change.</summary>
+        </member>
+        <member name="F:Common.Entities.DepthOperation.Descend">
+            <summary>Indicates that we are pushing 'NextParent' to the 'Parent' stack.</summary>
+        </member>
+        <member name="F:Common.Entities.DepthOperation.AscendAndDescend">
+            <summary>Indicates that we are popping the parent stack, then immediately pushing this entity to the stack.</summary>
+        </member>
         <member name="T:Common.Entities.EntityInfo">
             <summary>This is common data to describe variations of entity properties.</summary>
         </member>
-        <member name="F:Common.Entities.EntityInfo.Ascend">
-            <summary>Specifies an ascending sort order.</summary>
-            <remarks>Use to indicate ascending order in sorting or comparison operations.</remarks>
-        </member>
         <member name="P:Common.Entities.EntityInfo.Class">
-            <summary>This is the class that is created.</summary>
+            <summary>This is the class that is created. Must be derived from <see cref="T:Common.Entities.IEntity"/>.</summary>
         </member>
         <member name="P:Common.Entities.EntityInfo.GroupRequired">
-            <summary>The group that must be present for this entity to be produced.</summary>
+            <summary>The group that must be present in the match for this entity to be produced if specified.</summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.ExactTextRequired">
+            <summary>The exact text that the match must be for this entity to be produced if specified.</summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.IgnoreCaseWhenMatching">
+            <summary>If the exact text match requirement is not case sensitive.</summary>
         </member>
         <member name="P:Common.Entities.EntityInfo.DepthChange">
             <summary>The change in depth this token indicates.</summary>
             <remarks>
             Normally 0, 1, or -1.<br/>
-            <c> 1</c>: Increase depth (descend). For example, an opening bracket '{'.<br/>
-            <c> 0</c>: No change in depth. A comma ',' or a keyword in a statement. This is the default value.<br/>
-            <c>-1</c>: Decrease depth (ascend). For example, a closing bracket '}'.
+            <c>Descend (-1) </c>: Increase depth (descend). For example, an opening bracket '{'.<br/>
+            <c>Maintain (0) </c>: No change in depth. A comma ',' or a keyword in a statement. This is the default value.<br/>
+            <c>Ascend (1)   </c>: Decrease depth (ascend). For example, a closing bracket '}'.<br/>
+            <c>AscendAndDescend (0x7fff)</c>:
             </remarks>
         </member>
-        <member name="P:Common.Entities.EntityInfo.ChildType">
-            <summary>The type to create if the depth increases.</summary>
-            <remarks>This should be specified if <see cref="P:Common.Entities.EntityInfo.DepthChange"/> is positive.</remarks>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.AddToPropKey">
-            <summary>Gets a value indicating whether this item stores itself as a value in the property context variable</summary>
+        <member name="P:Common.Entities.EntityInfo.AddToProperty">
+            <summary>Adds this entity to the top entity in the 'Property' stack.</summary>
             <remarks>When <see langword="true"/>, this entity is added to the currently active property at this depth.
             Defaults to <see langword="false"/>.
             </remarks>
@@ -295,6 +312,15 @@
             Adds this entity to the 'NextParent' static property, meaning it will become the next parent when we descend,<br/>
             This does not have to be the depth changing token.
             </summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.OnlyAscendIfParentClass">
+            <summary>
+            Only pop the 'Parent' stack if the top of the stack is this class.
+            </summary>
+            <remarks>
+            Only valid for the <see cref="F:Common.Entities.DepthOperation.AscendAndDescend"/> depth option.
+            Ignored otherwise.
+            </remarks>
         </member>
         <member name="P:Common.Entities.EntityInfo.StorePieceTypes">
             <summary>The type of piece this entity stores as.</summary>
@@ -321,6 +347,12 @@
         <member name="T:Common.Entities.ErrorEntity">
             <summary>This is returned if a method must return an <see cref="T:Common.Entities.Entity"/> but one could not be created.</summary>
         </member>
+        <member name="T:Common.Entities.IEntity">
+            <summary>An interface for storing entities.</summary>
+        </member>
+        <member name="P:Common.Entities.IEntity.IsValid">
+            <summary>Returns <see langword="true"/> if the entity has been initialized successfully, <see langword="false"/> otherwise.</summary>
+        </member>
         <member name="P:Common.Entities.IEntity.Origin">
             <summary>Gets the origin of the parsed entity.</summary>
             <remarks>This is null for entities that are not derived from a single source.</remarks>
@@ -337,6 +369,10 @@
         <member name="M:Common.Entities.IEntity.SetParent(Common.Entities.IEntity)">
             <summary>Sets the parent property after the type has been constructed.</summary>
             <param name="parent">The parent or encompassing object.</param>
+        </member>
+        <member name="M:Common.Entities.IEntity.AddChild(Common.Entities.IEntity)">
+            <summary>Adds a child to the children list.</summary>
+            <param name="child">The child to add.</param>
         </member>
         <member name="T:Common.Entities.NullEntity">
             <summary>An entity representing a null value.</summary>
@@ -360,6 +396,12 @@
             Uses only standard DataValues.<br/>
             Uses Properties Dictionary for children.
             </summary>
+        </member>
+        <member name="P:Common.Entities.ObjectEntity.Item(System.String)">
+            <summary>Gets or sets the Property at the specified key.</summary>
+            <param name="key">The key to get/set.</param>
+            <returns>The </returns>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="F:Common.Entities.ParsingContext._depth">
             <summary>The number of objects this is within.</summary>
@@ -425,20 +467,6 @@
         </member>
         <member name="F:Common.Entities.PassType.EntityManipulation">
             <summary>Operating on the <see cref="T:Common.Entities.IEntity"/> objects to make defined structures.</summary>
-        </member>
-        <member name="P:Common.Entities.QuoteStyle.Open">
-            <summary>The character or character sequence that begins this <see langword="string"/> or <see langword="char"/>.</summary>
-        </member>
-        <member name="P:Common.Entities.QuoteStyle.Close">
-            <summary>The character or character sequence that ends this <see langword="string"/> or <see langword="char"/>.</summary>
-            <remarks>Leave this as <see langword="null"/> if it is the same as open.</remarks>
-        </member>
-        <member name="P:Common.Entities.QuoteStyle.Escape">
-            <summary>The character or character sequence that prevents this <see langword="string"/> or <see langword="char"/> from ending.</summary>
-            <remarks>Leave this as <see langword="null"/> if there is no escape character.</remarks>
-        </member>
-        <member name="P:Common.Entities.QuoteStyle.Expression">
-            <summary>The regular expression that captures this <see langword="string"/> or <see langword="char"/>.</summary>
         </member>
         <member name="M:Common.Entities.StringEntity.Serialize">
             <summary>Gets the serialized representation of the string value.</summary>

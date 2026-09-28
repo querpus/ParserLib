@@ -41,7 +41,7 @@ public class ObjectEntity : Entity, IEnumerable<IEntity>, IReadOnlyDictionary<st
   public bool ContainsKey (string key) => Properties.ContainsKey(key);
   public IEnumerator<IEntity> GetEnumerator () => GetPropertyEntities().GetEnumerator();
   IEnumerator IEnumerable.GetEnumerator () => GetEnumerator();
-  protected override void Assign (Match match) { }
+  public override void Assign (Match match) { }
 
   public bool TryGetValue (string key, [MaybeNullWhen(false)] out IEntity value) => Properties.TryGetValue(key, out value);
   IEnumerator<KeyValuePair<string, IEntity?>> IEnumerable<KeyValuePair<string, IEntity?>>.GetEnumerator () => Properties.GetEnumerator();

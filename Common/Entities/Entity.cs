@@ -3,7 +3,7 @@
 
 namespace Common.Entities;
 /// <summary>Base class for entities.</summary>
-public abstract class Entity : IEntity, IEquatable<IEntity>
+public abstract class Entity : IEntity
 {
   private bool _isAssigned;
   public virtual bool IsValid => _isAssigned;
@@ -55,13 +55,14 @@ public abstract class Entity : IEntity, IEquatable<IEntity>
       value!.Add(data);
     }
   }
-  public virtual Entity ToEntity () => this;
-  internal void DoAssign (Match match)
+  public virtual IEntity ToEntity () => this;
+  public void DoAssign (Match match)
   {
+    Assign(match);
     Origin = match.Value;
     _isAssigned = true;
   }
-  protected abstract void Assign (Match match);
+  public abstract void Assign (Match match);
 }
 
 public static class SerializerExt

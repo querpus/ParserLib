@@ -57,91 +57,11 @@ public static class EntityFactory
 
     IEntity? entity = null;
 
-    if (options.Class is null)
-      goto Logic;
-
-    entity = options.Class.InvokeMember(SE, BFCI, null, null, [], CIIC) as IEntity;
-    entity = entity switch
+    if (options.Class is not null)
     {
-      null => null,
-      SymbolEntity => new SymbolEntity
-      {
-        Content = match.Value,
-        Origin = match.Value
-      },
-      StringEntity => new StringEntity
-      {
-        Value = match.Groups["value"].Value,
-        Quote = match.Groups["quote"].Value,
-        Origin = match.Value
-      },
-      NumberEntity => new NumberEntity
-      {
-        Content = match.Groups["name"].Value,
-        Origin = match.Value,
-      },
-      BooleanEntity => entity,
-      NullEntity => new NullEntity
-      {
-        Origin = match.Value,
-      },
-      CommentEntity => new CommentEntity
-      {
-        Content = match.Value,
-        Origin = match.Value
-      },
-      WhitespaceEntity => new WhitespaceEntity
-      {
-        Content = match.Value,
-        Origin = match.Value
-      },
-      ArrayEntity => new ArrayEntity
-      {
-        Origin = match.Value
-      },
-      ObjectEntity => new ObjectEntity
-      {
-        Origin = match.Value
-      },
-      RawEntity => new RawEntity
-      {
-        Origin = match.Value,
-      },
-      ErrorEntity => throw new InvalidOperationException("Type was Invalid."),
-      DocumentEntity => new DocumentEntity
-      {
-        Content = match.Value,
-        Origin = match.Value
-      },
-      ContentEntity => entity,
-      ElementEntity when match.HasValidGroup("name") && match.HasValidGroup("single") => new ElementEntity
-      {
-        Origin = match.Value,
-        Name = match.Groups["name"].Value,
-        Attributes = ParseAttributes(match),
-      },
-      ElementEntity when match.HasValidGroup("name") => new ElementEntity
-      {
-        Origin = match.Value,
-        Name = match.Groups["name"].Value
-      },
-      ElementEntity when match.HasValidGroup("close") => null,
-      //BT.Attribute when match.HasValidGroup("Key") => new AttributeEntity { Origin = match.Value, Key = match.Groups["key"].Value },
-      SectionEntity when match.HasValidGroup("name") => new SectionEntity
-      {
-        Origin = match.Value,
-        Name = match.Groups["name"].Value
-      },
-      PropertyEntity when match.HasValidGroup("Key") => new PropertyEntity
-      {
-        Origin = match.Value,
-        Key = match.Groups["key"].Value
-      },
-      AttributeEntity => throw new InvalidOperationException("Attributes are handled in ParseAttributes."),
-      IEntity => options.Class.InvokeMember(SE, BFCI, null, null, [], CIIC) as IEntity,
-    };
-
-  Logic:
+      entity = options.Class.InvokeMember(SE, BFCI, null, null, [], CIIC) as IEntity;
+      entity?.DoAssign(match);
+    }
 
     // Push 'Property' Stack
     if (options.SetPropKey && entity is not null)
@@ -167,20 +87,22 @@ public static class EntityFactory
           string prop_name = kvp.Key;
           string match_group = kvp.Value;
 
-          string[]? caps = match.GetCaptures(match_group)!;
-
-          if (caps is null)
-            throw new InvalidOperationException($"Group name {match_group} not present, cannot assign property.");
+          string[]? caps = match.GetCaptures(match_group)! ?? throw new InvalidOperationException($"Group name {match_group} not present, cannot assign property.");
 
           if (caps.Length == 1)
           {
-
+            property.AddToDataCollection(prop_name, caps[0]);
+          }
+          else
+          {
+            property.AddToDataCollection(prop_name, caps);
           }
         }
+        ((ObjectEntity) context.Parent).AddProperty((property as PropertyEntity)!);
       }
       else
       {
-        
+        //TODO: Handle Arrays
       }
     }
 
@@ -191,21 +113,33 @@ public static class EntityFactory
       context.Parent?.AddChild(entity);
     }
 
-    if (options.DepthChange > 0)
+    void descend()
     {
-
       IEntity? child = context.GetStatic("NextParent");
 
-      child ??= options.ChildType?.InvokeMember(SE, BFCI, null, null, null, CIIC) as IEntity;
+      child ??= options.Class?.InvokeMember(SE, BFCI, null, null, null, CIIC) as IEntity;
 
       if (child is null)
         throw new InvalidOperationException("Child was null and could not become parent.");
 
       context.Descend(child);
     }
-    if (options.DepthChange < 0)
+
+    switch (options.DepthChange)
     {
-      context.Ascend();
+      case DepthOperation.Descend:
+        descend();
+        break;
+      case DepthOperation.Ascend:
+        context.Ascend();
+        break;
+      case DepthOperation.AscendAndDescend:
+        if (options.OnlyAscendIfParentClass is null || context.GetStack("Parent").Peek().TypeName == options.OnlyAscendIfParentClass.Name)
+        {
+          context.Ascend();
+        }
+        descend();
+        break;
     }
     return entity;
   }
@@ -254,7 +188,7 @@ public static class EntityFactory
     };
     MatchCollection matches = info.Regex!.Matches(content);
     List<IEntity> entities = [];
-    foreach (Match match in matches.Cast<Match>())
+    foreach (Match match in matches.Cast<Match>().Where(m => m.Success))
     {
       IEntity? entity = Generate(match, context);
       if (entity is not null) entities.Add(entity);

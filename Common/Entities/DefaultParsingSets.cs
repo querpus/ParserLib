@@ -1,6 +1,8 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
+using static Common.Entities.DepthOperation;
+
 namespace Common.Entities;
 
 public static class DefaultParsingSets
@@ -10,7 +12,7 @@ public static class DefaultParsingSets
     GeneratesSingleObject = true,
     IgnoreCase = false,
     SingleObject = new() {
-      Class = typeof(DocumentEntity),
+      Class = typeof(ElementEntity),
       SetAsNextLevelParent = true,
     },
     RegexOptions = ROIPW | ROML | ROEC,
@@ -29,9 +31,9 @@ public static class DefaultParsingSets
       (?# attributes)
       (   \s+ 
           (?'attribute'
-          ((?'a_ns'  \w+)     \s*     :     \s*)?
+          ((?'a_ns'  \w*?)     \s*     :?     \s*)
            (?'a_name'\w+)     \s*     =     \s*
-         " (?'a_val'(  [^\n"\\]  |  \\[^\n]  )*  )"
+         (?'a_qt'["']) (?'a_val'(  [^\n\\](?<!\k<a_qt>)  |  \\[^\n]  )*?  ) \k<a_qt>
         ))*
 
       (?'single'\s*\/)?
@@ -55,14 +57,16 @@ public static class DefaultParsingSets
       Class = typeof(ElementEntity),
     }, new() {
       GroupRequired = "close",
-      DepthChange = -1,
+      DepthChange = Ascend,
+      Class = null,
     }, new() {
       GroupRequired = "single",
+      Class = typeof(ElementEntity),
     }, new() {
       GroupRequired = "element",
-      DepthChange = 1,
+      DepthChange = Descend,
       SetAsNextLevelParent = true,
-      ChildType = typeof(ElementEntity),
+      Class = typeof(ElementEntity),
     },new() {
       GroupRequired = "ws",
     }, new() {
@@ -75,7 +79,7 @@ public static class DefaultParsingSets
   {
     GeneratesSingleObject = true,
     SingleObject = new() {
-      Class = typeof(DocumentEntity),
+      Class = typeof(ObjectEntity),
       SetAsNextLevelParent = true,
     },
     RegexOptions = ROIPW | ROML | ROEC,
@@ -100,58 +104,126 @@ public static class DefaultParsingSets
     new() {
       GroupRequired = "key",
       StorePieceTypes = new() { ["Key"] = "key" },
-      AddToProperty = true
+      SetPropKey = true,
+      Class = typeof(PropertyEntity)
     }, new() {
       GroupRequired = "str_value",
       AddToProperty = true,
       StorePieceTypes = new() { ["Value"] = "value" },
+      Class = typeof(StringEntity)
     }, new() {
       GroupRequired = "bool_value",
       AddToProperty = true,
       StorePieceTypes = new() { ["Value"] = "value" },
+      Class = typeof(BooleanEntity)
     }, new() {
       GroupRequired = "num_value",
       AddToProperty = true,
       StorePieceTypes = new() { ["Value"] = "value" },
+      Class = typeof(NumberEntity),
     }, new() {
       GroupRequired = "null_value",
       AddToProperty = true,
+      Class = typeof(NullEntity)
     }, new() {
       GroupRequired = "comment",
+      Class = typeof(CommentEntity)
     }, new() {
       GroupRequired = "ws",
+      Class = typeof(WhitespaceEntity)
     }, new() {
       GroupRequired = "Op",
       ExactTextRequired = "{",
-      DepthChange = 1,
+      DepthChange = Descend,
       AddToProperty = true,
-      ChildType = typeof(ObjectEntity),
+      Class = typeof(ObjectEntity),
     }, new() {
       GroupRequired = "Op",
       ExactTextRequired = "}",
-      DepthChange = -1,
+      DepthChange = Ascend,
+      Class = null,
     }, new() {
       GroupRequired = "Op",
       ExactTextRequired = "[",
-      DepthChange = 1,
+      DepthChange = Descend,
       AddToProperty = true,
-      ChildType = typeof(ArrayEntity),
+      Class = typeof(ArrayEntity),
     }, new() {
       GroupRequired = "Op",
       ExactTextRequired = ":",
+      Class = null,
     }, new() {
       GroupRequired = "Op",
       ExactTextRequired = ",",
+      Class = null,
     }, new() {
       GroupRequired = "Op",
       ExactTextRequired = "]",
-      DepthChange = -1,
+      DepthChange = Ascend,
+      Class = null,
     }]
   };
   public static ParsingInfo INI { get; } = new()
   {
     RegexOptions = ROEC | ROML | ROIPW,
     GeneratesSingleObject = false,
-    
+    RegexString =
+    """
+    ^\s*(?'remove'-)?(?'section'\[(?'name'[^\]\n]+)\]) |
+    (?<=^\s*)
+    (?'quote'["'])?
+    (?(?<=['"])
+      (?'key'[^[\]\n=-]+)\k'quote'|
+      (?'key'[^\s[\]\n="'-]+)
+    )
+    |
+    (?'op'=) |
+    (?<==\s*)
+    (?'quote'["']?)
+    (?(?<=['"])
+      (?'value'[^\n]+)| (?#If Quoted)
+      \s*(?'content'[^\n;"]+) (?#If Not Quoted)
+    )
+    \k'quote'
+    (?<!\s) | 
+    (?'comment';.*)|
+    (?'ws'\s+)|
+    (?'invalid'.)
+    """,
+    EntityOptions = [
+      new() {
+        Class = typeof(PropertyEntity),
+        GroupRequired = "key",
+        SetPropKey = true,
+        StorePieceTypes = new() {
+          ["Key"] = "key",
+          ["Quote"] = "quote"
+        },
+      }, new() {
+        Class = typeof(SectionEntity),
+        GroupRequired = "section",
+        StorePieceTypes = new() { ["Name"] = "name" },
+        SetAsNextLevelParent = true,
+        DepthChange = AscendAndDescend,
+        OnlyAscendIfParentClass = typeof(SectionEntity)
+      }, new() {
+        Class = typeof(StringEntity),
+        GroupRequired = "value",
+        AddToProperty = true,
+        StorePieceTypes = new() {
+          ["Value"] = "value",
+          ["Quote"] = "quote"
+        },
+      }, new() {
+        Class = typeof(CommentEntity),
+        GroupRequired = "comment"
+      }, new() {
+        Class = typeof(ContentEntity),
+        GroupRequired = "content",
+        StorePieceTypes = new() {
+          ["Content"] = "content",
+        },
+      }
+    ]
   };
 }

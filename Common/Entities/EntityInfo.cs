@@ -73,34 +73,40 @@ public readonly struct SpecialValue
   public ReadOnlyCollection<SpecialReq> SpecialReqs { get; init; }
 }
 
+public enum DepthOperation
+{
+  /// <summary>Indicates that we are popping the parent stack.</summary>
+  Ascend = -1,
+  /// <summary>Indicates the depth and parent to not change.</summary>
+  Maintain = 0,
+  /// <summary>Indicates that we are pushing 'NextParent' to the 'Parent' stack.</summary>
+  Descend = 1,
+  /// <summary>Indicates that we are popping the parent stack, then immediately pushing this entity to the stack.</summary>
+  AscendAndDescend = 0x7fff
+}
+
 /// <summary>This is common data to describe variations of entity properties.</summary>
 public class EntityInfo
 {
-  #region Constants
-  /// <summary>Specifies an ascending sort order.</summary>
-  /// <remarks>Use to indicate ascending order in sorting or comparison operations.</remarks>
-  public const int Ascend = -1;
-  public const int Descend = 1;
-  #endregion
   #region Functional Properties
-  /// <summary>This is the class that is created.</summary>
+  /// <summary>This is the class that is created. Must be derived from <see cref="IEntity"/>.</summary>
   public Type? Class { get; set; }
-  /// <summary>The group that must be present for this entity to be produced.</summary>
+  /// <summary>The group that must be present in the match for this entity to be produced if specified.</summary>
   public string? GroupRequired { get; set; }
+  /// <summary>The exact text that the match must be for this entity to be produced if specified.</summary>
   public string? ExactTextRequired { get; set; }
+  /// <summary>If the exact text match requirement is not case sensitive.</summary>
   public bool IgnoreCaseWhenMatching { get; set; }
   /// <summary>The change in depth this token indicates.</summary>
   /// <remarks>
   /// Normally 0, 1, or -1.<br/>
-  /// <c> 1</c>: Increase depth (descend). For example, an opening bracket '{'.<br/>
-  /// <c> 0</c>: No change in depth. A comma ',' or a keyword in a statement. This is the default value.<br/>
-  /// <c>-1</c>: Decrease depth (ascend). For example, a closing bracket '}'.
+  /// <c>Descend (-1) </c>: Increase depth (descend). For example, an opening bracket '{'.<br/>
+  /// <c>Maintain (0) </c>: No change in depth. A comma ',' or a keyword in a statement. This is the default value.<br/>
+  /// <c>Ascend (1)   </c>: Decrease depth (ascend). For example, a closing bracket '}'.<br/>
+  /// <c>AscendAndDescend (0x7fff)</c>:
   /// </remarks>
-  public int DepthChange { get; init; }
-  /// <summary>The type to create if the depth increases.</summary>
-  /// <remarks>This should be specified if <see cref="DepthChange"/> is positive.</remarks>
-  public Type? ChildType { get; init; }
-  /// <summary>Gets a value indicating whether this item stores itself as a value in the property context variable</summary>
+  public DepthOperation DepthChange { get; init; }
+  /// <summary>Adds this entity to the top entity in the 'Property' stack.</summary>
   /// <remarks>When <see langword="true"/>, this entity is added to the currently active property at this depth.
   /// Defaults to <see langword="false"/>.
   /// </remarks>
@@ -115,6 +121,15 @@ public class EntityInfo
   /// This does not have to be the depth changing token.
   /// </summary>
   public bool SetAsNextLevelParent { get; init; }
+  /// <summary>
+  /// Only pop the 'Parent' stack if the top of the stack is this class.
+  /// </summary>
+  /// <remarks>
+  /// Only valid for the <see cref="DepthOperation.AscendAndDescend"/> depth option.
+  /// Ignored otherwise.
+  /// </remarks>
+  public Type? OnlyAscendIfParentClass { get; internal set; }
+
   #endregion
   #region Data Properties
   /// <summary>The type of piece this entity stores as.</summary>
@@ -145,8 +160,8 @@ public class EntityInfo
   /// <param name="obj">The other object.</param>
   /// <returns><see langword="true"/> if the object is an <see cref="EntityInfo"/> and the properties are the same. Otherwise <see langword="false"/>.</returns>
   public override bool Equals (object? obj) => obj is EntityInfo info && GetHashCode() == info.GetHashCode();
-  public override int GetHashCode () => HashCode.Combine(DepthChange, SetPropKey, SetAsNextLevelParent, StorePieceTypes);
-  public static bool operator == (EntityInfo left, Match right) => left.Equals(right);
+  public override int GetHashCode () => HashCode.Combine(Class, DepthChange, SetPropKey, SetAsNextLevelParent, StorePieceTypes, SpecialValues);
+  public static bool operator == (EntityInfo left, Match right) => left.Matches(right);
   public static bool operator != (EntityInfo left, Match right) => !(left == right);
   #endregion
 }

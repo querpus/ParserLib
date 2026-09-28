@@ -22,7 +22,7 @@ public class BooleanEntity : Entity, IContentEntity
   }
   public override bool IsValid => Value is not null;
   public override string Serialize () => Content;
-  protected override void Assign (Match match)
+  public override void Assign (Match match)
   {
     Value = bool.Parse(match.Groups["value"].Value);
     Origin = match.Value;

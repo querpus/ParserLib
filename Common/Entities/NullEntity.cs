@@ -8,5 +8,5 @@ public class NullEntity : Entity
 {
   private const string NullString = "null";
   public override string Serialize () => NullString;
-  protected override void Assign (Match match) { }
+  public override void Assign (Match match) { }
 }

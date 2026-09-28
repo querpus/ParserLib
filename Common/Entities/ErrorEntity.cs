@@ -11,5 +11,5 @@ public class ErrorEntity : Entity
   public ErrorEntity (string message) => Message = message;
   public override string Serialize () => $"Error: {Message}";
   public override bool IsValid => false;
-  protected override void Assign (Match match) { }
+  public override void Assign (Match match) { }
 }

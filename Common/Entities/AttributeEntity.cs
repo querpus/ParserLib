@@ -30,7 +30,7 @@ public class AttributeEntity : Entity
   [MemberNotNullWhen(true, nameof(Key))]
   public override bool IsValid => Key is not null;
   public override string Serialize () => $"{(Namespace is not null ? $"{Namespace}:" : "")}{Key}={Quote}{Value}{Quote}";
-  protected override void Assign (Match match) => throw new InvalidOperationException("Tried to create an attribute entity with an element match.");
+  public override void Assign (Match match) => throw new InvalidOperationException("Tried to create an attribute entity with an element match.");
   //protected void Assign (Match match, int index) { }
   //TODO: Assign with index.
 }

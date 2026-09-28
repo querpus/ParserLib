@@ -12,5 +12,5 @@ public class SectionEntity : Entity
   }
   public override bool IsValid => Name is not null;
   public override string Serialize () => $"[{Name}]" + '\n' + Properties.TextJoin("\n");
-  protected override void Assign (Match match) { } //TODO: Implement
+  public override void Assign (Match match) { } //TODO: Implement
 }

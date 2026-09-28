@@ -62,12 +62,27 @@ public class ElementEntity : Entity
     }
   }
   public void AddAttributes (IEnumerable<IEntity> attributes) => attributes.Foreach(AddAttribute);
-  protected override void Assign (Match match)
+  public override void Assign (Match match)
   {
     IsHeader = match.HasValidGroup("header");
+    IsSingle = match.HasValidGroup("single");
     Origin = match.Value;
     Name = match.Groups["name"].Value;
-    //Attributes = ParseAttributes(match);
-    //TODO: Figure out what to do about ParseAttributes.
+    Namespace = match.GetGroup("namespace");
+
+    // Attributes
+    string[]? namespaces = match.GetCaptures("a_ns");
+    string[]? names = match.GetCaptures("a_name");
+    string[]? values = match.GetCaptures("a_val");
+    string[]? quotes = match.GetCaptures("a_qt");
+
+    if (names is null || namespaces is null || values is null || quotes is null)
+      return;
+
+    var together = namespaces.Zip(names, values.Zip(quotes));
+    foreach (var (ns, name, (val, qt)) in together)
+    {
+      AddAttribute(new AttributeEntity {Namespace=ns, Quote=qt, Value=val, Key=name});
+    }
   }
 }

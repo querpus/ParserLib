@@ -46,7 +46,7 @@ public class StringEntity : Entity
     get => DataValues.TryGetValue("Quote", out object? value) ? (string) value! : null;
     set => DataValues["Quote"] = value;
   }
-  protected override void Assign (Match match)
+  public override void Assign (Match match)
   {
     Value = match.Groups["value"].Value;
     Quote = match.Groups["quote"].Value;

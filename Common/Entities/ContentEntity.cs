@@ -22,7 +22,7 @@ public class ContentEntity : Entity, IContentEntity
   }
   public override bool IsValid => Content is not null;
   public override string Serialize () => Content ?? throw new SerializationException("Failed to serialize this entity. Content ws null");
-  protected override void Assign (Match match)
+  public override void Assign (Match match)
   {
     Content = match.Value;
     Origin = match.Value;

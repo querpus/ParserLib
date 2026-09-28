@@ -28,8 +28,11 @@ public interface IEntity : ITextSerializer, IEquatable<IEntity>
   /// <param name="parent">The parent or encompassing object.</param>
   void SetParent (IEntity parent);
   /// <summary>Adds a child to the children list.</summary>
-  /// <param name="child">The chikd to add.</param>
+  /// <param name="child">The child to add.</param>
   void AddChild (IEntity child);
   void AddChildren (IEnumerable<IEntity> children);
   void AddToDataCollection (string key, object data);
+  void DoAssign (Match match);
+  void Assign (Match match);
+  IEntity ToEntity ();
 }

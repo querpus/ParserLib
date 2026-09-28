@@ -29,7 +29,7 @@ public class SymbolEntity : Entity
     IEntity ipe => Equals(ipe),
     _ => false
   };
-  protected override void Assign (Match match)
+  public override void Assign (Match match)
   {
     Content = match.Value;
     Origin = match.Value;
