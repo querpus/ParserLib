@@ -24,7 +24,7 @@ public class ElementEntity : Entity
   }
   public string? Namespace
   {
-    get => DataValues.TryGetValue("Namespace", out object? value) ? (string?) value! : null;
+    get => DataValues.TryGetValue("Namespace", out object? value) ? (string?) value : null;
     set => DataValues["Namespace"] = value;
   }
   public Collection<AttributeEntity> Attributes
