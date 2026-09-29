@@ -9,22 +9,22 @@ public class ElementEntity : Entity
 {
   public bool IsHeader
   {
-    get => DataValues.TryGetValue("IsHeader", out object? value) && (bool) value!;
+    get => (bool) (DataValues.GetValueOrDefault("IsHeader", false) ?? false);
     set => DataValues["IsHeader"] = value;
   }
   public bool IsSingle
   {
-    get => DataValues.TryGetValue("IsSingle", out object? value) && (bool) value!;
+    get => (bool) (DataValues.GetValueOrDefault("IsSingle", false) ?? false);
     set => DataValues["IsSingle"] = value;
   }
   public string? Name
   {
-    get => DataValues.TryGetValue("Name", out object? value) ? (string) value! : null;
+    get => DataValues.GetValueOrDefault("Name", null) as string;
     set => DataValues["Name"] = value;
   }
   public string? Namespace
   {
-    get => DataValues.TryGetValue("Namespace", out object? value) ? (string?) value : null;
+    get => DataValues.GetValueOrDefault("Namespace", null) as string;
     set => DataValues["Namespace"] = value;
   }
   public Collection<AttributeEntity> Attributes
@@ -66,7 +66,6 @@ public class ElementEntity : Entity
   {
     IsHeader = match.HasValidGroup("header");
     IsSingle = match.HasValidGroup("single");
-    Origin = match.Value;
     Name = match.Groups["name"].Value;
     Namespace = match.GetGroup("namespace");
 

@@ -7,42 +7,25 @@ namespace Common.Entities;
 /// Uses only standard DataValues.<br/>
 /// Uses Properties Dictionary for children.
 /// </summary>
-public class ObjectEntity : Entity, IEnumerable<IEntity>, IReadOnlyDictionary<string, IEntity?>
+public class ObjectEntity : Entity, IEnumerable<IEntity>
 {
   public int Count => Children.Count;
 
-  public IEnumerable<string> Keys => Properties.Keys;
-  public IEnumerable<IEntity> Values => Properties.Values;
-
-  /// <summary>Gets or sets the Property at the specified key.</summary>
-  /// <param name="key">The key to get/set.</param>
-  /// <returns>The </returns>
-  /// <exception cref="InvalidOperationException"></exception>
-  public IEntity? this[string key]
+  private readonly Collection<string> _keys = [];
+  public void AddProperty (PropertyEntity property)
   {
-    get => Properties.TryGetValue(key, out IEntity? value) ? value : null;
-    set =>
-      Properties[key] = value is PropertyEntity pe
-      ? pe.Value!
-      : value is IEntity ent
-        ? ent
-        : throw new InvalidOperationException("Tried to assign a null entity to ObjectEntity Property.");
+    string key = property.Key!;
+    if (_keys.Contains(key))
+    {
+      throw new InvalidOperationException($"Duplicate property found {property.DataValues["Key"]}");
+    }
+    _keys.Add(key);
+    Children.Add(property);
   }
-  public IList<PropertyEntity> GetPropertyEntities () => [.. Properties.Select(i => new PropertyEntity
-  {
-    Key = i.Key,
-    Value = i.Value,
-    Origin = Origin,
-    Parent = Parent
-  })];
-  public void AddProperty (PropertyEntity property) => Properties.Add(property.Key, property.Value ?? new NullEntity());
   public void AddProperties (IEnumerable<PropertyEntity> properties) => properties.Foreach(AddProperty);
-  public override string Serialize () => GetPropertyEntities().TextJoin(",");
-  public bool ContainsKey (string key) => Properties.ContainsKey(key);
-  public IEnumerator<IEntity> GetEnumerator () => GetPropertyEntities().GetEnumerator();
+  public override string Serialize () => Children.TextJoin(",");
+  public bool ContainsKey (string key) => _keys.Contains(key);
+  public IEnumerator<IEntity> GetEnumerator () => Children.GetEnumerator();
   IEnumerator IEnumerable.GetEnumerator () => GetEnumerator();
   public override void Assign (Match match) { }
-
-  public bool TryGetValue (string key, [MaybeNullWhen(false)] out IEntity value) => Properties.TryGetValue(key, out value);
-  IEnumerator<KeyValuePair<string, IEntity?>> IEnumerable<KeyValuePair<string, IEntity?>>.GetEnumerator () => Properties.GetEnumerator();
 }

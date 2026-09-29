@@ -65,11 +65,11 @@ public static class Definition
       new (ErrorMatch, "None", @"\<\w+(?<error_pos>\s+)\w+\b\/?\>"),          // No spaces in element names
     ],
     GroupTokenRules = [
+      new ("DocumentNamespace", "t:NamespaceAttr x:Co n:AttrKey x:Eq v:String"),
+      new ("DocumentNamespace", "t:NamespaceAttr x:Eq v:String"),
+      new ("AttributeWithNamespace", "t:Namespace x:Co n:AttrKey x:Eq v:String"),
       new ("Attribute", "n:AttrKey x:Eq v:String"),
       new ("Header", "x:Ao x:Qm n:ElementName{xml} pa:Attribute x:Qm x:Ac"),
-      new ("AttributeWithNamespace", "t:Namespace x:Co d:Attribute"),
-      new ("DocumentNamespace", "t:NamespaceAttr x:Co d:Attribute"),
-      new ("DocumentNamespace", "t:NamespaceAttr x:Eq v:String"),
       new ("ElementEndWithNamespace", "x:Ao x:Sl t:Namespace x:Co n:ElementName x:Ac"),
       new ("ElementEnd", "x:Ao x:Sl n:ElementName x:Ac"),
       new ("ElementSingleWithNamespace", "x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Sl x:Ac"),
@@ -88,7 +88,7 @@ public static class Definition
     Operations = [
       new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
       new DebugPrintKeyOperation { InputKey = "tokens" },
-      new FilterTokenOperation("tokens", "tokens_filtered", false),
+      new FilterTokenOperation { InputKey="tokens", OutputKey="tokens_filtered", StrType="Whitespace" },
       new DebugPrintKeyOperation { InputKey = "tokens_filtered" },
       new TokenAssembleOperation { InputKey = "tokens_filtered", OutputKey = "tokens_assembled" },
       new DebugPrintKeyOperation { InputKey = "tokens_assembled" },

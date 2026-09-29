@@ -21,7 +21,7 @@ public class PropertyEntity : Entity
     set => DataValues["Value"] = value;
   }
   public override bool IsValid => Key is not null && Quote is not null;
-  public override string Serialize () => $"{Quote}{Key}{Quote}:{Value}";
+  public override string Serialize () => $"{Quote}{Key}{Quote}:{Value?.Serialize()}";
   public override void Assign (Match match)
   {
     Key = match.Groups["key"].Value;

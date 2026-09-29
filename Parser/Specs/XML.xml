@@ -8,22 +8,25 @@
       <EntityDef>
         <MatchRule group="element"/>
         <Structure>
-          <Property name="Name" class="string"/>
-          <PropertyList name="Properties" class="IEntity" collection="true">
+          <Property name="Name" class="string" group="name"/>
+          <PropertyList name="Attributes">
             <Item class="AttributeEntity">
-              <Property name="Key" class="string"/>
-              <Property name="Value" class="string"/>
+              <Property name="Namespace" class="string" group="a_ns"/>
+              <Property name="Key" class="string" group="a_key"/>
+              <Property name="Quote" class="string" group="a_qt"/>
+              <Property name="Value" class="string" group="a_val"/>
             </Item>
           </PropertyList>
-          <PropertyList name="Children" class="IEntity" collection="true">
-            <Content>
-              <Value class="string"/>
-            </Content>
-            <Comment>
-              <Value class="string" ignored="true"/>
-            </Comment>
-            <Element recurse="true"/>
+          <PropertyList name="Children">
+            <Item class="IEntity">
+              <Content class="ContentEntity"/>
+              <Content class="ElementEntity"/>
+              <Content class="WhitespaceEntity"/>
+              <Content class="CommentEntity"/>
+            </Item>
           </PropertyList>
+          <Property name="IsSingle" class="bool" value="false"/>
+          <Property name="IsHeader" class="bool" value="false"/>
         </Structure>
       </EntityDef>
     </EntityInfo>
@@ -36,9 +39,7 @@
       <Rule>
         <Type>None</Type>
         <TypeToAssign>Header</TypeToAssign>
-        <Data>
-          x:Ao x:Qm n:ElementName{xml} pa:Attribute x:Qm x:Ac
-        </Data>
+        <Data> x:Ao x:Qm n:ElementName{xml} pa:Attribute x:Qm x:Ac </Data>
       </Rule>
       <Rule>
         <Type>None</Type>
@@ -93,18 +94,15 @@
       <Rule>
         <Type>Recursive</Type>
         <TypeToAssign>ElementPair</TypeToAssign>
-        <Data>
-          d:ElementStartWithNamespace va:ValidContent x:ElementEndWithNamespace
-        </Data>
+        <Data>d:ElementStartWithNamespace va:ValidContent x:ElementEndWithNamespace</Data>
       </Rule>
     </GroupTokenRules>
     <Instructions>
-      <Label name="Start"></Label>
-      <Tokenize input_var="text" output_var="tokens"></Tokenize>
-      <Print check_var="tokens"></Print>
-      <TokenAssemble input_var="tokens" output_var="token_groups"></TokenAssemble>
-      <Print check_var="token_groups"></Print>
-      <Terminate success="true"></Terminate>
+      <Tokenize input_var="text" output_var="tokens"/>
+      <Print check_var="tokens"/>
+      <TokenAssemble input_var="tokens" output_var="token_groups"/>
+      <Print check_var="token_groups"/>
+      <Terminate success="true"/>
     </Instructions>
     <FileInferences initial="or">
       <Extension>ini</Extension>

@@ -7,7 +7,6 @@ namespace Common.Entities;
 public interface IEntity : ITextSerializer, IEquatable<IEntity>
 {
   IList<IEntity> Children { get; }
-  Dictionary<string, IEntity> Properties { get; }
   Dictionary<string, object?> DataValues { get; }
   /// <summary>Returns <see langword="true"/> if the entity has been initialized successfully, <see langword="false"/> otherwise.</summary>
   bool IsValid { get; }

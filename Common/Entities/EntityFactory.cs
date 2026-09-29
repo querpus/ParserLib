@@ -8,25 +8,6 @@ namespace Common.Entities;
 
 public static class EntityFactory
 {
-  private static Collection<AttributeEntity> ParseAttributes (Match match)
-  {
-    Collection<string> origins = [.. match.Groups["attribute"].Captures.Select(c => c.Value)];
-    Collection<string> namespaces = [..
-      from o in origins
-      let colon = o.IndexOf(':', SCO)
-      select colon != DNE ? o[..colon] : SE];
-    Collection<string> keys = [.. match.Groups["a_name"].Captures.Select(c => c.Value)];
-    Collection<string> values = [.. match.Groups["a_val"].Captures.Select(c => c.Value)];
-    if (keys.Count == origins.Count && values.Count == origins.Count)
-    {
-      IEnumerable<((string Key, string Value, string Origin) First, string Namespace)> zip = keys.Zip(values, origins).Zip(namespaces);
-      return [.. zip.Select(t => new AttributeEntity() { Key = t.First.Key, Value = t.First.Value, Origin = t.First.Origin, Namespace = t.Namespace })];
-    }
-    else
-    {
-      throw new InvalidOperationException($"Keys ({keys.Count}) and Values ({values.Count}) do not match Origin Count ({origins.Count}).");
-    }
-  }
   private static Collection<AttributeEntity> ParseAttributes (XElement element)
   {
     Collection<AttributeEntity> result = [];
@@ -77,8 +58,7 @@ public static class EntityFactory
     if (options.AddToProperty && entity is not null)
     {
       // Check if we can even add the property
-      // A keyed entity list would have 1 property stored minimum from the key definition, a non-keyed collection would have nothing
-      if (context.Parent?.Properties.Count > 0 && context.GetStack("Property").Count > 0)
+      if (object.ReferenceEquals (context.GetStack("Property").Peek().Parent, context.Parent))
       {
         IEntity property = context.GetStack("Property").Pop();
 
@@ -98,7 +78,6 @@ public static class EntityFactory
             property.AddToDataCollection(prop_name, caps);
           }
         }
-        ((ObjectEntity) context.Parent).AddProperty((property as PropertyEntity)!);
       }
       else
       {
@@ -171,11 +150,6 @@ public static class EntityFactory
   }
   public static DocumentEntity FromString (string content, ParsingInfo info)
   {
-    if (info.SingleObject is null)
-    {
-
-    }
-
     ParsingContext context = new()
     {
       ParsingSet = info,
@@ -186,13 +160,21 @@ public static class EntityFactory
         Content = content,
       },
     };
-    MatchCollection matches = info.Regex!.Matches(content);
-    List<IEntity> entities = [];
-    foreach (Match match in matches.Cast<Match>().Where(m => m.Success))
+
+    Collection<Match> matches = info.Regex?.Matches(content).ToCollection() ?? [];
+    Collection<IEntity> ents = [];
+    foreach (Match match in matches)
     {
-      IEntity? entity = Generate(match, context);
-      if (entity is not null) entities.Add(entity);
+      IEntity? gen = Generate(match, context);
+
+      if (gen is not null)
+      {
+        ents.Add(gen);
+
+        Debug.Log(MsgClass.BlueInfo, gen.ToString()!, "EntityFactory");
+      }
     }
+
     return context.Document;
   }
 }

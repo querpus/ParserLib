@@ -15,7 +15,7 @@ public class NumberEntity : Entity
   /// <summary>Gets or sets the decimal value of the entity.</summary>
   public decimal Value
   {
-    get => DataValues.TryGetValue("Value", out object? value) ? (decimal) value! : default;
+    get => (decimal) (DataValues.GetValueOrDefault("Value") ?? 0);
     set => DataValues["Value"] = value;
   }
   /// <summary>Gets or sets the decimal value as a <see langword="string"/>.</summary>

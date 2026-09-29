@@ -5,14 +5,12 @@ namespace Common.Entities;
 
 public class ParsingInfo
 {
-  /// <summary>The kind of object the end result of the operations should be.</summary>
+  /// <summary>Whether of not the result is under the RootNode property of the <see cref="DocumentEntity"/>,
+  /// or if there are many, the Children property.</summary>
   /// <remarks> This is for validation purposes.</remarks><value><br/>
-  /// * <see langword="true"/>,The parser should make a single <see cref="IEntity"/> object from the data.<br/>
-  /// * <see langword="false"/>, the parser should make a <see cref="Collection{T}"/> of <see cref="IEntity"/> objects.</value>
+  /// * <see langword="true"/>,The parser should make a single <see cref="IEntity"/> object from the data and store it under the RootNode property.<br/>
+  /// * <see langword="false"/>, the parser should make a <see cref="Collection{T}"/> of <see cref="IEntity"/> objects and store them in the Children property.</value>
   public bool GeneratesSingleObject { get; init; }
-  public EntityInfo? SingleObject { get; init; }
-  /// <summary>The number of iterative loops the parser must go through.</summary>
-  public int TotalPasses { get; init; }
   /// <summary>Whether to ignore case on non-regex matches.</summary>
   public bool IgnoreCase { get; init; }
   [SS("regex")]

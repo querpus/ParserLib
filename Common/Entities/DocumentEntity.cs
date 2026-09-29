@@ -17,12 +17,12 @@ public class DocumentEntity : ContentEntity
 {
   public IEntity? RootNode
   {
-    get => DataValues.TryGetValue("RootNode", out object? value) ? value as IEntity : null;
+    get => DataValues.GetValueOrDefault("RootNode", null) as IEntity;
     set => DataValues["RootNode"] = value;
   }
   public IEntity? Header
   {
-    get => DataValues.TryGetValue("Header", out object? value) ? value as IEntity : null;
+    get => DataValues.GetValueOrDefault("Header", null) as IEntity;
     set => DataValues["Header"] = value;
   }
   public override string Serialize ()
@@ -33,12 +33,10 @@ public class DocumentEntity : ContentEntity
     {
       result += Header.Serialize() + LFs;
     }
-
     if (RootNode is not null)
     {
       result += RootNode.Serialize() + LFs;
     }
-
     if (Children.Count > 0)
     {
       result += Children.Select(ent => ent.Serialize()).TextJoin(LFs) + LFs;

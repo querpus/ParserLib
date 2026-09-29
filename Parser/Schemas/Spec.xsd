@@ -1,42 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="unqualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="Parser/Spec">
+<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="Parser/Spec" xmlns:tns="Parser/Spec">
   <xs:include schemaLocation="Types.xsd"/>
-  <xs:complexType name="StructurePropertyType">
-    <xs:sequence>
-      <xs:choice minOccurs="0" maxOccurs="unbounded"></xs:choice>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="StructureType">
-    <xs:sequence>
-      <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="Property" type="StructurePropertyType"/>
-        <xs:element name="PropertyList"></xs:element>
-        <xs:element name="El"></xs:element>
-      </xs:choice>
-    </xs:sequence>
-  </xs:complexType>
   <xs:element name="Definition">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="Prefabs" minOccurs="0" maxOccurs="1">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="Prefab" minOccurs="1" maxOccurs="unbounded">
-                <xs:complexType>
-                  <xs:sequence>
-                    <xs:choice minOccurs="0" maxOccurs="unbounded">
-                      <xs:element name="TokenRule" type="NamedRuleDef" minOccurs="1" maxOccurs="unbounded"/>
-                      <xs:element name="Construct" type="NamedComplexTokenType" minOccurs="1" maxOccurs="unbounded"/>
-                      <xs:element name="TokenLookup" type="NamedTokenLookupType" minOccurs="1" maxOccurs="unbounded"/>
-                      <xs:element name="GroupTokenRule" type="NamedRuleDef" minOccurs="1" maxOccurs="unbounded"/>
-                      <xs:element name="CmdSequence" type="InnerInstructionSet" minOccurs="1" maxOccurs="unbounded"/>
-                    </xs:choice>
-                  </xs:sequence>
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
+        <xs:element name="Prefabs" minOccurs="0" maxOccurs="1" type="PrefabSection"/>
         <xs:element name="Spec" minOccurs="1" maxOccurs="unbounded">
           <xs:complexType>
             <xs:all maxOccurs="1">
@@ -51,34 +19,8 @@
               <xs:element name="EntityInfo">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element name="EntityDef" maxOccurs="unbounded">
-                      <xs:complexType>
-                        <xs:sequence>
-                          <xs:choice minOccurs="1" maxOccurs="unbounded">
-                            <xs:element name="MatchRule" minOccurs="1" maxOccurs="unbounded">
-                              <xs:complexType>
-                                <xs:attribute name="group" type="NonEmptyTokenType" use="optional"/>
-                                <xs:attribute name="exact" type="xs:string" use="optional"/>
-                                <xs:attribute name="ignorecase" type="xs:bool" use="optional"/>
-                              </xs:complexType>
-                            </xs:element>
-                            <xs:element name="Structure" type="StructureType" minOccurs="1" maxOccurs="1"/>
-                            <xs:element name="TokenLookup" type="NamedTokenLookupType" minOccurs="1" maxOccurs="unbounded"/>
-                            <xs:element name="GroupTokenRule" type="NamedRuleDef" minOccurs="1" maxOccurs="unbounded"/>
-                            <xs:element name="CmdSequence" type="InnerInstructionSet" minOccurs="1" maxOccurs="unbounded"/>
-                          </xs:choice>
-                        </xs:sequence>
-                      </xs:complexType>
-                    </xs:element>
+                    <xs:element name="EntityDef" maxOccurs="unbounded" type="EntityDefType"/>
                   </xs:sequence>
-                </xs:complexType>
-              </xs:element>
-              <xs:element name="TokenConstructs" minOccurs="0" maxOccurs="1">
-                <xs:complexType>
-                  <xs:sequence>
-                    <xs:element name="Construct" type="ComplexTokenType" minOccurs="1" maxOccurs="unbounded"/>
-                  </xs:sequence>
-                  <xs:attribute name="allow_unlisted" type="xs:boolean" use="optional" default="true"/>
                 </xs:complexType>
               </xs:element>
               <xs:element name="Instructions" minOccurs="0" type="InnerInstructionSet" maxOccurs="1"/>
@@ -86,19 +28,19 @@
             </xs:all>
           </xs:complexType>
           <xs:key name="OpLabelKey">
-            <xs:selector xpath=".//Label"/>
+            <xs:selector xpath=".//tns:Label"/>
             <xs:field xpath="@name"/>
           </xs:key>
           <xs:key name="TokenCompatKey">
-            <xs:selector xpath="TokenLookups/TokenLookup"/>
+            <xs:selector xpath="tns:TokenLookups/tns:TokenLookup"/>
             <xs:field xpath="@alias"/>
           </xs:key>
           <xs:key name="SpecKey">
-            <xs:selector xpath="Name"/>
-            <xs:field xpath="value"/>
+            <xs:selector xpath="tns:Spec"/>
+            <xs:field xpath="tns:Name"/>
           </xs:key>
           <xs:keyref refer="OpLabelKey" name="GotoLabelConstraint">
-            <xs:selector xpath=".//GotoLabel"/>
+            <xs:selector xpath=".//tns:GotoLabel"/>
             <xs:field xpath="@name"/>
           </xs:keyref>
         </xs:element>
