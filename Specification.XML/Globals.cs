@@ -8,8 +8,6 @@ global using Common.Extensions;
 
 global using static Common.Names;
 
-global using XTT = Specification.XML.XMLTokenType;
-
 [assembly: AssemblyCompany("Specification.XML")]
 #if DEBUG
 [assembly: AssemblyConfiguration("Debug")]

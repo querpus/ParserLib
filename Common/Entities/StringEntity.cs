@@ -9,7 +9,7 @@ public class StringEntity : Entity
   /// <remarks>This contains quotes.</remarks>
   public override string Serialize () => $"\"{Value}\"";
   /// <summary>Gets or sets the string value.</summary>
-  public required string Value
+  public string? Value
   {
     get => DataValues.TryGetValue("Value", out object? value) ? (string) value! : null;
     set => DataValues["Value"] = value;
