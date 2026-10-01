@@ -397,12 +397,6 @@
             Uses Properties Dictionary for children.
             </summary>
         </member>
-        <member name="P:Common.Entities.ObjectEntity.Item(System.String)">
-            <summary>Gets or sets the Property at the specified key.</summary>
-            <param name="key">The key to get/set.</param>
-            <returns>The </returns>
-            <exception cref="T:System.InvalidOperationException"></exception>
-        </member>
         <member name="F:Common.Entities.ParsingContext._depth">
             <summary>The number of objects this is within.</summary>
             <remarks>
@@ -438,13 +432,11 @@
             <param name="amt">The number change to depth.</param>
         </member>
         <member name="P:Common.Entities.ParsingInfo.GeneratesSingleObject">
-            <summary>The kind of object the end result of the operations should be.</summary>
+            <summary>Whether of not the result is under the RootNode property of the <see cref="T:Common.Entities.DocumentEntity"/>,
+            or if there are many, the Children property.</summary>
             <remarks> This is for validation purposes.</remarks><value><br/>
-            * <see langword="true"/>,The parser should make a single <see cref="T:Common.Entities.IEntity"/> object from the data.<br/>
-            * <see langword="false"/>, the parser should make a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see cref="T:Common.Entities.IEntity"/> objects.</value>
-        </member>
-        <member name="P:Common.Entities.ParsingInfo.TotalPasses">
-            <summary>The number of iterative loops the parser must go through.</summary>
+            * <see langword="true"/>,The parser should make a single <see cref="T:Common.Entities.IEntity"/> object from the data and store it under the RootNode property.<br/>
+            * <see langword="false"/>, the parser should make a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see cref="T:Common.Entities.IEntity"/> objects and store them in the Children property.</value>
         </member>
         <member name="P:Common.Entities.ParsingInfo.IgnoreCase">
             <summary>Whether to ignore case on non-regex matches.</summary>
@@ -855,6 +847,9 @@
         </member>
         <member name="P:Common.IPrintable.TabSize">
             <summary>The default number of spaces to add to indent each level.</summary>
+        </member>
+        <member name="P:Common.IPrintable.StartingIndent">
+            <summary>The indent at the start.</summary>
         </member>
         <member name="M:Common.IPrintable.Print(System.Int32)">
             <summary>Prints this object to the console, preserving hierarchy.</summary>

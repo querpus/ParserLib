@@ -7,9 +7,11 @@ public class SymbolEntity : Entity
 {
   public string Content
   {
-    get => DataValues.TryGetValue("Content", out object? value) ? (string) value! : SE;
+    get => DataValues.GetValueOrDefault("Content", null) as string ?? SE;
     set => DataValues["Content"] = value;
   }
+
+  public override bool IsValid => Content != SE;
 
   public static implicit operator string (SymbolEntity ce) => ce.Content;
   public static explicit operator SymbolEntity (string s) => new()

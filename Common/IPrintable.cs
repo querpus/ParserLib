@@ -14,6 +14,7 @@ public interface IPrintable
   static void SetTabSize (int size) => TabSize = size;
   /// <summary>The default number of spaces to add to indent each level.</summary>
   static int TabSize { get; private set; } = 2;
+  /// <summary>The indent at the start.</summary>
   static int StartingIndent { get; private set; }
   /// <summary>Prints this object to the console, preserving hierarchy.</summary>
   /// <param name="indent">The indent level.</param>

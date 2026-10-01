@@ -26,7 +26,6 @@ public abstract class Entity : IEntity
   public virtual Dictionary<string, object?> DataValues { get; } = [];
   public bool Equals (IEntity? other) =>
     other is IEntity entity &&
-    Properties.SequenceEqual(entity.Properties) &&
     DataValues.SequenceEqual(entity.DataValues) &&
     Children.SequenceEqual(entity.Children);
   public abstract string Serialize ();

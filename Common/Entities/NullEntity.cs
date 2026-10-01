@@ -8,5 +8,6 @@ public class NullEntity : Entity
 {
   private const string NullString = "null";
   public override string Serialize () => NullString;
+  public override bool IsValid => true;
   public override void Assign (Match match) { }
 }

@@ -9,12 +9,12 @@ public class StringEntity : Entity
   /// <remarks>This contains quotes.</remarks>
   public override string Serialize () => $"\"{Value}\"";
   /// <summary>Gets or sets the string value.</summary>
-  public string? Value
+  public string Value
   {
-    get => DataValues.TryGetValue("Value", out object? value) ? (string) value! : null;
+    get => DataValues.GetValueOrDefault("Value", null) as string ?? SE;
     set => DataValues["Value"] = value;
   }
-  public string? Content
+  public string Content
   {
     get => Serialize();
     set
@@ -43,9 +43,10 @@ public class StringEntity : Entity
   }
   public string? Quote
   {
-    get => DataValues.TryGetValue("Quote", out object? value) ? (string) value! : null;
+    get => DataValues.GetValueOrDefault("Quote", null) as string ?? SE;
     set => DataValues["Quote"] = value;
   }
+  public override bool IsValid => Quote != SE;
   public override void Assign (Match match)
   {
     Value = match.Groups["value"].Value;

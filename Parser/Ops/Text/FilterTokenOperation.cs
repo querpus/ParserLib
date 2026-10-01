@@ -3,10 +3,10 @@ namespace Parser.Ops.Text;
 /// <summary>Represents an operation to filter tokens based on specified criteria.</summary>
 public class FilterTokenOperation : Operation
 {
-  public string StrType { get; init; }
+  public required string StrType { get; init; }
   public string? OpData { get; init; }
-  public string InputKey { get; init; }
-  public string OutputKey { get; init; }
+  public required string InputKey { get; init; }
+  public required string OutputKey { get; init; }
 
   private FilterTokenType Type => Enum.Parse<FilterTokenType>(StrType, true);
   private enum FilterTokenType
@@ -18,6 +18,7 @@ public class FilterTokenOperation : Operation
     MatchEntireToken = 4,
     AnyMatchInToken = 5
   }
+  [SetsRequiredMembers]
   public FilterTokenOperation (string input_key, string output_key, [StringSyntax("regex")] string rx, bool accept_any_match)
   {
     InputKey = input_key;
@@ -25,6 +26,7 @@ public class FilterTokenOperation : Operation
     StrType = accept_any_match ? "AnyMatchInToken" : "MatchEntireToken";
     OpData = rx;
   }
+  [SetsRequiredMembers]
   public FilterTokenOperation (string input_key, string output_key, object token_type)
   {
     InputKey = input_key;
@@ -32,13 +34,14 @@ public class FilterTokenOperation : Operation
     StrType = "TokenType";
     OpData = token_type.ToString();
   }
+  [SetsRequiredMembers]
   public FilterTokenOperation (string input_key, string output_key, bool only_remove_empty_tokens)
   {
     InputKey = input_key;
     OutputKey = output_key;
     StrType = only_remove_empty_tokens ? "Empty" : "Whitespace";
   }
-
+  public FilterTokenOperation () { }
   protected override void Execute ()
   {
     if (Data[InputKey] is IEnumerable<IToken> tc)

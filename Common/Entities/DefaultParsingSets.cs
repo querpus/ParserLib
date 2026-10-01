@@ -11,10 +11,6 @@ public static class DefaultParsingSets
   {
     GeneratesSingleObject = true,
     IgnoreCase = false,
-    SingleObject = new() {
-      Class = typeof(ElementEntity),
-      SetAsNextLevelParent = true,
-    },
     RegexOptions = ROIPW | ROML | ROEC,
     RegexString =
     """
@@ -78,10 +74,6 @@ public static class DefaultParsingSets
   public static ParsingInfo JSON { get; } = new()
   {
     GeneratesSingleObject = true,
-    SingleObject = new() {
-      Class = typeof(ObjectEntity),
-      SetAsNextLevelParent = true,
-    },
     RegexOptions = ROIPW | ROML | ROEC,
     RegexString =
     """

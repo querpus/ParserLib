@@ -238,6 +238,49 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:complexType name="EntityDefType">
+    <xs:sequence>
+      <xs:choice minOccurs="1" maxOccurs="unbounded">
+        <xs:element name="MatchRule" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element name="Structure" type="StructureType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="TokenLookup" type="NamedTokenLookupType" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element name="GroupTokenRule" type="NamedRuleDef" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element name="CmdSequence" type="InnerInstructionSet" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="StructureContentType">
+    <xs:attribute name="class" type="NonEmptyTokenType" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="StructurePropertyType">
+    <xs:attribute name="name" type="NonEmptyTokenType" use="required"/>
+    <xs:attribute name="class" type="NonEmptyTokenType" use="required"/>
+    <xs:attribute name="value" type="xs:string" use="optional"/>
+    <xs:attribute name="group" type="xs:string" use="optional"/>
+  </xs:complexType>
+  <xs:complexType name="StructureListItemType">
+    <xs:choice maxOccurs="1" minOccurs="1">
+      <xs:element name="Property" type="StructurePropertyType" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="Content" type="StructureContentType" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:choice>
+    <xs:attribute name="class" type="NonEmptyTokenType" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="StructurePropertyListType">
+    <xs:sequence>
+      <xs:element name="Item" type="StructureListItemType" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="NonEmptyTokenType" use="required"/>
+    <xs:attribute name="value" type="xs:string" use="optional"/>
+  </xs:complexType>
+  <xs:complexType name="StructureType">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="Property" type="StructurePropertyType"/>
+        <xs:element name="PropertyList" type="StructurePropertyListType"/>
+        <xs:element name="Content" type="StructureContentType"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
   <xs:complexType name="FileInferencesType">
     <xs:sequence>
       <xs:choice maxOccurs="unbounded">
@@ -273,6 +316,22 @@ True by default.
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="PrefabSection">
+    <xs:sequence>
+      <xs:element name="Prefab" minOccurs="1" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+              <xs:element name="TokenRule" type="NamedRuleDef" minOccurs="1" maxOccurs="unbounded"/>
+              <xs:element name="TokenLookup" type="NamedTokenLookupType" minOccurs="1" maxOccurs="unbounded"/>
+              <xs:element name="GroupTokenRule" type="NamedRuleDef" minOccurs="1" maxOccurs="unbounded"/>
+              <xs:element name="CmdSequence" type="InnerInstructionSet" minOccurs="1" maxOccurs="unbounded"/>
+            </xs:choice>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="InnerInstructionSet">
     <xs:sequence>
@@ -579,28 +638,6 @@ True by default.
       </xs:choice>
     </xs:sequence>
     <xs:attributeGroup ref="ComplexTokenAttrGroup"/>
-  </xs:complexType>
-  <xs:complexType name="StructureLevel">
-    <xs:sequence>
-      <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="Property">
-          <xs:complexType>
-            <xs:attribute name="name" type="NonEmptyTokenType" use="required"/>
-            <xs:attribute name="class" type="NonEmptyTokenType" use="required"/>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="PropertyList">
-          <xs:complexType>
-            <xs:sequence>
-              
-            </xs:sequence>
-            <xs:attribute name="name" type="NonEmptyTokenType" use="required"/>
-            <xs:attribute name="class" type="NonEmptyTokenType" use="required"/>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="El"></xs:element>
-      </xs:choice>
-    </xs:sequence>
   </xs:complexType>
   <!-- Attribute Groups TODO: Finish Documentation -->
   <xs:attributeGroup name="ComplexTokenAttrGroup">
