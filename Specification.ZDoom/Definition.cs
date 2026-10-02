@@ -256,7 +256,7 @@ public static class Definition
       ["Value"] = ["Int", "Char", "String", "Dec", "Expression", "ExprName", "FunctionCall", "ArrayValue", "ExpressionStandalone"],
       ["Stmt"] = ["VarDecl", "BasicCmd", "FunctionCallStmt", "VarAssn", "VarInc", "ArrayDecl", "WaitStmt", "VarDeclAssn"],
       ["FuncStmt"] = ["VarDecl", "BasicCmd", "FunctionCallStmt", "VarAssn", "VarInc", "ArrayDecl", "VarDeclAssn", "ReturnStmt"],
-      ["Block"] = ["IfBlock", "ElseBlock", "ElseIfBlock", "LoopBlock", "SwitchBlock"],
+      ["Block"] = ["IfBlock", "ElseBlock", "ElseIfBlock", "LoopBlock", "SwitchBlock", "ForBlock"],
       ["MapVar"] = ["global", "world"],
       ["Loop"] = ["until", "while"],
       ["Wait"] = ["delay", "tagwait", "scriptwait", "polywait", "NamedScriptWait", "ScriptCallWaitStmt"],
@@ -316,6 +316,8 @@ public static class Definition
       Tm("DefineName", @"(?<= \#\w+\s+) (?>[a-z_]\w*)"),
       Tm("PreProcName", @"(?<= \#) (?>[a-z]+)"),
       Tm("ExprName", @"\b[a-z_]\w*\b"),
+      new TokenRule(RT.StoreExtra | RT.IgnoredToken, "ws", "\\s+"),
+      new TokenRule(RT.StoreOther, "unmatched")
     ],
     GroupTokenRules = [
       // Parameter Expressions
@@ -329,9 +331,9 @@ public static class Definition
       new(RT.Recursive, "Expression",             "c:(Unary|Minus) r:Value"),
       new(RT.Recursive, "ExpressionStandalone",   "l:Value c:IncDec"),
       new(RT.Recursive, "ExpressionStandalone",   "c:IncDec r:Value"),
-      new(RT.Recursive, "FunctionCall",           "n:FuncName x:Po q:PrintParameterValue x:Pc"),
+      new(RT.Recursive, "FunctionCall",           "n:FuncName x:Po q:PrintParameterValue xo:Cm qo:PrintParameterValue x:Pc"),
       new(RT.Recursive, "FunctionCall",           "n:FuncName x:Po q:Value x:Pc"),
-      new(RT.Recursive, "FunctionCall",           "n:FuncName x:Po q:Value xa:Cm qa:Value xa:Cm qa:Value xa:Cm qa:Value xa:Cm qa:Value xa:Cm qa:Value x:Pc"),
+      new(RT.Recursive, "FunctionCall",           "n:FuncName x:Po q:Value xo:Cm qo:Value xo:Cm qo:Value xo:Cm qo:Value xo:Cm qo:Value xo:Cm qo:Value x:Pc"),
       new(RT.Recursive, "FunctionCall",           "n:FuncName x:Po x:Pc"),
 
       new(RT.None, "ScriptCallStmt",              "n:ScriptFunc x:Po q:Value x:Cm q:Value xa:Cm qa:Value xa:Cm qa:Value xa:Cm qa:Value x:Pc x:Sc"),
@@ -342,7 +344,7 @@ public static class Definition
       // Statements
       new(RT.Recursive, "VarDecl",                "t:Type n:VarName x:Sc"),
       new(RT.Recursive, "VarDeclAssn",            "t:Type n:VarName x:Eq v:Value x:Sc"),
-      new(RT.Recursive, "VarAssn",                "n:(ArrayValue|ExprName) x:(Eq|Assign) v:Value x:Sc"),
+      new(RT.Recursive, "VarAssn",                "l:(ArrayValue|ExprName) c:(Eq|Assign) r:Value x:Sc"),
       new(RT.Recursive, "ArrayDecl",              "t:Type n:ArrVarName vm:ArrayDim x:Sc"),
       new(RT.Recursive, "BasicCmd",               "n:SimpleJump x:Sc"),
       new(RT.Recursive, "ReturnStmt",             "n:Return x:Sc"),
@@ -401,8 +403,8 @@ public static class Definition
     Operations = [
       new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
       new DebugPrintKeyOperation { InputKey = "tokens" },
-      new TokenAssembleOperation { InputKey = "tokens", OutputKey = "tokengroups" },
-      new DebugPrintKeyOperation { InputKey = "tokengroups" },
+      new TokenAssembleOperation { InputKey = "tokens", OutputKey = "token_groups" },
+      new DebugPrintKeyOperation { InputKey = "token_groups" },
     ]
   };
 
@@ -430,8 +432,8 @@ public static class Definition
     Operations = [
       new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
       new DebugPrintKeyOperation { InputKey = "tokens" },
-      new TokenAssembleOperation { InputKey = "tokens", OutputKey = "tokengroups" },
-      new DebugPrintKeyOperation { InputKey = "tokengroups" },
+      new TokenAssembleOperation { InputKey = "tokens", OutputKey = "token_groups" },
+      new DebugPrintKeyOperation { InputKey = "token_groups" },
     ]
   };
 }

@@ -78,9 +78,9 @@ public static class DefaultParsingSets
     RegexString =
     """
     (?#primitives)
-    (?'key'        " (?'key_name'\w+) " (?=\s*[:=])) |
-    (?'str_value'   (?<=[:=]\s*) " (?'value'([^\\"]|\\.)*) " ) |
-    (?'num_value'   (?<=[:=]\s*)   (?'value'[0-9.eExXbB-]+ )  ) |
+    (?'key'        (?'qt'["']) (?'key_name'\w+) \k<qt> (?=\s*[:=])) |
+    (?'str_value'   (?<=[:=]\s*) (?'qt'["']) (?'value'([^\\"]|\\.)*) \k<qt> ) |
+    (?'num_value'   (?<=[:=]\s*)   (?'value'[0-9.xXa-fA-F-]+ )  ) |
     (?'bool_value'  (?<=[:=]\s*)   (?'value'true|false)      ) |
     (?'null_value'  (?<=[:=]\s*)   (?'value'null)            ) |
     (?#operators)
@@ -95,13 +95,19 @@ public static class DefaultParsingSets
     EntityOptions = [
     new() {
       GroupRequired = "key",
-      StorePieceTypes = new() { ["Key"] = "key" },
+      StorePieceTypes = new() {
+        ["Key"] = "key",
+        ["Quote"] = "qt",
+      },
       SetPropKey = true,
       Class = typeof(PropertyEntity)
     }, new() {
       GroupRequired = "str_value",
       AddToProperty = true,
-      StorePieceTypes = new() { ["Value"] = "value" },
+      StorePieceTypes = new() {
+        ["Value"] = "value",
+        ["Quote"] = "qt"
+      },
       Class = typeof(StringEntity)
     }, new() {
       GroupRequired = "bool_value",

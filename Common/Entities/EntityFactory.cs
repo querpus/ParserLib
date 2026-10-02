@@ -26,11 +26,6 @@ public static class EntityFactory
 
   private static IEntity? Generate (Match match, ParsingContext context)
   {
-    if (!match.Success)
-    {
-      return new ErrorEntity() { Message = "Match was not a success: " + match.Value };
-    }
-
     if (!context.ParsingSet!.TryGetOptions(match, out EntityInfo? options))
     {
       return new ErrorEntity() { Message = "No entity match: " + match.Value };
@@ -161,7 +156,13 @@ public static class EntityFactory
       },
     };
 
-    Collection<Match> matches = info.Regex?.Matches(content).ToCollection() ?? [];
+    MatchCollection? matches = info.Regex?.Matches(content);
+
+    if (matches is null)
+    {
+      return context.Document;
+    }
+
     Collection<IEntity> ents = [];
     foreach (Match match in matches)
     {
