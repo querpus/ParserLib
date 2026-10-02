@@ -238,10 +238,15 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:complexType name="MatchType">
+    <xs:attribute name="group" type="NonEmptyTokenType" use="optional"/>
+    <xs:attribute name="exact" type="NonEmptyTokenType" use="optional"/>
+    <xs:attribute name="ignorecase" type="xs:boolean" use="optional"/>
+  </xs:complexType>
   <xs:complexType name="EntityDefType">
     <xs:sequence>
       <xs:choice minOccurs="1" maxOccurs="unbounded">
-        <xs:element name="MatchRule" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element name="MatchRule" type="MatchType" minOccurs="1" maxOccurs="unbounded"/>
         <xs:element name="Structure" type="StructureType" minOccurs="1" maxOccurs="1"/>
         <xs:element name="TokenLookup" type="NamedTokenLookupType" minOccurs="1" maxOccurs="unbounded"/>
         <xs:element name="GroupTokenRule" type="NamedRuleDef" minOccurs="1" maxOccurs="unbounded"/>

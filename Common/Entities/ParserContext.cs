@@ -45,15 +45,21 @@ public sealed class ParsingContext
     _depthProperties.TryGetValue(name, out Stack<object>? value) && value.Count > 0 ? value.Peek() : null;
   public Stack<dynamic> GetStack (string name)
   {
-    bool hasStack = _depthProperties.TryGetValue(name, out Stack<object>? stack);
+    bool hasStack = _depthProperties.TryGetValue(name, out Stack<dynamic>? stack);
 
     if (!hasStack || stack is null)
     {
-      stack = new Stack<object>();
+      stack = new Stack<dynamic>();
       _depthProperties[name] = stack;
     }
 
     return stack;
+  }
+  public TEntity? PeekStack<TEntity> (string name) where TEntity : class, IEntity, new()
+  {
+    bool hasStack = _depthProperties.TryGetValue(name, out Stack<dynamic>? stack);
+
+    return hasStack && stack is not null ? (TEntity) stack.Peek() : null;
   }
 
   public void SetProperty (string name, dynamic? value)
