@@ -17,12 +17,13 @@ public sealed class CaseInsensitiveEqualityComparer : IEqualityComparer<string>,
       ? Equals(sx, sy)
       : x is null && y is null;
   public int GetHashCode (string obj) => obj.GetHashCode(ComparisonType);
-  public int GetHashCode (object obj) =>
-    obj is null
-    ? 0
-    : obj is string x
-      ? GetHashCode(x)
-      : obj.GetHashCode();
+  public int GetHashCode (object obj) => obj switch
+  {
+    null => 0,
+    string x => x.GetHashCode(ComparisonType),
+    char[] arr => new string(arr).GetHashCode(ComparisonType),
+    _ => obj.GetHashCode()
+  };
   public int Compare (string? x, string? y) => x is not null
     ? x.CompareTo(y, ComparisonType)
     : y is null ? 0 : -1;

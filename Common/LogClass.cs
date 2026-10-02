@@ -1,7 +1,7 @@
 namespace Common;
 
 /// <summary>Defines the programs log level.</summary>
-/// <remarks>This is how the program displays meessages, not for the messages themselves.</remarks>
+/// <remarks>This is how the program displays messages, not for the messages themselves.</remarks>
 public enum LogClass
 {
   /// <summary>Only show forced messages.</summary>
