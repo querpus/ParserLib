@@ -43,4 +43,10 @@
     <Content CopyToOutputDirectory="Always" Include="Specs\*.xml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Schemas\ETokenizer.xsd">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:et="Parser/Spec">
+  <include schemaLocation="Types.xsd"/>
+  <element name="Definition">
+    <complexType>
+      <sequence>
+        <element name="ParseInfo" minOccurs="1" maxOccurs="unbounded">
+          <complexType>
+            <all maxOccurs="1">
+              <element name="Name" type="et:NonEmptyTokenType" minOccurs="1" maxOccurs="1"/>
+              <element name="CaseInsensitive" type="boolean" minOccurs="0" maxOccurs="1"/>
+              <element name="RegexDotMatchesNewline" type="boolean" minOccurs="0" maxOccurs="1"/>
+              <element name="RegexMultiline" minOccurs="0" maxOccurs="1" type="boolean"/>
+              <element name="EntityInfo">
+                <complexType>
+                  <sequence>
+                    <element name="Group" maxOccurs="unbounded">
+                      <complexType>
+                        <sequence>
+                          <element name="Tasks" maxOccurs="1">
+                            <complexType>
+                              <sequence>
+                                <choice maxOccurs="unbounded">
+                                  <element name="CreateEntity">
+                                    <complexType>
+                                      <attribute name="class" type="et:NonEmptyTokenType" use="required"/>
+                                    </complexType>
+                                  </element>
+                                  <element name="PushEntityToStack" type="et:TaskType"/>
+                                  <element name="TaskRef" type="et:TaskRefType"/>
+                                </choice>
+                              </sequence>
+                            </complexType>
+                          </element>
+                          </sequence>
+                        <attribute name="name" type="et:NonEmptyTokenType" use="required"/>
+                        
+                      </complexType>
+                    </element>
+                  </sequence>
+                </complexType>
+              </element>
+              <element name="Instructions" minOccurs="0" type="et:InnerInstructionSet" maxOccurs="1"/>
+              <element name="FileInferences" minOccurs="0" type="et:FileInferencesType" maxOccurs="1"/>
+            </all>
+          </complexType>
+          <key name="OpLabelKey">
+            <selector xpath=".//Label"/>
+            <field xpath="@name"/>
+          </key>
+          <key name="TokenCompatKey">
+            <selector xpath="TokenLookups/TokenLookup"/>
+            <field xpath="@alias"/>
+          </key>
+          <key name="SpecKey">
+            <selector xpath="Spec"/>
+            <field xpath="Name"/>
+          </key>
+          <keyref refer="et:OpLabelKey" name="GotoLabelConstraint">
+            <selector xpath=".//GotoLabel"/>
+            <field xpath="@name"/>
+          </keyref>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+</schema>
