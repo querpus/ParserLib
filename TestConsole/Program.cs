@@ -96,6 +96,20 @@ internal static class Program
         Log(MsgClass.Debug, parsedxelem.RootNode?.ToString() ?? SE, "Program");
         _ = GetInput();
         break;
+      case "NEWXML2":
+        string xmldata2 = File.ReadAllText(FinishPath(Paths.xml_operation));
+        NewTokenizer tokenizer = new() { ParsingInfo = DefaultParsingSets.XML };
+        var tokens = tokenizer.Tokenize(xmldata2);
+        Log(MsgClass.BlueInfo, $"{tokens}", "Program");
+        Log(MsgClass.Prompt, "Press enter to return to test selection.", "Program");
+        _ = GetInput();
+        break;
+      case "NEWJSON":
+        string newjson_data = File.ReadAllText(FinishPath(Paths.json_launch));
+        DocumentEntity parsed1 = EntityFactory.FromString(newjson_data, DefaultParsingSets.JSON);
+        Log(MsgClass.Debug, parsed1.RootNode?.ToString() ?? SE, "Program");
+        _ = GetInput();
+        break;
       case "WAD":
         InitialTest("wad", ResWAD.wad_rpg03);
         InitialTest("wad", ResWAD.wad_pl2);
@@ -139,6 +153,7 @@ internal static class Program
         throw new QuitException();
       case "JSON":
         InitialTest(SpecJSON.Spec, Paths.json_error);
+        InitialTest(SpecJSON.Spec, Paths.json_launch);
         break;
       case "":
         Log(MsgClass.Warning, "Nothing selected, enter a test, or type exit or quit to exit the program.", This);

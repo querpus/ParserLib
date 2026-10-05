@@ -32,7 +32,7 @@
             <summary>Backspace Character.</summary>
         </member>
         <member name="F:Common.Chars.NUL">
-            <summary>Unicode Control Codes.</summary>
+            <summary>Null Character</summary>
         </member>
         <member name="F:Common.Chars.SOH">
             <summary>Unicode Control Codes.</summary>
@@ -79,6 +79,12 @@
         <member name="F:Common.Chars.DEL">
             <summary>Unicode Control Codes.</summary>
         </member>
+        <member name="F:Common.Chars.SQ">
+            <summary>Single quote symbol.</summary>
+        </member>
+        <member name="F:Common.Chars.QT">
+            <summary>Double quote symbol.</summary>
+        </member>
         <member name="F:Common.Chars.CRLF">
             <summary>Standard line ending.</summary>
         </member>
@@ -88,11 +94,8 @@
         <member name="F:Common.Chars.CRs">
             <summary>Carriage return only.</summary>
         </member>
-        <member name="F:Common.Chars.QT">
+        <member name="F:Common.Chars.QTs">
             <summary>Double quote symbol.</summary>
-        </member>
-        <member name="F:Common.Chars.SQ">
-            <summary>Single quote symbol.</summary>
         </member>
         <member name="T:Common.Debug">
             <summary>Static class containing debugging log functions and other useful tools.</summary>
@@ -214,6 +217,59 @@
             * <c>Content</c> - The entire contents of the document as text.
             </summary>
         </member>
+        <member name="T:Common.Entities.PushParentStackTokenTask">
+            <summary>Creates an <see cref="T:Common.Entities.IEntity"/> and pushes it to the top of the parent stack.</summary>
+        </member>
+        <member name="M:Common.Entities.PushParentStackTokenTask.#ctor(System.Type)">
+            <summary>Creates an <see cref="T:Common.Entities.IEntity"/> and pushes it to the top of the parent stack.</summary>
+        </member>
+        <member name="T:Common.Entities.PopParentStackTokenTask">
+            <summary>Pops the parent stack.</summary>
+        </member>
+        <member name="T:Common.Entities.SetStaticTokenTask">
+            <summary>Represents a token task that sets a named static value in a ParsingContext.</summary>
+            <remarks>Execution requires Value to be non-null; if Value is null a ParsingException is thrown. On execution,
+            the task stores Value in the provided ParsingContext under Key.</remarks>
+            <param name="key">The name of the static entry to set in the parsing context.</param>
+        </member>
+        <member name="M:Common.Entities.SetStaticTokenTask.#ctor(System.String)">
+            <summary>Represents a token task that sets a named static value in a ParsingContext.</summary>
+            <remarks>Execution requires Value to be non-null; if Value is null a ParsingException is thrown. On execution,
+            the task stores Value in the provided ParsingContext under Key.</remarks>
+            <param name="key">The name of the static entry to set in the parsing context.</param>
+        </member>
+        <member name="T:Common.Entities.AddChildToParentTokenTask">
+            <summary>Creates an <see cref="T:Common.Entities.IEntity"/> and adds it to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack. Does not push or pop the stack.</summary>
+        </member>
+        <member name="M:Common.Entities.AddChildToParentTokenTask.#ctor(System.Type)">
+            <summary>Creates an <see cref="T:Common.Entities.IEntity"/> and adds it to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack. Does not push or pop the stack.</summary>
+        </member>
+        <member name="T:Common.Entities.AddDataToParentTokenTask">
+            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack.</summary>
+        </member>
+        <member name="M:Common.Entities.AddDataToParentTokenTask.#ctor(System.String)">
+            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack.</summary>
+        </member>
+        <member name="T:Common.Entities.AddDataToPropertyTokenTask">
+            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> on the top of the property stack.</summary>
+        </member>
+        <member name="M:Common.Entities.AddDataToPropertyTokenTask.#ctor(System.String)">
+            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> on the top of the property stack.</summary>
+        </member>
+        <member name="T:Common.Entities.SetBooleanToParentTokenTask">
+            <summary>Adds a simple boolean value to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack.</summary>
+        </member>
+        <member name="M:Common.Entities.SetBooleanToParentTokenTask.#ctor(System.String)">
+            <summary>Adds a simple boolean value to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack.</summary>
+        </member>
+        <member name="T:Common.Entities.AddDataToLastSibling">
+            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> that was last added to the <see cref="T:Common.Entities.IEntity"/> at the top of the parent stack's children.</summary>
+            <param name="key">The key of the data to add.</param>
+        </member>
+        <member name="M:Common.Entities.AddDataToLastSibling.#ctor(System.String)">
+            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> that was last added to the <see cref="T:Common.Entities.IEntity"/> at the top of the parent stack's children.</summary>
+            <param name="key">The key of the data to add.</param>
+        </member>
         <member name="T:Common.Entities.DocumentEntity">
             <summary>An entity representing a document.<br/><br/>
             <b>DataValues:</b><br/>
@@ -226,10 +282,6 @@
         </member>
         <member name="T:Common.Entities.Entity">
             <summary>Base class for entities.</summary>
-        </member>
-        <member name="P:Common.Entities.Entity.Parent">
-            <summary>Gets or sets the parent entity.</summary>
-            <remarks>This is <see langword="null"/> if the current entity is a root entity.</remarks>
         </member>
         <member name="P:Common.Entities.Entity.Origin">
             <summary>Gets or sets the data this entity was formed from.</summary>
@@ -254,10 +306,6 @@
             <summary>The serialized representation of this entity.</summary>
             <returns>Returns the serialized entity by default.</returns>
         </member>
-        <member name="M:Common.Entities.Entity.SetParent(Common.Entities.IEntity)">
-            <summary>Sets this object's Parent property.</summary>
-            <param name="parent"></param>
-        </member>
         <member name="F:Common.Entities.DepthOperation.Ascend">
             <summary>Indicates that we are popping the parent stack.</summary>
         </member>
@@ -278,6 +326,9 @@
         </member>
         <member name="P:Common.Entities.EntityInfo.GroupRequired">
             <summary>The group that must be present in the match for this entity to be produced if specified.</summary>
+        </member>
+        <member name="P:Common.Entities.EntityInfo.GroupTerminator">
+            <summary>The group that indicates the end of this entity.</summary>
         </member>
         <member name="P:Common.Entities.EntityInfo.ExactTextRequired">
             <summary>The exact text that the match must be for this entity to be produced if specified.</summary>
@@ -357,18 +408,11 @@
             <summary>Gets the origin of the parsed entity.</summary>
             <remarks>This is null for entities that are not derived from a single source.</remarks>
         </member>
-        <member name="P:Common.Entities.IEntity.Parent">
-            <summary>The parent of this entity.</summary>
-        </member>
         <member name="M:Common.Entities.IEntity.Equals(Common.Entities.IEntity,Common.Entities.IEntity)">
             <summary>Static equality method.</summary>
             <param name="obj_a">Entity 'A'.</param>
             <param name="obj_b">Entity 'B'.</param>
             <returns><see langword="true"/> if 'A' is equal to 'B', <see langword="false"/> otherwise.</returns>
-        </member>
-        <member name="M:Common.Entities.IEntity.SetParent(Common.Entities.IEntity)">
-            <summary>Sets the parent property after the type has been constructed.</summary>
-            <param name="parent">The parent or encompassing object.</param>
         </member>
         <member name="M:Common.Entities.IEntity.AddChild(Common.Entities.IEntity)">
             <summary>Adds a child to the children list.</summary>
@@ -397,7 +441,7 @@
             Uses Properties Dictionary for children.
             </summary>
         </member>
-        <member name="F:Common.Entities.ParsingContext._depth">
+        <member name="P:Common.Entities.ParsingContext.Depth">
             <summary>The number of objects this is within.</summary>
             <remarks>
             A depth of zero could still mean you are within a document object (if one is used).
@@ -407,29 +451,6 @@
         </member>
         <member name="P:Common.Entities.ParsingContext.Parent">
             <summary>Gets or sets the "Parent" depth property, which is used on most entities in some way.</summary>
-        </member>
-        <member name="M:Common.Entities.ParsingContext.GetProperty(System.String)">
-            <summary>Gets a depth specific property by key name.</summary>
-            <param name="name">The name of the property.</param>
-            <returns>The object stored at this depth and key.</returns>
-            <remarks>Predefined keys:<br/>
-            * <c>Parent</c> - The current item's parent object, or <see langword="null"/> if top-level.<br/>
-            * <c>Property</c> - The current item's property object, which stores a key/value pair.<br/>
-            </remarks>
-        </member>
-        <member name="M:Common.Entities.ParsingContext.Descend(Common.Entities.IEntity)">
-            <summary>Increase the current depth by the specified amount, store the provided values in DepthProperties at the new depth,
-            and if a child is specified set its parent (to Document when no current Parent, otherwise to Parent) and update Parent
-            to the child.</summary>
-            <remarks>Mutates Depth, updates DepthProperties entries at the incremented depth, and updates Parent and
-            the child's parent reference. Document is used with a null-forgiving assertion when assigning the child's parent
-            if Parent is null.</remarks>
-            <param name="amt">Number of depth levels to increase.</param>
-            <param name="child">The new object to set as the current parent.</param>
-        </member>
-        <member name="M:Common.Entities.ParsingContext.Ascend">
-            <summary>Changes the depth to move outward.</summary>
-            <param name="amt">The number change to depth.</param>
         </member>
         <member name="P:Common.Entities.ParsingInfo.GeneratesSingleObject">
             <summary>Whether of not the result is under the RootNode property of the <see cref="T:Common.Entities.DocumentEntity"/>,
@@ -893,7 +914,7 @@
         </member>
         <member name="T:Common.LogClass">
             <summary>Defines the programs log level.</summary>
-            <remarks>This is how the program displays meessages, not for the messages themselves.</remarks>
+            <remarks>This is how the program displays messages, not for the messages themselves.</remarks>
         </member>
         <member name="F:Common.LogClass.None">
             <summary>Only show forced messages.</summary>

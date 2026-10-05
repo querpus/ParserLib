@@ -66,7 +66,7 @@ public static class Definition
   private static RxS Letter (string c = "[a-zA-Z]") => Nm("t_letter", Gp(c));
   private static RxS Value ([SS("regex")] string c = "[-0-9.]+") => Nm("value", Gp(c));
   private static RxS Cmd (string name, [SS("regex")] string c) => Nm($"m_{name}", $"^{c}$");
-  private static RxS Qt ([SS("regex")] string s) => QT + s + QT;
+  private static RxS Qt ([SS("regex")] string s) => QTs + s + QTs;
 
   /// <summary>
   /// <para>Command Reader Regex</para>

@@ -89,10 +89,13 @@ public enum DepthOperation
 public class EntityInfo
 {
   #region Functional Properties
+  public Collection<ITokenTask> TokenTasks { get; init; } = [];
   /// <summary>This is the class that is created. Must be derived from <see cref="IEntity"/>.</summary>
   public Type? Class { get; set; }
   /// <summary>The group that must be present in the match for this entity to be produced if specified.</summary>
   public string? GroupRequired { get; set; }
+  /// <summary>The group that indicates the end of this entity.</summary>
+  public string? GroupTerminator { get; set; }
   /// <summary>The exact text that the match must be for this entity to be produced if specified.</summary>
   public string? ExactTextRequired { get; set; }
   /// <summary>If the exact text match requirement is not case sensitive.</summary>
@@ -106,6 +109,8 @@ public class EntityInfo
   /// <c>AscendAndDescend (0x7fff)</c>:
   /// </remarks>
   public DepthOperation DepthChange { get; init; }
+  public Dictionary<string, object> AscendIf { get; init; } = [];
+  public Dictionary<string, object> DescendIf { get; init; } = [];
   /// <summary>Adds this entity to the top entity in the 'Property' stack.</summary>
   /// <remarks>When <see langword="true"/>, this entity is added to the currently active property at this depth.
   /// Defaults to <see langword="false"/>.
@@ -116,6 +121,7 @@ public class EntityInfo
   /// Defaults to <see langword="false"/>.
   /// </remarks>
   public bool SetPropKey { get; init; }
+  public bool IgnoreExtra { get; init; }
   /// <summary>
   /// Adds this entity to the 'NextParent' static property, meaning it will become the next parent when we descend,<br/>
   /// This does not have to be the depth changing token.

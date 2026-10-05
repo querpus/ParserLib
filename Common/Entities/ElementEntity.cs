@@ -36,7 +36,7 @@ public class ElementEntity : Entity
 
       return (Collection<AttributeEntity>) DataValues["Attributes"]!;
     }
-    set => AddAttributes(value);
+    set => Add(value);
   }
 
   public override string Serialize ()
@@ -53,15 +53,18 @@ public class ElementEntity : Entity
     ? elem + " />"
     : elem + ">" + children + $"</{Name}>";
   }
-  public void AddAttribute (IEntity attribute)
+  public void Add (IEntity item)
   {
-    if (attribute is AttributeEntity ae)
+    if (item is AttributeEntity attribute)
     {
-      ae.SetParent(this);
-      Attributes.Add(ae);
+      Attributes.Add(attribute);
+    }
+    else
+    {
+      Children.Add(item);
     }
   }
-  public void AddAttributes (IEnumerable<IEntity> attributes) => attributes.Foreach(AddAttribute);
+  public void Add (IEnumerable<IEntity> items) => items.Foreach(Add);
   public override void Assign (Match match)
   {
     IsHeader = match.HasValidGroup("header");
@@ -81,7 +84,7 @@ public class ElementEntity : Entity
     var together = namespaces.Zip(names, values.Zip(quotes));
     foreach (var (ns, name, (val, qt)) in together)
     {
-      AddAttribute(new AttributeEntity {Namespace=ns, Quote=qt, Value=val, Key=name});
+      Add(new AttributeEntity {Namespace=ns, Quote=qt, Value=val, Key=name});
     }
   }
 }

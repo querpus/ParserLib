@@ -33,4 +33,16 @@ public class ACSTests
     TokenAssemblyResult tc = tokenAssembler.Execute(tokens);
     _ = Assert.Single(tc.Hierarchy);
   }
+
+  [Theory]
+  [InlineData("var + (564 * 45) / func_call(expr + other_expr) == 74")]
+  public void ACS_ExpressionParse (string to_parse)
+  {
+    TokenFactory tokenFactory = new(Specification.ZDoom.Definition.ACS);
+    TokenAssembler tokenAssembler = new(Specification.ZDoom.Definition.ACS);
+    TokenCollection tokens = tokenFactory.Produce(to_parse);
+    Assert.NotEmpty(tokens);
+    TokenAssemblyResult tc = tokenAssembler.Execute(tokens);
+    _ = Assert.Single(tc.Hierarchy);
+  }
 }

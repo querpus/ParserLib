@@ -1,8 +1,6 @@
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 #pragma warning disable IDE1006 // Naming Rule Violation
 
-using Specification.ZDoom.Lang.Decorate;
-
 using static Parser.DefinitionStaticFunctions;
 
 namespace Specification.ZDoom;
@@ -196,7 +194,7 @@ public static class Definition
     RxOpt = ROML | ROIPW | ROIC | ROEC,
     IsTextFile = true,
     SC = SCOIC,
-    TokenType = typeof(DecorateTokenType),
+    TokenType = typeof(string),
     Name = "zdoom.decorate",
     Operations = [
       new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
@@ -217,12 +215,7 @@ public static class Definition
       /* Symbols */
       .. s_op_pba,
       .. TokenRule.MakeSingleCharRules("=+-*/", RT.TokenExact, new string[] {
-        "Bo", "Bc",
-        "Po", "Pc",
-        "Ao", "Ac",
-        "Eq", "Pl",
-        "Mi", "Mu",
-        "Sl"}),
+        "Eq", "Pl", "Mi", "Mu", "Sl"}),
       new(RT.TokenMatch, "StateName", @"\b[\w\.-]+(?=\:)"),
       new(RT.TokenMatch, "FlagName", @"(?<=[+-])[\w.]+\b"),
       new(RT.TokenMatch, "Sprite_FrameDef", @"^(?<=\s*)""?[\w\/\\\?]{4}""?"),
@@ -291,7 +284,7 @@ public static class Definition
 
       // Script Functions
       Tm("ScriptFunc", @"\b(ACS_(Named)?Execute\w*)\b"),
-      Tm("ScriptType", @"\b(enter|re(turn|open|spawn)|death|kill|open|unloading|disconnect|lightning)\b"),
+      Tm("ScriptType", @"\b(enter|re(open|spawn)|death|kill|open|unloading|disconnect|lightning)\b"),
 
       // Operators
       Tm("IncDec", @"(\+\+|--)"),
@@ -342,17 +335,17 @@ public static class Definition
       new(RT.None, "Preprocessor",                "x:Pre ti:PreProcName{i(mport|nclude)|library} v:String"),
 
       // Statements
-      new(RT.Recursive, "VarDecl",                "t:Type n:VarName x:Sc"),
-      new(RT.Recursive, "VarDeclAssn",            "t:Type n:VarName x:Eq v:Value x:Sc"),
-      new(RT.Recursive, "VarAssn",                "l:(ArrayValue|ExprName) c:(Eq|Assign) r:Value x:Sc"),
-      new(RT.Recursive, "ArrayDecl",              "t:Type n:ArrVarName vm:ArrayDim x:Sc"),
-      new(RT.Recursive, "BasicCmd",               "n:SimpleJump x:Sc"),
-      new(RT.Recursive, "ReturnStmt",             "n:Return x:Sc"),
-      new(RT.Recursive, "ReturnStmt",             "n:Return v:value x:Sc"),
-      new(RT.Recursive, "WaitStmt",               "t:Wait x:Po p:Value x:Pc x:Sc"),
-      new(RT.Recursive, "FunctionCallStmt",       "d:FunctionCall x:Sc"),
-      new(RT.Recursive, "CaseLabel",              "x:Case n:Value x:Co"),
-      new(RT.Recursive, "CaseLabel",              "n:Default x:Co"),
+      new(RT.None, "VarDecl",                "t:Type n:VarName x:Sc"),
+      new(RT.None, "VarDeclAssn",            "t:Type n:VarName x:Eq v:Value x:Sc"),
+      new(RT.None, "VarAssn",                "l:(ArrayValue|ExprName) c:(Eq|Assign) r:Value x:Sc"),
+      new(RT.None, "ArrayDecl",              "t:Type n:ArrVarName vm:ArrayDim x:Sc"),
+      new(RT.None, "BasicCmd",               "n:SimpleJump x:Sc"),
+      new(RT.None, "ReturnStmt",             "n:Return x:Sc"),
+      new(RT.None, "ReturnStmt",             "n:Return v:Value x:Sc"),
+      new(RT.None, "WaitStmt",               "t:Wait x:Po p:Value x:Pc x:Sc"),
+      new(RT.None, "FunctionCallStmt",       "d:FunctionCall x:Sc"),
+      new(RT.None, "CaseLabel",              "x:Case n:Value x:Co"),
+      new(RT.None, "CaseLabel",              "n:Default x:Co"),
 
       new(RT.Recursive, "IfBlock",                "x:If x:Po v:Value x:Pc x:Bo sa:(Stmt|Block) x:Bc"),
       new(RT.Recursive, "IfBlock",                "x:If x:Po v:Value x:Pc s:(Stmt|Block)"),
@@ -371,10 +364,9 @@ public static class Definition
       new(RT.None, "FunctionFull",                "d:FunctionHeader x:Bo sa:(FuncStmt|Block) x:Bc"),
 
       new(RT.None, "ScriptHeader",                "x:Script n:Value ti:ScriptType{lightning} x:Po q:ParamDef x:Pc"),
-      new(RT.None, "ScriptHeader",                "x:Script n:Value t:ScriptType"),
+      new(RT.None, "ScriptHeader",                "x:Script n:Value t:(ScriptType|Return)"),
       new(RT.None, "ScriptHeader",                "x:Script n:Value x:Po qa:ParamDef x:Pc"),
       new(RT.None, "ScriptHeader",                "x:Script n:Value x:Po q:Void x:Pc"),
-      new(RT.None, "ScriptHeader",                "d:Script n:Value t:Return"),
       new(RT.None, "ScriptFull",                  "d:ScriptHeader x:Bo sa:(Stmt|Block) x:Bc"),
     ],
   };

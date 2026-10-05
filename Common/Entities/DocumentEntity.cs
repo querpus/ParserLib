@@ -50,14 +50,12 @@ public class DocumentEntity : ContentEntity
     if (root is null)
       return;
     RootNode = root;
-    root.SetParent(this);
   }
   public void SetHeader (IEntity? header)
   {
     if (header is null)
       return;
     Header = header;
-    header.SetParent(this);
   }
   public override void AddChild (IEntity child)
   {

@@ -5,6 +5,7 @@ namespace Common;
 /// <summary>Static class of common character combinations.</summary>
 public static class Chars
 {
+  #region Characters
   /// <summary>Beep control code.</summary>
   public const char BEEP = '\a';
   /// <summary>Vertical Tab.</summary>
@@ -19,13 +20,12 @@ public static class Chars
   public const char FF = '\f';
   /// <summary>Escape</summary>
   public const char ESC = '\e';
-
   /// <summary>Backspace Character.</summary>
   public const char BSPC = '\b';
-
+  /// <summary>Null Character</summary>
+  public const char NUL = '\0';
   /// <summary>Unicode Control Codes.</summary>
   public const char
-    NUL = '\u0000',
     SOH = '\u0001',
     STX = '\u0002',
     ETX = '\u0003',
@@ -41,7 +41,12 @@ public static class Chars
     RS  = '\u001E',
     US  = '\u001F',
     DEL = '\u007F';
-
+  /// <summary>Single quote symbol.</summary>
+  public const char SQ = '\'';
+  /// <summary>Double quote symbol.</summary>
+  public const char QT = '"';
+  #endregion
+  #region String Constants
   /// <summary>Standard line ending.</summary>
   public const string CRLF = "\r\n";
   /// <summary>Line feed only.</summary>
@@ -49,9 +54,7 @@ public static class Chars
   /// <summary>Carriage return only.</summary>
   public const string CRs = "\r";
   /// <summary>Double quote symbol.</summary>
-  public const string QT = "\"";
-  /// <summary>Single quote symbol.</summary>
-  public const char SQ = '\'';
-
-  public static readonly Collection<string> NewLines = [CRLF, LFs, CRs, $"{VT}"];
+  public const string QTs = "\"";
+  #endregion
+  public static readonly ImmutableList<string> NewLines = [CRLF, LFs, CRs, $"{VT}"];
 }

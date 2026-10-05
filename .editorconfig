@@ -336,3 +336,4 @@ dotnet_diagnostic.CA1005.severity = suggestion # CA1005: Avoid excessive paramet
 dotnet_diagnostic.CA1014.severity = suggestion # CA1014: Mark assemblies with CLSCompliant
 dotnet_diagnostic.CA1045.severity = suggestion # CA1045: Do not pass types by reference
 dotnet_diagnostic.CA2208.severity = none # CA2208: Do not pass types by reference
+dotnet_diagnostic.IDE0008.severity = silent # CA2208: Do not pass types by reference

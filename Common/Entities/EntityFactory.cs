@@ -39,10 +39,13 @@ public static class EntityFactory
       entity?.DoAssign(match);
     }
 
+    Stack<dynamic> parentStack = context.GetStack("Parent");
+    Stack<dynamic> propertyStack = context.GetStack("Property");
+
     // Push 'Property' Stack
     if (options.SetPropKey && entity is not null)
     {
-      context.GetStack("Property")?.Push(entity);
+      propertyStack.Push(entity);
     }
     // Set 'NextParent' Entity
     if (options.SetAsNextLevelParent && entity is not null)
@@ -53,9 +56,9 @@ public static class EntityFactory
     if (options.AddToProperty && entity is not null)
     {
       // Check if we can even add the property
-      if (object.ReferenceEquals (context.GetStack("Property").Peek().Parent, context.Parent))
+      if (object.ReferenceEquals (propertyStack.Peek().Parent, context.Parent))
       {
-        IEntity property = context.GetStack("Property").Pop();
+        IEntity prop = (IEntity) propertyStack.Pop();
 
         foreach (KeyValuePair<string, string> kvp in options.StorePieceTypes)
         {
@@ -66,11 +69,11 @@ public static class EntityFactory
 
           if (caps.Length == 1)
           {
-            property.AddToDataCollection(prop_name, caps[0]);
+            prop.AddToDataCollection(prop_name, caps[0]);
           }
           else
           {
-            property.AddToDataCollection(prop_name, caps);
+            prop.AddToDataCollection(prop_name, caps);
           }
         }
       }
@@ -82,37 +85,29 @@ public static class EntityFactory
 
     if (entity is not null)
     {
-      if (context.Parent is not null)
-        entity.SetParent(context.Parent);
       context.Parent?.AddChild(entity);
-    }
-
-    void descend()
-    {
-      IEntity? child = context.GetStatic("NextParent");
-
-      child ??= options.Class?.InvokeMember(SE, BFCI, null, null, null, CIIC) as IEntity;
-
-      if (child is null)
-        throw new InvalidOperationException("Child was null and could not become parent.");
-
-      context.Descend(child);
     }
 
     switch (options.DepthChange)
     {
       case DepthOperation.Descend:
-        descend();
+        context.Depth++;
+        IEntity? child = (context.GetStatic("NextParent") ?? entity) ?? throw new InvalidOperationException("Child was null and could not become parent.");
+        parentStack.Push(child);
         break;
       case DepthOperation.Ascend:
-        context.Ascend();
+        context.Depth--;
+        parentStack.Pop();
         break;
       case DepthOperation.AscendAndDescend:
         if (options.OnlyAscendIfParentClass is null || context.GetStack("Parent").Peek().TypeName == options.OnlyAscendIfParentClass.Name)
         {
-          context.Ascend();
+          context.Depth--;
+          parentStack.Pop();
         }
-        descend();
+        IEntity? child2 = (context.GetStatic("NextParent") ?? entity) ?? throw new InvalidOperationException("Child was null and could not become parent.");
+        parentStack.Push(child2);
+        context.Depth++;
         break;
     }
     return entity;
@@ -132,13 +127,12 @@ public static class EntityFactory
     {
       Name = root.Name.LocalName,
       Origin = root.Value,
-      Parent = context.Parent ?? document,
       Namespace = root.Name.NamespaceName.IsEmpty ? null : root.Name.NamespaceName,
     };
     context.Parent = parent;
     document.SetRoot(parent);
 
-    parent.AddAttributes(ParseAttributes(root));
+    parent.Add(ParseAttributes(root));
     parent.AddChildren([.. root.Elements().Select(xe => FromXElement(xe, context))]);
 
     return document;

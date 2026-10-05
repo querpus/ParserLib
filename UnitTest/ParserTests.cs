@@ -31,6 +31,7 @@ public class ParserTests
     DocumentEntity xMLDocumentEntity = Assert.IsType<DocumentEntity>(parsedEntity);
     Assert.NotNull(xMLDocumentEntity.RootNode);
     ElementEntity e = Assert.IsType<ElementEntity>(xMLDocumentEntity.RootNode, exactMatch: false);
+    Assert.NotEmpty(e.Children);
   }
 
   [Theory]

@@ -7,9 +7,6 @@ public abstract class Entity : IEntity
 {
   private bool _isAssigned;
   public virtual bool IsValid => _isAssigned;
-  /// <summary>Gets or sets the parent entity.</summary>
-  /// <remarks>This is <see langword="null"/> if the current entity is a root entity.</remarks>
-  public IEntity? Parent { get; set; }
   /// <summary>Gets or sets the data this entity was formed from.</summary>
   public string? Origin { get; set; }
   /// <summary>Gets the child entities.</summary>
@@ -32,14 +29,7 @@ public abstract class Entity : IEntity
   /// <summary>The serialized representation of this entity.</summary>
   /// <returns>Returns the serialized entity by default.</returns>
   public override string? ToString () => Serialize();
-  /// <summary>Sets this object's Parent property.</summary>
-  /// <param name="parent"></param>
-  public void SetParent (IEntity parent) => Parent = parent;
-  public virtual void AddChild (IEntity child)
-  {
-    child.SetParent(this);
-    Children.Add(child);
-  }
+  public virtual void AddChild (IEntity child) => Children.Add(child);
   public void AddChildren (IEnumerable<IEntity> children) => children.Foreach(AddChild);
   public void AddToDataCollection (string key, object data)
   {
