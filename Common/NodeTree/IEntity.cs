@@ -25,9 +25,9 @@ public static class NodeFactory
 public class QString : ITextSerializer, IEquatable<string>, IComparable<string>
 {
   public string Value { get; set; } = SE;
-  public string Quote { get; set; } = Chars.QT;
+  public string Quote { get; set; } = Chars.QTs;
   public QString () { }
-  public QString (string value, string quote = Chars.QT)
+  public QString (string value, string quote = Chars.QTs)
   {
     Value = value;
     Quote = quote;
