@@ -1,3 +1,4 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.0.11012.119
@@ -66,7 +67,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Specifications", "Specifica
 	ProjectSection(SolutionItems) = preProject
 		Parser\ByteOperations.md = Parser\ByteOperations.md
 		Parser\Naming Groups.md = Parser\Naming Groups.md
-		EndProjectSection
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FormObjectViewer", "FormObjectViewer\FormObjectViewer.csproj", "{A956E431-070B-45D6-8776-1A1D1ED793AE}"
 EndProject
@@ -90,6 +91,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Drafts", "Drafts", "{2124EC
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFormsControls", "WinFormsControls\WinFormsControls.csproj", "{877C5452-FB25-46EE-ADA0-1504BFBE13F3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "iCloud Drafts", "iCloud Drafts", "{0497A994-6158-4447-A7AB-F0F3DAF7BE1F}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\draftSyntax.json = ..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\draftSyntax.json
+		..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\grammar-javascript.json = ..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\grammar-javascript.json
+		..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\json.json = ..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\json.json
+		..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Themes\style-dark.json = ..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Themes\style-dark.json
+		..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\XML Syntax.json = ..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\XML Syntax.json
+		..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\xml.json = ..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\xml.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -32,11 +32,11 @@
             <xs:field xpath="@name"/>
           </xs:key>
           <xs:key name="TokenCompatKey">
-            <xs:selector xpath="tns:TokenLookups/tns:TokenLookup"/>
+            <xs:selector xpath=".//tns:TokenLookups/tns:TokenLookup"/>
             <xs:field xpath="@alias"/>
           </xs:key>
           <xs:key name="SpecKey">
-            <xs:selector xpath="tns:Spec"/>
+            <xs:selector xpath=".//tns:Spec"/>
             <xs:field xpath="tns:Name"/>
           </xs:key>
           <xs:keyref refer="OpLabelKey" name="GotoLabelConstraint">
