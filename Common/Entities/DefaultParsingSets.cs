@@ -246,29 +246,32 @@ public struct AddDataToLastSibling (string key) : ITokenTask
 }
 public static class DefaultParsingSets
 {
-  [SS("regex")] private const string elem_close = @"(?'element_close' < ) \s* (?'element_close' /) (?>\s*) (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?!\k<a_qt>).*) (?'a_end'\k<a_qt>) )* (?>\s*) (?'tag_close' > )";
-  [SS("regex")] private const string elem_single = @"(?'element_single' < ) \s* (?'element_header'\?)? (?>\s*) (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?!\k<a_qt>).*) (?'a_end'\k<a_qt>) )* (?>\s*) ((?'element_single' /)|(?# Header Close )\?) (?>\s*) (?'tag_close' > )";
-  [SS("regex")] private const string elem_open = @"(?'element_open' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?!\k<a_qt>).*) (?'a_end'\k<a_qt>) )* (?>\s*) (?'tag_close' > )";
-  [SS("regex")] private const string content = $@"(?'content'([^<]|{comment})*)";
-  [SS("regex")] private const string comment = @"(?'comment'<!-- ([^-]| -[^-])* -->)";
+  [SS("regex")] private const string elem_close = @"(?'element_close' < \s* /) \s* (?'tag_name' [:\w]+ ) \s* (?'tag_close' > )";
+  [SS("regex")] private const string elem_single = @"(?'element_single' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?!\k<a_qt>).*) (?'a_end'\k<a_qt>) )* \s*  (?'tag_close' / \s* > )";
+  [SS("regex")] private const string elem_header = @"(?'element_header' <\?) \s* (?'tag_name' xml ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?!\k<a_qt>).*) (?'a_end'\k<a_qt>) )* \s* (?'header_close' \?> )";
+  [SS("regex")] private const string elem_open = @"(?'element_open' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?!\k<a_qt>).*) (?'a_end'\k<a_qt>) )* \s* (?'tag_close' > )";
+  [SS("regex")] private const string content = $"(?'content'([^<]|{comment})*)";
+  [SS("regex")] private const string comment = "(?'comment'<!-- ([^-]| -[^-])* -->)";
+  [SS("regex")] private const string non_element_content = $@"({content}|{comment}|\s+)*";
+
+  private static string recurse_xml (int depth)
+  {
+    string recurse = $@"({elem_open} {non_element_content} {elem_close})";
+
+    for (int i = 0; i < depth; i++)
+    {
+      recurse = $"({elem_open} ({recurse}|{non_element_content}|{elem_single})* {elem_close})";
+    }
+    Log(MsgClass.Warning, recurse, "DefaultParsingSets");
+    return recurse;
+  }
 
   public static ParsingInfo XML { get; } = new()
   {
     GeneratesSingleObject = true,
     IgnoreCase = false,
     RegexOptions = ROIPW | ROML | ROEC,
-    RegexString =
-    $$"""
-    (?'data_element' {{elem_open}} \s* {{content}} \s* {{elem_close}} ) |
-    {{elem_open}} |
-    {{elem_single}} |
-    {{elem_close}} |
-    (?# Leading or Trailing Whitespace)
-    (?'ws'(?<=\>)\s+) |
-    (?'ws'(?<=[^\s>])\s+) |
-    {{content}} |
-    {{comment}}
-    """,
+    RegexString = recurse_xml(255),
     TokenRules = [
     new() {
       TokenName = "element_open",
@@ -282,6 +285,13 @@ public static class DefaultParsingSets
       ],
     }, new() {
       TokenName = "a_name",
+      Execute = (context, token) => {
+        context.Parent?.Add(new AttributeEntity() {
+          Origin = token.Value,
+          Key = token.Value,
+          
+        });
+      },
       TokenTasks = [
         new SetStaticTokenTask("AttributeName"),
         new AddDataToPropertyTokenTask("Name"),

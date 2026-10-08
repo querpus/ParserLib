@@ -33,10 +33,10 @@ public interface IEntity : ITextSerializer, IEquatable<IEntity>
 
 public readonly struct EToken : IIndexSortable
 {
-  public string? Value { get; init; }
-  public string? Group { get; init; }
-  public int CaptureIndex { get; init; }
-  public Range Position { get; init; }
+  public required string Value { get; init; }
+  public required string? Group { get; init; }
+  public required int CaptureIndex { get; init; }
+  public required Range Position { get; init; }
   public int Index => Position.Start.Value;
   public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
   public int CompareTo (object? obj) => CompareTo(obj is IIndexSortable iSort ? iSort : null);
