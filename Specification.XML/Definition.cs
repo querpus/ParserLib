@@ -67,17 +67,14 @@ public static class Definition
     GroupTokenRules = [
       new ("DocumentNamespace", "t:NamespaceAttr x:Co n:AttrKey x:Eq v:String"),
       new ("DocumentNamespace", "t:NamespaceAttr x:Eq v:String"),
-      new ("AttributeWithNamespace", "t:Namespace x:Co n:AttrKey x:Eq v:String"),
-      new ("Attribute", "n:AttrKey x:Eq v:String"),
+      new ("AttributeWithNamespace", "t:Namespace x:Co n:AttrKey"),
+      new ("Attribute", "n:(AttrKey|AttributeWithNamespace) x:Eq v:String"),
       new ("Header", "x:Ao x:Qm n:ElementName{xml} pa:Attribute x:Qm x:Ac"),
-      new ("ElementEndWithNamespace", "x:Ao x:Sl t:Namespace x:Co n:ElementName x:Ac"),
-      new ("ElementEnd", "x:Ao x:Sl n:ElementName x:Ac"),
-      new ("ElementSingleWithNamespace", "x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Sl x:Ac"),
-      new ("ElementSingle", "x:Ao n:ElementName pa:Attribute x:Sl x:Ac"),
-      new ("ElementStartWithNamespace", "x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Ac"),
-      new ("ElementStart", "x:Ao n:ElementName pa:Attribute x:Ac"),
+      new ("ElementWithNamespace", "t:Namespace x:Co n:ElementName"),
+      new ("ElementEnd", "x:Ao x:Sl n:(ElementName|ElementWithNamespace) x:Ac"),
+      new ("ElementSingle", "x:Ao n:(ElementName|ElementWithNamespace) pa:Attribute x:Sl x:Ac"),
+      new ("ElementStart", "x:Ao n:(ElementName|ElementWithNamespace) pa:Attribute x:Ac"),
       new (Recursive, "ElementPair", "d:ElementStart va:ValidContent x:ElementEnd"),
-      new (Recursive, "ElementPair", "d:ElementStartWithNamespace va:ValidContent x:ElementEndWithNamespace"),
 
     ],
     TokenCompatLookup = {
