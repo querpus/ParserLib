@@ -14,12 +14,12 @@ public static class StandardRuleSets
       Debug.Log(MsgClass.Warning, "Current was not null before assignment.", "StandardRuleSets");
     }
   }
-  private static void ErrorIfNull ([NotNull] INode? current)
+  private static void ErrorIfNull ([NotNull] object? current)
   {
     if (current is null)
     {
       Debug.Log(MsgClass.Error, "Node was null. Cannot Add Content.", "StandardRuleSets");
-      throw new InvalidOperationException("");
+      throw new InvalidOperationException("Node was null. Cannot Add Content.");
     }
   }
 
@@ -34,7 +34,7 @@ public static class StandardRuleSets
   };
   internal static NodeRule _element_close = new() {
     TokenName = "element_close",
-    Execute = (context, token) =>
+    Execute = (context, _) =>
     {
       WarnIfCurrentHasData(context);
       context.Current = context.NodeStack.Pop();
@@ -50,59 +50,44 @@ public static class StandardRuleSets
       Debug.Log(MsgClass.GreenInfo, "Element Tag Single Encountered. Assigning Current.", "StandardRuleSets");
     }
   };
+  internal static NodeRule _tag_name = new() {
+    TokenName = "tag_name",
+    Execute = (context, token) =>
+    {
+      ErrorIfNull(context.Current);
+      context.Current.AddData("Name", token.Value);
+      Debug.Log(MsgClass.GreenInfo, "Adding Name to Current.", "StandardRuleSets");
+    }
+  };
+  internal static NodeRule _a_name = new() {
+    TokenName = "a_name",
+    Execute = (context, token) =>
+    {
+      ErrorIfNull(context.Current);
+      context.PropKey = token.Value;
+    }
+  };
+  internal static NodeRule _a_value = new() {
+    TokenName = "a_value",
+    Execute = (context, token) =>
+    {
+      ErrorIfNull(context.Current);
+      ErrorIfNull(context.PropKey);
+      if (context.Current is XMLElementNode xen)
+        xen.Attributes.Add(context.PropKey, new QString(token.Value));
+    }
+  };
 
   public static NodeRuleSet XMLRuleSet { get; } = new()
   {
     InitialSetup = () => new(),
     Rules = {
-      new NodeRule {
-        TokenName = "element_open",
-        Execute = (context, token) =>
-        {
-          WarnIfCurrentHasData(context);
-          context.Current = (XMLElementNode) new() {
-            Origin = token.Value,
-          };
-          Debug.Log(MsgClass.GreenInfo, "Element Open Tag Open Encountered. Assigning Current.", "StandardRuleSets");
-        }
-      },
+      _element_open,
       _element_close,
-      new NodeRule {
-        TokenName = "tag_name",
-        Execute = (context, token) =>
-        {
-          ErrorIfNull(context.Current);
-          context.Current.AddData("Name", token.Value);
-          Debug.Log(MsgClass.GreenInfo, "Adding Name to Current.", "StandardRuleSets");
-        }
-      },
-      new NodeRule {
-        TokenName = "element_single",
-        Execute = (context, token) =>
-        {
-          INode last = context.NodeStack.Peek();
-          last.AddData("Name", token.Value);
-          Debug.Log(MsgClass.GreenInfo, "Beginning Close Validation", "StandardRuleSets");
-        }
-      },
-      new NodeRule {
-        TokenName = "tag_name",
-        Execute = (context, token) =>
-        {
-          INode last = context.NodeStack.Peek();
-          last.AddData("Name", token.Value);
-          Debug.Log(MsgClass.GreenInfo, "Beginning Close Validation", "StandardRuleSets");
-        }
-      },
-      new NodeRule {
-        TokenName = "tag_name",
-        Execute = (context, token) =>
-        {
-          INode last = context.NodeStack.Peek();
-          last.AddData("Name", token.Value);
-          Debug.Log(MsgClass.GreenInfo, "Beginning Close Validation", "StandardRuleSets");
-        }
-      },
+      _tag_name,
+      _element_single,
+      _a_name,
+      _a_value
     },
   };
 }
@@ -127,7 +112,7 @@ public class NodeRule
 {
   public string? TokenName { get; init; }
   public string? ExactText { get; init; }
-  public Action<NodeContext, Token> Execute { get; init; }
+  public Action<NodeContext, Token> Execute { get; init; } = (_, token) => Debug.Log(MsgClass.GreenInfo, $"No Execution Defined for '{token.Group}'", "NodeRule");
 }
 
 public class TokenProcessor (IEnumerable<Token> tokens, NodeRuleSet ruleset)

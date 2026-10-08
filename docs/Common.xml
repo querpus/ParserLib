@@ -205,7 +205,7 @@
             <summary>Represents an entity that contains an ordered collection of child entities and serializes them as a comma-separated
             list.</summary>
             <remarks>Valid only when it has no properties or data values. Serialization joins the Children collection with
-            commas. Assignment from a regex match is ignored (no-op), <see cref="M:Common.Entities.IEntity.AddChild(Common.Entities.IEntity)"/> should be used to assign children.</remarks>
+            commas. Assignment from a regex match is ignored (no-op), <see cref="M:Common.Entities.IEntity.Add(Common.Entities.IEntity)"/> should be used to assign children.</remarks>
         </member>
         <member name="T:Common.Entities.AttributeEntity">
             <summary>A key/value pair, with an optional namespace. It also stores what quote character was used.</summary>
@@ -414,7 +414,7 @@
             <param name="obj_b">Entity 'B'.</param>
             <returns><see langword="true"/> if 'A' is equal to 'B', <see langword="false"/> otherwise.</returns>
         </member>
-        <member name="M:Common.Entities.IEntity.AddChild(Common.Entities.IEntity)">
+        <member name="M:Common.Entities.IEntity.Add(Common.Entities.IEntity)">
             <summary>Adds a child to the children list.</summary>
             <param name="child">The child to add.</param>
         </member>
@@ -1112,6 +1112,38 @@
         <member name="F:Common.Names.EmptyString">
             <summary>Reference to an empty <see langword="string"/>.</summary>
             <remarks>This one is a compile-time constant.</remarks>
+        </member>
+        <member name="T:Common.NodeTree.INode">
+            <summary>An interface for storing nodes.</summary>
+        </member>
+        <member name="P:Common.NodeTree.INode.Origin">
+            <summary>Gets the origin of the parsed entity.</summary>
+        </member>
+        <member name="M:Common.NodeTree.INode.Equals(Common.NodeTree.INode,Common.NodeTree.INode)">
+            <summary>Static equality method.</summary>
+            <param name="obj_a">Entity 'A'.</param>
+            <param name="obj_b">Entity 'B'.</param>
+            <returns><see langword="true"/> if 'A' is equal to 'B', <see langword="false"/> otherwise.</returns>
+        </member>
+        <member name="M:Common.NodeTree.INode.AddChild(Common.NodeTree.INode)">
+            <summary>Adds a child to the children list.</summary>
+            <param name="child">The child to add.</param>
+        </member>
+        <member name="P:Common.NodeTree.XMLElementNode.Name">
+            <summary>Gets the element name and namespace.</summary>
+        </member>
+        <member name="P:Common.NodeTree.XMLElementNode.LocalName">
+            <summary>Gets the local element name.</summary>
+        </member>
+        <member name="P:Common.NodeTree.XMLElementNode.Namespace">
+            <summary>Gets the namespace, or <see langword="null"/> if one is not specified on this element.</summary>
+            <remarks>This does not account for globally set or namespaces set by this element's parents.</remarks>
+        </member>
+        <member name="P:Common.NodeTree.XMLContentNode.Content">
+            <summary>Gets the content of this node.</summary>
+        </member>
+        <member name="P:Common.NodeTree.XMLCommentNode.Content">
+            <summary>Gets the content of this node.</summary>
         </member>
         <member name="T:Common.Pos">
             <summary>A lightweight variant of section that holds a start position and a length for operating on a <see cref="T:System.Span`1"/>, <see cref="T:System.Memory`1"/> or <see langword="string"/>.</summary>

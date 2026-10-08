@@ -79,7 +79,7 @@ public readonly struct PushParentStackTokenTask (Type child_type) : ITokenTask
     }
     if (stack.TryPeek(out var parent) && parent is IEntity ie)
     {
-      ie.AddChild(entity);
+      ie.Add(entity);
     }
     stack.Push(entity);
   }
@@ -139,7 +139,7 @@ public readonly struct AddChildToParentTokenTask (Type child_type) : ITokenTask
     }
     if (stack.TryPeek(out var parent) && parent is IEntity ie)
     {
-      ie.AddChild(entity);
+      ie.Add(entity);
     }
   }
 }
@@ -256,7 +256,7 @@ public static class DefaultParsingSets
 
   private static string recurse_xml (int depth)
   {
-    string recurse = $@"({elem_open} {non_element_content} {elem_close})";
+    string recurse = $"({elem_open} {non_element_content} {elem_close})";
 
     for (int i = 0; i < depth; i++)
     {
@@ -271,7 +271,7 @@ public static class DefaultParsingSets
     GeneratesSingleObject = true,
     IgnoreCase = false,
     RegexOptions = ROIPW | ROML | ROEC,
-    RegexString = recurse_xml(255),
+    RegexString = $"{recurse_xml(255)}|{elem_header}|{comment}",
     TokenRules = [
     new() {
       TokenName = "element_open",
@@ -285,13 +285,12 @@ public static class DefaultParsingSets
       ],
     }, new() {
       TokenName = "a_name",
-      Execute = (context, token) => {
-        context.Parent?.Add(new AttributeEntity() {
+      Execute = (context, token) =>
+      context.Parent?.Add(new AttributeEntity() {
           Origin = token.Value,
           Key = token.Value,
-          
-        });
-      },
+
+        }),
       TokenTasks = [
         new SetStaticTokenTask("AttributeName"),
         new AddDataToPropertyTokenTask("Name"),

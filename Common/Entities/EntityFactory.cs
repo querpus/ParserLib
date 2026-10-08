@@ -85,7 +85,7 @@ public static class EntityFactory
 
     if (entity is not null)
     {
-      context.Parent?.AddChild(entity);
+      context.Parent?.Add(entity);
     }
 
     switch (options.DepthChange)
@@ -133,7 +133,7 @@ public static class EntityFactory
     document.SetRoot(parent);
 
     parent.Add(ParseAttributes(root));
-    parent.AddChildren([.. root.Elements().Select(xe => FromXElement(xe, context))]);
+    parent.Add([.. root.Elements().Select(xe => FromXElement(xe, context))]);
 
     return document;
   }

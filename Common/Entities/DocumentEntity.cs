@@ -57,11 +57,11 @@ public class DocumentEntity : ContentEntity
       return;
     Header = header;
   }
-  public override void AddChild (IEntity child)
+  public override void Add (IEntity child)
   {
     if (RootNode is not null)
       throw new InvalidOperationException("Root node is defined, do not add children to the document. Add them to the root node.");
 
-    base.AddChild(child);
+    base.Add(child);
   }
 }

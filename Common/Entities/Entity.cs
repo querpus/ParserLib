@@ -29,8 +29,8 @@ public abstract class Entity : IEntity
   /// <summary>The serialized representation of this entity.</summary>
   /// <returns>Returns the serialized entity by default.</returns>
   public override string? ToString () => Serialize();
-  public virtual void AddChild (IEntity child) => Children.Add(child);
-  public void AddChildren (IEnumerable<IEntity> children) => children.Foreach(AddChild);
+  public virtual void Add (IEntity child) => Children.Add(child);
+  public void Add (IEnumerable<IEntity> children) => children.Foreach(Add);
   public void AddToDataCollection (string key, object data)
   {
     if (!DataValues.TryGetValue(key, out dynamic? value))

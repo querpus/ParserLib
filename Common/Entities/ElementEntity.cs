@@ -53,7 +53,7 @@ public class ElementEntity : Entity
     ? elem + " />"
     : elem + ">" + children + $"</{Name}>";
   }
-  public void Add (IEntity item)
+  public override void Add (IEntity item)
   {
     if (item is AttributeEntity attribute)
     {
@@ -64,7 +64,6 @@ public class ElementEntity : Entity
       Children.Add(item);
     }
   }
-  public void Add (IEnumerable<IEntity> items) => items.Foreach(Add);
   public override void Assign (Match match)
   {
     IsHeader = match.HasValidGroup("header");
