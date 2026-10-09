@@ -56,7 +56,7 @@ public static class EntityFactory
     if (options.AddToProperty && entity is not null)
     {
       // Check if we can even add the property
-      if (object.ReferenceEquals (propertyStack.Peek().Parent, context.Parent))
+      if (propertyStack.IsNotEmpty && object.ReferenceEquals (propertyStack.Peek().Parent, context.Parent))
       {
         IEntity prop = (IEntity) propertyStack.Pop();
 

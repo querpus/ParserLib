@@ -100,6 +100,10 @@ public static class ObjectExtensions
     /// <summary>Resets the <see cref="StreamReader"/> to the beginning of the stream.</summary>
     public void Reset () => reader?.BaseStream.Position = 0;
   }
+  extension<T> (Stack<T> stack)
+  {
+    public bool IsNotEmpty => !stack.IsEmpty;
+  }
   extension(NumberStyles styles)
   {
     /// <summary>Determines if a <see cref="NumberStyles"/> object contains the binary flag.</summary>

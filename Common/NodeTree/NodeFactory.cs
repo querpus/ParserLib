@@ -1,8 +1,6 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-using Token = Common.Entities.EToken;
-
 namespace Common.NodeTree;
 
 public static class StandardRuleSets
@@ -55,8 +53,20 @@ public static class StandardRuleSets
     Execute = (context, token) =>
     {
       ErrorIfNull(context.Current);
-      context.Current.AddData("Name", token.Value);
-      Debug.Log(MsgClass.GreenInfo, "Adding Name to Current.", "StandardRuleSets");
+
+      if (context.Current.Data["Name"] is not string prev)
+      {
+        context.Current.AddData("Name", token.Value);
+        Debug.Log(MsgClass.GreenInfo, "Adding Name to Current.", "StandardRuleSets");
+      }
+      else if (prev.Equals(token.Value, SCO))
+      {
+        Debug.Log(MsgClass.GreenInfo, "Validation Passed", "StandardRuleSets");
+      }
+      else
+      {
+        Debug.Log(MsgClass.Warning, "Validation Failed", "StandardRuleSets");
+      }
     }
   };
   internal static NodeRule _a_name = new() {
@@ -65,6 +75,7 @@ public static class StandardRuleSets
     {
       ErrorIfNull(context.Current);
       context.PropKey = token.Value;
+      Debug.Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
     }
   };
   internal static NodeRule _a_value = new() {
@@ -75,6 +86,54 @@ public static class StandardRuleSets
       ErrorIfNull(context.PropKey);
       if (context.Current is XMLElementNode xen)
         xen.Attributes.Add(context.PropKey, new QString(token.Value));
+      context.PropKey = null;
+      Debug.Log(MsgClass.GreenInfo, "Adding attribute to current. Clearing PropKey.", "StandardRuleSets");
+    }
+  };
+  internal static NodeRule _content = new()
+  {
+    TokenName = "content",
+    Execute = (context, token) =>
+    {
+      if (context.IsRoot)
+      {
+        Debug.Log(MsgClass.GreenInfo, "Ignoring out of root content.", "StandardRuleSets");
+      }
+      else
+      {
+        var parent = context.NodeStack.Peek();
+        parent.AddChild(new XMLContentNode() { Data = { ["Content"] = token.Value }, Origin = token.Value });
+        Debug.Log(MsgClass.GreenInfo, "Adding content to node at top of node stack.", "StandardRuleSets");
+      }
+    }
+  };
+  internal static NodeRule _open_tag_close = new()
+  {
+    TokenName = "open_tag_close",
+    Execute = (context, _) =>
+    {
+      ErrorIfNull(context.Current);
+      if (context.Current is XMLElementNode xen)
+      {
+        if (context.IsRoot && context.Root is null)
+        {
+          context.Root = xen;
+          context.NodeStack.Push(xen);
+          context.Current = null;
+          Debug.Log(MsgClass.Warning, "Element Open Tag Closed. Pushing Stack. Assigning Root.", "StandardRuleSets");
+        }
+        else if (context.IsRoot)
+        {
+          Debug.Log(MsgClass.Warning, "RootNode already defined.", "StandardRuleSets");
+        }
+        else
+        {
+          context.NodeStack.Peek().AddChild(context.Current);
+          context.NodeStack.Push(xen);
+          context.Current = null;
+          Debug.Log(MsgClass.Warning, "RootNode already defined.", "StandardRuleSets");
+        }
+      }
     }
   };
 
@@ -87,50 +146,9 @@ public static class StandardRuleSets
       _tag_name,
       _element_single,
       _a_name,
-      _a_value
+      _a_value,
+      _open_tag_close,
+      _content
     },
   };
-}
-
-public class NodeContext
-{
-  public string? PropKey { get; set; }
-  public Stack<INode> NodeStack { get; init; } = [];
-  public INode? Current { get; set; }
-
-  public bool IsRoot => NodeStack.Count == 1;
-  public bool CanPop => NodeStack.Count > 0;
-}
-
-public class NodeRuleSet
-{
-  public required Func<NodeContext> InitialSetup { get; init; }
-  public Collection<NodeRule> Rules { get; init; } = [];
-  public Dictionary<string, NodeRule> RulesByGroup => Rules.Where(rule => rule.TokenName is not null).ToDictionary(rule => rule.TokenName!, StringComparer.OrdinalIgnoreCase);
-}
-public class NodeRule
-{
-  public string? TokenName { get; init; }
-  public string? ExactText { get; init; }
-  public Action<NodeContext, Token> Execute { get; init; } = (_, token) => Debug.Log(MsgClass.GreenInfo, $"No Execution Defined for '{token.Group}'", "NodeRule");
-}
-
-public class TokenProcessor (IEnumerable<Token> tokens, NodeRuleSet ruleset)
-{
-  public Collection<Token> Tokens { get; } = [.. tokens];
-  public NodeRuleSet RuleSet { get; } = ruleset;
-  public void Process ()
-  {
-    NodeContext context = RuleSet.InitialSetup();
-    int count = 0;
-    foreach (Token token in tokens.Where(t => t.Group is not null))
-    {
-      NodeRule rule = RuleSet.RulesByGroup[token.Group!];
-
-      rule.Execute(context, token);
-      count++;
-      Debug.Log(MsgClass.Debug, $"Processed Token {token}", this);
-    }
-    Debug.Log(MsgClass.Debug, $"Token Processing Complete: {count} tokens processed.", this);
-  }
 }

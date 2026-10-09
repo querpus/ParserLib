@@ -6,7 +6,6 @@ namespace Common.Entities;
 public class TokenRule
 {
   public required string TokenName { get; init; }
-  public Collection<ITokenTask> TokenTasks { get; init; } = [];
   public Action<ParsingContext, EToken>? Execute { get; init; }
 }
 

@@ -89,7 +89,6 @@ public enum DepthOperation
 public class EntityInfo
 {
   #region Functional Properties
-  public Collection<ITokenTask> TokenTasks { get; init; } = [];
   /// <summary>This is the class that is created. Must be derived from <see cref="IEntity"/>.</summary>
   public Type? Class { get; set; }
   /// <summary>The group that must be present in the match for this entity to be produced if specified.</summary>

@@ -217,59 +217,6 @@
             * <c>Content</c> - The entire contents of the document as text.
             </summary>
         </member>
-        <member name="T:Common.Entities.PushParentStackTokenTask">
-            <summary>Creates an <see cref="T:Common.Entities.IEntity"/> and pushes it to the top of the parent stack.</summary>
-        </member>
-        <member name="M:Common.Entities.PushParentStackTokenTask.#ctor(System.Type)">
-            <summary>Creates an <see cref="T:Common.Entities.IEntity"/> and pushes it to the top of the parent stack.</summary>
-        </member>
-        <member name="T:Common.Entities.PopParentStackTokenTask">
-            <summary>Pops the parent stack.</summary>
-        </member>
-        <member name="T:Common.Entities.SetStaticTokenTask">
-            <summary>Represents a token task that sets a named static value in a ParsingContext.</summary>
-            <remarks>Execution requires Value to be non-null; if Value is null a ParsingException is thrown. On execution,
-            the task stores Value in the provided ParsingContext under Key.</remarks>
-            <param name="key">The name of the static entry to set in the parsing context.</param>
-        </member>
-        <member name="M:Common.Entities.SetStaticTokenTask.#ctor(System.String)">
-            <summary>Represents a token task that sets a named static value in a ParsingContext.</summary>
-            <remarks>Execution requires Value to be non-null; if Value is null a ParsingException is thrown. On execution,
-            the task stores Value in the provided ParsingContext under Key.</remarks>
-            <param name="key">The name of the static entry to set in the parsing context.</param>
-        </member>
-        <member name="T:Common.Entities.AddChildToParentTokenTask">
-            <summary>Creates an <see cref="T:Common.Entities.IEntity"/> and adds it to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack. Does not push or pop the stack.</summary>
-        </member>
-        <member name="M:Common.Entities.AddChildToParentTokenTask.#ctor(System.Type)">
-            <summary>Creates an <see cref="T:Common.Entities.IEntity"/> and adds it to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack. Does not push or pop the stack.</summary>
-        </member>
-        <member name="T:Common.Entities.AddDataToParentTokenTask">
-            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack.</summary>
-        </member>
-        <member name="M:Common.Entities.AddDataToParentTokenTask.#ctor(System.String)">
-            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack.</summary>
-        </member>
-        <member name="T:Common.Entities.AddDataToPropertyTokenTask">
-            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> on the top of the property stack.</summary>
-        </member>
-        <member name="M:Common.Entities.AddDataToPropertyTokenTask.#ctor(System.String)">
-            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> on the top of the property stack.</summary>
-        </member>
-        <member name="T:Common.Entities.SetBooleanToParentTokenTask">
-            <summary>Adds a simple boolean value to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack.</summary>
-        </member>
-        <member name="M:Common.Entities.SetBooleanToParentTokenTask.#ctor(System.String)">
-            <summary>Adds a simple boolean value to the <see cref="T:Common.Entities.IEntity"/> on the top of the parent stack.</summary>
-        </member>
-        <member name="T:Common.Entities.AddDataToLastSibling">
-            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> that was last added to the <see cref="T:Common.Entities.IEntity"/> at the top of the parent stack's children.</summary>
-            <param name="key">The key of the data to add.</param>
-        </member>
-        <member name="M:Common.Entities.AddDataToLastSibling.#ctor(System.String)">
-            <summary>Adds data to the <see cref="T:Common.Entities.IEntity"/> that was last added to the <see cref="T:Common.Entities.IEntity"/> at the top of the parent stack's children.</summary>
-            <param name="key">The key of the data to add.</param>
-        </member>
         <member name="T:Common.Entities.DocumentEntity">
             <summary>An entity representing a document.<br/><br/>
             <b>DataValues:</b><br/>

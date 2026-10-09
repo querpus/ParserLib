@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 
 using Common.Entities;
+using Common.NodeTree;
 
 using Parser.Exceptions;
 
@@ -100,6 +101,10 @@ internal static class Program
         string xmldata2 = File.ReadAllText(FinishPath(Paths.xml_operation));
         NewTokenizer tokenizer = new() { ParsingInfo = DefaultParsingSets.XML };
         var tokens = tokenizer.Tokenize(xmldata2);
+        TokenProcessor processor = new(tokens, StandardRuleSets.XMLRuleSet);
+        processor.Process();
+        var context = processor.Context;
+        Log(MsgClass.Debug, $"{context?.Root}", "Program");
         Log(MsgClass.BlueInfo, $"{tokens}", "Program");
         Log(MsgClass.Prompt, "Press enter to return to test selection.", "Program");
         _ = GetInput();
