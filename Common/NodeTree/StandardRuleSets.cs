@@ -1,18 +1,23 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
+using Common.Entities;
+using static Common.NodeTree.NodeRuleHelper;
+
 namespace Common.NodeTree;
 
-public static class StandardRuleSets
+public static class NodeRuleHelper
 {
-  private static void WarnIfCurrentHasData (NodeContext context)
+  public static void WarnIfCurrentHasData (NodeContext context)
   {
     if (context.Current is not null)
     {
       Debug.Log(MsgClass.Warning, "Current was not null before assignment.", "StandardRuleSets");
     }
   }
-  private static void ErrorIfNull ([NotNull] object? current)
+  public static void DebugIgnoredGroup (string group) =>
+    Debug.Log(MsgClass.GreenInfo, $"Group {group} ignored.", "StandardRuleSets");
+  public static void ErrorIfNull ([NotNull] object? current)
   {
     if (current is null)
     {
@@ -20,41 +25,55 @@ public static class StandardRuleSets
       throw new InvalidOperationException("Node was null. Cannot Add Content.");
     }
   }
+  public static void ClearCurrent (NodeContext context) => context.Current = null;
+  public static void CreateNewCurrent<TNode> (NodeContext context, EToken token) where TNode : INode, new()
+  {
+    WarnIfCurrentHasData(context);
+    context.Current = new TNode { Origin = token.Value };
+  }
+  public static INode GetParent (NodeContext context) => context.NodeStack.Peek();
 
+  public static void DebugMessage (string message)
+  {
+#if DEBUG
+    Debug.Log(MsgClass.GreenInfo, message, "NodeRuleHelper");
+#endif
+  }
+}
+
+public static class StandardRuleSets
+{
   internal static NodeRule _element_open = new() {
     TokenName = "element_open",
-    Execute = (context, token) =>
+    Execute = static (context, token) =>
     {
-      WarnIfCurrentHasData(context);
-      context.Current = new XMLElementNode() { Origin = token.Value };
-      Debug.Log(MsgClass.GreenInfo, "Element Open Tag Open Encountered. Assigning Current.", "StandardRuleSets");
+      CreateNewCurrent<XMLElementNode>(context, token);
+      DebugMessage("Element Open Tag Open Encountered. Assigning Current.");
     }
   };
   internal static NodeRule _element_close = new() {
     TokenName = "element_close",
-    Execute = (context, _) =>
+    Execute = static (context, _) =>
     {
       WarnIfCurrentHasData(context);
       context.Current = context.NodeStack.Pop();
-      Debug.Log(MsgClass.GreenInfo, "Beginning Close Validation", "StandardRuleSets");
+      DebugMessage("Beginning Close Validation");
     }
   };
   internal static NodeRule _element_single = new() {
     TokenName = "element_single",
-    Execute = (context, token) =>
+    Execute = static (context, token) =>
     {
-      WarnIfCurrentHasData(context);
-      context.Current = new XMLElementNode() { Origin = token.Value };
+      CreateNewCurrent<XMLElementNode>(context, token);
       Debug.Log(MsgClass.GreenInfo, "Element Tag Single Encountered. Assigning Current.", "StandardRuleSets");
     }
   };
   internal static NodeRule _element_header = new()
   {
     TokenName = "element_header",
-    Execute = (context, token) =>
+    Execute = static (context, token) =>
     {
-      WarnIfCurrentHasData(context);
-      context.Current = new XMLElementNode() { Origin = token.Value };
+      CreateNewCurrent<XMLElementNode>(context, token);
       context.Header = context.Current;
       Debug.Log(MsgClass.GreenInfo, "Element Tag Header Encountered. Assigning Current.", "StandardRuleSets");
     }
@@ -62,61 +81,51 @@ public static class StandardRuleSets
   internal static NodeRule _header_close = new()
   {
     TokenName = "header_close",
-    Execute = (context, _) =>
+    Execute = static (context, _) =>
     {
-      context.Current = null;
+      ClearCurrent(context);
       Debug.Log(MsgClass.GreenInfo, "Element Tag Header Close Encountered. Current is now null.", "StandardRuleSets");
     }
-  };
-  internal static NodeRule _a_qt = new()
-  {
-    TokenName = "a_qt",
-    Execute = (_, _) => Debug.Log(MsgClass.GreenInfo, "Quote group ignored.", "StandardRuleSets")
-  };
-  internal static NodeRule _a_eq = new()
-  {
-    TokenName = "a_eq",
-    Execute = (_, _) => Debug.Log(MsgClass.GreenInfo, "Equals group ignored.", "StandardRuleSets")
   };
   internal static NodeRule _tag_close = new()
   {
     TokenName = "tag_close",
-    Execute = (context, _) =>
+    Execute = static (context, _) =>
     {
       ErrorIfNull(context.Current);
-      context.NodeStack.Peek().AddChild(context.Current);
-      context.Current = null;
+      GetParent(context).AddChild(context.Current);
+      ClearCurrent(context);
       Debug.Log(MsgClass.GreenInfo, "Single Tag Closing. Adding as child to top of node stack. Setting Current to null.", "StandardRuleSets");
     }
   };
   internal static NodeRule _close_tag_close = new()
   {
     TokenName = "close_tag_close",
-    Execute = (context, _) =>
+    Execute = static (context, _) =>
     {
       ErrorIfNull(context.Current);
-      context.Current = null;
+      ClearCurrent(context);
       Debug.Log(MsgClass.GreenInfo, "Closing Tag Closing. Clearing Current.", "StandardRuleSets");
     }
   };
   internal static NodeRule _tag_name = new() {
     TokenName = "tag_name",
-    Execute = (context, token) =>
+    Execute = static (context, token) =>
     {
       ErrorIfNull(context.Current);
 
       if (!context.Current.Data.TryGetValue("Name", out object? name_obj))
       {
         context.Current.AddData("Name", token.Value);
-        Debug.Log(MsgClass.GreenInfo, "Adding Name to Current.", "StandardRuleSets");
+        DebugMessage("Adding Name to Current.");
       }
       else if (name_obj is string prev && prev.Equals(token.Value, SCO))
       {
-        Debug.Log(MsgClass.GreenInfo, "Validation Passed", "StandardRuleSets");
+        DebugMessage("Validation Passed");
       }
       else
       {
-        Debug.Log(MsgClass.Warning, "Validation Failed", "StandardRuleSets");
+        ParsingException.ThrowValidationFailed($"XML Closing Tag Mismatched: <{name_obj as string}></{token.Value}>");
       }
     }
   };
@@ -194,7 +203,7 @@ public static class StandardRuleSets
 
   public static NodeRuleSet XMLRuleSet { get; } = new()
   {
-    InitialSetup = () => new(),
+    InitialSetup = () => new() { SingleRoot = true },
     Rules = {
       _element_open,
       _element_close,
@@ -206,8 +215,8 @@ public static class StandardRuleSets
       _content,
       _element_header,
       _header_close,
-      _a_qt,
-      _a_eq,
+      NodeRule.IgnoreGroup("a_qt"),
+      NodeRule.IgnoreGroup("a_eq"),
       _tag_close,
       _close_tag_close
     },

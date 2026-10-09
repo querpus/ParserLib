@@ -53,6 +53,8 @@ public class ParsingException : InvalidOperationException
   public static dynamic ThrowStackMismatch() => throw new("Stack mismatch. Attempted to pop from an empty stack.");
   [DoesNotReturn]
   public static dynamic ThrowNullData (string key) => throw new($"Attempted to write null data to key {key}.");
+  [DoesNotReturn]
+  public static dynamic ThrowValidationFailed (string message) => throw new($"Validation Failed. {message}");
   public ParsingException (string message) : base(message) { }
   public ParsingException (string message, Exception innerException) : base(message, innerException) { }
   public ParsingException () { }
@@ -64,8 +66,8 @@ public static class DefaultParsingSets
   [SS("regex")] private const string elem_single = @"(?'element_single' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s*  (?'tag_close' / \s* > )";
   [SS("regex")] private const string elem_header = @"(?'element_header' <\?) \s* (?'tag_name' xml ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s* (?'header_close' \?> )";
   [SS("regex")] private const string elem_open = @"(?'element_open' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s* (?'open_tag_close' > )";
-  [SS("regex")] private const string content = "(?'content'[^<]*)";
-  [SS("regex")] private const string comment = "(?'comment'<!-- ([^-]| -[^-])* -->)";
+  [SS("regex")] private const string content = @"(?<= >) (?'ws'\s*) (?'content'[^<]*?) (?'ws'\s*) (?=<)";
+  [SS("regex")] private const string comment = @"(?'comment'<!-- ((?!--)[\s\S])* -->)";
   public static ParsingInfo XML { get; } = new()
   {
     GeneratesSingleObject = true,

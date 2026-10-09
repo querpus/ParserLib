@@ -18,8 +18,10 @@ public class TokenProcessor (IEnumerable<Token> tokens, NodeRuleSet ruleset)
     {
 
       if (!RuleSet.RulesByGroup.TryGetValue(token.Group!, out NodeRule? rule))
+      {
+        Debug.Log(MsgClass.Warning, $"Token ID ({token.Group}) is not handled.", this);
         continue;
-
+      }
       rule.Execute(Context, token);
       count++;
       Debug.Log(MsgClass.Debug, $"Processed Token {token}", this);
