@@ -146,9 +146,13 @@ public static class StandardRuleSets
     TokenName = "content",
     Execute = (context, token) =>
     {
-      if (context.IsRoot)
+      if (token.Value.IsWhitespace)
       {
-        Debug.Log(MsgClass.GreenInfo, "Ignoring out of root content.", "StandardRuleSets");
+        Debug.Log(MsgClass.BlueInfo, "Ignoring whitespace.", "StandardRuleSets");
+      }
+      else if (context.IsRoot)
+      {
+        Debug.Log(MsgClass.Warning, "Ignoring out of root content.", "StandardRuleSets");
       }
       else
       {
@@ -171,7 +175,7 @@ public static class StandardRuleSets
           context.Root = xen;
           context.NodeStack.Push(xen);
           context.Current = null;
-          Debug.Log(MsgClass.Warning, "Element Open Tag Closed. Pushing Stack. Assigning Root.", "StandardRuleSets");
+          Debug.Log(MsgClass.GreenInfo, "Element Open Tag Closed. Pushing Stack. Assigning Root.", "StandardRuleSets");
         }
         else if (context.IsRoot)
         {
@@ -182,7 +186,7 @@ public static class StandardRuleSets
           context.NodeStack.Peek().AddChild(context.Current);
           context.NodeStack.Push(xen);
           context.Current = null;
-          Debug.Log(MsgClass.Warning, "RootNode already defined.", "StandardRuleSets");
+          Debug.Log(MsgClass.GreenInfo, "Element Open Tag CLosed. Pushing Stack.", "StandardRuleSets");
         }
       }
     }
