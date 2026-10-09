@@ -48,18 +48,69 @@ public static class StandardRuleSets
       Debug.Log(MsgClass.GreenInfo, "Element Tag Single Encountered. Assigning Current.", "StandardRuleSets");
     }
   };
+  internal static NodeRule _element_header = new()
+  {
+    TokenName = "element_header",
+    Execute = (context, token) =>
+    {
+      WarnIfCurrentHasData(context);
+      context.Current = new XMLElementNode() { Origin = token.Value };
+      context.Header = context.Current;
+      Debug.Log(MsgClass.GreenInfo, "Element Tag Header Encountered. Assigning Current.", "StandardRuleSets");
+    }
+  };
+  internal static NodeRule _header_close = new()
+  {
+    TokenName = "header_close",
+    Execute = (context, _) =>
+    {
+      context.Current = null;
+      Debug.Log(MsgClass.GreenInfo, "Element Tag Header Close Encountered. Current is now null.", "StandardRuleSets");
+    }
+  };
+  internal static NodeRule _a_qt = new()
+  {
+    TokenName = "a_qt",
+    Execute = (_, _) => Debug.Log(MsgClass.GreenInfo, "Quote group ignored.", "StandardRuleSets")
+  };
+  internal static NodeRule _a_eq = new()
+  {
+    TokenName = "a_eq",
+    Execute = (_, _) => Debug.Log(MsgClass.GreenInfo, "Equals group ignored.", "StandardRuleSets")
+  };
+  internal static NodeRule _tag_close = new()
+  {
+    TokenName = "tag_close",
+    Execute = (context, _) =>
+    {
+      ErrorIfNull(context.Current);
+      context.NodeStack.Peek().AddChild(context.Current);
+      context.Current = null;
+      Debug.Log(MsgClass.GreenInfo, "Single Tag Closing. Adding as child to top of node stack. Setting Current to null.", "StandardRuleSets");
+    }
+  };
+  internal static NodeRule _close_tag_close = new()
+  {
+    TokenName = "close_tag_close",
+    Execute = (context, _) =>
+    {
+      ErrorIfNull(context.Current);
+      context.Current = null;
+      Debug.Log(MsgClass.GreenInfo, "Closing Tag Closing. Clearing Current.", "StandardRuleSets");
+    }
+  };
   internal static NodeRule _tag_name = new() {
     TokenName = "tag_name",
     Execute = (context, token) =>
     {
       ErrorIfNull(context.Current);
 
-      if (context.Current.Data["Name"] is not string prev)
+      if (!context.Current.Data.TryGetValue("Name", out object? name_obj))
       {
         context.Current.AddData("Name", token.Value);
         Debug.Log(MsgClass.GreenInfo, "Adding Name to Current.", "StandardRuleSets");
       }
-      else if (prev.Equals(token.Value, SCO))
+      else if (name_obj is string prev && prev.Equals(token.Value, SCO))
       {
         Debug.Log(MsgClass.GreenInfo, "Validation Passed", "StandardRuleSets");
       }
@@ -148,7 +199,13 @@ public static class StandardRuleSets
       _a_name,
       _a_value,
       _open_tag_close,
-      _content
+      _content,
+      _element_header,
+      _header_close,
+      _a_qt,
+      _a_eq,
+      _tag_close,
+      _close_tag_close
     },
   };
 }

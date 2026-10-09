@@ -60,7 +60,7 @@ public class ParsingException : InvalidOperationException
 
 public static class DefaultParsingSets
 {
-  [SS("regex")] private const string elem_close = @"(?'element_close' < \s* /) \s* (?'tag_name' [:\w]+ ) \s* (?'tag_close' > )";
+  [SS("regex")] private const string elem_close = @"(?'element_close' < \s* /) \s* (?'tag_name' [:\w]+ ) \s* (?'close_tag_close' > )";
   [SS("regex")] private const string elem_single = @"(?'element_single' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?!\k<a_qt>).*) (?'a_end'\k<a_qt>) )* \s*  (?'tag_close' / \s* > )";
   [SS("regex")] private const string elem_header = @"(?'element_header' <\?) \s* (?'tag_name' xml ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?!\k<a_qt>).*) (?'a_end'\k<a_qt>) )* \s* (?'header_close' \?> )";
   [SS("regex")] private const string elem_open = @"(?'element_open' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?!\k<a_qt>).*) (?'a_end'\k<a_qt>) )* \s* (?'open_tag_close' > )";

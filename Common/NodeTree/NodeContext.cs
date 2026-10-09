@@ -8,6 +8,7 @@ public class NodeContext
   public Stack<INode> NodeStack { get; init; } = [];
   public INode? Current { get; set; }
   public INode? Root { get; set; }
+  public INode? Header { get; set; }
 
   public bool IsRoot => NodeStack.Count == 0;
   public bool CanPop => NodeStack.Count > 0;

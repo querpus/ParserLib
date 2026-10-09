@@ -14,9 +14,11 @@ public class TokenProcessor (IEnumerable<Token> tokens, NodeRuleSet ruleset)
   {
     Context = RuleSet.InitialSetup();
     int count = 0;
-    foreach (Token token in tokens.Where(t => t.Group is not null))
+    foreach (Token token in tokens.Where(t => t.Group is not null).Order())
     {
-      NodeRule rule = RuleSet.RulesByGroup[token.Group!];
+
+      if (!RuleSet.RulesByGroup.TryGetValue(token.Group!, out NodeRule? rule))
+        continue;
 
       rule.Execute(Context, token);
       count++;
