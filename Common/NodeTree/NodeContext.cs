@@ -25,27 +25,65 @@ public class NodeContext
   /// <remarks>This assigns the root node if the stack is empty.</remarks>
   public void PushAndAddChild (INode node)
   {
-    if (IsRoot && SingleRoot)
-    {
-      Root = node;
-    }
-    else if (IsRoot)
-    {
-      RootNodes.Add(node);
-    }
-    else
-    {
-      Parent.AddChild(node);
-    }
+    AddChildToParent(node);
     NodeStack.Push(node);
   }
-
   public void PushAndAddChild ()
   {
     if (HasCurrent)
       PushAndAddChild(Current);
     else
       ParsingException.ThrowNullData("Current");
+  }
+  public void AddChildToParent (INode child)
+  {
+    if (IsRoot && SingleRoot)
+    {
+      Root = child;
+    }
+    else if (IsRoot)
+    {
+      RootNodes.Add(child);
+    }
+    else
+    {
+      Parent.AddChild(child);
+    }
+  }
+  public void AddChildToParent ()
+  {
+    if (HasCurrent)
+      AddChildToParent(Current);
+    else
+      ParsingException.ThrowNullData("Current");
+  }
+  [MemberNotNull(nameof(Current))]
+  public TNode GenerateCurrent<TNode> () where TNode : INode, new()
+  {
+    WarnIfCurrentHasData();
+    TNode node = new();
+    Current = node;
+    return node;
+  }
+  public void WarnIfCurrentHasData ()
+  {
+    if (Current is not null)
+    {
+      Debug.Log(MsgClass.Warning, "Current was not null before assignment.", "StandardRuleSets");
+    }
+  }
+  public void WarnIfCurrentIsNull ()
+  {
+    if (Current is null)
+    {
+      Debug.Log(MsgClass.Warning, "Current was already null.", "StandardRuleSets");
+    }
+  }
+  public void ClearCurrent ()
+  {
+    WarnIfCurrentIsNull();
+    Current = null;
+    Debug.Log(MsgClass.GreenInfo, "Current Cleared.", this);
   }
 
   [MemberNotNullWhen(false, nameof(Parent))]

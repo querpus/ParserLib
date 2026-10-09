@@ -3,12 +3,6 @@
 
 namespace Common.Entities;
 
-public class TokenRule
-{
-  public required string TokenName { get; init; }
-  public Action<ParsingContext, EToken>? Execute { get; init; }
-}
-
 public class ParsingInfo
 {
   /// <summary>Whether of not the result is under the RootNode property of the <see cref="DocumentEntity"/>,
@@ -38,7 +32,6 @@ public class ParsingInfo
       }
     }
   }
-  public IImmutableList<TokenRule> TokenRules { get; init; } = [];
   public IImmutableList<EntityInfo> EntityOptions { get; init; } = [];
   /// <summary>Tries to get the <see cref="EntityInfo"/> for the given <see cref="Match"/>.</summary>
   /// <param name="match">The regex match.</param>

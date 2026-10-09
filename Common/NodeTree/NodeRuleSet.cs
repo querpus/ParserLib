@@ -2,6 +2,15 @@
 #pragma warning disable format // Formatting
 
 namespace Common.NodeTree;
+
+public class TokenRuleSet
+{
+  public required Collection<string> TokenSequences { get; init; }
+  public string RegexString => TokenSequences.TextJoin("|");
+  public RegexOptions RegexOptions { get; init; } = ROIPW | ROML;
+  public Regex Regex => new(RegexString, RegexOptions);
+}
+
 public class NodeRuleSet
 {
   public required Func<NodeContext> InitialSetup { get; init; }
