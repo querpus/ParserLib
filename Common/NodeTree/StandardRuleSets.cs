@@ -87,9 +87,11 @@ public static class StandardRuleSets
   {
     public static readonly NodeRule ElementOpen = new() {
       TokenName = "element_open",
-      Execute = static (context, _) =>
+      Execute = static (context, token) =>
       {
-        context.PushAndAddChild(context.GenerateCurrent<XMLElementNode>());
+        XMLElementNode node = context.GenerateCurrent<XMLElementNode>();
+        node.Origin = token.Value;
+        context.PushAndAddChild(node);
         DebugMessage("Element Open Tag Open Encountered. Assigning Current.");
       }
     };
@@ -109,7 +111,7 @@ public static class StandardRuleSets
       {
         XMLElementNode node = context.GenerateCurrent<XMLElementNode>();
         node.Origin = token.Value;
-        context.AddNodeTo(node, NodeTarget.Parent, token);
+        context.AddNodeTo(node, NodeTarget.Parent);
         DebugMessage("Element Tag Single Encountered. Assigning Current.");
       }
     };
@@ -219,7 +221,7 @@ public static class StandardRuleSets
           {
             context.Root = xen;
             context.NodeStack.Push(xen);
-            context.Current = null;
+            context.ClearCurrent();
             Debug.Log(MsgClass.GreenInfo, "Element Open Tag Closed. Pushing Stack. Assigning Root.", "StandardRuleSets");
           }
           else if (context.IsRoot)
@@ -228,9 +230,8 @@ public static class StandardRuleSets
           }
           else
           {
-            context.NodeStack.Peek().AddChild(context.Current);
-            context.NodeStack.Push(xen);
-            context.Current = null;
+            context.PushAndAddChild(xen);
+            context.ClearCurrent();
             Debug.Log(MsgClass.GreenInfo, "Element Open Tag CLosed. Pushing Stack.", "StandardRuleSets");
           }
         }
@@ -354,9 +355,9 @@ public static class StandardRuleSets
         Execute = (c, t) => {
           if (c.HasParent)
           {
-            c.NodeStack.Pop();
+            _ = c.NodeStack.Pop();
           }
-          INode node = c.GenerateCurrent<>();
+          INode node = c.GenerateCurrent<IPLCommandNode>();
         }
       }
     ]

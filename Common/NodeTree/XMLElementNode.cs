@@ -39,6 +39,14 @@ public sealed class XMLContentNode : Node
   public string? Content => Data.TryGetValue("Content", out object? obj) ? obj as string : null;
 }
 
+public sealed class IPLCommandNode : Node
+{
+  public override string Serialize () => $"{CommandLetter}{Values.TextJoin(",")};";
+  /// <summary>Gets the content of this node.</summary>
+  public char? CommandLetter => Data.TryGetValue("CommandLetter", out object? obj) ? (char) obj : null;
+  public Collection<string> Values => Data.TryGetValue("Values", out object? obj) ? obj as Collection<string> ?? [] : [];
+}
+
 public sealed class XMLCommentNode : Node
 {
   public override string Serialize () => $"{Content}";

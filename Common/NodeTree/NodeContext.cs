@@ -7,7 +7,6 @@ namespace Common.NodeTree;
 
 public class NodeContext
 {
-  public Common.
   public dynamic? GetTargetValue (NodeTarget target, Token? token = null) => target switch
   {
     NodeTarget.Current => Current,
@@ -58,7 +57,7 @@ public class NodeContext
   /// <remarks>This assigns the root node if the stack is empty.</remarks>
   public void PushAndAddChild (INode node)
   {
-    AddNodeTo(node, NodeTarget.Parent, null);
+    AddNodeTo(node, NodeTarget.Parent);
     NodeStack.Push(node);
   }
   public void PushAndAddChild ()
@@ -66,11 +65,11 @@ public class NodeContext
     if (HasCurrent)
       PushAndAddChild(Current);
     else
-      ParsingException.ThrowNullData("Current");
+      throw new InvalidOperationException();
   }
-  public void AddNodeTo (INode node, NodeTarget target, Token? token)
+  public void AddNodeTo (INode node, NodeTarget target)
   {
-    INode? parent = GetTargetValue(target, token) as INode;
+    INode? parent = GetTargetValue(target, null) as INode;
     if (parent is null && target is NodeTarget.Parent)
     {
       if (SingleRoot && Root is not null)

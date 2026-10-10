@@ -49,7 +49,7 @@
     </Grid.ColumnDefinitions>
     <DataGrid x:Name="dataGrid" Grid.Column="1" Grid.Row="1" d:ItemsSource="{d:SampleData ItemCount=5}">
       <DataGrid.DataContext>
-        <NodeTree:NewTokenizer/>
+        <NodeTree:CaptureTokenizer/>
       </DataGrid.DataContext>
     </DataGrid>
   </Grid>
