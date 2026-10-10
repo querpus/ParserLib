@@ -30,15 +30,19 @@ public class NewTokenizer
         Group group = match.Groups[groupName];
         if (group.Success && !groupName.Equals("0", SCO))
         {
-          EToken token = new()
+          for (int i = 0; i < group.Captures.Count; i++)
           {
-            Value = group.Value,
-            Group = groupName,
-            CaptureIndex = group.Captures.Count - 1,
-            Position = group.Index..(group.Index + group.Length)
-          };
-          Tokens.Add(token);
-          Log(MsgClass.GreenInfo, $"{token}", this);
+            Capture cap = group.Captures[i];
+            EToken token = new()
+            {
+              Value = cap.Value,
+              Group = groupName,
+              CaptureIndex = i,
+              Position = cap.Index..(cap.Index + cap.Length)
+            };
+            Tokens.Add(token);
+            Log(MsgClass.GreenInfo, $"{token}", this);
+          }
         }
       }
     }

@@ -14,9 +14,9 @@ public class TokenProcessor (IEnumerable<Token> tokens, NodeRuleSet ruleset)
   {
     Context = RuleSet.InitialSetup();
     int count = 0;
-    foreach (Token token in tokens.Where(t => t.Group is not null).Order())
+    Collection<Token> finalTokens = [.. tokens.Where(t => t.Group is not null).Order()];
+    foreach (Token token in finalTokens)
     {
-
       if (!RuleSet.RulesByGroup.TryGetValue(token.Group!, out NodeRule? rule))
       {
         Debug.Log(MsgClass.Warning, $"Token ID ({token.Group}) is not handled.", this);
