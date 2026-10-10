@@ -47,6 +47,10 @@
       <ColumnDefinition Width="333*"/>
       <ColumnDefinition Width="67*"/>
     </Grid.ColumnDefinitions>
-    <DataGrid x:Name="dataGrid" Grid.Column="1" Grid.Row="1" d:ItemsSource="{d:SampleData ItemCount=5}"/>
+    <DataGrid x:Name="dataGrid" Grid.Column="1" Grid.Row="1" d:ItemsSource="{d:SampleData ItemCount=5}">
+      <DataGrid.DataContext>
+        <NodeTree:NewTokenizer/>
+      </DataGrid.DataContext>
+    </DataGrid>
   </Grid>
 </Window>

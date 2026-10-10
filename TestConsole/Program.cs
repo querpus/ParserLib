@@ -101,7 +101,7 @@ internal static class Program
       case "NEWXML2":
         string xmldata2 = File.ReadAllText(FinishPath(Paths.xml_operation));
         CaptureTokenizer tokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
-        Collection<EToken> tokens = tokenizer.Tokenize(xmldata2);
+        Collection<Token> tokens = tokenizer.Tokenize(xmldata2);
         TokenProcessor processor = new(tokens, StandardRuleSets.XMLRuleSet);
         processor.Process();
         var context = processor.Context;
@@ -118,7 +118,7 @@ internal static class Program
         break;
       case "NEWJSON2":
         string json = File.ReadAllText(FinishPath(Paths.json_launch));
-        NewTokenizer tokenizer2 = new() { Rules = StandardRuleSets.JSONTokenRuleSet };
+        CaptureTokenizer tokenizer2 = new() { Rules = StandardRuleSets.JSONTokenRuleSet };
         Collection<Token> tokens2 = tokenizer2.Tokenize(json);
         TokenProcessor processor2 = new(tokens2, StandardRuleSets.JSONRuleSet);
         processor2.Process();
