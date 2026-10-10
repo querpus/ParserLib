@@ -53,7 +53,7 @@ public static class Definition
     TokenRules = [
       new(Competitive, "DString", @"""[^""><]*"""),
       new(Competitive, "SString", "'[^'><]*'"),
-      new(Competitive, "Comment", @"<!--((?!--).)*-->"),
+      new(Competitive, "Comment", "<!--((?!--).)*-->"),
       new (TokenMatch, "Content", @"(?<= >)[^<]+(?=<)"),
       new (TokenComment, "None", @"(?<=\>)\s+(?=\<)"),
       .. TokenRule.MakeSingleCharRules("<>/?;&:=!-", TokenExact, new Collection<string>() { "Ao", "Ac", "Sl", "Qm", "Sc", "An", "Co", "Eq", "Em", "Hy" }),

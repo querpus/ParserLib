@@ -9,7 +9,7 @@ charset = utf-8
 
 # Roslynator: enable all diagnostics
 roslynator_analyzers_enabled = true
-
+dotnet_diagnostic.CA1515.severity = none # Consider making public types internal
 dotnet_code_quality_unused_parameters = non_public:suggestion
 dotnet_diagnostic.CA2252.severity = warning
 dotnet_diagnostic.CA1034.severity = silent

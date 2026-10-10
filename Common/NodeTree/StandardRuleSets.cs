@@ -35,7 +35,7 @@ public static class NodeRuleHelper
 #endif
   }
 
-  public static void DoXMLOperation (NodeContext context, string action, string? assignTo, string? valueFrom, string? className)
+  public static void DoXMLOperation (NodeTree.NodeContext context, string action, string? assignTo, string? valueFrom, string? className)
   {
     switch(action)
     {
