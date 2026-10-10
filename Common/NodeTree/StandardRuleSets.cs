@@ -8,6 +8,12 @@ namespace Common.NodeTree;
 
 public static class NodeRuleHelper
 {
+  extension (string className)
+  {
+    public object? CreateClass () =>
+      Type.GetType(className)?.InvokeMember(SE, BFCI, null, null, null, CIIC);
+  }
+
   public static void DebugIgnoredGroup (string group) =>
     Debug.Log(MsgClass.GreenInfo, $"Group {group} ignored.", "StandardRuleSets");
   public static void ErrorIfNull ([NotNull] object? current)
@@ -26,6 +32,34 @@ public static class NodeRuleHelper
 #if DEBUG
     Debug.Log(MsgClass.GreenInfo, message, "NodeRuleHelper");
 #endif
+  }
+
+  public static void DoXMLOperation (NodeContext context, string action, string? assignTo, string? valueFrom, string? className)
+  {
+    switch(action)
+    {
+      case "GenerateNode":
+        if (className is null || assignTo is null)
+          throw new InvalidOperationException();
+        if (className.CreateClass() is not INode node)
+          throw new InvalidOperationException();
+        switch(assignTo)
+        {
+          case "TokenValue" or "TokenGroup":
+            throw new InvalidOperationException();
+          case "Current":
+            context.Current = node;
+            break;
+          case "Parent":
+            if (context.Parent is not null)
+            {
+              _ = context.NodeStack.Pop();
+              context.PushAndAddChild(node);
+            }
+            break;
+        }
+        break;
+    }
   }
 }
 
@@ -195,6 +229,22 @@ public static class StandardRuleSets
 
   private static class JSON
   {
+    [SS("regex")]
+    public const string RxAfterKey = @"(?<=[:=]\s*)";
+    [SS("regex")] public const string RxKey = @"(?'qt'[""']) (?'key_name'\w+) \k<qt> (?=\s*[:=])";
+    [SS("regex")] public const string RxString = @"(?<=[:=]\s*) (?'qt'[""']) (?'value'([^\\""]|\\.)*) \k<qt>";
+    [SS("regex")] public const string RxNumber = @"(?<=[:=]\s*) (?'value'[0-9.xXa-fA-F-]+ )";
+    [SS("regex")] public const string RxBool = @"(?<=[:=]\s*) (?'value'true|false)";
+    [SS("regex")] public const string RxNull = @"(?<=[:=]\s*) (?'value'null)";
+    [SS("regex")] public const string RxArray = @"(?'a_open'\[)|(?'a_close'\])";
+    [SS("regex")] public const string RxObject = @"(?'o_open'\{)|(?'o_close'\})";
+    [SS("regex")] public const string RxOps = "(?'op'[,:=])";
+    [SS("regex")] public const string RxComment = @"(?'comment'\/\/.*|\/\* [\s\S]*? \*\/)";
+    [SS("regex")] public const string RxWhitespace = @"(?'ws'\s+)";
+    [SS("regex")] public const string RxErrorTrailingComma = @",\s*[\]}]";
+    [SS("regex")] public const string RxErrorMissingComma = @"[}\]] \s* [\{[]";
+    [SS("regex")] public const string RxErrorInvalidEscape = @"\\[^0nr\\""']";
+
     public static readonly NodeRule ElementOpen = new()
     {
       TokenName = "array_open",
@@ -207,6 +257,24 @@ public static class StandardRuleSets
       }
     };
   }
+
+  public static TokenRuleSet JSONTokenRuleSet { get; } = new()
+  {
+    RegexOptions = ROCI | ROEC | ROIPW | ROML,
+    TokenSequences =
+    [
+      JSON.RxKey,
+      JSON.RxString,
+      JSON.RxNumber,
+      JSON.RxBool,
+      JSON.RxNull,
+      JSON.RxComment,
+      JSON.RxObject,
+      JSON.RxArray,
+      JSON.RxWhitespace,
+      JSON.RxOps
+    ]
+  };
 
   public static NodeRuleSet JSONRuleSet { get; } = new()
   {
@@ -242,7 +310,6 @@ public static class StandardRuleSets
       XML.RxContent
     ]
   };
-
   public static NodeRuleSet XMLRuleSet { get; } = new()
   {
     InitialSetup = () => new() { SingleRoot = true },

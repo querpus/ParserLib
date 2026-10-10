@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Ruleset xmlns="http://querp.us/schema/NodeRules.xsd">
+  <Name>ini</Name>
+  <TokenRuleset>
+    <Options>IgnorePatternWhitespace ExplicitCapture</Options>
+    <Regex>(?'section' [ .* ] )</Regex>
+    <Regex>^\s* (?'key'".*"|[^=\s]|'.*') \s* = \s* (?'value'".*"|'.*'|[^;\n]*?) \s*</Regex>
+    <Regex>(?'comment' ; .*$ )</Regex>
+  </TokenRuleset>
+  <NodeRuleSet>
+    <NodeRule group="section">
+      <ClearNode valueFrom="Parent"/>
+      <GenerateNode assignTo="Parent"/>
+      <AssignNode valueFrom="Parent" assignTo="Root"/>
+    </NodeRule>
+    <NodeRule group="key">
+      <StoreValue assignTo="PropKey" valueFrom="TokenValue"/>
+    </NodeRule>
+    <NodeRule group="value">
+      <GenerateNode assignTo="Parent"/>
+      <StoreValue assignTo="Current" valueFrom="TokenValue" name="Value"/>
+    </NodeRule>
+  </NodeRuleSet>
+</Ruleset>

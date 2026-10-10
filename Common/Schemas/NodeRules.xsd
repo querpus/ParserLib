@@ -27,6 +27,12 @@
     <xs:attribute name="assignTo" type="TargetType"/>
     <xs:attribute name="valueFrom" type="TargetType"/>
   </xs:complexType>
+
+  <xs:complexType name="NamedIOInstructionType">
+    <xs:attribute name="name" type="StringNotEmptyType"/>
+    <xs:attribute name="assignTo" type="TargetType"/>
+    <xs:attribute name="valueFrom" type="TargetType"/>
+  </xs:complexType>
   
   <xs:complexType name="GOInstructionType">
     <xs:attribute name="assignTo" type="TargetType"/>
@@ -41,6 +47,8 @@
       <xs:enumeration value="Root"/>
       <xs:enumeration value="Header"/>
       <xs:enumeration value="Null"/>
+      <xs:enumeration value="TokenValue"/>
+      <xs:enumeration value="TokenGroup"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -65,9 +73,10 @@
     <xs:list itemType="RegexOptionType"/>
   </xs:simpleType>
 
-  <xs:element name="Rulesets">
+  <xs:element name="Ruleset">
     <xs:complexType>
-      <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:all minOccurs="1" maxOccurs="1">
+        <xs:element name="Name" type="StringNotEmptyType"/>
         <xs:element name="TokenRuleset">
           <xs:complexType>
             <xs:sequence minOccurs="1" maxOccurs="1">
@@ -83,12 +92,13 @@
                 <xs:complexType>
                   <xs:sequence>
                     <xs:choice minOccurs="0" maxOccurs="unbounded">
-                      <xs:element name="AssignValue" type="IOInstructionType"/>
-                      <xs:element name="GenerateValue" type="GOInstructionType"/>
+                      <xs:element name="AssignNode" type="IOInstructionType"/>
+                      <xs:element name="GenerateNode" type="GOInstructionType"/>
                       <xs:element name="PushStack" type="IInstructionType"/>
                       <xs:element name="PopStack" type="OInstructionType"/>
-                      <xs:element name="ClearValue" type="IInstructionType"/>
+                      <xs:element name="ClearNode" type="IInstructionType"/>
                       <xs:element name="Message" type="MessageInstructionType"/>
+                      <xs:element name="StoreValue" type="NamedIOInstructionType"/>
                     </xs:choice>
                   </xs:sequence>
                   <xs:attribute name="group" use="required" type="xs:token"/>
@@ -99,7 +109,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-      </xs:choice>
+      </xs:all>
     </xs:complexType>
   </xs:element>
 </xs:schema>
