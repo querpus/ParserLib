@@ -100,7 +100,7 @@ internal static class Program
         break;
       case "NEWXML2":
         string xmldata2 = File.ReadAllText(FinishPath(Paths.xml_operation));
-        NewTokenizer tokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
+        CaptureTokenizer tokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
         Collection<EToken> tokens = tokenizer.Tokenize(xmldata2);
         TokenProcessor processor = new(tokens, StandardRuleSets.XMLRuleSet);
         processor.Process();

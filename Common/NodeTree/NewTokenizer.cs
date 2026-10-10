@@ -6,7 +6,7 @@ using static Common.Debug;
 
 namespace Common.NodeTree;
 
-public class NewTokenizer
+public class CaptureTokenizer
 {
   public Collection<EToken> Tokens { get; } = [];
   public required TokenRuleSet Rules { get; init; }
@@ -17,9 +17,9 @@ public class NewTokenizer
     Tokens.Clear();
     CurrentIndex = 0;
 
-    if (Rules.RegexString is null)
+    if (Rules.TokenSequences.Count == 0)
     {
-      throw new InvalidOperationException("ParsingInfo.RegexString is null.");
+      throw new InvalidOperationException("No token sequences.");
     }
 
     var regex = Rules.Regex;
