@@ -2,6 +2,7 @@
 #pragma warning disable format // Formatting
 
 using Common.Entities;
+
 using static Common.NodeTree.NodeRuleHelper;
 
 namespace Common.NodeTree;
@@ -43,20 +44,37 @@ public static class NodeRuleHelper
           throw new InvalidOperationException();
         if (className.CreateClass() is not INode node)
           throw new InvalidOperationException();
-        switch(assignTo)
+        switch (assignTo)
         {
-          case "TokenValue" or "TokenGroup":
+          case "TokenValue" or "TokenGroup" or "PropKey":
             throw new InvalidOperationException();
           case "Current":
             context.Current = node;
             break;
           case "Parent":
-            if (context.Parent is not null)
+            if (context.HasParent)
             {
               _ = context.NodeStack.Pop();
               context.PushAndAddChild(node);
             }
             break;
+          default:
+            throw new InvalidOperationException();
+        }
+        break;
+      case "AssignNode":
+        if (valueFrom is null || assignTo is null)
+          throw new InvalidOperationException();
+        INode? from = valueFrom switch
+        {
+          "Current" => context.Current,
+          "Parent" => context.Parent,
+          "Root" => context.SingleRoot ? context.Root : throw new InvalidOperationException(),
+          _ => throw new InvalidOperationException()
+        };
+        switch (assignTo)
+        {
+
         }
         break;
     }
@@ -91,7 +109,7 @@ public static class StandardRuleSets
       {
         XMLElementNode node = context.GenerateCurrent<XMLElementNode>();
         node.Origin = token.Value;
-        context.AddChildToParent(node);
+        context.AddNodeTo(node, NodeTarget.Parent, token);
         DebugMessage("Element Tag Single Encountered. Assigning Current.");
       }
     };
@@ -245,15 +263,24 @@ public static class StandardRuleSets
     [SS("regex")] public const string RxErrorMissingComma = @"[}\]] \s* [\{[]";
     [SS("regex")] public const string RxErrorInvalidEscape = @"\\[^0nr\\""']";
 
-    public static readonly NodeRule ElementOpen = new()
+    public static readonly NodeRule ObjectOpen = new()
     {
-      TokenName = "array_open",
+      TokenName = "o_open",
       Execute = static (context, token) =>
       {
-        JSONArrayNode node = context.GenerateCurrent<JSONArrayNode>();
+        JSONObjectNode node = context.GenerateCurrent<JSONObjectNode>();
         node.Origin = token.Value;
         context.PushAndAddChild(node);
-        DebugMessage("Array Open Token Processed.");
+        DebugMessage("Object Open Token Processed.");
+      }
+    };
+    public static readonly NodeRule ObjectClose = new()
+    {
+      TokenName = "o_close",
+      Execute = static (context, token) =>
+      {
+        _ = context.NodeStack.Pop();
+        DebugMessage("Object Close Token Processed.");
       }
     };
   }
@@ -275,28 +302,14 @@ public static class StandardRuleSets
       JSON.RxOps
     ]
   };
-
   public static NodeRuleSet JSONRuleSet { get; } = new()
   {
     InitialSetup = () => new() { SingleRoot = true },
     Rules = {
-      XML.ElementOpen,
-      XML.ElementOpenEnd,
-      XML.ElementClose,
-      XML.ElementCloseEnd,
-      XML.ElementSingle,
-      XML.ElementSingleEnd,
-      XML.ElementHeader,
-      XML.ElementHeaderEnd,
-      XML.AttributeName,
-      XML.AttributeValue,
-      XML.Content,
-      NodeRule.IgnoreGroup("comment"),
-      NodeRule.IgnoreGroup("a_qt"),
-      NodeRule.IgnoreGroup("a_eq"),
+      JSON.ObjectOpen,
+      JSON.ObjectClose,
     },
   };
-
   public static TokenRuleSet XMLTokenRuleSet { get; } = new()
   {
     RegexOptions = ROCI | ROEC | ROIPW | ROML,
@@ -330,5 +343,22 @@ public static class StandardRuleSets
       NodeRule.IgnoreGroup("a_qt"),
       NodeRule.IgnoreGroup("a_eq"),
     },
+  };
+  public static NodeRuleSet IPLRuleSet = new()
+  {
+    InitialSetup = () => new() { SingleRoot = false },
+    Rules = [
+      new()
+      {
+        TokenName = "H_Line",
+        Execute = (c, t) => {
+          if (c.HasParent)
+          {
+            c.NodeStack.Pop();
+          }
+          INode node = c.GenerateCurrent<>();
+        }
+      }
+    ]
   };
 }

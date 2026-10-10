@@ -20,9 +20,9 @@ public class ETokenFactory
     "key" = "property value"
     """;
 
-  public Collection<EToken> CreateTokens (string input)
+  public Collection<Token> CreateTokens (string input)
   {
-    Collection<EToken> tokens = [];
+    Collection<Token> tokens = [];
     Regex regex = new(Test, RegexOptions.IgnorePatternWhitespace);
     MatchCollection matches = regex.Matches(input);
     foreach (Match match in matches)
@@ -35,7 +35,7 @@ public class ETokenFactory
           for (int i = 0; i < group.Captures.Count; i++)
           {
             Capture capture = group.Captures[i];
-            EToken token = new()
+            Token token = new()
             {
               Value = capture.Value,
               Group = kvp.Key,

@@ -1076,6 +1076,14 @@
             <summary>Adds a child to the children list.</summary>
             <param name="child">The child to add.</param>
         </member>
+        <member name="F:Common.NodeTree.NodeTarget.Parent">
+            <summary>This node's parent.</summary>
+            <remarks>Read only. Cannot write to this field.</remarks>
+        </member>
+        <member name="F:Common.NodeTree.NodeTarget.TokenGroup">
+            <summary>The token group.</summary>
+            <remarks>Read only. Cannot write to token.</remarks>
+        </member>
         <member name="P:Common.NodeTree.NodeContext.NodeStack">
             <summary>Gets the stack of nodes used to track the current node hierarchy during traversal or processing.</summary>
             <remarks>Init-only and initialized to an empty stack.</remarks>

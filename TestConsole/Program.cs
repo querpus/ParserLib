@@ -101,7 +101,7 @@ internal static class Program
       case "NEWXML2":
         string xmldata2 = File.ReadAllText(FinishPath(Paths.xml_operation));
         NewTokenizer tokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
-        Collection<EToken> tokens = tokenizer.Tokenize(xmldata2);
+        Collection<Token> tokens = tokenizer.Tokenize(xmldata2);
         TokenProcessor processor = new(tokens, StandardRuleSets.XMLRuleSet);
         processor.Process();
         var context = processor.Context;
@@ -114,6 +114,18 @@ internal static class Program
         string newjson_data = File.ReadAllText(FinishPath(Paths.json_launch));
         DocumentEntity parsed1 = EntityFactory.FromString(newjson_data, DefaultParsingSets.JSON);
         Log(MsgClass.Debug, parsed1.RootNode?.ToString() ?? SE, "Program");
+        _ = GetInput();
+        break;
+      case "NEWJSON2":
+        string json = File.ReadAllText(FinishPath(Paths.json_launch));
+        NewTokenizer tokenizer2 = new() { Rules = StandardRuleSets.JSONTokenRuleSet };
+        Collection<Token> tokens2 = tokenizer2.Tokenize(json);
+        TokenProcessor processor2 = new(tokens2, StandardRuleSets.JSONRuleSet);
+        processor2.Process();
+        var context2 = processor2.Context;
+        Log(MsgClass.Debug, $"{context2?.Root}", "Program");
+        Log(MsgClass.BlueInfo, $"{tokens2}", "Program");
+        Log(MsgClass.Prompt, "Press enter to return to test selection.", "Program");
         _ = GetInput();
         break;
       case "WAD":

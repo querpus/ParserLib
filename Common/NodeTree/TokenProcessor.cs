@@ -1,8 +1,6 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-using Token = Common.NodeTree.EToken;
-
 namespace Common.NodeTree;
 
 public class TokenProcessor (IEnumerable<Token> tokens, NodeRuleSet ruleset)
