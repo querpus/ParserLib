@@ -1076,6 +1076,24 @@
             <summary>Adds a child to the children list.</summary>
             <param name="child">The child to add.</param>
         </member>
+        <member name="P:Common.NodeTree.NodeContext.NodeStack">
+            <summary>Gets the stack of nodes used to track the current node hierarchy during traversal or processing.</summary>
+            <remarks>Init-only and initialized to an empty stack.</remarks>
+        </member>
+        <member name="P:Common.NodeTree.NodeContext.Current">
+            <summary>The currently selected node. (Child Node)</summary>
+        </member>
+        <member name="P:Common.NodeTree.NodeContext.Root">
+            <summary>The root node.</summary>
+        </member>
+        <member name="P:Common.NodeTree.NodeContext.Header">
+            <summary>Document Header.</summary>
+        </member>
+        <member name="M:Common.NodeTree.NodeContext.PushAndAddChild(Common.NodeTree.INode)">
+            <summary>Pushes a node to the top of the node stack, and adds it as a child of the previous node on the stack.</summary>
+            <param name="node">The child node to push.</param>
+            <remarks>This assigns the root node if the stack is empty.</remarks>
+        </member>
         <member name="P:Common.NodeTree.XMLElementNode.Name">
             <summary>Gets the element name and namespace.</summary>
         </member>

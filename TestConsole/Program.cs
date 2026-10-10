@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Xml.Linq;
 
 using Common.Entities;
@@ -99,8 +100,8 @@ internal static class Program
         break;
       case "NEWXML2":
         string xmldata2 = File.ReadAllText(FinishPath(Paths.xml_operation));
-        NewTokenizer tokenizer = new() { ParsingInfo = DefaultParsingSets.XML };
-        var tokens = tokenizer.Tokenize(xmldata2);
+        NewTokenizer tokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
+        Collection<EToken> tokens = tokenizer.Tokenize(xmldata2);
         TokenProcessor processor = new(tokens, StandardRuleSets.XMLRuleSet);
         processor.Process();
         var context = processor.Context;

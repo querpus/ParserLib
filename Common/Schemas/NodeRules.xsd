@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema targetNamespace="http://querp.us/schema/NodeRules.xsd"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified"
+    xmlns="http://querp.us/schema/NodeRules.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:simpleType name="StringNotEmptyType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="MessageInstructionType">
+    <xs:attribute name="message" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="IInstructionType">
+    <xs:attribute name="valueFrom" type="TargetType"/>
+  </xs:complexType>
+
+  <xs:complexType name="OInstructionType">
+    <xs:attribute name="assignTo" type="TargetType"/>
+  </xs:complexType>
+  
+  <xs:complexType name="IOInstructionType">
+    <xs:attribute name="assignTo" type="TargetType"/>
+    <xs:attribute name="valueFrom" type="TargetType"/>
+  </xs:complexType>
+  
+  <xs:complexType name="GOInstructionType">
+    <xs:attribute name="assignTo" type="TargetType"/>
+    <xs:attribute name="generateType" type="StringNotEmptyType"/>
+  </xs:complexType>
+
+  <xs:simpleType name="TargetType">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Current"/>
+      <xs:enumeration value="Parent"/>
+      <xs:enumeration value="PropKey"/>
+      <xs:enumeration value="Root"/>
+      <xs:enumeration value="Header"/>
+      <xs:enumeration value="Null"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="RegexOptionType">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="IgnorePatternWhitespace"/>
+      <xs:enumeration value="IgnoreCase"/>
+      <xs:enumeration value="RightToLeft"/>
+      <xs:enumeration value="MultiLine"/>
+      <xs:enumeration value="DotIncludesNewline"/>
+      <xs:enumeration value="NonBacktracking"/>
+      <xs:enumeration value="-IgnorePatternWhitespace"/>
+      <xs:enumeration value="-IgnoreCase"/>
+      <xs:enumeration value="-RightToLeft"/>
+      <xs:enumeration value="-MultiLine"/>
+      <xs:enumeration value="-DotIncludesNewline"/>
+      <xs:enumeration value="-NonBacktracking"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="RegexOptionList">
+    <xs:list itemType="RegexOptionType"/>
+  </xs:simpleType>
+
+  <xs:element name="Rulesets">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="TokenRuleset">
+          <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="1">
+              <xs:element name="Options" type="StringNotEmptyType" maxOccurs="1" minOccurs="0"/>
+              <xs:element name="Regex" type="StringNotEmptyType" minOccurs="1" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="NodeRuleSet">
+          <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="1">
+              <xs:element name="NodeRule" minOccurs="1" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                      <xs:element name="AssignValue" type="IOInstructionType"/>
+                      <xs:element name="GenerateValue" type="GOInstructionType"/>
+                      <xs:element name="PushStack" type="IInstructionType"/>
+                      <xs:element name="PopStack" type="OInstructionType"/>
+                      <xs:element name="ClearValue" type="IInstructionType"/>
+                      <xs:element name="Message" type="MessageInstructionType"/>
+                    </xs:choice>
+                  </xs:sequence>
+                  <xs:attribute name="group" use="required" type="xs:token"/>
+                  <xs:attribute name="exact" use="optional" type="xs:string"/>
+                  <xs:attribute name="ignoresCase" use="optional" type="xs:boolean"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -3,62 +3,8 @@
 #pragma warning disable IDE1006 // Naming Styles
 
 using static Common.Entities.DepthOperation;
-using static Common.Debug;
 
 namespace Common.Entities;
-
-public class NewTokenizer
-{
-  public Collection<EToken> Tokens { get; } = [];
-  public required ParsingInfo ParsingInfo { get; init; }
-  protected int CurrentIndex { get; set; }
-
-  public Collection<EToken> Tokenize (string input)
-  {
-    Tokens.Clear();
-    CurrentIndex = 0;
-
-    if (ParsingInfo.RegexString is null)
-    {
-      throw new InvalidOperationException("ParsingInfo.RegexString is null.");
-    }
-
-    var regex = new Regex(ParsingInfo.RegexString, ParsingInfo.RegexOptions);
-    foreach (Match match in regex.Matches(input))
-    {
-      foreach (string groupName in regex.GetGroupNames())
-      {
-        Group group = match.Groups[groupName];
-        if (group.Success && !groupName.Equals("0", SCO))
-        {
-          EToken token = new()
-          {
-            Value = group.Value,
-            Group = groupName,
-            CaptureIndex = group.Captures.Count - 1,
-            Position = group.Index..(group.Index + group.Length)
-          };
-          Tokens.Add(token);
-          Log(MsgClass.GreenInfo, $"{token}", this);
-        }
-      }
-    }
-    return Tokens;
-  }
-}
-
-public class ParsingException : InvalidOperationException
-{
-  [DoesNotReturn]
-  public static dynamic ThrowStackMismatch() => throw new("Stack mismatch. Attempted to pop from an empty stack.");
-  [DoesNotReturn]
-  public static dynamic ThrowNullData (string key) => throw new($"Attempted to write null data to key {key}.");
-  [DoesNotReturn]
-  public static dynamic ThrowValidationFailed (string message) => throw new($"Validation Failed. {message}");
-  public ParsingException (string message) : base(message) { }
-  public ParsingException (string message, Exception innerException) : base(message, innerException) { }
-  public ParsingException () { }
-}
 
 public static class DefaultParsingSets
 {

@@ -58,7 +58,7 @@ public static class StandardRuleSets
         XMLElementNode node = context.GenerateCurrent<XMLElementNode>();
         node.Origin = token.Value;
         context.AddChildToParent(node);
-        Debug.Log(MsgClass.GreenInfo, "Element Tag Single Encountered. Assigning Current.", "StandardRuleSets");
+        DebugMessage("Element Tag Single Encountered. Assigning Current.");
       }
     };
     public static readonly NodeRule ElementSingleEnd = new()
@@ -73,7 +73,7 @@ public static class StandardRuleSets
     public static readonly NodeRule ElementHeader = new()
     {
       TokenName = "element_header",
-      Execute = static (context, token) =>
+      Execute = static (context, _) =>
       {
         context.Header = context.GenerateCurrent<XMLElementNode>();
         DebugMessage("Element Tag Header Open Encountered. Assigning Header.");
@@ -184,6 +184,13 @@ public static class StandardRuleSets
         }
       }
     };
+
+    [SS("regex")] public const string RxElementClose = @"(?'element_close' < \s* /) \s* (?'tag_name' [:\w]+ ) \s* (?'close_tag_close' > )";
+    [SS("regex")] public const string RxElementSingle = @"(?'element_single' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s*  (?'tag_close' / \s* > )";
+    [SS("regex")] public const string RxElementHeader = @"(?'element_header' <\?) \s* (?'tag_name' xml ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s* (?'header_close' \?> )";
+    [SS("regex")] public const string RxElementOpen = @"(?'element_open' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s* (?'open_tag_close' > )";
+    [SS("regex")] public const string RxContent = @"(?<= >) (?'ws'\s*) (?'content'[^<]*?) (?'ws'\s*) (?=<)";
+    [SS("regex")] public const string RxComment = @"(?'comment'<!-- ((?!--)[\s\S])* -->)";
   }
 
   private static class JSON
@@ -222,6 +229,20 @@ public static class StandardRuleSets
     },
   };
 
+  public static TokenRuleSet XMLTokenRuleSet { get; } = new()
+  {
+    RegexOptions = ROCI | ROEC | ROIPW | ROML,
+    TokenSequences =
+    [
+      XML.RxComment,
+      XML.RxElementHeader,
+      XML.RxElementSingle,
+      XML.RxElementClose,
+      XML.RxElementOpen,
+      XML.RxContent
+    ]
+  };
+
   public static NodeRuleSet XMLRuleSet { get; } = new()
   {
     InitialSetup = () => new() { SingleRoot = true },
@@ -234,6 +255,7 @@ public static class StandardRuleSets
       XML.ElementSingleEnd,
       XML.ElementHeader,
       XML.ElementHeaderEnd,
+      XML.TagName,
       XML.AttributeName,
       XML.AttributeValue,
       XML.Content,
