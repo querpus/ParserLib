@@ -8,11 +8,11 @@ namespace Common.NodeTree;
 
 public class CaptureTokenizer
 {
-  public Collection<EToken> Tokens { get; } = [];
+  public Collection<Token> Tokens { get; } = [];
   public required TokenRuleSet Rules { get; init; }
   protected int CurrentIndex { get; set; }
 
-  public Collection<EToken> Tokenize (string input)
+  public Collection<Token> Tokenize (string input)
   {
     Tokens.Clear();
     CurrentIndex = 0;
@@ -33,7 +33,7 @@ public class CaptureTokenizer
           for (int i = 0; i < group.Captures.Count; i++)
           {
             Capture cap = group.Captures[i];
-            EToken token = new()
+            Token token = new()
             {
               Value = cap.Value,
               Group = groupName,

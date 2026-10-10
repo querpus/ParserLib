@@ -3,9 +3,58 @@
 
 using Common.Entities;
 
+using static Common.NodeTree.NodeTarget;
+
 namespace Common.NodeTree;
+
+public enum NodeTarget
+{
+  /// <summary>This node's parent.</summary>
+  /// <remarks>Read only. Cannot write to this field.</remarks>
+  Parent,
+  Current,
+  Header,
+  Root,
+  RootNodes,
+  PropKey,
+  /// <summary>The token group.</summary>
+  /// <remarks>Read only. Cannot write to token.</remarks>
+  TokenGroup,
+  TokenValue,
+}
 public class NodeContext
 {
+  public dynamic? GetTargetValue (NodeTarget target, Token? token = null) => target switch
+  {
+    NodeTarget.Current => Current,
+    NodeTarget.Parent => Parent,
+    NodeTarget.Header => Header,
+    NodeTarget.Root => Root,
+    NodeTarget.RootNodes => RootNodes,
+    NodeTarget.PropKey => PropKey,
+    TokenGroup when token is not null => token.Value.Group,
+    TokenValue when token is not null => token.Value.Value,
+  };
+  public void SetTargetValue (NodeTarget target, dynamic value, Token? token = null)
+  {
+    INode assignRootNodes (dynamic value)
+    {
+      RootNodes.Add(value);
+      return value;
+    }
+
+    dynamic? c = target switch
+    {
+      NodeTarget.Current => Current = value,
+      NodeTarget.Parent => throw new InvalidOperationException(),
+      NodeTarget.Header => Header = value,
+      NodeTarget.Root => Root = value,
+      NodeTarget.RootNodes => assignRootNodes(value),
+      NodeTarget.PropKey => PropKey = value,
+      TokenGroup => throw new InvalidOperationException(),
+      TokenValue => throw new InvalidOperationException(),
+    };
+  }
   public required bool SingleRoot { get; init; }
   public string? PropKey { get; set; }
   /// <summary>Gets the stack of nodes used to track the current node hierarchy during traversal or processing.</summary>
@@ -25,7 +74,7 @@ public class NodeContext
   /// <remarks>This assigns the root node if the stack is empty.</remarks>
   public void PushAndAddChild (INode node)
   {
-    AddChildToParent(node);
+    AddNodeTo(node, NodeTarget.Parent, null);
     NodeStack.Push(node);
   }
   public void PushAndAddChild ()
@@ -35,27 +84,26 @@ public class NodeContext
     else
       ParsingException.ThrowNullData("Current");
   }
-  public void AddChildToParent (INode child)
+  public void AddNodeTo (INode node, NodeTarget target, Token? token)
   {
-    if (IsRoot && SingleRoot)
+    INode? parent = GetTargetValue(target, token) as INode;
+    if (parent is null && target is NodeTarget.Parent)
     {
-      Root = child;
+      if (SingleRoot && Root is not null)
+        Root.AddChild(node);
+      else if (!SingleRoot && RootNodes is not null)
+        RootNodes.Add(node);
+      else
+        throw new InvalidOperationException();
     }
-    else if (IsRoot)
+    else if (parent is not null)
     {
-      RootNodes.Add(child);
+      parent.AddChild(node);
     }
     else
     {
-      Parent.AddChild(child);
+      throw new InvalidOperationException();
     }
-  }
-  public void AddChildToParent ()
-  {
-    if (HasCurrent)
-      AddChildToParent(Current);
-    else
-      ParsingException.ThrowNullData("Current");
   }
   [MemberNotNull(nameof(Current))]
   public TNode GenerateCurrent<TNode> () where TNode : INode, new()

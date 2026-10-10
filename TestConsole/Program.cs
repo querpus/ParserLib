@@ -116,6 +116,18 @@ internal static class Program
         Log(MsgClass.Debug, parsed1.RootNode?.ToString() ?? SE, "Program");
         _ = GetInput();
         break;
+      case "NEWJSON2":
+        string json = File.ReadAllText(FinishPath(Paths.json_launch));
+        NewTokenizer tokenizer2 = new() { Rules = StandardRuleSets.JSONTokenRuleSet };
+        Collection<Token> tokens2 = tokenizer2.Tokenize(json);
+        TokenProcessor processor2 = new(tokens2, StandardRuleSets.JSONRuleSet);
+        processor2.Process();
+        var context2 = processor2.Context;
+        Log(MsgClass.Debug, $"{context2?.Root}", "Program");
+        Log(MsgClass.BlueInfo, $"{tokens2}", "Program");
+        Log(MsgClass.Prompt, "Press enter to return to test selection.", "Program");
+        _ = GetInput();
+        break;
       case "WAD":
         InitialTest("wad", ResWAD.wad_rpg03);
         InitialTest("wad", ResWAD.wad_pl2);

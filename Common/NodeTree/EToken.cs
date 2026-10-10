@@ -2,7 +2,7 @@
 #pragma warning disable format // Formatting
 
 namespace Common.NodeTree;
-public readonly struct EToken : IIndexSortable
+public readonly struct Token : IIndexSortable
 {
   public required string Value { get; init; }
   public required string? Group { get; init; }
