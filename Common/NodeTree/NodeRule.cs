@@ -8,14 +8,18 @@ public class NodeRule
   public string? TokenName { get; init; }
   public string? ExactText { get; init; }
   public Action<NodeContext, Token> Execute { get; init; } = (_, token) => Debug.Log(MsgClass.GreenInfo, $"No Execution Defined for '{token.Group}'", "NodeRule");
-  public static NodeRule IgnoreGroup (string groupName, bool addToOrigin = false) => new()
+  public static NodeRule IgnoreGroup (string groupName, bool addToOriginHead = false, bool addToOriginTail = false) => new()
   {
     TokenName = groupName,
     Execute = (context, token) =>
     {
-      if (context.HasCurrent && addToOrigin)
+      if (context.HasCurrent && addToOriginHead)
       {
-        context.Current.Origin += token.Value;
+        context.Current.OriginHead += token.Value;
+      }
+      if (context.HasCurrent && addToOriginTail)
+      {
+        context.Current.OriginTail += token.Value;
       }
     }
   };

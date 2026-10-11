@@ -1063,7 +1063,7 @@
         <member name="T:Common.NodeTree.INode">
             <summary>An interface for storing nodes.</summary>
         </member>
-        <member name="P:Common.NodeTree.INode.Origin">
+        <member name="P:Common.NodeTree.INode.OriginHead">
             <summary>Gets the origin of the parsed entity.</summary>
         </member>
         <member name="M:Common.NodeTree.INode.Equals(Common.NodeTree.INode,Common.NodeTree.INode)">
@@ -1089,7 +1089,7 @@
         <member name="P:Common.NodeTree.NodeContext.Header">
             <summary>Document Header.</summary>
         </member>
-        <member name="M:Common.NodeTree.NodeContext.PushAndAddChild(Common.NodeTree.INode)">
+        <member name="M:Common.NodeTree.NodeContext.PushAndAddTo(Common.NodeTree.INode)">
             <summary>Pushes a node to the top of the node stack, and adds it as a child of the previous node on the stack.</summary>
             <param name="node">The child node to push.</param>
             <remarks>This assigns the root node if the stack is empty.</remarks>
@@ -1113,13 +1113,16 @@
             <remarks>This does not account for globally set or namespaces set by this element's parents.</remarks>
         </member>
         <member name="P:Common.NodeTree.XMLContentNode.Content">
-            <summary>Gets the content of this node.</summary>
+            <summary>Gets or sets the content of this node.</summary>
         </member>
         <member name="P:Common.NodeTree.IPLCommandNode.CommandLetter">
             <summary>Gets the content of this node.</summary>
         </member>
         <member name="P:Common.NodeTree.XMLCommentNode.Content">
             <summary>Gets the content of this node.</summary>
+        </member>
+        <member name="P:Common.NodeTree.JSONContentNode.Content">
+            <summary>This contains the quoted string, unquoted boolean, null, undefined, or unquoted number.</summary>
         </member>
         <member name="T:Common.Pos">
             <summary>A lightweight variant of section that holds a start position and a length for operating on a <see cref="T:System.Span`1"/>, <see cref="T:System.Memory`1"/> or <see langword="string"/>.</summary>

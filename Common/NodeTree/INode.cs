@@ -10,15 +10,16 @@ public interface INode : ITextSerializer
   Dictionary<string, ITextSerializer> Properties { get; }
   Dictionary<string, object> Data { get; }
   /// <summary>Gets the origin of the parsed entity.</summary>
-  string? Origin { get; set; }
+  string? OriginHead { get; set; }
+  string? OriginTail { get; set; }
   /// <summary>Static equality method.</summary>
   /// <param name="obj_a">Entity 'A'.</param>
   /// <param name="obj_b">Entity 'B'.</param>
   /// <returns><see langword="true"/> if 'A' is equal to 'B', <see langword="false"/> otherwise.</returns>
   static bool Equals (INode? obj_a, INode? obj_b) =>
     (obj_a is null && obj_b is null) || (obj_a is not null && obj_b is not null && obj_a.Equals(obj_b));
-  bool Equals (object? obj) => obj is Node node && Origin == node.Origin && Children.SequenceEqual(node.Children) && Properties.SequenceEqual(node.Properties) && Data.SequenceEqual(node.Data);
-  int GetHashCode () => HashCode.Combine(Origin, Children, Properties, Data);
+  bool Equals (object? obj) => obj is Node node && OriginHead == node.OriginHead && Children.SequenceEqual(node.Children) && Properties.SequenceEqual(node.Properties) && Data.SequenceEqual(node.Data);
+  int GetHashCode () => HashCode.Combine(OriginHead, OriginTail, Children, Properties, Data);
   /// <summary>Adds a child to the children list.</summary>
   /// <param name="child">The child to add.</param>
   void AddChild (INode child) => Children.Add(child);

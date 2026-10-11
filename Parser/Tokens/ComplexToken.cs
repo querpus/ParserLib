@@ -137,7 +137,7 @@ public sealed class ComplexToken : IToken, IPrintable
   /// <remarks>This will not call both Value and ValueList. It chooses based on the quantity of the list.</remarks>
   private void EachPart (Action<KeyValuePair<string, IToken?>> action)
   {
-    foreach (KeyValuePair<string, IToken?> part in Parts)
+    foreach (KeyValuePair<string, IToken?> part in Parts.Where(k => k.Value is not null))
     {
       // Skip if multiple values
       if (part.Key.Like("Value") && part.Value is TokenCollection tc && tc.Count > 1)

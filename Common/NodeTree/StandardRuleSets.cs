@@ -2,8 +2,10 @@
 #pragma warning disable format // Formatting
 
 using Common.Entities;
-using NT = Common.NodeTree.NodeTarget;
+
 using static Common.NodeTree.NodeRuleHelper;
+
+using NT = Common.NodeTree.NodeTarget;
 
 namespace Common.NodeTree;
 
@@ -57,13 +59,15 @@ public static class NodeRuleHelper
     {
       case "GenerateNode" when className is not null:
         INode node = context.GenerateNode(target, className);
-        node.Origin = token.Value;
+        node.OriginHead = token.Value;
         break;
       case "AssignNode" when target is not NT.Null && source is not NT.Null:
         context.AssignNodeTo(context.GetTargetValue(source), target);
         break;
       case "AddToNode" when target is not NT.Null && source is not NT.Null:
         context.AddNodeTo(context.GetTargetValue(source), target);
+        break;
+      default:
         break;
     }
   }
@@ -80,9 +84,9 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         XMLElementNode node = context.GenerateNode<XMLElementNode>(NT.Current);
-        node.Origin = token.Value;
+        node.OriginHead = token.Value;
         context.PushAndAddTo(node);
-        DebugMessage("Element Open Tag Open Encountered. Assigning Current.");
+        DebugMessage($"Element Open Tag Open Encountered. Assigning Current. Pushing Current. Stack count:{context.NodeStack.Count}");
       }
     };
     public static readonly NodeRule ElementClose = new()
@@ -92,7 +96,7 @@ public static class StandardRuleSets
       {
         context.WarnIfNotNull(NT.Current);
         context.Current = context.NodeStack.Pop();
-        DebugMessage("Beginning Close Validation");
+        DebugMessage($"Beginning Close Validation, Popping Current. Stack count:{context.NodeStack.Count}");
       }
     };
     public static readonly NodeRule ElementSingle = new()
@@ -101,7 +105,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         XMLElementNode node = context.GenerateNode<XMLElementNode>(NT.Current);
-        node.Origin = token.Value;
+        node.OriginHead = token.Value;
         context.AddNodeTo(node, NT.Parent);
         DebugMessage("Element Tag Single Encountered. Assigning Current.");
       }
@@ -109,32 +113,38 @@ public static class StandardRuleSets
     public static readonly NodeRule ElementSingleEnd = new()
     {
       TokenName = "tag_close",
-      Execute = static (context, _) =>
+      Execute = static (context, token) =>
       {
+        context.Current?.OriginHead += token.Value;
         context.ClearNode(NT.Current);
-        DebugMessage("Single Tag Closing. Adding as child to top of node stack. Setting Current to null.");
+        DebugMessage("Single Tag Closing. Clearing Current.");
       }
     };
     public static readonly NodeRule ElementHeader = new()
     {
       TokenName = "element_header",
-      Execute = static (context, _) =>
+      Execute = static (context, token) =>
       {
         context.Header = context.GenerateNode<XMLElementNode>(NT.Current);
+        context.Header.OriginHead = token.Value;
         DebugMessage("Element Tag Header Open Encountered. Assigning Header.");
       }
     };
     public static readonly NodeRule ElementHeaderEnd = new()
     {
       TokenName = "header_close",
-      Execute = static (context, _) => context.ClearNode(NT.Current)
+      Execute = static (context, token) =>
+      {
+        context.Current?.OriginHead += token.Value;
+        context.ClearNode(NT.Current);
+      }
     };
     public static readonly NodeRule ElementCloseEnd = new()
     {
       TokenName = "close_tag_close",
       Execute = static (context, token) =>
       {
-        context.Current?.Origin += token.Value;
+        context.Current?.OriginTail += token.Value;
         context.ClearNode(NT.Current);
       }
     };
@@ -144,7 +154,15 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         ErrorIfNull(context.Current);
-        context.Current.Origin += token.Value;
+
+        if (context.Current.OriginHead?.Contains(token.Value) ?? false)
+        {
+          context.Current.OriginTail += token.Value;
+        }
+        else
+        {
+          context.Current.OriginHead += token.Value;
+        }
 
         if (!context.Current.Data.TryGetValue("Name", out object? name_obj))
         {
@@ -167,7 +185,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         ErrorIfNull(context.Current);
-        context.Current?.Origin += " " + token.Value;
+        context.Current?.OriginHead += " " + token.Value;
         context.PropKey = token.Value;
         Debug.Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
       }
@@ -182,6 +200,7 @@ public static class StandardRuleSets
         if (context.Current is XMLElementNode xen)
           xen.Attributes.Add(context.PropKey, new QString(token.Value));
         context.PropKey = null;
+        context.Current.OriginHead += token.Value;
         Debug.Log(MsgClass.GreenInfo, "Adding attribute to current. Clearing PropKey.", "StandardRuleSets");
       }
     };
@@ -192,7 +211,7 @@ public static class StandardRuleSets
       {
         if (token.Value.IsWhitespace)
         {
-          Debug.Log(MsgClass.BlueInfo, "Ignoring whitespace.", "StandardRuleSets");
+          Debug.Log(MsgClass.Warning, "Ignoring whitespace.", "StandardRuleSets");
         }
         else if (context.IsRoot)
         {
@@ -200,8 +219,10 @@ public static class StandardRuleSets
         }
         else
         {
-          var parent = context.NodeStack.Peek();
-          parent.AddChild(new XMLContentNode() { Data = { ["Content"] = token.Value }, Origin = token.Value });
+          XMLContentNode node = context.GenerateNode<XMLContentNode>(NT.Current);
+          node.Content = token.Value;
+          node.OriginHead = token.Value;
+          context.AddNodeTo(node, NT.Parent);
           Debug.Log(MsgClass.GreenInfo, "Adding content to node at top of node stack.", "StandardRuleSets");
         }
       }
@@ -209,31 +230,21 @@ public static class StandardRuleSets
     public static readonly NodeRule ElementOpenEnd = new()
     {
       TokenName = "open_tag_close",
-      Execute = static (context, _) =>
+      Execute = static (context, token) =>
       {
         ErrorIfNull(context.Current);
-        if (context.Current is XMLElementNode xen)
-        {
-          if (context.IsRoot && context.Root is not null)
-          {
-            Debug.Log(MsgClass.Warning, "RootNode already defined.", "StandardRuleSets");
-          }
-          else
-          {
-            context.PushAndAddTo(xen);
-            context.ClearNode(NT.Current);
-            Debug.Log(MsgClass.GreenInfo, "Element Open Tag CLosed. Pushing Stack.", "StandardRuleSets");
-          }
-        }
+        context.Current.OriginHead += token.Value;
+        context.ClearNode(NT.Current);
+        Debug.Log(MsgClass.GreenInfo, "Element Open Tag Closed. Clearing current", "StandardRuleSets");
       }
-    }; 
+    };
     #endregion
     #region Regex Sequences
     [SS("regex")] public const string RxElementClose = @"(?'element_close' < \s* /) \s* (?'tag_name' [:\w]+ ) \s* (?'close_tag_close' > )";
     [SS("regex")] public const string RxElementSingle = @"(?'element_single' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s*  (?'tag_close' / \s* > )";
     [SS("regex")] public const string RxElementHeader = @"(?'element_header' <\?) \s* (?'tag_name' xml ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s* (?'header_close' \?> )";
     [SS("regex")] public const string RxElementOpen = @"(?'element_open' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s* (?'open_tag_close' > )";
-    [SS("regex")] public const string RxContent = @"(?<= >) (?'ws'\s*) (?'content'[^<]*?) (?'ws'\s*) (?=<)";
+    [SS("regex")] public const string RxContent = @"(?<= >) (?'ws'\s*) ((?'content'[^<]+) (?'ws'\s*))? (?=<)";
     [SS("regex")] public const string RxComment = @"(?'comment'<!-- ((?!--)[\s\S])* -->)";
     #endregion Regex Sequences
   }
@@ -245,7 +256,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.Origin = token.Value;
+        node.OriginHead = token.Value;
         node.CommandLetter = token.Value[0];
 
         if (context.HasParent)
@@ -270,7 +281,7 @@ public static class StandardRuleSets
         if (context.Current is IPLCommandNode icn)
         {
           icn.AddValue(token.Value);
-          icn.Origin += token.Value;
+          icn.OriginHead += token.Value;
         }
         else
         {
@@ -291,7 +302,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.Origin = token.Value;
+        node.OriginHead = token.Value;
         node.CommandLetter = token.Value[0];
 
         if (context.PropKey is "<ESC>" or "\e")
@@ -310,7 +321,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.Origin = token.Value;
+        node.OriginHead = token.Value;
         node.CommandLetter = token.Value[0];
 
         context.AddNodeTo(node, NT.Parent);
@@ -329,7 +340,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         if (context.HasCurrent)
-          context.Current.Origin += token.Value;
+          context.Current.OriginHead += token.Value;
         else
           throw new InvalidOperationException("No current node to operate on.");
       }
@@ -341,7 +352,7 @@ public static class StandardRuleSets
     [SS("regex")] public const string RxPropCommand_1 = @"(?'prop_cmd' [hlw] ) (?'value' -?\d+) (?'end' ;|$|(?=<))";
     [SS("regex")] public const string RxPropCommand_2 = @"(?'prop_cmd' [cdo] ) (?'value' -?\d+) (?'op' ,) (?'value' [^;<\n]*) (?'end' ;|$|(?=<))";
     [SS("regex")] public const string RxBeforeStart = "(?'before' ^(?>((?!<STX>).)*)<STX>)";
-    [SS("regex")] public const string RxBetweenMarkers = @"(?'between'<ETX>(?>((?!<STX>).)*)<STX>)";
+    [SS("regex")] public const string RxBetweenMarkers = "(?'between'<ETX>(?>((?!<STX>).)*)<STX>)";
     [SS("regex")] public const string RxAfterEnd = "(?'after'<ETX>(?>((?!<STX>).)*))";
   }
   private static class JSON
@@ -368,7 +379,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         JSONObjectNode node = context.GenerateNode<JSONObjectNode>(NT.Current);
-        node.Origin = token.Value;
+        node.OriginHead = token.Value;
         context.PushAndAddTo(node);
         DebugMessage("Object Open Token Processed.");
       }
@@ -378,8 +389,23 @@ public static class StandardRuleSets
       TokenName = "o_close",
       Execute = static (context, token) =>
       {
-        _ = context.NodeStack.Pop();
+        JSONObjectNode node = (JSONObjectNode) context.NodeStack.Pop();
+        node.OriginTail = token.Value;
         DebugMessage("Object Close Token Processed.");
+      }
+    };
+
+    public static readonly NodeRule PropertyName = new()
+    {
+      TokenName = "key_name",
+      Execute = static (context, token) =>
+      {
+        if (context.PropKey is not null)
+          Debug.Log(MsgClass.Warning, "PropKey was not null when assigned.", "StandardRuleSets");
+
+        context.PropKey = token.Value;
+        context.Current?.OriginHead += "\n" + token.Value;
+        Debug.Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
       }
     };
   }
@@ -407,6 +433,10 @@ public static class StandardRuleSets
     Rules = {
       JSON.ObjectOpen,
       JSON.ObjectClose,
+      JSON.PropertyName,
+      NodeRule.IgnoreGroup("op", true),
+      NodeRule.IgnoreGroup("ws"),
+      NodeRule.IgnoreGroup("comment")
     },
   };
   public static TokenRuleSet XMLTokenRuleSet { get; } = new()

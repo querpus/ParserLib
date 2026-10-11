@@ -20,11 +20,16 @@ public class NodeContext
     NT.TokenValue when token is not null => token.Value.Value,
     _ => throw new InvalidOperationException(),
   };
-  public void SetTargetValue (NT target, dynamic value)
+  public void SetTargetValue (NT target, dynamic? value)
   {
     INode assignRootNodes (dynamic value)
     {
       RootNodes.Add(value);
+      return value;
+    }
+    INode? clearRootNodes (dynamic? value)
+    {
+      RootNodes.Clear();
       return value;
     }
 
@@ -36,7 +41,8 @@ public class NodeContext
       NT.Parent => throw new InvalidOperationException(),
       NT.Header => Header = value,
       NT.Root => Root = value,
-      NT.RootNodes => assignRootNodes(value),
+      NT.RootNodes when value is not null => assignRootNodes(value),
+      NT.RootNodes when value is null => clearRootNodes(value),
       NT.PropKey => value is string ? PropKey = value : throw new InvalidOperationException(),
       NT.TokenGroup => throw new InvalidOperationException(),
       NT.TokenValue => throw new InvalidOperationException(),
@@ -68,23 +74,41 @@ public class NodeContext
   }
   public void AddNodeTo (INode node, NT target)
   {
-    INode? parent = GetTargetValue(target, null) as INode;
-    if (parent is null && target is NT.Parent)
+    if (target is NT.Parent)
     {
-      if (SingleRoot && Root is not null)
-        Root.AddChild(node);
-      else if (!SingleRoot && RootNodes is not null)
-        RootNodes.Add(node);
+      if (GetTargetValue(target, null) is not INode parent)
+      {
+        if (SingleRoot)
+        {
+          if (Root is not null)
+            Root.AddChild(node);
+          else
+            Root = node;
+        }
+        else
+        {
+          RootNodes.Add(node);
+        }
+      }
       else
-        throw new InvalidOperationException();
+      {
+        parent.AddChild(node);
+      }
     }
-    if (target is NT.RootNodes && Root is null)
+    else if (target is NT.RootNodes)
     {
       RootNodes.Add(node);
     }
-    else if (parent is not null)
+    else if (target is NT.Current)
     {
-      parent.AddChild(node);
+      if (Current is not null)
+      {
+        Current.AddChild(node);
+      }
+      else
+      {
+        throw new InvalidOperationException("Current is null");
+      }
     }
     else
     {
@@ -123,8 +147,8 @@ public class NodeContext
   public void ClearNode (NT target)
   {
     WarnIfNull(target);
-    Current = null;
-    Debug.Log(MsgClass.GreenInfo, "Current Cleared.", this);
+    SetTargetValue(target, null);
+    Debug.Log(MsgClass.GreenInfo, $"Node stored in {target} was cleared.", this);
   }
 
   [MemberNotNullWhen(false, nameof(Parent))]
