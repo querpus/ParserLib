@@ -139,13 +139,20 @@ public sealed class ComplexToken : IToken, IPrintable
   {
     foreach (KeyValuePair<string, IToken?> part in Parts.Where(k => k.Value is not null))
     {
-      // Skip if multiple values
-      if (part.Key.Like("Value") && part.Value is TokenCollection tc && tc.Count > 1)
-        continue;
-      if (part.Key.Like("ValueList") && ((part.Value is TokenCollection tc2 && tc2.Count == 1) || part.Value is not TokenCollection))
-        continue;
+      if (part.Key.Like("Value") && (part.Value is not TokenCollection tc || tc.Count == 1))
+      {
+        action(part);
+      }
+      else if (part.Key.Like("ValueList") && (part.Value is TokenCollection tc2 && tc2.Count > 1))
+      {
+        action(part);
+      }
+      else if (part.Key.Like(["StatementList", "PropertyList", "AddFlagList", "SubFlagList", "ParameterList", "Left", "Right", "Center", "Type", "Name"]))
+      {
+        action(part);
+      }
 
-      action(part);
+      
     }
   }
 

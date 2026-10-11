@@ -158,8 +158,9 @@ public static class EntityFactory
     }
 
     Collection<IEntity> ents = [];
-    foreach (Match match in matches)
+    foreach (object obj in matches)
     {
+      Match match = (obj as Match)!;
       IEntity? gen = Generate(match, context);
 
       if (gen is not null)
