@@ -20,7 +20,7 @@ public class NodeContext
     NT.TokenValue when token is not null => token.Value.Value,
     _ => throw new InvalidOperationException(),
   };
-  public void SetTargetValue (NT target, dynamic value, Token? token = null)
+  public void SetTargetValue (NT target, dynamic value)
   {
     INode assignRootNodes (dynamic value)
     {

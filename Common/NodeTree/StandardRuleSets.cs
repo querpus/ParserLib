@@ -73,7 +73,9 @@ public static class StandardRuleSets
 {
   private static class XML
   {
-    public static readonly NodeRule ElementOpen = new() {
+    #region Node Rules
+    public static readonly NodeRule ElementOpen = new()
+    {
       TokenName = "element_open",
       Execute = static (context, token) =>
       {
@@ -83,7 +85,8 @@ public static class StandardRuleSets
         DebugMessage("Element Open Tag Open Encountered. Assigning Current.");
       }
     };
-    public static readonly NodeRule ElementClose = new() {
+    public static readonly NodeRule ElementClose = new()
+    {
       TokenName = "element_close",
       Execute = static (context, _) =>
       {
@@ -129,7 +132,11 @@ public static class StandardRuleSets
     public static readonly NodeRule ElementCloseEnd = new()
     {
       TokenName = "close_tag_close",
-      Execute = static (context, _) => context.ClearNode(NT.Current)
+      Execute = static (context, token) =>
+      {
+        context.Current?.Origin += token.Value;
+        context.ClearNode(NT.Current);
+      }
     };
     public static readonly NodeRule TagName = new()
     {
@@ -137,6 +144,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         ErrorIfNull(context.Current);
+        context.Current.Origin += token.Value;
 
         if (!context.Current.Data.TryGetValue("Name", out object? name_obj))
         {
@@ -159,6 +167,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         ErrorIfNull(context.Current);
+        context.Current?.Origin += " " + token.Value;
         context.PropKey = token.Value;
         Debug.Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
       }
@@ -217,25 +226,123 @@ public static class StandardRuleSets
           }
         }
       }
-    };
-
+    }; 
+    #endregion
+    #region Regex Sequences
     [SS("regex")] public const string RxElementClose = @"(?'element_close' < \s* /) \s* (?'tag_name' [:\w]+ ) \s* (?'close_tag_close' > )";
     [SS("regex")] public const string RxElementSingle = @"(?'element_single' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s*  (?'tag_close' / \s* > )";
     [SS("regex")] public const string RxElementHeader = @"(?'element_header' <\?) \s* (?'tag_name' xml ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s* (?'header_close' \?> )";
     [SS("regex")] public const string RxElementOpen = @"(?'element_open' < ) \s* (?'tag_name' [:\w]+ ) (\s+ (?'a_name' [:\w]+) (?'a_eq'=) (?'a_qt'['""]) (?'a_value'(?:(?!\k<a_qt>).)*) (?'a_end'\k<a_qt>) )* \s* (?'open_tag_close' > )";
     [SS("regex")] public const string RxContent = @"(?<= >) (?'ws'\s*) (?'content'[^<]*?) (?'ws'\s*) (?=<)";
     [SS("regex")] public const string RxComment = @"(?'comment'<!-- ((?!--)[\s\S])* -->)";
+    #endregion Regex Sequences
   }
   private static class IPL
   {
+    public static NodeRule LineCommand = new()
+    {
+      TokenName = "line_cmd",
+      Execute = static (context, token) =>
+      {
+        IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
+        node.Origin = token.Value;
+        node.CommandLetter = token.Value[0];
+
+        if (context.HasParent)
+        {
+          _ = context.NodeStack.Pop();
+          DebugMessage("Popping previous line command.");
+        }
+
+        if (context.IsRoot)
+        {
+          context.PushAndAddTo(node);
+          DebugMessage("Pushing new line command.");
+        }
+      }
+    };
+
+    public static NodeRule LineIndex = new()
+    {
+      TokenName = "index",
+      Execute = static (context, token) =>
+      {
+        if (context.Current is IPLCommandNode icn)
+        {
+          icn.AddValue(token.Value);
+          icn.Origin += token.Value;
+        }
+        else
+        {
+          DebugMessage("Current was not an IPL node.");
+        }
+      }
+    };
+
+    public static NodeRule CmdEnd = new()
+    {
+      TokenName = "end",
+      Execute = static (context, _) => context.ClearNode(NT.Current)
+    };
+
+    public static NodeRule BasicCommand = new()
+    {
+      TokenName = "cmd",
+      Execute = static (context, token) =>
+      {
+        IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
+        node.Origin = token.Value;
+        node.CommandLetter = token.Value[0];
+
+        if (context.PropKey is "<ESC>" or "\e")
+        {
+          node.Escaped = true;
+          context.ClearNode(NT.PropKey);
+        }
+
+        context.AddNodeTo(node, NT.RootNodes);
+      }
+    };
+
+    public static NodeRule PropertyCommand = new()
+    {
+      TokenName = "prop_cmd",
+      Execute = static (context, token) =>
+      {
+        IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
+        node.Origin = token.Value;
+        node.CommandLetter = token.Value[0];
+
+        context.AddNodeTo(node, NT.Parent);
+      }
+    };
+
+    public static NodeRule Escape = new()
+    {
+      TokenName = "esc",
+      Execute = static (context, token) => context.PropKey = token.Value
+    };
+
+    public static NodeRule Comma = new()
+    {
+      TokenName = "op",
+      Execute = static (context, token) =>
+      {
+        if (context.HasCurrent)
+          context.Current.Origin += token.Value;
+        else
+          throw new InvalidOperationException("No current node to operate on.");
+      }
+    };
+
     [SS("regex")] public const string RxSimpleCommand = "(?'cmd' [R] ) (?'end' ;|$|(?=<))";
     [SS("regex")] public const string RxEscapedCommand = @"(?'esc' <ESC> | \e ) (?'cmd' [AP] ) (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string RxLineCommand = @"(?'cmd' [BHLMQSU] ) (?'index' \d+) (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string RxPropCommand_1 = @"(?'cmd' [hlw] ) (?'value' -?\d+) (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string RxPropCommand_2 = @"(?'cmd' [cdo] ) (?'value' -?\d+) (?'op' ,) (?'value' [^;<\n]*) (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string BeforeStart = "(?'before' ^(?>((?!<STX>).)*)<STX>)";
-    [SS("regex")] public const string BetweenMarkers = @"(?'between'<ETX>(?>((?!<STX>).)*)<STX>)";
-    [SS("regex")] public const string AfterEnd = "(?'after'<ETX>(?>((?!<STX>).)*))";
+    [SS("regex")] public const string RxLineCommand = @"(?'line_cmd' [BHLMQSU] ) (?'index' \d+) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxPropCommand_1 = @"(?'prop_cmd' [hlw] ) (?'value' -?\d+) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxPropCommand_2 = @"(?'prop_cmd' [cdo] ) (?'value' -?\d+) (?'op' ,) (?'value' [^;<\n]*) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxBeforeStart = "(?'before' ^(?>((?!<STX>).)*)<STX>)";
+    [SS("regex")] public const string RxBetweenMarkers = @"(?'between'<ETX>(?>((?!<STX>).)*)<STX>)";
+    [SS("regex")] public const string RxAfterEnd = "(?'after'<ETX>(?>((?!<STX>).)*))";
   }
   private static class JSON
   {
@@ -333,26 +440,38 @@ public static class StandardRuleSets
       XML.Content,
       NodeRule.IgnoreGroup("comment"),
       NodeRule.IgnoreGroup("ws"),
-      NodeRule.IgnoreGroup("a_qt"),
-      NodeRule.IgnoreGroup("a_eq"),
-      NodeRule.IgnoreGroup("a_end"),
+      NodeRule.IgnoreGroup("a_qt", true),
+      NodeRule.IgnoreGroup("a_eq", true),
+      NodeRule.IgnoreGroup("a_end", true),
     },
   };
-  public static NodeRuleSet IPLRuleSet = new()
+  public static TokenRuleSet IPLTokenRuleSet { get; } = new()
+  {
+    RegexOptions = ROIPW | ROML | ROEC,
+    TokenSequences = [
+      IPL.RxEscapedCommand,
+      IPL.RxLineCommand,
+      IPL.RxPropCommand_1,
+      IPL.RxPropCommand_2,
+      IPL.RxBeforeStart,
+      IPL.RxBetweenMarkers,
+      IPL.RxAfterEnd
+    ]
+  };
+  public static NodeRuleSet IPLRuleSet { get; } = new()
   {
     InitialSetup = () => new() { SingleRoot = false },
     Rules = [
-      new()
-      {
-        TokenName = "H_Line",
-        Execute = (c, t) => {
-          if (c.HasParent)
-          {
-            _ = c.NodeStack.Pop();
-          }
-          INode node = c.GenerateCurrent<IPLCommandNode>();
-        }
-      }
+      IPL.LineCommand,
+      IPL.BasicCommand,
+      IPL.LineIndex,
+      IPL.CmdEnd,
+      IPL.Escape,
+      IPL.PropertyCommand,
+      IPL.Comma,
+      NodeRule.IgnoreGroup("before"),
+      NodeRule.IgnoreGroup("after"),
+      NodeRule.IgnoreGroup("between"),
     ]
   };
 }

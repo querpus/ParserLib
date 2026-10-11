@@ -35,16 +35,34 @@ public sealed class XMLElementNode : Node
 public sealed class XMLContentNode : Node
 {
   public override string Serialize () => Content ?? SE;
-  /// <summary>Gets the content of this node.</summary>
-  public string? Content => Data.TryGetValue("Content", out object? obj) ? obj as string : null;
+  /// <summary>Gets or sets the content of this node.</summary>
+  public string? Content
+  {
+    get => Data.TryGetValue("Content", out object? obj) ? obj as string : null;
+    set => Data["Content"] = value ?? throw new InvalidOperationException("Tried to assign null to Content.");
+  }
 }
 
 public sealed class IPLCommandNode : Node
 {
   public override string Serialize () => $"{CommandLetter}{Values.TextJoin(",")};";
   /// <summary>Gets the content of this node.</summary>
-  public char? CommandLetter => Data.TryGetValue("CommandLetter", out object? obj) ? (char) obj : null;
-  public Collection<string> Values => Data.TryGetValue("Values", out object? obj) ? obj as Collection<string> ?? [] : [];
+  public char? CommandLetter
+  {
+    get => Data.TryGetValue("CommandLetter", out object? obj) ? (char) obj : null;
+    set => Data["CommandLetter"] = value ?? '\0';
+  }
+  public bool Escaped
+  {
+    get => Data.TryGetValue("Escaped", out object? obj) && obj is true;
+    set => Data["Escaped"] = value;
+  }
+  public Collection<string> Values
+  {
+    get => Data.TryGetValue("Values", out object? obj) ? obj as Collection<string> ?? [] : (Collection<string>) (Data["Values"] = new Collection<string>());
+    set => Values.AddRange(value);
+  }
+  public void AddValue (string value) => Values.Add(value);
 }
 
 public sealed class XMLCommentNode : Node
@@ -70,6 +88,17 @@ public sealed class JSONArrayNode : Node
   public override string Serialize () => "[" + SerializeChildren() + "]";
 
   public bool IsRoot => Data.TryGetValue("IsRoot", out object? obj) && obj is true;
+}
+
+public sealed class JSONContentNode : Node
+{
+  public override string Serialize () => Content;
+  /// <summary>This contains the quoted string, unquoted boolean, null, undefined, or unquoted number.</summary>
+  public string Content
+  {
+    get => Data.TryGetValue("Content", out object? obj) ? obj as string ?? SE : SE;
+    set => Data["Content"] = value ?? throw new InvalidOperationException("Tried to assign null to Content.");
+  }
 }
 
 public sealed class INISection : Node
