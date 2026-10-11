@@ -2,7 +2,7 @@
 #pragma warning disable format // Formatting
 
 using Common.Entities;
-
+using NT = Common.NodeTree.NodeTarget;
 using static Common.NodeTree.NodeRuleHelper;
 
 namespace Common.NodeTree;
@@ -15,8 +15,23 @@ public static class NodeRuleHelper
       Type.GetType(className)?.InvokeMember(SE, BFCI, null, null, null, CIIC);
   }
 
-  public static void DebugIgnoredGroup (string group) =>
-    Debug.Log(MsgClass.GreenInfo, $"Group {group} ignored.", "StandardRuleSets");
+  extension (string target)
+  {
+    public NT ToNodeTarget () => target switch
+    {
+      "Parent" => NT.Parent,
+      "Root" => NT.Root,
+      "Current" => NT.Current,
+      "PropKey" => NT.PropKey,
+      "RootNodes" => NT.RootNodes,
+      "Header" => NT.Header,
+      "TokenGroup" => NT.TokenGroup,
+      "TokenValue" => NT.TokenValue,
+      _ => NT.Null,
+    };
+  }
+
+  public static void DebugIgnoredGroup (string group) => DebugMessage($"Group {group} ignored.");
   public static void ErrorIfNull ([NotNull] object? current)
   {
     if (current is null)
@@ -25,8 +40,6 @@ public static class NodeRuleHelper
       throw new InvalidOperationException("Node was null. Cannot Add Content.");
     }
   }
-  public static void ClearCurrent (NodeContext context) => context.Current = null;
-  public static INode GetParent (NodeContext context) => context.NodeStack.Peek();
 
   public static void DebugMessage (string message)
   {
@@ -35,47 +48,22 @@ public static class NodeRuleHelper
 #endif
   }
 
-  public static void DoXMLOperation (NodeTree.NodeContext context, string action, string? assignTo, string? valueFrom, string? className)
+  public static void DoXMLOperation (NodeContext context, Token token, string action, string? assignTo, string? valueFrom, string? className)
   {
+    NT target = assignTo?.ToNodeTarget() ?? NT.Null;
+    NT source = valueFrom?.ToNodeTarget() ?? NT.Null;
+
     switch(action)
     {
-      case "GenerateNode":
-        if (className is null || assignTo is null)
-          throw new InvalidOperationException();
-        if (className.CreateClass() is not INode node)
-          throw new InvalidOperationException();
-        switch (assignTo)
-        {
-          case "TokenValue" or "TokenGroup" or "PropKey":
-            throw new InvalidOperationException();
-          case "Current":
-            context.Current = node;
-            break;
-          case "Parent":
-            if (context.HasParent)
-            {
-              _ = context.NodeStack.Pop();
-              context.PushAndAddChild(node);
-            }
-            break;
-          default:
-            throw new InvalidOperationException();
-        }
+      case "GenerateNode" when className is not null:
+        INode node = context.GenerateNode(target, className);
+        node.Origin = token.Value;
         break;
-      case "AssignNode":
-        if (valueFrom is null || assignTo is null)
-          throw new InvalidOperationException();
-        INode? from = valueFrom switch
-        {
-          "Current" => context.Current,
-          "Parent" => context.Parent,
-          "Root" => context.SingleRoot ? context.Root : throw new InvalidOperationException(),
-          _ => throw new InvalidOperationException()
-        };
-        switch (assignTo)
-        {
-
-        }
+      case "AssignNode" when target is not NT.Null && source is not NT.Null:
+        context.AssignNodeTo(context.GetTargetValue(source), target);
+        break;
+      case "AddToNode" when target is not NT.Null && source is not NT.Null:
+        context.AddNodeTo(context.GetTargetValue(source), target);
         break;
     }
   }
@@ -89,9 +77,9 @@ public static class StandardRuleSets
       TokenName = "element_open",
       Execute = static (context, token) =>
       {
-        XMLElementNode node = context.GenerateCurrent<XMLElementNode>();
+        XMLElementNode node = context.GenerateNode<XMLElementNode>(NT.Current);
         node.Origin = token.Value;
-        context.PushAndAddChild(node);
+        context.PushAndAddTo(node);
         DebugMessage("Element Open Tag Open Encountered. Assigning Current.");
       }
     };
@@ -99,7 +87,7 @@ public static class StandardRuleSets
       TokenName = "element_close",
       Execute = static (context, _) =>
       {
-        context.WarnIfCurrentHasData();
+        context.WarnIfNotNull(NT.Current);
         context.Current = context.NodeStack.Pop();
         DebugMessage("Beginning Close Validation");
       }
@@ -109,9 +97,9 @@ public static class StandardRuleSets
       TokenName = "element_single",
       Execute = static (context, token) =>
       {
-        XMLElementNode node = context.GenerateCurrent<XMLElementNode>();
+        XMLElementNode node = context.GenerateNode<XMLElementNode>(NT.Current);
         node.Origin = token.Value;
-        context.AddNodeTo(node, NodeTarget.Parent);
+        context.AddNodeTo(node, NT.Parent);
         DebugMessage("Element Tag Single Encountered. Assigning Current.");
       }
     };
@@ -120,8 +108,8 @@ public static class StandardRuleSets
       TokenName = "tag_close",
       Execute = static (context, _) =>
       {
-        context.ClearCurrent();
-        Debug.Log(MsgClass.GreenInfo, "Single Tag Closing. Adding as child to top of node stack. Setting Current to null.", "StandardRuleSets");
+        context.ClearNode(NT.Current);
+        DebugMessage("Single Tag Closing. Adding as child to top of node stack. Setting Current to null.");
       }
     };
     public static readonly NodeRule ElementHeader = new()
@@ -129,19 +117,19 @@ public static class StandardRuleSets
       TokenName = "element_header",
       Execute = static (context, _) =>
       {
-        context.Header = context.GenerateCurrent<XMLElementNode>();
+        context.Header = context.GenerateNode<XMLElementNode>(NT.Current);
         DebugMessage("Element Tag Header Open Encountered. Assigning Header.");
       }
     };
     public static readonly NodeRule ElementHeaderEnd = new()
     {
       TokenName = "header_close",
-      Execute = static (context, _) => context.ClearCurrent()
+      Execute = static (context, _) => context.ClearNode(NT.Current)
     };
     public static readonly NodeRule ElementCloseEnd = new()
     {
       TokenName = "close_tag_close",
-      Execute = static (context, _) => context.ClearCurrent()
+      Execute = static (context, _) => context.ClearNode(NT.Current)
     };
     public static readonly NodeRule TagName = new()
     {
@@ -168,7 +156,7 @@ public static class StandardRuleSets
     public static readonly NodeRule AttributeName = new()
     {
       TokenName = "a_name",
-      Execute = (context, token) =>
+      Execute = static (context, token) =>
       {
         ErrorIfNull(context.Current);
         context.PropKey = token.Value;
@@ -178,7 +166,7 @@ public static class StandardRuleSets
     public static readonly NodeRule AttributeValue = new()
     {
       TokenName = "a_value",
-      Execute = (context, token) =>
+      Execute = static (context, token) =>
       {
         ErrorIfNull(context.Current);
         ErrorIfNull(context.PropKey);
@@ -191,7 +179,7 @@ public static class StandardRuleSets
     public static readonly NodeRule Content = new()
     {
       TokenName = "content",
-      Execute = (context, token) =>
+      Execute = static (context, token) =>
       {
         if (token.Value.IsWhitespace)
         {
@@ -212,26 +200,19 @@ public static class StandardRuleSets
     public static readonly NodeRule ElementOpenEnd = new()
     {
       TokenName = "open_tag_close",
-      Execute = (context, _) =>
+      Execute = static (context, _) =>
       {
         ErrorIfNull(context.Current);
         if (context.Current is XMLElementNode xen)
         {
-          if (context.IsRoot && context.Root is null)
-          {
-            context.Root = xen;
-            context.NodeStack.Push(xen);
-            context.ClearCurrent();
-            Debug.Log(MsgClass.GreenInfo, "Element Open Tag Closed. Pushing Stack. Assigning Root.", "StandardRuleSets");
-          }
-          else if (context.IsRoot)
+          if (context.IsRoot && context.Root is not null)
           {
             Debug.Log(MsgClass.Warning, "RootNode already defined.", "StandardRuleSets");
           }
           else
           {
-            context.PushAndAddChild(xen);
-            context.ClearCurrent();
+            context.PushAndAddTo(xen);
+            context.ClearNode(NT.Current);
             Debug.Log(MsgClass.GreenInfo, "Element Open Tag CLosed. Pushing Stack.", "StandardRuleSets");
           }
         }
@@ -245,7 +226,17 @@ public static class StandardRuleSets
     [SS("regex")] public const string RxContent = @"(?<= >) (?'ws'\s*) (?'content'[^<]*?) (?'ws'\s*) (?=<)";
     [SS("regex")] public const string RxComment = @"(?'comment'<!-- ((?!--)[\s\S])* -->)";
   }
-
+  private static class IPL
+  {
+    [SS("regex")] public const string RxSimpleCommand = "(?'cmd' [R] ) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxEscapedCommand = @"(?'esc' <ESC> | \e ) (?'cmd' [AP] ) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxLineCommand = @"(?'cmd' [BHLMQSU] ) (?'index' \d+) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxPropCommand_1 = @"(?'cmd' [hlw] ) (?'value' -?\d+) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxPropCommand_2 = @"(?'cmd' [cdo] ) (?'value' -?\d+) (?'op' ,) (?'value' [^;<\n]*) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string BeforeStart = "(?'before' ^(?>((?!<STX>).)*)<STX>)";
+    [SS("regex")] public const string BetweenMarkers = @"(?'between'<ETX>(?>((?!<STX>).)*)<STX>)";
+    [SS("regex")] public const string AfterEnd = "(?'after'<ETX>(?>((?!<STX>).)*))";
+  }
   private static class JSON
   {
     [SS("regex")]
@@ -269,9 +260,9 @@ public static class StandardRuleSets
       TokenName = "o_open",
       Execute = static (context, token) =>
       {
-        JSONObjectNode node = context.GenerateCurrent<JSONObjectNode>();
+        JSONObjectNode node = context.GenerateNode<JSONObjectNode>(NT.Current);
         node.Origin = token.Value;
-        context.PushAndAddChild(node);
+        context.PushAndAddTo(node);
         DebugMessage("Object Open Token Processed.");
       }
     };
@@ -341,8 +332,10 @@ public static class StandardRuleSets
       XML.AttributeValue,
       XML.Content,
       NodeRule.IgnoreGroup("comment"),
+      NodeRule.IgnoreGroup("ws"),
       NodeRule.IgnoreGroup("a_qt"),
       NodeRule.IgnoreGroup("a_eq"),
+      NodeRule.IgnoreGroup("a_end"),
     },
   };
   public static NodeRuleSet IPLRuleSet = new()

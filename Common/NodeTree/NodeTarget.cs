@@ -4,6 +4,7 @@
 namespace Common.NodeTree;
 public enum NodeTarget
 {
+  Null = 0,
   /// <summary>This node's parent.</summary>
   /// <remarks>Read only. Cannot write to this field.</remarks>
   Parent,

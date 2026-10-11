@@ -11,6 +11,12 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="TokenNotEmptyType">
+    <xs:restriction base="xs:token">
+      <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:complexType name="MessageInstructionType">
     <xs:attribute name="message" type="xs:string"/>
   </xs:complexType>
@@ -45,6 +51,7 @@
       <xs:enumeration value="Parent"/>
       <xs:enumeration value="PropKey"/>
       <xs:enumeration value="Root"/>
+      <xs:enumeration value="RootNodes"/>
       <xs:enumeration value="Header"/>
       <xs:enumeration value="Null"/>
       <xs:enumeration value="TokenValue"/>
@@ -76,11 +83,11 @@
   <xs:element name="Ruleset">
     <xs:complexType>
       <xs:all minOccurs="1" maxOccurs="1">
-        <xs:element name="Name" type="StringNotEmptyType"/>
+        <xs:element name="Name" type="TokenNotEmptyType"/>
         <xs:element name="TokenRuleset">
           <xs:complexType>
             <xs:sequence minOccurs="1" maxOccurs="1">
-              <xs:element name="Options" type="StringNotEmptyType" maxOccurs="1" minOccurs="0"/>
+              <xs:element name="Options" type="RegexOptionList" maxOccurs="1" minOccurs="0"/>
               <xs:element name="Regex" type="StringNotEmptyType" minOccurs="1" maxOccurs="unbounded"/>
             </xs:sequence>
           </xs:complexType>
@@ -94,6 +101,7 @@
                     <xs:choice minOccurs="0" maxOccurs="unbounded">
                       <xs:element name="AssignNode" type="IOInstructionType"/>
                       <xs:element name="GenerateNode" type="GOInstructionType"/>
+                      <xs:element name="AddNodeTo" type="IOInstructionType"/>
                       <xs:element name="PushStack" type="IInstructionType"/>
                       <xs:element name="PopStack" type="OInstructionType"/>
                       <xs:element name="ClearNode" type="IInstructionType"/>
