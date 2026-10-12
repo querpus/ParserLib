@@ -3,17 +3,17 @@
 
 namespace Common.NodeTree;
 
-public class TokenProcessor (IEnumerable<Token> tokens, NodeRuleSet ruleset)
+public class TokenProcessor (IEnumerable<CaptureToken> tokens, NodeRuleSet ruleset)
 {
-  public Collection<Token> Tokens { get; } = [.. tokens];
+  public Collection<CaptureToken> Tokens { get; } = [.. tokens];
   public NodeRuleSet RuleSet { get; } = ruleset;
   public NodeContext? Context { get; private set; }
   public void Process ()
   {
     Context = RuleSet.InitialSetup();
     int count = 0;
-    Collection<Token> finalTokens = [.. tokens.Where(t => t.Group is not null).Order()];
-    foreach (Token token in finalTokens)
+    Collection<CaptureToken> finalTokens = [.. tokens.Where(t => t.Group is not null).Order()];
+    foreach (CaptureToken token in finalTokens)
     {
       if (!RuleSet.RulesByGroup.TryGetValue(token.Group!, out NodeRule? rule))
       {

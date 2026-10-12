@@ -50,7 +50,7 @@ public static class NodeRuleHelper
 #endif
   }
 
-  public static void DoXMLOperation (NodeContext context, Token token, string action, string? assignTo, string? valueFrom, string? className)
+  public static void DoXMLOperation (NodeContext context, CaptureToken token, string action, string? assignTo, string? valueFrom, string? className)
   {
     NT target = assignTo?.ToNodeTarget() ?? NT.Null;
     NT source = valueFrom?.ToNodeTarget() ?? NT.Null;

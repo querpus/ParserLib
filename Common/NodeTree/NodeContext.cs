@@ -7,7 +7,7 @@ namespace Common.NodeTree;
 
 public class NodeContext
 {
-  public dynamic? GetTargetValue (NT target, Token? token = null) => target switch
+  public dynamic? GetTargetValue (NT target, CaptureToken? token = null) => target switch
   {
     NT.Null => null,
     NT.Current => Current,
