@@ -151,8 +151,6 @@ public sealed class ComplexToken : IToken, IPrintable
       {
         action(part);
       }
-
-      
     }
   }
 

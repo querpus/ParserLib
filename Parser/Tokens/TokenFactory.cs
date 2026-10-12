@@ -1,10 +1,14 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 
+using Common.NodeTree;
+
 using MC = Common.MsgClass;
 
 namespace Parser.Tokens;
 
-public sealed class TokenFactory
+/// <summary>Match Tokenizer</summary>
+/// <remarks>Each match is a token.</remarks>
+public sealed class TokenFactory : ITokenizer<IToken>
 {
   #region Private Fields
   private const string Area = "TokenFactory";
@@ -20,6 +24,7 @@ public sealed class TokenFactory
   [NotNull]
   public SectionCollection? CannotMatch { get; private set; }
   public bool PromptAfterEach { get; set; }
+  public Collection<IToken> Tokens => [.. _result];
   #endregion
   #region Constructors
   public TokenFactory (Spec spec, IEnumerable<TokenRule>? rules = null)
@@ -263,7 +268,7 @@ public sealed class TokenFactory
     _default_rule = _spec.DefaultRuleSet;
   }
   [MemberNotNull(nameof(CannotMatch))]
-  public TokenCollection Produce (string input)
+  public Collection<IToken> Tokenize (string input)
   {
     DebugIn(Area, "Produce");
     _result.Clear();

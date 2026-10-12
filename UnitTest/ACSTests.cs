@@ -28,9 +28,9 @@ public class ACSTests
     TokenFactory tokenFactory = new(Specification.ZDoom.Definition.ACS);
     TokenAssembler tokenAssembler = new(Specification.ZDoom.Definition.ACS);
 
-    TokenCollection tokens = tokenFactory.Produce(to_parse);
+    Collection<IToken> tokens = tokenFactory.Tokenize(to_parse);
     Assert.NotEmpty(tokens);
-    TokenAssemblyResult tc = tokenAssembler.Execute(tokens);
+    TokenAssemblyResult tc = tokenAssembler.Execute([.. tokens]);
     _ = Assert.Single(tc.Hierarchy);
   }
 
@@ -40,9 +40,9 @@ public class ACSTests
   {
     TokenFactory tokenFactory = new(Specification.ZDoom.Definition.ACS);
     TokenAssembler tokenAssembler = new(Specification.ZDoom.Definition.ACS);
-    TokenCollection tokens = tokenFactory.Produce(to_parse);
+    Collection<IToken> tokens = tokenFactory.Tokenize(to_parse);
     Assert.NotEmpty(tokens);
-    TokenAssemblyResult tc = tokenAssembler.Execute(tokens);
+    TokenAssemblyResult tc = tokenAssembler.Execute([.. tokens]);
     _ = Assert.Single(tc.Hierarchy);
   }
 }

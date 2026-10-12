@@ -6,16 +6,22 @@ using static Common.Debug;
 
 namespace Common.NodeTree;
 
-public class CaptureTokenizer
+public interface ITokenizer<TToken>
+{
+  Collection<TToken> Tokens { get; }
+  Collection<TToken> Tokenize (string input);
+  int Count => Tokens.Count;
+}
+
+public class CaptureTokenizer : ITokenizer<Token>
 {
   public Collection<Token> Tokens { get; } = [];
   public required TokenRuleSet Rules { get; init; }
-  protected int CurrentIndex { get; set; }
-
+  public int Count => Tokens.Count;
+  public void Reset () => Tokens.Clear();
   public Collection<Token> Tokenize (string input)
   {
-    Tokens.Clear();
-    CurrentIndex = 0;
+    Reset();
 
     if (Rules.TokenSequences.Count == 0)
     {
