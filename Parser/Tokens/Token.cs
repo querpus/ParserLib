@@ -11,10 +11,15 @@ public sealed class Token : IToken, IPrintable
   public int LastPosition => Index + Length - 1;
   public int Length => Content.Length;
   public int Index { get; init; }
-  public string Type { get => field.IsEmpty ? "None" : field; set; } = SE;
+  public string Type { get => field.IsEmpty ? "None" : field; set; } = "None";
   public IToken? Parent { get; set; }
   public IList<IToken> Children { get; } = [];
   public bool HasType => Type is not null;
+
+  IEnumerable<string> Common.NodeTree.IToken.Value { get => Content; init => Content = value; }
+  string? Common.NodeTree.IToken.Name { get => Type; init => Type = value ?? "None"; }
+  Range Common.NodeTree.IToken.Position { get => new(Index, LastPosition); init => Index = value.Start.Value; }
+
   int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
   public override string ToString () => $"{Type} : {Content}";
   public string ToString (int indent) => $"{Type} : {Content}";
@@ -28,7 +33,7 @@ public sealed class Token : IToken, IPrintable
   public override int GetHashCode () => HashCode.Combine(Content, Index, Type);
   public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
   public bool Equals (IToken? other) => GetHashCode() == other?.GetHashCode();
-
+  public string Serialize () => Content;
   public static bool operator == (Token left, IToken right) => left is null ? right is null : left.Equals(right);
   public static bool operator != (Token left, IToken right) => !(left == right);
   public static bool operator < (Token left, IToken right) => left is null ? right is not null : left.CompareTo(right) < 0;

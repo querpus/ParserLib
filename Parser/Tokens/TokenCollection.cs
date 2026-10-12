@@ -1,3 +1,5 @@
+using System.Reflection.Metadata;
+
 namespace Parser.Tokens;
 
 public static class TokenType
@@ -26,8 +28,11 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IToken, IPrintab
   int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
 
   public int Count => _tokens.Count;
-
   public string Type { get; set; } = SE;
+
+  IEnumerable<string> Common.NodeTree.IToken.Value { get => Content; init => Content = value; }
+  string? Common.NodeTree.IToken.Name { get => Type; init => Type = value ?? "None"; }
+  Range Common.NodeTree.IToken.Position { get => new(Index, LastPosition); init => Index = value.Start.Value; }
 
   public bool HasType => !TokenType.IsEmpty(Type);
   public IToken? Parent { get; set; }
