@@ -2,7 +2,7 @@
 
 namespace Parser.Tokens;
 
-public interface IToken : IIndexSortable, IEquatable<IToken>, Common.NodeTree.IToken
+public interface IToken : IEquatable<IToken>, Common.NodeTree.IMultiToken
 {
   Spec Spec { get; }
   /// <summary>Assigned at match, cleared if match fails, kept if passes.</summary>

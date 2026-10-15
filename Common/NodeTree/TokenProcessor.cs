@@ -12,8 +12,7 @@ public class TokenProcessor (IEnumerable<CaptureToken> tokens, NodeRuleSet rules
   {
     Context = RuleSet.InitialSetup();
     int count = 0;
-    Collection<CaptureToken> finalTokens = [.. tokens.Where(t => t.Group is not null).Order()];
-    foreach (CaptureToken token in finalTokens)
+    foreach (CaptureToken token in tokens.Where(t => t.Group is not null).Order())
     {
       if (!RuleSet.RulesByGroup.TryGetValue(token.Group!, out NodeRule? rule))
       {

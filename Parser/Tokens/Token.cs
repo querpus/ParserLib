@@ -4,6 +4,7 @@ namespace Parser.Tokens;
 
 public sealed class Token : IToken, IPrintable
 {
+  public string Delim { get; init; } = " ";
   public TokenRef? AssignTo { get; set; }
   public required Spec Spec { get; init; }
   public string Content { get; set; } = SE;
@@ -16,7 +17,7 @@ public sealed class Token : IToken, IPrintable
   public IList<IToken> Children { get; } = [];
   public bool HasType => Type is not null;
 
-  IEnumerable<string> Common.NodeTree.IToken.Value { get => Content; init => Content = value; }
+  Collection<Common.NodeTree.IToken> Common.NodeTree.IMultiToken.Value => [.. Children];
   string? Common.NodeTree.IToken.Name { get => Type; init => Type = value ?? "None"; }
   Range Common.NodeTree.IToken.Position { get => new(Index, LastPosition); init => Index = value.Start.Value; }
 

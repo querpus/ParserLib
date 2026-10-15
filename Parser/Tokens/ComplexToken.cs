@@ -4,6 +4,7 @@ namespace Parser.Tokens;
 
 public sealed class ComplexToken : IToken, IPrintable
 {
+  public string Delim { get; init; } = " ";
   private readonly Dictionary<TokenRef, IToken> _token_pieces = [];
   public TokenRef? AssignTo { get; set; }
   public Dictionary<TokenRef, IToken?> TokenPieces
@@ -132,6 +133,12 @@ public sealed class ComplexToken : IToken, IPrintable
   string IToken.ContentNoNewLine => Children.Select(child => child.ToString()).TextJoin().Replace(["\n", "\r"], ["<LF>", "<CR>"]);
 
   public required Spec Spec { get; init; }
+
+  Collection<Common.NodeTree.IToken> Common.NodeTree.IMultiToken.Value => throw new NotImplementedException();
+
+  string? Common.NodeTree.IToken.Name { get => throw new NotImplementedException(); init => throw new NotImplementedException(); }
+  Range Common.NodeTree.IToken.Position { get => throw new NotImplementedException(); init => throw new NotImplementedException(); }
+
   /// <summary>Calls the action on every piece in this token.</summary>
   /// <param name="action">The action to call.</param>
   /// <remarks>This will not call both Value and ValueList. It chooses based on the quantity of the list.</remarks>
@@ -205,4 +212,5 @@ public sealed class ComplexToken : IToken, IPrintable
     Children = [.. Children],
     Type = Type,
   };
+  string ITextSerializer.Serialize () => throw new NotImplementedException();
 }

@@ -1,11 +1,4 @@
-using System.Reflection.Metadata;
-
 namespace Parser.Tokens;
-
-public static class TokenType
-{
-  public static bool IsEmpty (string type) => type is null or "-" or EmptyString || type.Like("None");
-}
 
 /// <summary>A collection of tokens, use this to keep token operations consistent.</summary>
 public sealed class TokenCollection () : IReadOnlyList<IToken>, IToken, IPrintable
@@ -30,11 +23,7 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IToken, IPrintab
   public int Count => _tokens.Count;
   public string Type { get; set; } = SE;
 
-  IEnumerable<string> Common.NodeTree.IToken.Value { get => Content; init => Content = value; }
-  string? Common.NodeTree.IToken.Name { get => Type; init => Type = value ?? "None"; }
-  Range Common.NodeTree.IToken.Position { get => new(Index, LastPosition); init => Index = value.Start.Value; }
-
-  public bool HasType => !TokenType.IsEmpty(Type);
+  public bool HasType => !(Type is null or "-" or EmptyString || Type.Like("None"));
   public IToken? Parent { get; set; }
   IList<IToken> IToken.Children => _tokens;
   public int Index => _tokens.Count > 0 ? _tokens[0].Index : -1;

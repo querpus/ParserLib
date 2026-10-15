@@ -3,22 +3,9 @@
 
 namespace Common.NodeTree;
 
-public interface ITokenRule : IEquatable<IToken>
-{
-  bool IsSatisfiedBy (IToken token);
-}
-
-public interface IToken : IIndexSortable, ITextSerializer
-{
-  IEnumerable<string> Value { get; init; }
-  string? Name { get; init; }
-  Range Position { get; init; }
-}
-
 public readonly struct CaptureToken : IToken
 {
   public string Value { get; init; }
-  IEnumerable<string> IToken.Value { get => [Value]; init => Value = value.Single(); }
   public required string? Group { get; init; }
   public required int CaptureIndex { get; init; }
   public required Range Position { get; init; }
