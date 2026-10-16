@@ -43,7 +43,7 @@ public class CaptureTokenizer : ITokenizer<CaptureToken>
             CaptureToken token = new()
             {
               Value = cap.Value,
-              Group = groupName,
+              Name = groupName,
               CaptureIndex = i,
               Position = cap.Index..(cap.Index + cap.Length)
             };
@@ -87,7 +87,7 @@ public class GroupTokenizer : ITokenizer<CaptureToken>
             CaptureToken token = new()
             {
               Value = cap.Value,
-              Group = groupName,
+              Name = groupName,
               CaptureIndex = i,
               Position = cap.Index..(cap.Index + cap.Length)
             };

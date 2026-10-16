@@ -7,21 +7,38 @@ public class NodeRule
 {
   public string? TokenName { get; init; }
   public string? ExactText { get; init; }
-  public static void DefaultAction (NodeContext context, CaptureToken token) => Debug.Log(MsgClass.GreenInfo, $"No Execution Defined for '{token.Group}'", "NodeRule");
+  public static void DefaultAction (NodeContext context, CaptureToken token) => Debug.Log(MsgClass.GreenInfo, $"No Execution Defined for '{token.Name}'", "NodeRule");
   public Action<NodeContext, CaptureToken> Execute { get; init; } = DefaultAction;
-  public static NodeRule IgnoreGroup (string groupName, bool addToOriginHead = false, bool addToOriginTail = false) => new()
+  public static NodeRule KeepAndIgnore (string groupName, bool appendToPrefix = false, bool appendToSuffix = false) => new()
   {
     TokenName = groupName,
     Execute = (context, token) =>
     {
-      if (context.HasCurrent && addToOriginHead)
-      {
-        context.Current.OriginHead += token.Value;
-      }
-      if (context.HasCurrent && addToOriginTail)
-      {
-        context.Current.OriginTail += token.Value;
-      }
+      if (!context.HasCurrent) return;
+      if (appendToPrefix) context.Current.AppendToPrefix(token.Value);
+      if (appendToSuffix) context.Current.AppendToSuffix(token.Value);
     }
   };
+  public static NodeRule Discard (string groupName, bool appendToPrefix = false, bool appendToSuffix = false, string replace_with = EmptyString) => new()
+  {
+    TokenName = groupName,
+    Execute = (context, _) =>
+    {
+      if (replace_with.IsEmpty) return;
+      if (!context.HasCurrent) return;
+      if (appendToPrefix) context.Current.AppendToPrefix(replace_with);
+      if (appendToSuffix) context.Current.AppendToSuffix(replace_with);
+    }
+  };
+  public static NodeRule ReplaceEmpty (string groupName, bool appendToPrefix = false, bool appendToSuffix = false, string if_empty_insert_text = EmptyString) => new()
+  {
+    TokenName = groupName,
+    Execute = (context, token) =>
+    {
+      if (!context.HasCurrent) return;
+      if (appendToPrefix) context.Current.AppendToPrefix(token.Value.IsEmpty ? if_empty_insert_text : token.Value);
+      if (appendToSuffix) context.Current.AppendToSuffix(token.Value.IsEmpty ? if_empty_insert_text : token.Value);
+    }
+  };
+  public static NodeRule 
 }

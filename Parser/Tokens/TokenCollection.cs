@@ -1,7 +1,9 @@
+using Common.NodeTree;
+
 namespace Parser.Tokens;
 
 /// <summary>A collection of tokens, use this to keep token operations consistent.</summary>
-public sealed class TokenCollection () : IReadOnlyList<IToken>, IToken, IPrintable
+public sealed class TokenCollection () : IReadOnlyList<IToken>, Common.NodeTree.IMultiToken<IToken>, IPrintable, IToken
 {
   #region Private Fields
   /// <summary>The internal token list.</summary>
@@ -25,9 +27,22 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IToken, IPrintab
 
   public bool HasType => !(Type is null or "-" or EmptyString || Type.Like("None"));
   public IToken? Parent { get; set; }
-  IList<IToken> IToken.Children => _tokens;
+  public IList<IToken> Children => _tokens;
   public int Index => _tokens.Count > 0 ? _tokens[0].Index : -1;
-  string IToken.ContentNoNewLine => _tokens.Select(child => child.ToString()).TextJoin("");
+  public string ContentNoNewLine => this.ToString();
+  string IToken.Content => ToString();
+  string? Common.NodeTree.IToken.Value => null;
+  public string Delim { get; init; } = SE;
+
+  string? Common.NodeTree.IToken.Name => Type;
+
+  Range Common.NodeTree.IToken.Position => Children.Count switch
+  {
+    < 1 => new(-1, -1),
+    1 => Children[0].Position,
+    > 1 => new(Children[0].Position.Start, Children[^1].Position.End)
+  };
+
   public void Add (IToken item)
   {
     item.ThrowIfNull();
@@ -99,9 +114,11 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IToken, IPrintab
   }
 
   public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
-  public bool Equals (IToken? other) => other is TokenCollection tc && _tokens.SequenceEqual(tc._tokens);
+  public bool Equals (IToken? other) => other is IMultiToken<IToken> tc && _tokens.SequenceEqual(tc.Children);
   public override bool Equals (object? obj) => obj is not null && obj is TokenCollection tc && Equals(tc);
   public override int GetHashCode () => _tokens.GetHashCode();
+  string ITextSerializer.Serialize () => Children.Select(c => c.Serialize()).TextJoin(" ");
+
   public static bool operator == (TokenCollection left, TokenCollection right) => left is null ? right is null : left.Equals(right);
   public static bool operator != (TokenCollection left, TokenCollection right) => !(left == right);
   public static bool operator < (TokenCollection left, TokenCollection right) => left is null ? right is not null : left.CompareTo(right) < 0;

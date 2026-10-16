@@ -67,25 +67,32 @@ public sealed class IPLCommandNode : Node
 
 public sealed class XMLCommentNode : Node
 {
-  public override string Serialize () => $"{Content}";
+  public override string Prefix => "<!--";
+  public override string Suffix => "-->";
+  public override string Serialize () => Prefix + Content + Suffix;
   /// <summary>Gets the content of this node.</summary>
   public string Content => Data.TryGetValue("Content", out object? obj) ? obj as string ?? SE : SE;
 }
 
 public sealed class JSONObjectNode : Node
 {
+  public override string ChildDelim => ",";
+  public override string Prefix => "{";
+  public override string Suffix => "}";
   private static string SerializeProperty (KeyValuePair<string, ITextSerializer> kvp) => $"\"{kvp.Key}\":{kvp.Value.Serialize()}";
   private string SerializeProperties () => Properties.Select(SerializeProperty).TextJoin(",");
-  public override string Serialize () => "{" + SerializeProperties() + "}";
+  public override string Serialize () => Prefix + SerializeProperties() + Suffix;
 
   public bool IsRoot => Data.TryGetValue("IsRoot", out object? obj) && obj is true;
 }
 
 public sealed class JSONArrayNode : Node
 {
+  public override string Prefix => "[";
+  public override string Suffix => "]";
   private static string SerializeChild (ITextSerializer node) => $"{node.Serialize()}";
   private string SerializeChildren () => Children.Select(SerializeChild).TextJoin(",");
-  public override string Serialize () => "[" + SerializeChildren() + "]";
+  public override string Serialize () => Prefix + SerializeChildren() + Suffix;
 
   public bool IsRoot => Data.TryGetValue("IsRoot", out object? obj) && obj is true;
 }

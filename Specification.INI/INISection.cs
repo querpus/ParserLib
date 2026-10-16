@@ -1,5 +1,7 @@
 //using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
+using System.Collections.Immutable;
+
 using Parser.Tokens;
 
 namespace Specification.INI;
@@ -21,7 +23,7 @@ public sealed class INISection : IEnumerable<IProperty<string>>, ITextSerializer
     }
 
     string? name = ct.Name?.Content;
-    TokenCollection? props = ct.Properties;
+    ImmutableList<IToken>? props = ct.Properties;
 
     if (name is null)
     {

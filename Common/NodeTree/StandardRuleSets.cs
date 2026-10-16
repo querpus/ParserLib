@@ -59,7 +59,7 @@ public static class NodeRuleHelper
     {
       case "GenerateNode" when className is not null:
         INode node = context.GenerateNode(target, className);
-        node.OriginHead = token.Value;
+        node.AppendToPrefix(token.Value);
         break;
       case "AssignNode" when target is not NT.Null && source is not NT.Null:
         context.AssignNodeTo(context.GetTargetValue(source), target);
@@ -84,7 +84,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         XMLElementNode node = context.GenerateNode<XMLElementNode>(NT.Current);
-        node.OriginHead = token.Value;
+        node.Prefix = token.Value;
         context.PushAndAddTo(node);
         DebugMessage($"Element Open Tag Open Encountered. Assigning Current. Pushing Current. Stack count:{context.NodeStack.Count}");
       }
@@ -105,7 +105,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         XMLElementNode node = context.GenerateNode<XMLElementNode>(NT.Current);
-        node.OriginHead = token.Value;
+        node.Prefix = token.Value;
         context.AddNodeTo(node, NT.Parent);
         DebugMessage("Element Tag Single Encountered. Assigning Current.");
       }
@@ -115,7 +115,7 @@ public static class StandardRuleSets
       TokenName = "tag_close",
       Execute = static (context, token) =>
       {
-        context.Current?.OriginHead += token.Value;
+        context.Current?.AppendToPrefix(token.Value);
         context.ClearNode(NT.Current);
         DebugMessage("Single Tag Closing. Clearing Current.");
       }
@@ -126,7 +126,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         context.Header = context.GenerateNode<XMLElementNode>(NT.Current);
-        context.Header.OriginHead = token.Value;
+        context.Header.AppendToPrefix(token.Value);
         DebugMessage("Element Tag Header Open Encountered. Assigning Header.");
       }
     };
@@ -135,7 +135,7 @@ public static class StandardRuleSets
       TokenName = "header_close",
       Execute = static (context, token) =>
       {
-        context.Current?.OriginHead += token.Value;
+        context.Current?.AppendToPrefix(token.Value);
         context.ClearNode(NT.Current);
       }
     };
@@ -144,7 +144,7 @@ public static class StandardRuleSets
       TokenName = "close_tag_close",
       Execute = static (context, token) =>
       {
-        context.Current?.OriginTail += token.Value;
+        context.Current?.AppendToSuffix(token.Value);
         context.ClearNode(NT.Current);
       }
     };
@@ -155,13 +155,13 @@ public static class StandardRuleSets
       {
         ErrorIfNull(context.Current);
 
-        if (context.Current.OriginHead?.Contains(token.Value) ?? false)
+        if (context.Current.Prefix?.Contains(token.Value) ?? false)
         {
-          context.Current.OriginTail += token.Value;
+          context.Current.AppendToSuffix(token.Value);
         }
         else
         {
-          context.Current.OriginHead += token.Value;
+          context.Current.AppendToPrefix(token.Value);
         }
 
         if (!context.Current.Data.TryGetValue("Name", out object? name_obj))
@@ -185,7 +185,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         ErrorIfNull(context.Current);
-        context.Current?.OriginHead += " " + token.Value;
+        context.Current?.AppendToPrefix(" " + token.Value);
         context.PropKey = token.Value;
         Debug.Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
       }
@@ -200,7 +200,7 @@ public static class StandardRuleSets
         if (context.Current is XMLElementNode xen)
           xen.Attributes.Add(context.PropKey, new QString(token.Value));
         context.PropKey = null;
-        context.Current.OriginHead += token.Value;
+        context.Current.AppendToPrefix(token.Value);
         Debug.Log(MsgClass.GreenInfo, "Adding attribute to current. Clearing PropKey.", "StandardRuleSets");
       }
     };
@@ -221,7 +221,6 @@ public static class StandardRuleSets
         {
           XMLContentNode node = context.GenerateNode<XMLContentNode>(NT.Current);
           node.Content = token.Value;
-          node.OriginHead = token.Value;
           context.AddNodeTo(node, NT.Parent);
           Debug.Log(MsgClass.GreenInfo, "Adding content to node at top of node stack.", "StandardRuleSets");
         }
@@ -233,7 +232,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         ErrorIfNull(context.Current);
-        context.Current.OriginHead += token.Value;
+        context.Current.AppendToPrefix(token.Value);
         context.ClearNode(NT.Current);
         Debug.Log(MsgClass.GreenInfo, "Element Open Tag Closed. Clearing current", "StandardRuleSets");
       }
@@ -256,7 +255,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.OriginHead = token.Value;
+        node.Prefix = token.Value;
         node.CommandLetter = token.Value[0];
 
         if (context.HasParent)
@@ -270,6 +269,10 @@ public static class StandardRuleSets
           context.PushAndAddTo(node);
           DebugMessage("Pushing new line command.");
         }
+        else
+        {
+          Debug.Log(MsgClass.Warning, "Warning: Context was not at root when pushing line command.", "StandardRuleSets");
+        }
       }
     };
 
@@ -281,7 +284,7 @@ public static class StandardRuleSets
         if (context.Current is IPLCommandNode icn)
         {
           icn.AddValue(token.Value);
-          icn.OriginHead += token.Value;
+          icn.Prefix += token.Value;
         }
         else
         {
@@ -302,7 +305,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.OriginHead = token.Value;
+        node.Prefix = token.Value;
         node.CommandLetter = token.Value[0];
 
         if (context.PropKey is "<ESC>" or "\e")
@@ -321,7 +324,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.OriginHead = token.Value;
+        node.Prefix = token.Value;
         node.CommandLetter = token.Value[0];
 
         context.AddNodeTo(node, NT.Parent);
@@ -331,26 +334,48 @@ public static class StandardRuleSets
     public static NodeRule Escape = new()
     {
       TokenName = "esc",
-      Execute = static (context, token) => context.PropKey = token.Value
+      Execute = static (context, token) =>
+      {
+        if (context.HasCurrent)
+        {
+          context.ClearNode(NT.Current);
+        }
+        IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
+        node.AppendToPrefix(token);
+        node.Escaped = true;
+      }
     };
 
     public static NodeRule Comma = new()
     {
       TokenName = "op",
+      ExactText = ",",
       Execute = static (context, token) =>
       {
         if (context.HasCurrent)
-          context.Current.OriginHead += token.Value;
+          context.Current.AppendToPrefix(token);
         else
           throw new InvalidOperationException("No current node to operate on.");
       }
     };
 
     [SS("regex")] public const string RxSimpleCommand = "(?'cmd' [R] ) (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string RxEscapedCommand = @"(?'esc' <ESC> | \e ) (?'cmd' [AP] ) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxEscapedCommand_0 = @"(?'esc' <ESC> | \e ) (?'cmd' [APc] ) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxAdvancedMode = @"(?'esc' <ESC> | \e ) (?'mode' C ) (?'value'0|1)? (?'end' ;|$|(?=<))";
     [SS("regex")] public const string RxLineCommand = @"(?'line_cmd' [BHLMQSU] ) (?'index' \d+) (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string RxPropCommand_1 = @"(?'prop_cmd' [hlw] ) (?'value' -?\d+) (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string RxPropCommand_2 = @"(?'prop_cmd' [cdo] ) (?'value' -?\d+) (?'op' ,) (?'value' [^;<\n]*) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxPropCommand_1 = @"(?'prop_cmd' [cdhlw] ) (?'value' -?\d+) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxPropCommand_2 = @"(?'prop_cmd' [cdo] ) (?'value' -?\d+) (?'op' ,) (?'value' [^;<\n,]*) (?'end' ;|$|(?=<))";
+    [SS("regex")] public const string RxPropCommand_7 =
+      """
+      (?# Property with 7 Values c17)
+      (?'prop_cmd' [c] ) (?'value' -?\d+) (?'op' ,)
+      (?'value' -?\d+) (?'op' ,)
+      (?'value' -?\d+) (?'op' ,)
+      (?'value' -?\d+) (?'op' ,)
+      (?'value' -?\d+) (?'op' ,)
+      (?'value' -?\d+) (?'op' ,)
+      (?'value' -?\d+)(?'end' ;|$|(?=<))
+      """;
     [SS("regex")] public const string RxBeforeStart = "(?'before' ^(?>((?!<STX>).)*)<STX>)";
     [SS("regex")] public const string RxBetweenMarkers = "(?'between'<ETX>(?>((?!<STX>).)*)<STX>)";
     [SS("regex")] public const string RxAfterEnd = "(?'after'<ETX>(?>((?!<STX>).)*))";
@@ -359,10 +384,10 @@ public static class StandardRuleSets
   {
     [SS("regex")]
     public const string RxAfterKey = @"(?<=[:=]\s*)";
-    [SS("regex")] public const string RxKey = @"(?'qt'[""']) (?'key_name'\w+) \k<qt> (?=\s*[:=])";
-    [SS("regex")] public const string RxString = @"(?<=[:=]\s*) (?'qt'[""']) (?'value'([^\\""]|\\.)*) \k<qt>";
-    [SS("regex")] public const string RxNumber = @"(?<=[:=]\s*) (?'value'[0-9.xXa-fA-F-]+ )";
-    [SS("regex")] public const string RxBool = @"(?<=[:=]\s*) (?'value'true|false)";
+    [SS("regex")] public const string RxKey = @"(?'key' (?'qt'[""']) (?'key_name'\w+) \k<qt>) (?=\s*[:=])";
+    [SS("regex")] public const string RxString = RxAfterKey + @"(?'q_value' (?'qt'[""']) (?'value'((?!\k<qt>).|\\.)*) \k<qt>)";
+    [SS("regex")] public const string RxNumber = RxAfterKey + "(?'value'[0-9.xXa-fA-F-]+ )";
+    [SS("regex")] public const string RxBool = RxAfterKey + "(?'value'true|false)";
     [SS("regex")] public const string RxNull = @"(?<=[:=]\s*) (?'value'null)";
     [SS("regex")] public const string RxArray = @"(?'a_open'\[)|(?'a_close'\])";
     [SS("regex")] public const string RxObject = @"(?'o_open'\{)|(?'o_close'\})";
@@ -370,8 +395,11 @@ public static class StandardRuleSets
     [SS("regex")] public const string RxComment = @"(?'comment'\/\/.*|\/\* [\s\S]*? \*\/)";
     [SS("regex")] public const string RxWhitespace = @"(?'ws'\s+)";
     [SS("regex")] public const string RxErrorTrailingComma = @",\s*[\]}]";
-    [SS("regex")] public const string RxErrorMissingComma = @"[}\]] \s* [\{[]";
+    [SS("regex")] public const string RxErrorMissingComma = @"} \s* \{ | ] \s* \[";
+    [SS("regex")] public const string RxErrorTypeChangeInArray = @"} \s* , \s*  \[ | ] \s* , \s* \{";
+    [SS("regex")] public const string RxErrorTypeChangeInArrayAndNoComma = @"}  \s*  \[ | ]  \s* \{";
     [SS("regex")] public const string RxErrorInvalidEscape = @"\\[^0nr\\""']";
+    [SS("regex")] public const string RxError = $"(?'error'{RxErrorInvalidEscape}|{RxErrorMissingComma}|{RxErrorTrailingComma}|{RxErrorTypeChangeInArray}|{RxErrorTypeChangeInArrayAndNoComma})";
 
     public static readonly NodeRule ObjectOpen = new()
     {
@@ -379,7 +407,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         JSONObjectNode node = context.GenerateNode<JSONObjectNode>(NT.Current);
-        node.OriginHead = token.Value;
+        node.Prefix = token.Value;
         context.PushAndAddTo(node);
         DebugMessage("Object Open Token Processed.");
       }
@@ -390,7 +418,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         JSONObjectNode node = (JSONObjectNode) context.NodeStack.Pop();
-        node.OriginTail = token.Value;
+        node.AppendToSuffix(token.Value);
         DebugMessage("Object Close Token Processed.");
       }
     };
@@ -404,7 +432,7 @@ public static class StandardRuleSets
           Debug.Log(MsgClass.Warning, "PropKey was not null when assigned.", "StandardRuleSets");
 
         context.PropKey = token.Value;
-        context.Current?.OriginHead += "\n" + token.Value;
+        context.Current?.AppendToPrefix("\n" + token.Value);
         Debug.Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
       }
     };
@@ -434,9 +462,10 @@ public static class StandardRuleSets
       JSON.ObjectOpen,
       JSON.ObjectClose,
       JSON.PropertyName,
-      NodeRule.IgnoreGroup("op", true),
-      NodeRule.IgnoreGroup("ws"),
-      NodeRule.IgnoreGroup("comment")
+      NodeRule.KeepAndIgnore("op", true),
+      NodeRule.KeepAndIgnore("ws"),
+      NodeRule.KeepAndIgnore("comment"),
+      NodeRule.SyntaxError("error")
     },
   };
   public static TokenRuleSet XMLTokenRuleSet { get; } = new()
@@ -468,24 +497,32 @@ public static class StandardRuleSets
       XML.AttributeName,
       XML.AttributeValue,
       XML.Content,
-      NodeRule.IgnoreGroup("comment"),
-      NodeRule.IgnoreGroup("ws"),
-      NodeRule.IgnoreGroup("a_qt", true),
-      NodeRule.IgnoreGroup("a_eq", true),
-      NodeRule.IgnoreGroup("a_end", true),
+      NodeRule.KeepAndIgnore("comment"),
+      NodeRule.KeepAndIgnore("ws"),
+      NodeRule.KeepAndIgnore("a_qt", true),
+      NodeRule.KeepAndIgnore("a_eq", true),
+      NodeRule.KeepAndIgnore("a_end", true),
     },
   };
   public static TokenRuleSet IPLTokenRuleSet { get; } = new()
   {
     RegexOptions = ROIPW | ROML | ROEC,
     TokenSequences = [
-      IPL.RxEscapedCommand,
+      IPL.RxAdvancedMode,
+
+      IPL.RxSimpleCommand,
+
+      IPL.RxEscapedCommand_0,
+
       IPL.RxLineCommand,
+
       IPL.RxPropCommand_1,
       IPL.RxPropCommand_2,
+      IPL.RxPropCommand_7,
+
       IPL.RxBeforeStart,
       IPL.RxBetweenMarkers,
-      IPL.RxAfterEnd
+      IPL.RxAfterEnd,
     ]
   };
   public static NodeRuleSet IPLRuleSet { get; } = new()
@@ -499,9 +536,10 @@ public static class StandardRuleSets
       IPL.Escape,
       IPL.PropertyCommand,
       IPL.Comma,
-      NodeRule.IgnoreGroup("before"),
-      NodeRule.IgnoreGroup("after"),
-      NodeRule.IgnoreGroup("between"),
+      NodeRule.KeepAndIgnore("before"),
+      NodeRule.KeepAndIgnore("after"),
+      NodeRule.KeepAndIgnore("between"),
+      NodeRule.ReplaceEmpty("end", appendToSuffix: true, if_empty_insert_text: ";"),
     ]
   };
 }

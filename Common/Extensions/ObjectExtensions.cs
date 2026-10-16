@@ -5,6 +5,7 @@ namespace Common.Extensions;
 
 public static class ObjectExtensions
 {
+  private const string NullString = "<null>";
 
   extension([NotNull] object? obj)
   {
@@ -24,7 +25,7 @@ public static class ObjectExtensions
   /// <param name="obj">The object reference.</param>
   extension(object? obj)
   {
-    public string TypeName => obj?.GetType().Name ?? "null";
+    public string TypeName => obj?.GetType().Name ?? NullString;
     /// <summary>Returns the object as a collection.</summary>
     /// <returns>A collection from the object given, or an empty collection if the object cannot be translated.</returns>
     public Collection<object> AsCollection () => obj?.AsCollection<object>() ?? [];
@@ -47,7 +48,7 @@ public static class ObjectExtensions
     /// <returns>A string representation of the object.</returns>
     public string ToString2 () => obj switch
     {
-      null => "<null>",
+      null => NullString,
       string s => s,
       char c => $"{c}",
       ITextSerializer t => t.Serialize(),
@@ -59,6 +60,7 @@ public static class ObjectExtensions
 
       _ => obj.ToString(),
     } ?? SE;
+    public string ToString (bool strip_special_chars) => (strip_special_chars ? obj?.ToString()?.Select(c => c.Display).ToString() : obj?.ToString()) ?? NullString;
     public string DecodeAsEnum (Type enumType)
     {
       ANEx.ThrowIfNull(enumType);

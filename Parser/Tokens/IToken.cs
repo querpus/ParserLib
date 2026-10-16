@@ -2,7 +2,7 @@
 
 namespace Parser.Tokens;
 
-public interface IToken : IEquatable<IToken>, Common.NodeTree.IMultiToken
+public interface IToken : IEquatable<IToken>, Common.NodeTree.IToken
 {
   Spec Spec { get; }
   /// <summary>Assigned at match, cleared if match fails, kept if passes.</summary>
@@ -10,8 +10,8 @@ public interface IToken : IEquatable<IToken>, Common.NodeTree.IMultiToken
   string Type { get; }
   bool HasType { get; }
   IToken? Parent { get; set; }
-  IList<IToken> Children { get; }
-  string Content => Children.Select(static t => t.Content).TextJoin(" ");
+  string Content { get; }
+  string? Common.NodeTree.IToken.Value => Content;
   string ContentNoNewLine => Content.Replace(["\n", "\r"], ["<LF>", "<CR>"]);
   string ToString (int indent);
   void Print (int indent);

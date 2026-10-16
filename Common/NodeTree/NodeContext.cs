@@ -16,8 +16,9 @@ public class NodeContext
     NT.Root => Root,
     NT.RootNodes => RootNodes,
     NT.PropKey => PropKey,
-    NT.TokenGroup when token is not null => token.Value.Group,
+    NT.TokenGroup when token is not null => token.Value.Name,
     NT.TokenValue when token is not null => token.Value.Value,
+    NT.AnyRootOrParent => (dynamic?) Parent ?? (SingleRoot ? Root : RootNodes),
     _ => throw new InvalidOperationException(),
   };
   public void SetTargetValue (NT target, dynamic? value)
@@ -46,6 +47,7 @@ public class NodeContext
       NT.PropKey => value is string ? PropKey = value : throw new InvalidOperationException(),
       NT.TokenGroup => throw new InvalidOperationException(),
       NT.TokenValue => throw new InvalidOperationException(),
+      NT.AnyRootOrParent when value is not null && Parent is null => SingleRoot ? Root = value : assignRootNodes(value),
       _ => throw new InvalidOperationException(),
     };
 #pragma warning restore IDE0059 // Unnecessary assignment of a value
@@ -74,7 +76,9 @@ public class NodeContext
   }
   public void AddNodeTo (INode node, NT target)
   {
-    if (target is NT.Parent)
+    bool success = false;
+
+    if (target.HasFlag(NT.AnyRootOrParent))
     {
       if (GetTargetValue(target, null) is not INode parent)
       {
@@ -94,25 +98,36 @@ public class NodeContext
       {
         parent.AddChild(node);
       }
+      return;
     }
-    else if (target is NT.RootNodes)
+    if (target.HasFlag(NT.Parent))
+    {
+      if (GetTargetValue(target, null) is INode parent)
+      {
+        success = true;
+        parent.AddChild(node);
+      }
+    }
+    if (target.HasFlag(NT.RootNodes))
     {
       RootNodes.Add(node);
+      success = true;
     }
-    else if (target is NT.Current)
+    if (target.HasFlag(NT.Parent))
     {
       if (Current is not null)
       {
         Current.AddChild(node);
+        success = true;
       }
       else
       {
         throw new InvalidOperationException("Current is null");
       }
     }
-    else
+    if (!success)
     {
-      throw new InvalidOperationException("Not handled yet");
+      throw new InvalidOperationException($"No Node Added to Target {target}.");
     }
   }
   public void AssignNodeTo (INode node, NT target) => SetTargetValue(target, node);

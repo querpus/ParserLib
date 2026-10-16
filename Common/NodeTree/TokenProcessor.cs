@@ -12,16 +12,15 @@ public class TokenProcessor (IEnumerable<CaptureToken> tokens, NodeRuleSet rules
   {
     Context = RuleSet.InitialSetup();
     int count = 0;
-    foreach (CaptureToken token in tokens.Where(t => t.Group is not null).Order())
+    foreach (CaptureToken token in tokens.Where(t => t.Name is not null).Order())
     {
-      if (!RuleSet.RulesByGroup.TryGetValue(token.Group!, out NodeRule? rule))
+      if (!RuleSet.RulesByGroup.TryGetValue(token.Name!, out NodeRule? rule))
       {
-        Debug.Log(MsgClass.Warning, $"Token ID ({token.Group}) is not handled.", this);
+        Debug.Log(MsgClass.Warning, $"Token ID ({token.Name}) is not handled.", this);
         continue;
       }
       rule.Execute(Context, token);
       count++;
-      Debug.Log(MsgClass.Debug, $"Processed Token {token}", this);
     }
     Debug.Log(MsgClass.Debug, $"Token Processing Complete: {count} tokens processed.", this);
   }

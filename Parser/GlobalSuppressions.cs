@@ -3,7 +3,6 @@
 // Project-level suppressions either have no target or are given
 // a specific target and scoped to a namespace, type, member, etc.
 
-[assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>", Scope = "member", Target = "~P:Parser.Tokens.IToken.Children")]
 [assembly: SuppressMessage("Style", "IDE0045:Convert to conditional expression", Justification = "<Pending>", Scope = "member", Target = "~M:Parser.Ops.JumpOperation.Execute")]
 [assembly: SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "<Pending>", Scope = "member", Target = "~M:Parser.Condition.ParsedExpression.Operate(Parser.Condition.KeyOption,System.Object,System.Object)~System.Object")]
 [assembly: SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "<Pending>", Scope = "member", Target = "~M:Parser.Tokens.ComplexToken.GetListID(Parser.Tokens.TokenRef)~Parser.Tokens.TokenRef")]

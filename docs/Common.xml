@@ -1060,21 +1060,32 @@
             <summary>Reference to an empty <see langword="string"/>.</summary>
             <remarks>This one is a compile-time constant.</remarks>
         </member>
+        <member name="M:Common.NodeTree.CaptureToken.ToString">
+            <summary>Displays a brief summary of this token's data.</summary>
+            <returns>A string representation of this token's data.</returns>
+            <remarks>Format: {Group}[{CaptureIndex}] = {Value}</remarks>
+        </member>
+        <member name="T:Common.NodeTree.CaptureTokenizer">
+            <summary>Creates a token for every capture with the group name as the type within every match. Multiple captures are additional tokens.</summary>
+        </member>
+        <member name="T:Common.NodeTree.GroupTokenizer">
+            <summary>Creates a token for every group in each match. Multiple captures are stored as an array of string data.</summary>
+        </member>
         <member name="T:Common.NodeTree.INode">
             <summary>An interface for storing nodes.</summary>
         </member>
-        <member name="P:Common.NodeTree.INode.OriginHead">
+        <member name="P:Common.NodeTree.INode.Prefix">
             <summary>Gets the origin of the parsed entity.</summary>
-        </member>
-        <member name="M:Common.NodeTree.INode.Equals(Common.NodeTree.INode,Common.NodeTree.INode)">
-            <summary>Static equality method.</summary>
-            <param name="obj_a">Entity 'A'.</param>
-            <param name="obj_b">Entity 'B'.</param>
-            <returns><see langword="true"/> if 'A' is equal to 'B', <see langword="false"/> otherwise.</returns>
         </member>
         <member name="M:Common.NodeTree.INode.AddChild(Common.NodeTree.INode)">
             <summary>Adds a child to the children list.</summary>
             <param name="child">The child to add.</param>
+        </member>
+        <member name="P:Common.NodeTree.IToken.Value">
+            <summary>The value of this token. This will be <see langword="null"/> if the token is composed of multiple tokens.</summary>
+        </member>
+        <member name="P:Common.NodeTree.IToken.Name">
+            <summary>The name or type of this token.</summary>
         </member>
         <member name="P:Common.NodeTree.NodeContext.NodeStack">
             <summary>Gets the stack of nodes used to track the current node hierarchy during traversal or processing.</summary>
@@ -1094,13 +1105,41 @@
             <param name="node">The child node to push.</param>
             <remarks>This assigns the root node if the stack is empty.</remarks>
         </member>
+        <member name="F:Common.NodeTree.NodeTarget.Null">
+            <summary>No target, do not store in a field.</summary>
+        </member>
         <member name="F:Common.NodeTree.NodeTarget.Parent">
             <summary>This node's parent.</summary>
-            <remarks>Read only. Cannot write to this field.</remarks>
+            <remarks>Use Push and Pop to travel up or down the hierarchy.</remarks>
+        </member>
+        <member name="F:Common.NodeTree.NodeTarget.Current">
+            <summary>The currently selected node.</summary>
+        </member>
+        <member name="F:Common.NodeTree.NodeTarget.Header">
+            <summary>The document header field.</summary>
+        </member>
+        <member name="F:Common.NodeTree.NodeTarget.Root">
+            <summary>The root document field.</summary>
+            <remarks>Use this if the document requires a single root node.</remarks>
+        </member>
+        <member name="F:Common.NodeTree.NodeTarget.RootNodes">
+            <summary>The root document collection.</summary>
+            <remarks>Use this if the document doesn't require a single root node.</remarks>
+        </member>
+        <member name="F:Common.NodeTree.NodeTarget.PropKey">
+            <summary>The property name field.</summary>
+            <remarks>This is a <see langword="string"/> field.</remarks>
         </member>
         <member name="F:Common.NodeTree.NodeTarget.TokenGroup">
-            <summary>The token group.</summary>
-            <remarks>Read only. Cannot write to token.</remarks>
+            <summary>The token group (aka. Token Type or Token Name)</summary>
+            <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
+        </member>
+        <member name="F:Common.NodeTree.NodeTarget.TokenValue">
+            <summary>The token value (aka. Token Content)</summary>
+            <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
+        </member>
+        <member name="F:Common.NodeTree.NodeTarget.AnyRootOrParent">
+            <summary>Write to parent, if the parent doesn't exist, write to root or add to rootnodes.</summary>
         </member>
         <member name="P:Common.NodeTree.XMLElementNode.Name">
             <summary>Gets the element name and namespace.</summary>
