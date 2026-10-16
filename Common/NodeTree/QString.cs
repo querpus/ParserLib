@@ -2,7 +2,7 @@
 #pragma warning disable format // Formatting
 
 namespace Common.NodeTree;
-public class QString : ITextSerializer, IEquatable<string>, IComparable<string>
+public class QString : ISerializable, IEquatable<string>, IComparable<string>
 {
   public string Value { get; set; } = SE;
   public string Quote { get; set; } = Chars.QTs;

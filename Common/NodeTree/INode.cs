@@ -4,10 +4,10 @@
 namespace Common.NodeTree;
 
 /// <summary>An interface for storing nodes.</summary>
-public interface INode : ITextSerializer, IEquatable<INode>
+public interface INode : ISerializable, IEquatable<INode>
 {
-  Collection<ITextSerializer> Children { get; }
-  Dictionary<string, ITextSerializer> Properties { get; }
+  Collection<ISerializable> Children { get; }
+  Dictionary<string, ISerializable> Properties { get; }
   Dictionary<string, object> Data { get; }
   /// <summary>Gets the origin of the parsed entity.</summary>
   string? Prefix { get; }

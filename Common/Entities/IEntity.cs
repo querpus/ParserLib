@@ -4,7 +4,7 @@
 namespace Common.Entities;
 
 /// <summary>An interface for storing entities.</summary>
-public interface IEntity : ITextSerializer, IEquatable<IEntity>
+public interface IEntity : ISerializable, IEquatable<IEntity>
 {
   IList<IEntity> Children { get; }
   Dictionary<string, object?> DataValues { get; }

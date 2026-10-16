@@ -216,5 +216,5 @@ public sealed class ComplexToken : IToken, IPrintable, IMultiToken<IToken>
     Children = [.. Children],
     Type = Type,
   };
-  string ITextSerializer.Serialize () => Children.Select(c => c.Serialize()).TextJoin("");
+  string ISerializable.Serialize () => Children.Select(c => c.Serialize()).TextJoin("");
 }

@@ -4,7 +4,7 @@
 namespace Common.NodeTree;
 public sealed class XMLElementNode : Node
 {
-  private static string SerializeAttribute (KeyValuePair<string, ITextSerializer> kvp) => $"{kvp.Key}={kvp.Value.Serialize()}";
+  private static string SerializeAttribute (KeyValuePair<string, ISerializable> kvp) => $"{kvp.Key}={kvp.Value.Serialize()}";
   private string SerializeAttributes () => Properties.Select(SerializeAttribute).TextJoin(" ");
   public override string Serialize ()
   {
@@ -29,7 +29,7 @@ public sealed class XMLElementNode : Node
   /// <summary>Gets the namespace, or <see langword="null"/> if one is not specified on this element.</summary>
   /// <remarks>This does not account for globally set or namespaces set by this element's parents.</remarks>
   public string? Namespace => Name?.Contains(':') == true ? Name[..Name.IndexOf(':')] : null;
-  public Dictionary<string, ITextSerializer> Attributes => Properties;
+  public Dictionary<string, ISerializable> Attributes => Properties;
 }
 
 public sealed class XMLContentNode : Node
@@ -79,7 +79,7 @@ public sealed class JSONObjectNode : Node
   public override string ChildDelim => ",";
   public override string Prefix => "{";
   public override string Suffix => "}";
-  private static string SerializeProperty (KeyValuePair<string, ITextSerializer> kvp) => $"\"{kvp.Key}\":{kvp.Value.Serialize()}";
+  private static string SerializeProperty (KeyValuePair<string, ISerializable> kvp) => $"\"{kvp.Key}\":{kvp.Value.Serialize()}";
   private string SerializeProperties () => Properties.Select(SerializeProperty).TextJoin(",");
   public override string Serialize () => Prefix + SerializeProperties() + Suffix;
 
@@ -90,7 +90,7 @@ public sealed class JSONArrayNode : Node
 {
   public override string Prefix => "[";
   public override string Suffix => "]";
-  private static string SerializeChild (ITextSerializer node) => $"{node.Serialize()}";
+  private static string SerializeChild (ISerializable node) => $"{node.Serialize()}";
   private string SerializeChildren () => Children.Select(SerializeChild).TextJoin(",");
   public override string Serialize () => Prefix + SerializeChildren() + Suffix;
 

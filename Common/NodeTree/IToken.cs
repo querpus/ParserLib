@@ -2,7 +2,7 @@
 #pragma warning disable format // Formatting
 
 namespace Common.NodeTree;
-public interface IToken : IIndexSortable, ITextSerializer
+public interface IToken : IIndexSortable, ISerializable
 {
   /// <summary>The value of this token. This will be <see langword="null"/> if the token is composed of multiple tokens.</summary>
   string? Value { get; }

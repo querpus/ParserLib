@@ -4,8 +4,8 @@
 namespace Common.NodeTree;
 public abstract class Node : INode
 {
-  public Collection<ITextSerializer> Children { get; } = [];
-  public Dictionary<string, ITextSerializer> Properties { get; } = [];
+  public Collection<ISerializable> Children { get; } = [];
+  public Dictionary<string, ISerializable> Properties { get; } = [];
   public Dictionary<string, object> Data { get; } = [];
   public virtual string? Prefix { get; set; }
   public virtual string? Suffix { get; set; }
@@ -43,9 +43,9 @@ public abstract class Node : INode
   }
 }
 
-public struct DataReference : ITextSerializer
+public struct DataReference : ISerializable
 {
   public INode LinkedNode { get; set; }
   public string Key { get; set; }
-  public readonly string Serialize () => LinkedNode.Data[Key] is ITextSerializer its ? its.Serialize() : LinkedNode.Data[Key].ToString() ?? SE;
+  public readonly string Serialize () => LinkedNode.Data[Key] is ISerializable its ? its.Serialize() : LinkedNode.Data[Key].ToString() ?? SE;
 }

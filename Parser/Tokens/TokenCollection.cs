@@ -117,7 +117,7 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, Common.NodeTree.
   public bool Equals (IToken? other) => other is IMultiToken<IToken> tc && _tokens.SequenceEqual(tc.Children);
   public override bool Equals (object? obj) => obj is not null && obj is TokenCollection tc && Equals(tc);
   public override int GetHashCode () => _tokens.GetHashCode();
-  string ITextSerializer.Serialize () => Children.Select(c => c.Serialize()).TextJoin(" ");
+  string ISerializable.Serialize () => Children.Select(c => c.Serialize()).TextJoin(" ");
 
   public static bool operator == (TokenCollection left, TokenCollection right) => left is null ? right is null : left.Equals(right);
   public static bool operator != (TokenCollection left, TokenCollection right) => !(left == right);

@@ -51,7 +51,7 @@ public static class ObjectExtensions
       null => NullString,
       string s => s,
       char c => $"{c}",
-      ITextSerializer t => t.Serialize(),
+      ISerializable t => t.Serialize(),
       IConvertible ic => ic.ToString(CIIC),
       IEnumerable<object> col => col.TextJoin("\n"),
       IReadOnlyProperty<string> prp => $"IProperty \"{prp.Key}\" : \"{prp.Value}\"",

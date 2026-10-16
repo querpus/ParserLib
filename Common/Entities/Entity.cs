@@ -56,7 +56,7 @@ public abstract class Entity : IEntity
 
 public static class SerializerExt
 {
-  extension (IEnumerable<ITextSerializer> attributes)
+  extension (IEnumerable<ISerializable> attributes)
   {
     public string Serialize () => attributes.Select(d => d.Serialize()).TextJoin(" ");
   }

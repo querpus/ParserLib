@@ -40,5 +40,29 @@ public class NodeRule
       if (appendToSuffix) context.Current.AppendToSuffix(token.Value.IsEmpty ? if_empty_insert_text : token.Value);
     }
   };
-  public static NodeRule 
+  public static NodeRule SyntaxError (string groupName, bool throw_error = false, string error_message = EmptyString) => new()
+  {
+    TokenName = groupName,
+    Execute = (_, _) =>
+    {
+      if (!throw_error)
+      {
+        Debug.Log(MsgClass.Warning, "Warning: " + error_message, "NodeRule");
+      }
+      else
+      {
+        Debug.Log(MsgClass.Error, "Error: " + error_message, "NodeRule");
+        throw new ValidationException("Error: " + error_message);
+      }
+    }
+  };
+}
+
+public class ValidationException : Exception
+{
+  public ValidationException () { }
+
+  public ValidationException (string? message) : base(message) { }
+
+  public ValidationException (string? message, Exception?innerException) : base(message, innerException) { }
 }

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Common.Entities;
 
-public interface IContentEntity : ITextSerializer
+public interface IContentEntity : ISerializable
 {
   string? Content { get; }
 }
