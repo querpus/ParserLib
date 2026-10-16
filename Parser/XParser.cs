@@ -259,7 +259,7 @@ public sealed class XParser
         });
         checkAction("show next", $"Next Operation: {NextOpIndex} : {NextOp}", data => Log(MsgClass.Debug, data, this));
         checkPrompt("data in", "Enter the key to display.", _ => Log(MsgClass.Debug, $"[{userInput}] = {(Data.TryLoad(userInput, out object? data) ? data : "<Load Failure>")}", this));
-      } while (!userInput.EqualsAny(allow_continue, SCOIC) || userInput.IsNotEmpty);
+      } while (!userInput.EqualsAny(SCOIC, [.. allow_continue]) || userInput.IsNotEmpty);
     }
     DebugOut();
     return LastStatus;

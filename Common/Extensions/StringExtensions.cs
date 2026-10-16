@@ -190,9 +190,9 @@ public static class StringExtensions
       return s;
     }
     public bool Equals (char c) => s?.Length == 1 && c == s[0];
-    public bool EqualsAny (IEnumerable<string> list, StringComparison sc = SCO) =>
+    public bool EqualsAny (StringComparison sc = SCO, params Collection<string> list) =>
       list.Any(s2 => s.Equals(s2, sc));
-    public bool EqualsAll (IEnumerable<string> list, StringComparison sc = SCO) =>
+    public bool EqualsAll (StringComparison sc = SCO, params Collection<string> list) =>
       list.All(s2 => s.Equals(s2, sc));
     public bool StartsWithAny (IEnumerable<string> list, StringComparison sc = SCO) =>
       list.Any(s2 => s.StartsWith(s2, sc));

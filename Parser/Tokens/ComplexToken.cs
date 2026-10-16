@@ -132,6 +132,12 @@ public sealed class ComplexToken : IToken, IPrintable
   string IToken.ContentNoNewLine => Children.Select(child => child.ToString()).TextJoin().Replace(["\n", "\r"], ["<LF>", "<CR>"]);
 
   public required Spec Spec { get; init; }
+
+  IEnumerable<string> Common.NodeTree.IToken.Value => throw new NotImplementedException();
+
+  string? Common.NodeTree.IToken.Name { get => Type; init => Type = value ?? "None"; }
+  Range Common.NodeTree.IToken.Position { get => throw new NotImplementedException(); init => throw new NotImplementedException(); }
+
   /// <summary>Calls the action on every piece in this token.</summary>
   /// <param name="action">The action to call.</param>
   /// <remarks>This will not call both Value and ValueList. It chooses based on the quantity of the list.</remarks>
@@ -205,4 +211,5 @@ public sealed class ComplexToken : IToken, IPrintable
     Children = [.. Children],
     Type = Type,
   };
+  string ITextSerializer.Serialize () => Content;
 }

@@ -16,7 +16,7 @@ public sealed class Token : IToken, IPrintable
   public IList<IToken> Children { get; } = [];
   public bool HasType => Type is not null;
 
-  IEnumerable<string> Common.NodeTree.IToken.Value { get => Content; init => Content = value; }
+  IEnumerable<string> Common.NodeTree.IToken.Value => [Content];
   string? Common.NodeTree.IToken.Name { get => Type; init => Type = value ?? "None"; }
   Range Common.NodeTree.IToken.Position { get => new(Index, LastPosition); init => Index = value.Start.Value; }
 

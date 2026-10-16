@@ -1,11 +1,5 @@
-using System.Reflection.Metadata;
 
 namespace Parser.Tokens;
-
-public static class TokenType
-{
-  public static bool IsEmpty (string type) => type is null or "-" or EmptyString || type.Like("None");
-}
 
 /// <summary>A collection of tokens, use this to keep token operations consistent.</summary>
 public sealed class TokenCollection () : IReadOnlyList<IToken>, IToken, IPrintable
@@ -29,12 +23,13 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IToken, IPrintab
 
   public int Count => _tokens.Count;
   public string Type { get; set; } = SE;
+  public string Delim { get; set; } = " ";
 
-  IEnumerable<string> Common.NodeTree.IToken.Value { get => Content; init => Content = value; }
+  IEnumerable<string> Common.NodeTree.IToken.Value => _tokens.Select(t => t.Content);
   string? Common.NodeTree.IToken.Name { get => Type; init => Type = value ?? "None"; }
-  Range Common.NodeTree.IToken.Position { get => new(Index, LastPosition); init => Index = value.Start.Value; }
+  Range Common.NodeTree.IToken.Position { get => new(Index, _tokens[^1].Index + _tokens[^1].Content.Length - 1); init => object.DoNothing(); }
 
-  public bool HasType => !TokenType.IsEmpty(Type);
+  public bool HasType => !Type.EqualsAny(SCOIC, "None", SE, "-");
   public IToken? Parent { get; set; }
   IList<IToken> IToken.Children => _tokens;
   public int Index => _tokens.Count > 0 ? _tokens[0].Index : -1;
@@ -108,7 +103,7 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IToken, IPrintab
     }
     return ret;
   }
-
+  public string Serialize () => _tokens.TextJoin(Delim);
   public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
   public bool Equals (IToken? other) => other is TokenCollection tc && _tokens.SequenceEqual(tc._tokens);
   public override bool Equals (object? obj) => obj is not null && obj is TokenCollection tc && Equals(tc);

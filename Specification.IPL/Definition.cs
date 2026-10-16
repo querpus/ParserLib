@@ -118,7 +118,6 @@ public static class Definition
       new(TokenMatch, ITT.Can, $"{Can}"),
       new(TokenMatch, ITT.Fs, $"{FS}|<FS>"),
       new(TokenMatch, ITT.Eot, $"{Eot}"),
-      new(TokenMatch, ITT.SmplCmd, $"(?<={Esc})[CcPT]"),
       new(TokenMatch, ITT.Text, Rx($"(?<=d3,).+?(?=;|{Etx}|{Etb}|{Can}|{Lf})")),
       new(TokenMatch, ITT.OriginX, Rx(@"(?<=o)\d+(?=,)")),
       new(TokenMatch, ITT.OriginY, Rx(@"(?<=o\d+,)\d+(?=;|\<)")),
@@ -133,7 +132,7 @@ public static class Definition
       [ITT.Cmd] = [ITT.Etb, ITT.Can, ITT.Prop, ITT.Ack, ITT.Qty],
     },
     GroupTokenRules = [
-      new(ITT.Mode, "x:Esc n:SmplCmd{P} xo:Sc"),
+      new(ITT.Mode, "x:Esc n:Letter{P} xo:Sc"),
       new(ITT.Prop, "n:Letter{o} q:OriginX, x:Cm q:OriginY xo:Sc"),
       new(ITT.Prop, "n:Letter{l} q:Value xo:Sc"),
       new(ITT.Prop, "n:Letter{w} q:Value xo:Sc"),
