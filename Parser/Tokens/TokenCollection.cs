@@ -1,7 +1,13 @@
+using Common.Nodes;
+
 namespace Parser.Tokens;
 
 /// <summary>A collection of tokens, use this to keep token operations consistent.</summary>
+<<<<<<< HEAD
 public sealed class TokenCollection() : IReadOnlyList<IToken>, IToken, IPrintable
+=======
+public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<IToken>, IPrintable, IToken
+>>>>>>> 7e087e8f45d7545d80a1d515430bcf6aceb19b52
 {
   #region Private Fields
   /// <summary>The internal token list.</summary>
@@ -26,10 +32,28 @@ public sealed class TokenCollection() : IReadOnlyList<IToken>, IToken, IPrintabl
 
   public bool HasType => !(Type is null or "-" or EmptyString || Type.Like("None"));
   public IToken? Parent { get; set; }
-  IList<IToken> IToken.Children => _tokens;
+  public IList<IToken> Children => _tokens;
   public int Index => _tokens.Count > 0 ? _tokens[0].Index : -1;
+<<<<<<< HEAD
   string IToken.ContentNoNewLine => _tokens.Select(child => child.ToString()).TextJoin("");
   public void Add(IToken item)
+=======
+  public string ContentNoNewLine => this.ToString();
+  string IToken.Content => ToString();
+  string? Common.Nodes.IToken.Value => null;
+  public string Delim { get; init; } = SE;
+
+  string? Common.Nodes.IToken.Name => Type;
+
+  Range Common.Nodes.IToken.Position => Children.Count switch
+  {
+    < 1 => new(-1, -1),
+    1 => Children[0].Position,
+    > 1 => new(Children[0].Position.Start, Children[^1].Position.End)
+  };
+
+  public void Add (IToken item)
+>>>>>>> 7e087e8f45d7545d80a1d515430bcf6aceb19b52
   {
     item.ThrowIfNull();
     _tokens.Add(item);
@@ -98,6 +122,7 @@ public sealed class TokenCollection() : IReadOnlyList<IToken>, IToken, IPrintabl
     }
     return ret;
   }
+<<<<<<< HEAD
   public string Serialize() => _tokens.TextJoin(Delim);
   public int CompareTo(IIndexSortable? other) => Index.CompareTo(other?.Index);
   public bool Equals(IToken? other) => other is TokenCollection tc && _tokens.SequenceEqual(tc._tokens);
@@ -109,4 +134,19 @@ public sealed class TokenCollection() : IReadOnlyList<IToken>, IToken, IPrintabl
   public static bool operator <=(TokenCollection left, TokenCollection right) => left is null || left.CompareTo(right) <= 0;
   public static bool operator >(TokenCollection left, TokenCollection right) => left?.CompareTo(right) > 0;
   public static bool operator >=(TokenCollection left, TokenCollection right) => left is null ? right is null : left.CompareTo(right) >= 0;
+=======
+
+  public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
+  public bool Equals (IToken? other) => other is IMultiToken<IToken> tc && _tokens.SequenceEqual(tc.Children);
+  public override bool Equals (object? obj) => obj is not null && obj is TokenCollection tc && Equals(tc);
+  public override int GetHashCode () => _tokens.GetHashCode();
+  string ISerializable.Serialize () => Children.Select(c => c.Serialize()).TextJoin(" ");
+
+  public static bool operator == (TokenCollection left, TokenCollection right) => left is null ? right is null : left.Equals(right);
+  public static bool operator != (TokenCollection left, TokenCollection right) => !(left == right);
+  public static bool operator < (TokenCollection left, TokenCollection right) => left is null ? right is not null : left.CompareTo(right) < 0;
+  public static bool operator <= (TokenCollection left, TokenCollection right) => left is null || left.CompareTo(right) <= 0;
+  public static bool operator > (TokenCollection left, TokenCollection right) => left?.CompareTo(right) > 0;
+  public static bool operator >= (TokenCollection left, TokenCollection right) => left is null ? right is null : left.CompareTo(right) >= 0;
+>>>>>>> 7e087e8f45d7545d80a1d515430bcf6aceb19b52
 }
