@@ -4,7 +4,7 @@
 namespace Common.NodeTree;
 public interface IToken : IIndexSortable, ITextSerializer
 {
-  IEnumerable<string> Value { get; }
+  string Value { get; }
   string? Name { get; init; }
   Range Position { get; init; }
 }

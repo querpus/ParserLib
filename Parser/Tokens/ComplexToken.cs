@@ -4,6 +4,7 @@ namespace Parser.Tokens;
 
 public sealed class ComplexToken : IToken, IPrintable
 {
+  public string Delim { get; init; } = " ";
   private readonly Dictionary<TokenRef, IToken> _token_pieces = [];
   public TokenRef? AssignTo { get; set; }
   public Dictionary<TokenRef, IToken?> TokenPieces
@@ -25,12 +26,12 @@ public sealed class ComplexToken : IToken, IPrintable
   public IToken? Left => GetPiece(TokenRef.Left);
   public IToken? Right => GetPiece(TokenRef.Right);
   public IToken? Center => GetPiece(TokenRef.Center);
-  public TokenCollection? AddFlags => (TokenCollection?) GetPiece(TokenRef.AddFlagList);
-  public TokenCollection? SubFlags => (TokenCollection?) GetPiece(TokenRef.SubFlagList);
-  public TokenCollection? Properties => (TokenCollection?) GetPiece(TokenRef.PropertyList);
-  public TokenCollection? Parameters => (TokenCollection?) GetPiece(TokenRef.ParameterList);
-  public TokenCollection? Statements => (TokenCollection?) GetPiece(TokenRef.StatementList);
-  public TokenCollection? Values => (TokenCollection?) GetPiece(TokenRef.ValueList);
+  public TokenCollection? AddFlags => (TokenCollection?)GetPiece(TokenRef.AddFlagList);
+  public TokenCollection? SubFlags => (TokenCollection?)GetPiece(TokenRef.SubFlagList);
+  public TokenCollection? Properties => (TokenCollection?)GetPiece(TokenRef.PropertyList);
+  public TokenCollection? Parameters => (TokenCollection?)GetPiece(TokenRef.ParameterList);
+  public TokenCollection? Statements => (TokenCollection?)GetPiece(TokenRef.StatementList);
+  public TokenCollection? Values => (TokenCollection?)GetPiece(TokenRef.ValueList);
 
   public string Content => Children.Select(i => i.Content).TextJoin(" ");
   public IReadOnlyCollection<TokenRef> PiecesPresent => [.. _token_pieces.Keys.Where(kvp => kvp.IsUsed(_token_pieces))];
@@ -39,13 +40,13 @@ public sealed class ComplexToken : IToken, IPrintable
   public IToken? Parent { get; set; }
   public IList<IToken> Children { get; init; } = [];
   public int Index => Children.Count > 0 ? Children[0].Index : -1;
-  public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
-  public bool Equals (IToken? other) => other is ComplexToken && Children.SequenceEqual(other.Children);
-  public IToken? GetPiece (TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) ? value : null;
-  public string? GetPieceContent (TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) ? value.Content : null;
-  public bool HasPieceType (TokenRef piece_type) => piece_type.IsUsed(_token_pieces);
-  public bool HasPieceTypes (TokenRef[] piece_types) => piece_types.All(p => p.IsUsed(_token_pieces));
-  private static TokenRef GetListID (TokenRef itemID) => itemID switch
+  public int CompareTo(IIndexSortable? other) => Index.CompareTo(other?.Index);
+  public bool Equals(IToken? other) => other is ComplexToken && Children.SequenceEqual(other.Children);
+  public IToken? GetPiece(TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) ? value : null;
+  public string? GetPieceContent(TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) ? value.Content : null;
+  public bool HasPieceType(TokenRef piece_type) => piece_type.IsUsed(_token_pieces);
+  public bool HasPieceTypes(TokenRef[] piece_types) => piece_types.All(p => p.IsUsed(_token_pieces));
+  private static TokenRef GetListID(TokenRef itemID) => itemID switch
   {
     TokenRef.Value => TokenRef.ValueList,
     TokenRef.Property => TokenRef.PropertyList,
@@ -55,8 +56,8 @@ public sealed class ComplexToken : IToken, IPrintable
     TokenRef.SubFlag => TokenRef.SubFlagList,
     _ => itemID
   };
-  private static bool HasListID (TokenRef itemID) => itemID != GetListID(itemID);
-  public void AddPieceType (TokenRef piece_type, IToken token)
+  private static bool HasListID(TokenRef itemID) => itemID != GetListID(itemID);
+  public void AddPieceType(TokenRef piece_type, IToken token)
   {
     if (!HasListID(piece_type))
     {
@@ -93,7 +94,7 @@ public sealed class ComplexToken : IToken, IPrintable
       SetPieceType(piece_type, new_list);
     }
   }
-  public void AddPiecesToType (TokenRef piece_type, TokenCollection tokens)
+  public void AddPiecesToType(TokenRef piece_type, TokenCollection tokens)
   {
     if (tokens is null || tokens.Count == 0)
       return;
@@ -103,15 +104,15 @@ public sealed class ComplexToken : IToken, IPrintable
       AddPieceType(piece_type, token);
     }
   }
-  private void SetPieceType (TokenRef piece_type, IToken token) => _token_pieces[piece_type] = token;
-  public override bool Equals (object? obj) => obj is IToken ct && Equals(ct);
-  public override int GetHashCode () => _token_pieces.GetHashCode();
-  public static bool operator == (ComplexToken left, ComplexToken right) => left is null ? right is null : left.Equals(right);
-  public static bool operator != (ComplexToken left, ComplexToken right) => !(left == right);
-  public static bool operator < (ComplexToken left, ComplexToken right) => left is null ? right is not null : left.CompareTo(right) < 0;
-  public static bool operator <= (ComplexToken left, ComplexToken right) => left is null || left.CompareTo(right) <= 0;
-  public static bool operator > (ComplexToken left, ComplexToken right) => left?.CompareTo(right) > 0;
-  public static bool operator >= (ComplexToken left, ComplexToken right) => left is null ? right is null : left.CompareTo(right) >= 0;
+  private void SetPieceType(TokenRef piece_type, IToken token) => _token_pieces[piece_type] = token;
+  public override bool Equals(object? obj) => obj is IToken ct && Equals(ct);
+  public override int GetHashCode() => _token_pieces.GetHashCode();
+  public static bool operator ==(ComplexToken left, ComplexToken right) => left is null ? right is null : left.Equals(right);
+  public static bool operator !=(ComplexToken left, ComplexToken right) => !(left == right);
+  public static bool operator <(ComplexToken left, ComplexToken right) => left is null ? right is not null : left.CompareTo(right) < 0;
+  public static bool operator <=(ComplexToken left, ComplexToken right) => left is null || left.CompareTo(right) <= 0;
+  public static bool operator >(ComplexToken left, ComplexToken right) => left?.CompareTo(right) > 0;
+  public static bool operator >=(ComplexToken left, ComplexToken right) => left is null ? right is null : left.CompareTo(right) >= 0;
 
   private Dictionary<string, IToken?> Parts => new()
   {
@@ -128,7 +129,7 @@ public sealed class ComplexToken : IToken, IPrintable
     ["ValueList"] = Values,
     ["StatementList"] = Statements,
   };
-  int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
+  int IComparable.CompareTo(object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
   string IToken.ContentNoNewLine => Children.Select(child => child.ToString()).TextJoin().Replace(["\n", "\r"], ["<LF>", "<CR>"]);
 
   public required Spec Spec { get; init; }
@@ -141,7 +142,7 @@ public sealed class ComplexToken : IToken, IPrintable
   /// <summary>Calls the action on every piece in this token.</summary>
   /// <param name="action">The action to call.</param>
   /// <remarks>This will not call both Value and ValueList. It chooses based on the quantity of the list.</remarks>
-  private void EachPart (Action<KeyValuePair<string, IToken?>> action)
+  private void EachPart(Action<KeyValuePair<string, IToken?>> action)
   {
     foreach (KeyValuePair<string, IToken?> part in Parts.Where(k => k.Value is not null))
     {
@@ -160,8 +161,8 @@ public sealed class ComplexToken : IToken, IPrintable
     }
   }
 
-  public override string ToString () => ToString(0);
-  public void Print (int indent)
+  public override string ToString() => ToString(0);
+  public void Print(int indent)
   {
     string ind_str = new(' ', indent);
     LogPart(MsgClass.Forced, Type);
@@ -177,10 +178,10 @@ public sealed class ComplexToken : IToken, IPrintable
       }
     });
   }
-  public string ToString (int indent)
+  public string ToString(int indent)
   {
     DebugIn("ComplexToken", "ToString");
-    static string sp (int i) => new(' ', i);
+    static string sp(int i) => new(' ', i);
     int spCount = indent + 2;
     string indent2 = $"{sp(spCount)}";
 
@@ -204,12 +205,12 @@ public sealed class ComplexToken : IToken, IPrintable
     return temp;
   }
 
-  public object Clone () => new ComplexToken()
+  public object Clone() => new ComplexToken()
   {
     Spec = Spec,
     TokenPieces = [.. _token_pieces],
     Children = [.. Children],
     Type = Type,
   };
-  string ITextSerializer.Serialize () => Content;
+  string ITextSerializer.Serialize() => Content;
 }

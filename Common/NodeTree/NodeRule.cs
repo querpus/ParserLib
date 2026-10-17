@@ -7,7 +7,8 @@ public class NodeRule
 {
   public string? TokenName { get; init; }
   public string? ExactText { get; init; }
-  public Action<NodeContext, CaptureToken> Execute { get; init; } = (_, token) => Debug.Log(MsgClass.GreenInfo, $"No Execution Defined for '{token.Group}'", "NodeRule");
+  public static void DefaultAction (NodeContext context, CaptureToken token) => Debug.Log(MsgClass.GreenInfo, $"No Execution Defined for '{token.Group}'", "NodeRule");
+  public Action<NodeContext, CaptureToken> Execute { get; init; } = DefaultAction;
   public static NodeRule IgnoreGroup (string groupName, bool addToOriginHead = false, bool addToOriginTail = false) => new()
   {
     TokenName = groupName,
