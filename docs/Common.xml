@@ -201,240 +201,6 @@
         <member name="F:Common.DictionaryMode.MergeCollection">
             <summary>If the existing value is a collection, and this value is a collection of the same type, merge the two collections.</summary>
         </member>
-        <member name="T:Common.Entities.ArrayEntity">
-            <summary>Represents an entity that contains an ordered collection of child entities and serializes them as a comma-separated
-            list.</summary>
-            <remarks>Valid only when it has no properties or data values. Serialization joins the Children collection with
-            commas. Assignment from a regex match is ignored (no-op), <see cref="M:Common.Entities.IEntity.Add(Common.Entities.IEntity)"/> should be used to assign children.</remarks>
-        </member>
-        <member name="T:Common.Entities.AttributeEntity">
-            <summary>A key/value pair, with an optional namespace. It also stores what quote character was used.</summary>
-            <remarks>Stores all 4 values in data, not as <see cref="T:Common.Entities.IEntity"/> objects.</remarks>
-        </member>
-        <member name="T:Common.Entities.ContentEntity">
-            <summary>An entity representing loose unquoted content.<br/><br/>
-            Uses DataValues:<br/>
-            * <c>Content</c> - The entire contents of the document as text.
-            </summary>
-        </member>
-        <member name="T:Common.Entities.DocumentEntity">
-            <summary>An entity representing a document.<br/><br/>
-            <b>DataValues:</b><br/>
-            * <c>RootNode</c> - The root node of the document.<br/>
-            * <c>Header</c> - The header of the document (if present).<br/>
-            * <c>Content</c> - The entire contents of the document as text.<br/>
-            <b>Children:</b><br/>
-            Only if the document does not have a root node.
-            </summary>
-        </member>
-        <member name="T:Common.Entities.Entity">
-            <summary>Base class for entities.</summary>
-        </member>
-        <member name="P:Common.Entities.Entity.Origin">
-            <summary>Gets or sets the data this entity was formed from.</summary>
-        </member>
-        <member name="P:Common.Entities.Entity.Children">
-            <summary>Gets the child entities.</summary>
-            <remarks>These are the values of a JSON object or <see cref="T:Common.Entities.ArrayEntity"/>, or any non-keyed objects stored within this entity.
-            This would also be the content between the open and closing XML tags.</remarks>
-        </member>
-        <member name="P:Common.Entities.Entity.Omit">
-            <summary>Whether or not this item is omitted and ignored when reading data.</summary>
-        </member>
-        <member name="P:Common.Entities.Entity.Properties">
-            <summary>Gets the property values.</summary>
-            <remarks>These are keyed values, like the properties of a JSON object, or the attributes of an XML Element.</remarks>
-        </member>
-        <member name="P:Common.Entities.Entity.DataValues">
-            <summary>Gets the data values.</summary>
-            <remarks>These are the values that are stored in the regular expression groups, or any other data that is not stored as a child or property.</remarks>
-        </member>
-        <member name="M:Common.Entities.Entity.ToString">
-            <summary>The serialized representation of this entity.</summary>
-            <returns>Returns the serialized entity by default.</returns>
-        </member>
-        <member name="F:Common.Entities.DepthOperation.Ascend">
-            <summary>Indicates that we are popping the parent stack.</summary>
-        </member>
-        <member name="F:Common.Entities.DepthOperation.Maintain">
-            <summary>Indicates the depth and parent to not change.</summary>
-        </member>
-        <member name="F:Common.Entities.DepthOperation.Descend">
-            <summary>Indicates that we are pushing 'NextParent' to the 'Parent' stack.</summary>
-        </member>
-        <member name="F:Common.Entities.DepthOperation.AscendAndDescend">
-            <summary>Indicates that we are popping the parent stack, then immediately pushing this entity to the stack.</summary>
-        </member>
-        <member name="T:Common.Entities.EntityInfo">
-            <summary>This is common data to describe variations of entity properties.</summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.Class">
-            <summary>This is the class that is created. Must be derived from <see cref="T:Common.Entities.IEntity"/>.</summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.GroupRequired">
-            <summary>The group that must be present in the match for this entity to be produced if specified.</summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.GroupTerminator">
-            <summary>The group that indicates the end of this entity.</summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.ExactTextRequired">
-            <summary>The exact text that the match must be for this entity to be produced if specified.</summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.IgnoreCaseWhenMatching">
-            <summary>If the exact text match requirement is not case sensitive.</summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.DepthChange">
-            <summary>The change in depth this token indicates.</summary>
-            <remarks>
-            Normally 0, 1, or -1.<br/>
-            <c>Descend (-1) </c>: Increase depth (descend). For example, an opening bracket '{'.<br/>
-            <c>Maintain (0) </c>: No change in depth. A comma ',' or a keyword in a statement. This is the default value.<br/>
-            <c>Ascend (1)   </c>: Decrease depth (ascend). For example, a closing bracket '}'.<br/>
-            <c>AscendAndDescend (0x7fff)</c>:
-            </remarks>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.AddToProperty">
-            <summary>Adds this entity to the top entity in the 'Property' stack.</summary>
-            <remarks>When <see langword="true"/>, this entity is added to the currently active property at this depth.
-            Defaults to <see langword="false"/>.
-            </remarks>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.SetPropKey">
-            <summary>Gets a value indicating whether the property context variable should be set.</summary>
-            <remarks>When <see langword="true"/>, this entity is set to be the currently active property at this depth.
-            Defaults to <see langword="false"/>.
-            </remarks>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.SetAsNextLevelParent">
-            <summary>
-            Adds this entity to the 'NextParent' static property, meaning it will become the next parent when we descend,<br/>
-            This does not have to be the depth changing token.
-            </summary>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.OnlyAscendIfParentClass">
-            <summary>
-            Only pop the 'Parent' stack if the top of the stack is this class.
-            </summary>
-            <remarks>
-            Only valid for the <see cref="F:Common.Entities.DepthOperation.AscendAndDescend"/> depth option.
-            Ignored otherwise.
-            </remarks>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.StorePieceTypes">
-            <summary>The type of piece this entity stores as.</summary>
-            <remarks>
-            Format:<br/>
-            Key is value <see langword="string"/>.<br/>
-            Value is GroupName <see langword="string"/>.<br/>
-            Multiple Captures on the group mean a <see cref="T:System.Collections.ObjectModel.Collection`1"/> is made with an entry for each capture.
-            </remarks>
-        </member>
-        <member name="P:Common.Entities.EntityInfo.SpecialValues">
-            <summary>These are conditional assignments to an entity.</summary>
-        </member>
-        <member name="M:Common.Entities.EntityInfo.Matches(System.Text.RegularExpressions.Match)">
-            <summary>Checks to see if a match will satisfy the entity</summary>
-            <param name="match">The regex match that is being analyzed.</param>
-            <returns><see langword="true"/> if the match satisfies the requirements, <see langword="false"/> if the match is <see langword="null"/> or does not meet them.</returns>
-        </member>
-        <member name="M:Common.Entities.EntityInfo.Equals(System.Object)">
-            <summary>Basic equality, quick method.</summary>
-            <param name="obj">The other object.</param>
-            <returns><see langword="true"/> if the object is an <see cref="T:Common.Entities.EntityInfo"/> and the properties are the same. Otherwise <see langword="false"/>.</returns>
-        </member>
-        <member name="T:Common.Entities.ErrorEntity">
-            <summary>This is returned if a method must return an <see cref="T:Common.Entities.Entity"/> but one could not be created.</summary>
-        </member>
-        <member name="T:Common.Entities.IEntity">
-            <summary>An interface for storing entities.</summary>
-        </member>
-        <member name="P:Common.Entities.IEntity.IsValid">
-            <summary>Returns <see langword="true"/> if the entity has been initialized successfully, <see langword="false"/> otherwise.</summary>
-        </member>
-        <member name="P:Common.Entities.IEntity.Origin">
-            <summary>Gets the origin of the parsed entity.</summary>
-            <remarks>This is null for entities that are not derived from a single source.</remarks>
-        </member>
-        <member name="M:Common.Entities.IEntity.Equals(Common.Entities.IEntity,Common.Entities.IEntity)">
-            <summary>Static equality method.</summary>
-            <param name="obj_a">Entity 'A'.</param>
-            <param name="obj_b">Entity 'B'.</param>
-            <returns><see langword="true"/> if 'A' is equal to 'B', <see langword="false"/> otherwise.</returns>
-        </member>
-        <member name="M:Common.Entities.IEntity.Add(Common.Entities.IEntity)">
-            <summary>Adds a child to the children list.</summary>
-            <param name="child">The child to add.</param>
-        </member>
-        <member name="T:Common.Entities.NullEntity">
-            <summary>An entity representing a null value.</summary>
-        </member>
-        <member name="T:Common.Entities.NumberEntity">
-            <summary>An entity representing an <see langword="int"/> or <see langword="decimal"/>.<br/>
-            <br/>
-            Data Stored:<br/>
-            <c>* Value</c> - Decimal value.<br/>
-            <c>* Content</c> - Assigns to <c>Value</c> as a <see langword="string"/>.
-            </summary>
-        </member>
-        <member name="P:Common.Entities.NumberEntity.Value">
-            <summary>Gets or sets the decimal value of the entity.</summary>
-        </member>
-        <member name="P:Common.Entities.NumberEntity.Content">
-            <summary>Gets or sets the decimal value as a <see langword="string"/>.</summary>
-        </member>
-        <member name="T:Common.Entities.ObjectEntity">
-            <summary>An entity representing a json style object.<br/><br/>
-            Uses only standard DataValues.<br/>
-            Uses Properties Dictionary for children.
-            </summary>
-        </member>
-        <member name="P:Common.Entities.ParsingContext.Depth">
-            <summary>The number of objects this is within.</summary>
-            <remarks>
-            A depth of zero could still mean you are within a document object (if one is used).
-            There are no more potentially recursive objects to exit, you are at the surface.
-            </remarks>
-            <value>This value is clamped to be within 0 and 32767.</value>
-        </member>
-        <member name="P:Common.Entities.ParsingContext.Parent">
-            <summary>Gets or sets the "Parent" depth property, which is used on most entities in some way.</summary>
-        </member>
-        <member name="P:Common.Entities.ParsingInfo.GeneratesSingleObject">
-            <summary>Whether of not the result is under the RootNode property of the <see cref="T:Common.Entities.DocumentEntity"/>,
-            or if there are many, the Children property.</summary>
-            <remarks> This is for validation purposes.</remarks><value><br/>
-            * <see langword="true"/>,The parser should make a single <see cref="T:Common.Entities.IEntity"/> object from the data and store it under the RootNode property.<br/>
-            * <see langword="false"/>, the parser should make a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see cref="T:Common.Entities.IEntity"/> objects and store them in the Children property.</value>
-        </member>
-        <member name="P:Common.Entities.ParsingInfo.IgnoreCase">
-            <summary>Whether to ignore case on non-regex matches.</summary>
-        </member>
-        <member name="M:Common.Entities.ParsingInfo.TryGetOptions(System.Text.RegularExpressions.Match,Common.Entities.EntityInfo@)">
-            <summary>Tries to get the <see cref="T:Common.Entities.EntityInfo"/> for the given <see cref="T:System.Text.RegularExpressions.Match"/>.</summary>
-            <param name="match">The regex match.</param>
-            <param name="context">The parser context of the previous matches.</param>
-            <param name="options">The output of the <see cref="T:Common.Entities.EntityInfo"/> if the info is located.</param>
-            <returns><see langword="true"/> if the match is able to select an <see cref="T:Common.Entities.EntityInfo"/> that meets the requirements, <see langword="false"/> otherwise.</returns>
-        </member>
-        <member name="F:Common.Entities.PassType.None">
-            <summary>Do nothing.</summary>
-        </member>
-        <member name="F:Common.Entities.PassType.RegexMatching">
-            <summary>Converting a <see langword="string"/> or strings into regex <see cref="T:System.Text.RegularExpressions.Match"/> objects.</summary>
-        </member>
-        <member name="F:Common.Entities.PassType.MatchToEntity">
-            <summary>Converting a <see cref="T:System.Text.RegularExpressions.Match"/> into <see cref="T:Common.Entities.IEntity"/> objects.</summary>
-        </member>
-        <member name="F:Common.Entities.PassType.EntityManipulation">
-            <summary>Operating on the <see cref="T:Common.Entities.IEntity"/> objects to make defined structures.</summary>
-        </member>
-        <member name="M:Common.Entities.StringEntity.Serialize">
-            <summary>Gets the serialized representation of the string value.</summary>
-            <remarks>This contains quotes.</remarks>
-        </member>
-        <member name="P:Common.Entities.StringEntity.Value">
-            <summary>Gets or sets the string value.</summary>
-        </member>
         <member name="T:Common.EntryNameEqual">
             <summary>An <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> comparer to determine if the name of the <see cref="T:Common.IProperty`1"/> is the same as another.</summary>
         </member>
@@ -848,16 +614,16 @@
         <member name="P:Common.IReadOnlyProperty`1.Value">
             <summary>The value assigned to the key.</summary>
         </member>
-        <member name="T:Common.ITextSerializer">
+        <member name="T:Common.ISerializable">
             <summary>An interface specifying that this object can be represented by a <see langword="string"/>.</summary>
         </member>
-        <member name="M:Common.ITextSerializer.Serialize">
+        <member name="M:Common.ISerializable.Serialize">
             <summary>Creates a lossless <see cref="T:System.String"/> representation of the calling object.</summary>
             <returns>A lossless <see cref="T:System.String"/> representation of the calling object.</returns>
         </member>
-        <member name="M:Common.ITextSerializer.ToString">
-            <summary>Creates a lossless <see cref="T:System.String"/> representation of the calling object.</summary>
-            <returns>A lossless <see cref="T:System.String"/> representation of the calling object.</returns>
+        <member name="M:Common.ISerializable.ToString">
+            <summary>A <see cref="T:System.String"/> representation of the calling object, used for debugging or user readability.</summary>
+            <returns>A summary or the object.</returns>
         </member>
         <member name="T:Common.LogClass">
             <summary>Defines the programs log level.</summary>
@@ -1060,108 +826,127 @@
             <summary>Reference to an empty <see langword="string"/>.</summary>
             <remarks>This one is a compile-time constant.</remarks>
         </member>
-        <member name="M:Common.NodeTree.CaptureToken.ToString">
+        <member name="M:Common.Nodes.CaptureToken.ToString">
             <summary>Displays a brief summary of this token's data.</summary>
             <returns>A string representation of this token's data.</returns>
             <remarks>Format: {Group}[{CaptureIndex}] = {Value}</remarks>
         </member>
-        <member name="T:Common.NodeTree.CaptureTokenizer">
+        <member name="T:Common.Nodes.MatchTokenizer">
+            <summary>Creates a token for every match with the groups as properties within every match. Multiple captures are stored as a Collection under the group name.</summary>
+        </member>
+        <member name="T:Common.Nodes.CaptureTokenizer">
             <summary>Creates a token for every capture with the group name as the type within every match. Multiple captures are additional tokens.</summary>
         </member>
-        <member name="T:Common.NodeTree.GroupTokenizer">
+        <member name="T:Common.Nodes.GroupTokenizer">
             <summary>Creates a token for every group in each match. Multiple captures are stored as an array of string data.</summary>
         </member>
-        <member name="T:Common.NodeTree.INode">
+        <member name="T:Common.Nodes.INode">
             <summary>An interface for storing nodes.</summary>
         </member>
-        <member name="P:Common.NodeTree.INode.Prefix">
+        <member name="P:Common.Nodes.INode.Prefix">
             <summary>Gets the origin of the parsed entity.</summary>
         </member>
-        <member name="M:Common.NodeTree.INode.AddChild(Common.NodeTree.INode)">
+        <member name="M:Common.Nodes.INode.AddChild(Common.Nodes.INode)">
             <summary>Adds a child to the children list.</summary>
             <param name="child">The child to add.</param>
         </member>
-        <member name="P:Common.NodeTree.IToken.Value">
+        <member name="P:Common.Nodes.IPLCommandNode.CommandLetter">
+            <summary>Gets the content of this node.</summary>
+        </member>
+        <member name="P:Common.Nodes.IToken.Value">
             <summary>The value of this token. This will be <see langword="null"/> if the token is composed of multiple tokens.</summary>
         </member>
-        <member name="P:Common.NodeTree.IToken.Name">
+        <member name="P:Common.Nodes.IToken.Name">
             <summary>The name or type of this token.</summary>
         </member>
-        <member name="P:Common.NodeTree.NodeContext.NodeStack">
+        <member name="P:Common.Nodes.JSONContentNode.Content">
+            <summary>This contains the quoted string, unquoted boolean, null, undefined, or unquoted number.</summary>
+        </member>
+        <member name="P:Common.Nodes.MatchToken.Value">
+            <summary>The full match text.</summary>
+        </member>
+        <member name="P:Common.Nodes.MatchToken.Name">
+            <summary>The name or type of this token.</summary>
+        </member>
+        <member name="P:Common.Nodes.MatchToken.MatchIndex">
+            <summary>The match index within the <see cref="T:System.Text.RegularExpressions.MatchCollection"/>.</summary>
+        </member>
+        <member name="P:Common.Nodes.MatchToken.GroupData">
+            <summary>The data from the match groups.</summary>
+        </member>
+        <member name="M:Common.Nodes.MatchToken.ToString">
+            <summary>Displays a brief summary of this token's data.</summary>
+            <returns>A string representation of this token's data.</returns>
+        </member>
+        <member name="P:Common.Nodes.NodeContext.NodeStack">
             <summary>Gets the stack of nodes used to track the current node hierarchy during traversal or processing.</summary>
             <remarks>Init-only and initialized to an empty stack.</remarks>
         </member>
-        <member name="P:Common.NodeTree.NodeContext.Current">
+        <member name="P:Common.Nodes.NodeContext.Current">
             <summary>The currently selected node. (Child Node)</summary>
         </member>
-        <member name="P:Common.NodeTree.NodeContext.Root">
+        <member name="P:Common.Nodes.NodeContext.Root">
             <summary>The root node.</summary>
         </member>
-        <member name="P:Common.NodeTree.NodeContext.Header">
+        <member name="P:Common.Nodes.NodeContext.Header">
             <summary>Document Header.</summary>
         </member>
-        <member name="M:Common.NodeTree.NodeContext.PushAndAddTo(Common.NodeTree.INode)">
+        <member name="M:Common.Nodes.NodeContext.PushAndAddTo(Common.Nodes.INode)">
             <summary>Pushes a node to the top of the node stack, and adds it as a child of the previous node on the stack.</summary>
             <param name="node">The child node to push.</param>
             <remarks>This assigns the root node if the stack is empty.</remarks>
         </member>
-        <member name="F:Common.NodeTree.NodeTarget.Null">
+        <member name="F:Common.Nodes.NodeTarget.Null">
             <summary>No target, do not store in a field.</summary>
         </member>
-        <member name="F:Common.NodeTree.NodeTarget.Parent">
+        <member name="F:Common.Nodes.NodeTarget.Parent">
             <summary>This node's parent.</summary>
             <remarks>Use Push and Pop to travel up or down the hierarchy.</remarks>
         </member>
-        <member name="F:Common.NodeTree.NodeTarget.Current">
+        <member name="F:Common.Nodes.NodeTarget.Current">
             <summary>The currently selected node.</summary>
         </member>
-        <member name="F:Common.NodeTree.NodeTarget.Header">
+        <member name="F:Common.Nodes.NodeTarget.Header">
             <summary>The document header field.</summary>
         </member>
-        <member name="F:Common.NodeTree.NodeTarget.Root">
+        <member name="F:Common.Nodes.NodeTarget.Root">
             <summary>The root document field.</summary>
             <remarks>Use this if the document requires a single root node.</remarks>
         </member>
-        <member name="F:Common.NodeTree.NodeTarget.RootNodes">
+        <member name="F:Common.Nodes.NodeTarget.RootNodes">
             <summary>The root document collection.</summary>
             <remarks>Use this if the document doesn't require a single root node.</remarks>
         </member>
-        <member name="F:Common.NodeTree.NodeTarget.PropKey">
+        <member name="F:Common.Nodes.NodeTarget.PropKey">
             <summary>The property name field.</summary>
             <remarks>This is a <see langword="string"/> field.</remarks>
         </member>
-        <member name="F:Common.NodeTree.NodeTarget.TokenGroup">
+        <member name="F:Common.Nodes.NodeTarget.TokenGroup">
             <summary>The token group (aka. Token Type or Token Name)</summary>
             <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
         </member>
-        <member name="F:Common.NodeTree.NodeTarget.TokenValue">
+        <member name="F:Common.Nodes.NodeTarget.TokenValue">
             <summary>The token value (aka. Token Content)</summary>
             <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
         </member>
-        <member name="F:Common.NodeTree.NodeTarget.AnyRootOrParent">
+        <member name="F:Common.Nodes.NodeTarget.AnyRootOrParent">
             <summary>Write to parent, if the parent doesn't exist, write to root or add to rootnodes.</summary>
         </member>
-        <member name="P:Common.NodeTree.XMLElementNode.Name">
-            <summary>Gets the element name and namespace.</summary>
+        <member name="P:Common.Nodes.XMLCommentNode.Content">
+            <summary>Gets the content of this node.</summary>
         </member>
-        <member name="P:Common.NodeTree.XMLElementNode.LocalName">
-            <summary>Gets the local element name.</summary>
-        </member>
-        <member name="P:Common.NodeTree.XMLElementNode.Namespace">
-            <summary>Gets the namespace, or <see langword="null"/> if one is not specified on this element.</summary>
-            <remarks>This does not account for globally set or namespaces set by this element's parents.</remarks>
-        </member>
-        <member name="P:Common.NodeTree.XMLContentNode.Content">
+        <member name="P:Common.Nodes.XMLContentNode.Content">
             <summary>Gets or sets the content of this node.</summary>
         </member>
-        <member name="P:Common.NodeTree.IPLCommandNode.CommandLetter">
-            <summary>Gets the content of this node.</summary>
+        <member name="P:Common.Nodes.XMLElementNode.Name">
+            <summary>Gets the element name and namespace.</summary>
         </member>
-        <member name="P:Common.NodeTree.XMLCommentNode.Content">
-            <summary>Gets the content of this node.</summary>
+        <member name="P:Common.Nodes.XMLElementNode.LocalName">
+            <summary>Gets the local element name.</summary>
         </member>
-        <member name="P:Common.NodeTree.JSONContentNode.Content">
-            <summary>This contains the quoted string, unquoted boolean, null, undefined, or unquoted number.</summary>
+        <member name="P:Common.Nodes.XMLElementNode.Namespace">
+            <summary>Gets the namespace, or <see langword="null"/> if one is not specified on this element.</summary>
+            <remarks>This does not account for globally set or namespaces set by this element's parents.</remarks>
         </member>
         <member name="T:Common.Pos">
             <summary>A lightweight variant of section that holds a start position and a length for operating on a <see cref="T:System.Span`1"/>, <see cref="T:System.Memory`1"/> or <see langword="string"/>.</summary>

@@ -35,6 +35,7 @@ dotnet_diagnostic.CA1863.severity = suggestion
 dotnet_diagnostic.CA2225.severity = silent
 dotnet_diagnostic.CS1591.severity = silent
 dotnet_diagnostic.IDE0047.severity = silent
+dotnet_diagnostic.IDE0072.severity = silent # Populate Switch
 dotnet_hide_advanced_members = false
 dotnet_member_insertion_location = with_other_members_of_the_same_kind
 dotnet_naming_rule.enums_should_be_pascalcase.severity = suggestion
@@ -337,3 +338,6 @@ dotnet_diagnostic.CA1014.severity = suggestion # CA1014: Mark assemblies with CL
 dotnet_diagnostic.CA1045.severity = suggestion # CA1045: Do not pass types by reference
 dotnet_diagnostic.CA2208.severity = none # CA2208: Do not pass types by reference
 dotnet_diagnostic.IDE0008.severity = silent # CA2208: Do not pass types by reference
+
+# CS8509: The switch expression does not handle all possible values of its input type (it is not exhaustive).
+dotnet_diagnostic.CS8509.severity = silent

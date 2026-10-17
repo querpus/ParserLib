@@ -1,8 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Xml.Linq;
 
-using Common.Entities;
-using Common.NodeTree;
+using Common.Nodes;
 
 using Parser.Exceptions;
 
@@ -91,11 +90,11 @@ internal static class Program
     {
       case "NEWXML":
         string newxml_data = File.ReadAllText(FinishPath(Paths.xml_operation));
-        DocumentEntity parsed = EntityFactory.FromString(newxml_data, DefaultParsingSets.XML);
+        //DocumentEntity parsed = EntityFactory.FromString(newxml_data, DefaultParsingSets.XML);
         XElement x_elem = XElement.Load(FinishPath(Paths.xml_operation));
-        DocumentEntity parsedxelem = EntityFactory.FromXElement(x_elem, null);
-        Log(MsgClass.Debug, parsed.RootNode?.ToString() ?? SE, "Program");
-        Log(MsgClass.Debug, parsedxelem.RootNode?.ToString() ?? SE, "Program");
+        //DocumentEntity parsedxelem = EntityFactory.FromXElement(x_elem, null);
+        //Log(MsgClass.Debug, parsed.RootNode?.ToString() ?? SE, "Program");
+        //Log(MsgClass.Debug, parsedxelem.RootNode?.ToString() ?? SE, "Program");
         _ = GetInput();
         break;
       case "NEWXML2":
@@ -112,8 +111,8 @@ internal static class Program
         break;
       case "NEWJSON":
         string newjson_data = File.ReadAllText(FinishPath(Paths.json_launch));
-        DocumentEntity parsed1 = EntityFactory.FromString(newjson_data, DefaultParsingSets.JSON);
-        Log(MsgClass.Debug, parsed1.RootNode?.ToString() ?? SE, "Program");
+        //DocumentEntity parsed1 = EntityFactory.FromString(newjson_data, DefaultParsingSets.JSON);
+        //Log(MsgClass.Debug, parsed1.RootNode?.ToString() ?? SE, "Program");
         _ = GetInput();
         break;
       case "NEWJSON2":

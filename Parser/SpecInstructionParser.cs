@@ -2,8 +2,6 @@
 
 using System.Xml.Linq;
 
-using Common.Entities;
-
 using Parser.Inference;
 
 namespace Parser;
@@ -40,21 +38,21 @@ public static class SpecInstructionParser
 
     XDocument doc = XDocument.Load(path);
     XElement root = doc.Root ?? throw Err.ThrowNoSpec("Spec XML is not good.");
-    DocumentEntity aRoot = EntityFactory.FromXElement(root, null);
-    ElementEntity bRoot = (ElementEntity) (aRoot.RootNode ?? throw new InvalidDataException("Root node should not be null."));
-    ElementEntity prefabs = bRoot.Children.OfType<ElementEntity>().Where(i => i.Name == "Prefabs").At(0);
+    //DocumentEntity aRoot = EntityFactory.FromXElement(root, null);
+   // ElementEntity bRoot = (ElementEntity) (aRoot.RootNode ?? throw new InvalidDataException("Root node should not be null."));
+   // ElementEntity prefabs = bRoot.Children.OfType<ElementEntity>().Where(i => i.Name == "Prefabs").At(0);
 
-    if (!bRoot.Name.Is("Definition"))
+   // if (!bRoot.Name.Is("Definition"))
     {
       _ = Err.ThrowNoSpec("Root element must be Definition.");
     }
 
-    if (prefabs is not null)
+   // if (prefabs is not null)
     {
-      IEnumerable<ElementEntity> prefab_tokenRules_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "TokenRule");
-      IEnumerable<ElementEntity> prefab_tokenLookups_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "TokenLookup");
-      IEnumerable<ElementEntity> prefab_tokenGroups_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "GroupTokenRule");
-      IEnumerable<ElementEntity> prefab_constructs_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "Construct");
+   //   IEnumerable<ElementEntity> prefab_tokenRules_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "TokenRule");
+  //    IEnumerable<ElementEntity> prefab_tokenLookups_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "TokenLookup");
+   //   IEnumerable<ElementEntity> prefab_tokenGroups_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "GroupTokenRule");
+  //    IEnumerable<ElementEntity> prefab_constructs_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "Construct");
     }
 
     foreach (XElement specxml in root.Elements(NS + "Spec"))

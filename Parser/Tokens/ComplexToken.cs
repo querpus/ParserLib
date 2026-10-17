@@ -2,7 +2,7 @@
 
 using System.Collections.Immutable;
 
-using Common.NodeTree;
+using Common.Nodes;
 
 namespace Parser.Tokens;
 
@@ -139,9 +139,9 @@ public sealed class ComplexToken : IToken, IPrintable, IMultiToken<IToken>
 
   public required Spec Spec { get; init; }
 
-  string? Common.NodeTree.IToken.Name => Type;
-  Range Common.NodeTree.IToken.Position => new(Index, Children[^1].Position.End.Value);
-  string? Common.NodeTree.IToken.Value => null;
+  string? Common.Nodes.IToken.Name => Type;
+  Range Common.Nodes.IToken.Position => new(Index, Children[^1].Position.End.Value);
+  string? Common.Nodes.IToken.Value => null;
 
   /// <summary>Calls the action on every piece in this token.</summary>
   /// <param name="action">The action to call.</param>

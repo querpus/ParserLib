@@ -2,7 +2,7 @@
 
 namespace Parser.Tokens;
 
-public interface IToken : IEquatable<IToken>, Common.NodeTree.IToken
+public interface IToken : IEquatable<IToken>, Common.Nodes.IToken
 {
   Spec Spec { get; }
   /// <summary>Assigned at match, cleared if match fails, kept if passes.</summary>
@@ -11,7 +11,7 @@ public interface IToken : IEquatable<IToken>, Common.NodeTree.IToken
   bool HasType { get; }
   IToken? Parent { get; set; }
   string Content { get; }
-  string? Common.NodeTree.IToken.Value => Content;
+  string? Common.Nodes.IToken.Value => Content;
   string ContentNoNewLine => Content.Replace(["\n", "\r"], ["<LF>", "<CR>"]);
   string ToString (int indent);
   void Print (int indent);

@@ -1,9 +1,9 @@
-using Common.NodeTree;
+using Common.Nodes;
 
 namespace Parser.Tokens;
 
 /// <summary>A collection of tokens, use this to keep token operations consistent.</summary>
-public sealed class TokenCollection () : IReadOnlyList<IToken>, Common.NodeTree.IMultiToken<IToken>, IPrintable, IToken
+public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<IToken>, IPrintable, IToken
 {
   #region Private Fields
   /// <summary>The internal token list.</summary>
@@ -31,12 +31,12 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, Common.NodeTree.
   public int Index => _tokens.Count > 0 ? _tokens[0].Index : -1;
   public string ContentNoNewLine => this.ToString();
   string IToken.Content => ToString();
-  string? Common.NodeTree.IToken.Value => null;
+  string? Common.Nodes.IToken.Value => null;
   public string Delim { get; init; } = SE;
 
-  string? Common.NodeTree.IToken.Name => Type;
+  string? Common.Nodes.IToken.Name => Type;
 
-  Range Common.NodeTree.IToken.Position => Children.Count switch
+  Range Common.Nodes.IToken.Position => Children.Count switch
   {
     < 1 => new(-1, -1),
     1 => Children[0].Position,

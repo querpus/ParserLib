@@ -16,8 +16,8 @@ public sealed class Token : IToken, IPrintable
   public IToken? Parent { get; set; }
   public bool HasType => Type is not null;
 
-  string? Common.NodeTree.IToken.Name => Type;
-  Range Common.NodeTree.IToken.Position => new(Index, LastPosition);
+  string? Common.Nodes.IToken.Name => Type;
+  Range Common.Nodes.IToken.Position => new(Index, LastPosition);
 
   int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
   public override string ToString () => $"{Type} : {Content}";

@@ -67,12 +67,7 @@
       <xs:enumeration value="MultiLine"/>
       <xs:enumeration value="DotIncludesNewline"/>
       <xs:enumeration value="NonBacktracking"/>
-      <xs:enumeration value="-IgnorePatternWhitespace"/>
-      <xs:enumeration value="-IgnoreCase"/>
-      <xs:enumeration value="-RightToLeft"/>
-      <xs:enumeration value="-MultiLine"/>
-      <xs:enumeration value="-DotIncludesNewline"/>
-      <xs:enumeration value="-NonBacktracking"/>
+      <xs:enumeration value="ExplicitCapture"/>
     </xs:restriction>
   </xs:simpleType>
 
