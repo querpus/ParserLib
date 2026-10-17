@@ -4,10 +4,10 @@
 
 using static Common.Debug;
 
-namespace Common.NodeTree;
+namespace Common.Nodes;
 
 /// <summary>Creates a token for every group in each match. Multiple captures are stored as an array of string data.</summary>
-public class GroupTokenizer : ITokenizer<GroupToken>
+public class GroupTokenizer : ITokenizer<CaptureToken>
 {
   public Collection<CaptureToken> Tokens { get; } = [];
   public required TokenRuleSet Rules { get; init; }
@@ -36,7 +36,7 @@ public class GroupTokenizer : ITokenizer<GroupToken>
             CaptureToken token = new()
             {
               Value = cap.Value,
-              Group = groupName,
+              Name = groupName,
               CaptureIndex = i,
               Position = cap.Index..(cap.Index + cap.Length)
             };

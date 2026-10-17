@@ -2,7 +2,7 @@
 #pragma warning disable format // Formatting
 #pragma warning disable IDE1006 // Naming Styles
 
-namespace Common.NodeTree;
+namespace Common.Nodes;
 public interface ITokenizer<TToken>
 {
   Collection<TToken> Tokens { get; }

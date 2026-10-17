@@ -1,8 +1,6 @@
 using Common.Extensions;
 using Common.Nodes;
 
-using static Common.Names;
-
 namespace UnitTest;
 
 public class CommonTests

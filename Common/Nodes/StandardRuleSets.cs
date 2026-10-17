@@ -476,7 +476,6 @@ public static class StandardRuleSets
           Debug.Log(MsgClass.Warning, "PropKey was not null when assigned.", "StandardRuleSets");
 
         JSONContentNode node = context.GenerateNode<JSONContentNode>(NT.Current);
-       
         node.AppendToPrefix(token);
         Debug.Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
       }
