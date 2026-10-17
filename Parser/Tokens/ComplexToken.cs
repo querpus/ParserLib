@@ -1,8 +1,12 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 
+using System.Collections.Immutable;
+
+using Common.Nodes;
+
 namespace Parser.Tokens;
 
-public sealed class ComplexToken : IToken, IPrintable
+public sealed class ComplexToken : IToken, IPrintable, IMultiToken<IToken>
 {
   public string Delim { get; init; } = " ";
   private readonly Dictionary<TokenRef, IToken> _token_pieces = [];
@@ -22,16 +26,16 @@ public sealed class ComplexToken : IToken, IPrintable
   public IToken? Name => GetPiece(TokenRef.Name);
   public IToken? ObjType => GetPiece(TokenRef.Type);
   /// <summary>Value is simply the first item in the ValueList.</summary>
-  public IToken? Value => (GetPiece(TokenRef.ValueList) as TokenCollection)?[0];
+  public IToken? Value => Values?.Count > 0 ? Values[0] : null;
   public IToken? Left => GetPiece(TokenRef.Left);
   public IToken? Right => GetPiece(TokenRef.Right);
   public IToken? Center => GetPiece(TokenRef.Center);
-  public TokenCollection? AddFlags => (TokenCollection?)GetPiece(TokenRef.AddFlagList);
-  public TokenCollection? SubFlags => (TokenCollection?)GetPiece(TokenRef.SubFlagList);
-  public TokenCollection? Properties => (TokenCollection?)GetPiece(TokenRef.PropertyList);
-  public TokenCollection? Parameters => (TokenCollection?)GetPiece(TokenRef.ParameterList);
-  public TokenCollection? Statements => (TokenCollection?)GetPiece(TokenRef.StatementList);
-  public TokenCollection? Values => (TokenCollection?)GetPiece(TokenRef.ValueList);
+  public ImmutableList<IToken>? AddFlags => GetPieces(TokenRef.AddFlagList);
+  public ImmutableList<IToken>? SubFlags => GetPieces(TokenRef.SubFlagList);
+  public ImmutableList<IToken>? Properties => GetPieces(TokenRef.PropertyList);
+  public ImmutableList<IToken>? Parameters => GetPieces(TokenRef.ParameterList);
+  public ImmutableList<IToken>? Statements => GetPieces(TokenRef.StatementList);
+  public ImmutableList<IToken>? Values => GetPieces(TokenRef.ValueList);
 
   public string Content => Children.Select(i => i.Content).TextJoin(" ");
   public IReadOnlyCollection<TokenRef> PiecesPresent => [.. _token_pieces.Keys.Where(kvp => kvp.IsUsed(_token_pieces))];
@@ -41,8 +45,9 @@ public sealed class ComplexToken : IToken, IPrintable
   public IList<IToken> Children { get; init; } = [];
   public int Index => Children.Count > 0 ? Children[0].Index : -1;
   public int CompareTo(IIndexSortable? other) => Index.CompareTo(other?.Index);
-  public bool Equals(IToken? other) => other is ComplexToken && Children.SequenceEqual(other.Children);
+  public bool Equals(IToken? other) => other is ComplexToken ct && Children.SequenceEqual(ct.Children);
   public IToken? GetPiece(TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) ? value : null;
+  public ImmutableList<IToken>? GetPieces(TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) && value is IMultiToken<IToken> multi ? [.. multi.Children] : null;
   public string? GetPieceContent(TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) ? value.Content : null;
   public bool HasPieceType(TokenRef piece_type) => piece_type.IsUsed(_token_pieces);
   public bool HasPieceTypes(TokenRef[] piece_types) => piece_types.All(p => p.IsUsed(_token_pieces));
@@ -114,7 +119,7 @@ public sealed class ComplexToken : IToken, IPrintable
   public static bool operator >(ComplexToken left, ComplexToken right) => left?.CompareTo(right) > 0;
   public static bool operator >=(ComplexToken left, ComplexToken right) => left is null ? right is null : left.CompareTo(right) >= 0;
 
-  private Dictionary<string, IToken?> Parts => new()
+  private Dictionary<string, dynamic?> Parts => new()
   {
     ["Name"] = Name,
     ["Type"] = ObjType,
@@ -134,17 +139,16 @@ public sealed class ComplexToken : IToken, IPrintable
 
   public required Spec Spec { get; init; }
 
-  IEnumerable<string> Common.NodeTree.IToken.Value => throw new NotImplementedException();
-
-  string? Common.NodeTree.IToken.Name { get => Type; init => Type = value ?? "None"; }
-  Range Common.NodeTree.IToken.Position { get => throw new NotImplementedException(); init => throw new NotImplementedException(); }
+  string? Common.Nodes.IToken.Name => Type;
+  Range Common.Nodes.IToken.Position => new(Index, Children[^1].Position.End.Value);
+  string? Common.Nodes.IToken.Value => null;
 
   /// <summary>Calls the action on every piece in this token.</summary>
   /// <param name="action">The action to call.</param>
   /// <remarks>This will not call both Value and ValueList. It chooses based on the quantity of the list.</remarks>
-  private void EachPart(Action<KeyValuePair<string, IToken?>> action)
+  private void EachPart(Action<KeyValuePair<string, dynamic?>> action)
   {
-    foreach (KeyValuePair<string, IToken?> part in Parts.Where(k => k.Value is not null))
+    foreach (KeyValuePair<string, dynamic?> part in Parts.Where(k => k.Value is not null))
     {
       if (part.Key.Like("Value") && (part.Value is not TokenCollection tc || tc.Count == 1))
       {
@@ -212,5 +216,5 @@ public sealed class ComplexToken : IToken, IPrintable
     Children = [.. Children],
     Type = Type,
   };
-  string ITextSerializer.Serialize() => Content;
+  string ISerializable.Serialize() => Children.Select(c => c.Serialize()).TextJoin("");
 }

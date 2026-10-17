@@ -845,7 +845,7 @@
         <member name="P:Parser.Tokens.ComplexToken.Value">
             <summary>Value is simply the first item in the ValueList.</summary>
         </member>
-        <member name="M:Parser.Tokens.ComplexToken.EachPart(System.Action{System.Collections.Generic.KeyValuePair{System.String,Parser.Tokens.IToken}})">
+        <member name="M:Parser.Tokens.ComplexToken.EachPart(System.Action{System.Collections.Generic.KeyValuePair{System.String,System.Object}})">
             <summary>Calls the action on every piece in this token.</summary>
             <param name="action">The action to call.</param>
             <remarks>This will not call both Value and ValueList. It chooses based on the quantity of the list.</remarks>
@@ -896,6 +896,10 @@
             <summary>Removes <paramref name="count"/> from the collection starting at <paramref name="first"/>.</summary>
             <param name="first">The first token to remove.</param>
             <param name="count">The number of tokens to remove.</param>
+        </member>
+        <member name="T:Parser.Tokens.TokenFactory">
+            <summary>Match Tokenizer</summary>
+            <remarks>Each match is a token.</remarks>
         </member>
         <member name="M:Parser.Tokens.TokenFactory.StoreExtra">
             <summary>Checks every unmatched section for a match, and if said section matches, adds the token.</summary>

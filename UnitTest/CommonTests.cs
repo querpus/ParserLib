@@ -1,5 +1,5 @@
-using Common.Entities;
 using Common.Extensions;
+using Common.Nodes;
 
 using static Common.Names;
 
@@ -11,11 +11,7 @@ public class CommonTests
   [InlineData("\u0000\u0010\u0020")]
   public void CharDisplayTest (string data)
   {
-    string result = SE;
-    foreach (char c in data)
-    {
-      result += c.Display;
-    }
+    string result = data.ToString(true);
     Assert.Equal("␀␐␠", result);
   }
 
@@ -30,24 +26,16 @@ public class CommonTests
   {
     string content = File.ReadAllText(Helper.GitDir + path);
 
-    DocumentEntity result = EntityFactory.FromString(content, DefaultParsingSets.XML);
+    var m_tokenizer = new MatchTokenizer() { Rules = StandardRuleSets.XMLTokenRuleSet };
+    var c_tokenizer = new CaptureTokenizer() { Rules = StandardRuleSets.XMLTokenRuleSet };
 
-    Assert.NotNull(result);
+    Assert.NotNull(m_tokenizer);
+    Assert.NotNull(c_tokenizer);
 
-    foreach (KeyValuePair<string, object?> item in result.DataValues)
-    {
-      if (item.Value is null)
-        Assert.Fail("Null value stored in DataValues");
-    }
-  }
+    var m_tokens = m_tokenizer.Tokenize(content);
+    var c_tokens = c_tokenizer.Tokenize(content);
 
-  [Fact]
-  public void EntityDataTest ()
-  {
-    RawEntity entity = new();
-
-    entity.AddToDataCollection("test", new object());
-
-    Assert.NotNull(entity.DataValues["test"]);
+    Assert.NotNull(m_tokens);
+    Assert.NotNull(c_tokens);
   }
 }

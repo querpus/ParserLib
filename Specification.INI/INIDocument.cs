@@ -3,7 +3,7 @@ using Parser.Tokens;
 namespace Specification.INI;
 
 /// <summary>A document, which is a collection of INISections.</summary>
-public sealed class INIDocument : ITextSerializer, ICloneable, IEnumerable<INISection>
+public sealed class INIDocument : ISerializable, ICloneable, IEnumerable<INISection>
 {
   #region Static Constructors
   /// <summary>Creates an <c>INIDocument</c> from another <c>INIDocument</c>.</summary>

@@ -3,7 +3,7 @@ using Parser.Tokens;
 namespace Specification.INI;
 
 /// <summary>A key and value pair in an INI file.</summary>
-public class PropertyObj : PropertyBase<string>, ITextSerializer
+public class PropertyObj : PropertyBase<string>, ISerializable
 {
   /// <summary>Creates an empty <see cref="PropertyObj"/>.</summary>
   public PropertyObj () { }

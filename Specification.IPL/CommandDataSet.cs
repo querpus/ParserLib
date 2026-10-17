@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Specification.IPL;
 
 /// <summary>Contains the details of an IPL command.</summary>
-public class CommandDataSet : IEquatable<CommandDataSet>, ITextSerializer, IComparable<CommandDataSet>, IReadOnlyCollection<object>
+public class CommandDataSet : IEquatable<CommandDataSet>, ISerializable, IComparable<CommandDataSet>, IReadOnlyCollection<object>
 {
   /// <summary>The data that created this object.</summary>
   public MatchDataSet Origin { get; }

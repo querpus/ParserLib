@@ -12,14 +12,12 @@ public sealed class Token : IToken, IPrintable
   public int LastPosition => Index + Length - 1;
   public int Length => Content.Length;
   public int Index { get; init; }
-  public string Type { get => field.IsEmpty ? "None" : field; set; } = "None";
+  public string Type { get => field.IsEmpty ? field = "None" : field; set; }
   public IToken? Parent { get; set; }
-  public IList<IToken> Children { get; } = [];
   public bool HasType => Type is not null;
 
-  IEnumerable<string> Common.NodeTree.IToken.Value => [Content];
-  string? Common.NodeTree.IToken.Name { get => Type; init => Type = value ?? "None"; }
-  Range Common.NodeTree.IToken.Position { get => new(Index, LastPosition); init => Index = value.Start.Value; }
+  string? Common.Nodes.IToken.Name => Type;
+  Range Common.Nodes.IToken.Position => new(Index, LastPosition);
 
   int IComparable.CompareTo(object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
   public override string ToString() => $"{Type} : {Content}";

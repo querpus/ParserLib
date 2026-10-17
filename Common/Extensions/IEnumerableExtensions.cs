@@ -116,7 +116,7 @@ public static class IEnumerableExtensions
     public string ReplaceByNodes (string input, StringComparison sc) => nodes.Aggregate(input, (text, node) => text = node.ReplaceText(text, sc));
   }
 
-  extension(IEnumerable<ITextSerializer> items)
+  extension(IEnumerable<ISerializable> items)
   {
     public string Serialize (string delimiter = "") => items.TextJoin(delimiter);
   }
