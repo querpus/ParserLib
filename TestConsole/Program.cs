@@ -88,7 +88,29 @@ internal static class Program
     Log(MsgClass.Prompt, "Select a test. (wad/xml/mapinfo/acs/ini)", This);
     switch (GetInput())
     {
-      case "NEWXML":
+      case "XML":
+        Log(MsgClass.Prompt, "Select a version. (capture/group/match/linq/xparser)", This);
+        switch (GetInput())
+        {
+          case "CAPTURE":
+            CaptureTokenizer cTokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
+            var cTokens = cTokenizer.Tokenize(File.ReadAllText(FinishPath(ResZDoom.xml_acs)));
+            cTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
+            break;
+          case "XPARSER":
+            InitialTest("xml", Paths.xml_operation);
+            InitialTest(SpecXML.Spec, Paths.xml_errors);
+            InitialTest(SpecXML.Spec, ResZDoom.xml_acs);
+            break;
+          case "MATCH":
+            MatchTokenizer mTokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
+            var mTokens = mTokenizer.Tokenize(File.ReadAllText(FinishPath(ResZDoom.xml_acs)));
+            mTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
+            break;
+          default:
+            Log(MsgClass.Error, "Invalid choice.", This);
+            break;
+        }
         string newxml_data = File.ReadAllText(FinishPath(Paths.xml_operation));
         //DocumentEntity parsed = EntityFactory.FromString(newxml_data, DefaultParsingSets.XML);
         XElement x_elem = XElement.Load(FinishPath(Paths.xml_operation));
@@ -143,11 +165,6 @@ internal static class Program
         InitialTest(SpecZDoom.ACS, ResZDoom.acs_rpgmfunc);
         InitialTest(SpecZDoom.ACS, ResZDoom.acs_foolib);
         InitialTest(SpecZDoom.ACS, ResZDoom.acs_sample);
-        break;
-      case "XML":
-        InitialTest("xml", Paths.xml_operation);
-        InitialTest(SpecXML.Spec, Paths.xml_errors);
-        InitialTest(SpecXML.Spec, ResZDoom.xml_acs);
         break;
       case "SNDINFO":
         InitialTest(SpecZDoom.SndInfo, ResZDoom.sndinfo_test);
