@@ -23,5 +23,10 @@
         </MultiTrigger>
       </Style.Triggers>
     </Style>
+    <BindingGroup x:Key="TokenRuleBinding" >
+    </BindingGroup>
+    <DataGridTextColumn Header="">
+
+    </DataGridTextColumn>
   </Application.Resources>
 </Application>

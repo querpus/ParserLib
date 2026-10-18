@@ -878,12 +878,19 @@
             <summary>Displays a brief summary of this token's data.</summary>
             <returns>A string representation of this token's data.</returns>
         </member>
+        <member name="P:Common.Nodes.NodeContext.SingleRoot">
+            <summary>Set this to <see langword="true"/> if there must be a single node that everything is within.
+            Set this to <see langword="false"/> if there can be multiple top-level objects.</summary>
+        </member>
         <member name="P:Common.Nodes.NodeContext.NodeStack">
             <summary>Gets the stack of nodes used to track the current node hierarchy during traversal or processing.</summary>
             <remarks>Init-only and initialized to an empty stack.</remarks>
         </member>
         <member name="P:Common.Nodes.NodeContext.Current">
             <summary>The currently selected node. (Child Node)</summary>
+        </member>
+        <member name="P:Common.Nodes.NodeContext.RootNodes">
+            <summary>The root nodes when <see cref="P:Common.Nodes.NodeContext.SingleRoot"/> is <see langword="false"/>.</summary>
         </member>
         <member name="P:Common.Nodes.NodeContext.Root">
             <summary>The root node.</summary>
@@ -896,12 +903,38 @@
             <param name="node">The child node to push.</param>
             <remarks>This assigns the root node if the stack is empty.</remarks>
         </member>
+        <member name="M:Common.Nodes.NodeContext.PopTo(Common.Nodes.NodeTarget)">
+            <summary>Pops a node from the node stack, and assigns it to the target field.</summary>
+            <param name="target">The field to assign the popped node to.</param>
+            <returns>The node that was taken off the top of the stack.</returns>
+            <remarks>If you do not need the node, you can use <see cref="F:Common.Nodes.NodeTarget.Null"/> to prevent any assignment.</remarks>
+        </member>
+        <member name="M:Common.Nodes.NodeContext.AddNodeTo(Common.Nodes.INode,Common.Nodes.NodeTarget)">
+            <summary>Adds the node <paramref name="node"/> to the node at <paramref name="target"/></summary>
+            <param name="node">The child node.</param>
+            <param name="target">The target of the parent node.</param>
+            <remarks>Additional targets will be have the node added to, except for <see cref="F:Common.Nodes.NodeTarget.AnyRootOrParent"/>.
+            This combination flag attempts to add it to the parent object,
+            if that fails then add it to the root object, or add it to the <see cref="F:Common.Nodes.NodeTarget.RootNodes"/> list.</remarks>
+            <exception cref="T:System.InvalidOperationException">No node was added to any target.</exception>
+        </member>
+        <member name="M:Common.Nodes.NodeContext.AppendTokenTo(Common.Nodes.NodeTarget,Common.Nodes.CaptureToken)">
+            <summary>Appends the currrent token to the prefix field or the suffix field on the target node.</summary>
+            <param name="target">The target node and field.</param>
+            <param name="token">The token to append.</param>
+            <exception cref="T:System.InvalidOperationException">Both Suffix and Prefix were included in <paramref name="target"/> or an invalid <paramref name="target"/> was specified.</exception>
+        </member>
+        <member name="T:Common.Nodes.NodeTarget">
+            <summary>The node to be designated a target or referred to as a source.</summary>
+            <remarks>You can use the 'OR' operator to specify a field within a node, or to make multiple assignments.</remarks>
+        </member>
         <member name="F:Common.Nodes.NodeTarget.Null">
             <summary>No target, do not store in a field.</summary>
+            <remarks>This will throw an exception if you specify this as a source node.</remarks>
         </member>
         <member name="F:Common.Nodes.NodeTarget.Parent">
-            <summary>This node's parent.</summary>
-            <remarks>Use Push and Pop to travel up or down the hierarchy.</remarks>
+            <summary>This node's parent. This is the top of the node stack.</summary>
+            <remarks>This field cannot be assigned. Use Push and Pop to travel up or down the hierarchy.</remarks>
         </member>
         <member name="F:Common.Nodes.NodeTarget.Current">
             <summary>The currently selected node.</summary>
@@ -917,6 +950,10 @@
             <summary>The root document collection.</summary>
             <remarks>Use this if the document doesn't require a single root node.</remarks>
         </member>
+        <member name="F:Common.Nodes.NodeTarget.AnyRootOrParent">
+            <summary>Write to parent, if the parent doesn't exist, write to root or add to rootnodes.</summary>
+            <remarks>This has special logic when adding a node, it only assigns once, not to all of the target locations.</remarks>
+        </member>
         <member name="F:Common.Nodes.NodeTarget.PropKey">
             <summary>The property name field.</summary>
             <remarks>This is a <see langword="string"/> field.</remarks>
@@ -929,8 +966,16 @@
             <summary>The token value (aka. Token Content)</summary>
             <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
         </member>
-        <member name="F:Common.Nodes.NodeTarget.AnyRootOrParent">
-            <summary>Write to parent, if the parent doesn't exist, write to root or add to rootnodes.</summary>
+        <member name="F:Common.Nodes.NodeTarget.Prefix">
+            <summary>Access the Prefix field of a node.</summary>
+            <remarks>Read only. This is a <see langword="string"/> field that must be modified with the <see cref="M:Common.Nodes.INode.AppendToPrefix(System.String)"/> method or its overloads.</remarks>
+        </member>
+        <member name="F:Common.Nodes.NodeTarget.Suffix">
+            <summary>Access the Suffix field of a node.</summary>
+            <remarks>Read only. This is a <see langword="string"/> field that must be modified with the <see cref="M:Common.Nodes.INode.AppendToSuffix(System.String)"/> method or its overloads.</remarks>
+        </member>
+        <member name="F:Common.Nodes.NodeTarget.Fields">
+            <summary>The readonly fields that cannot be assigned to.</summary>
         </member>
         <member name="P:Common.Nodes.XMLCommentNode.Content">
             <summary>Gets the content of this node.</summary>

@@ -34,7 +34,7 @@ public static class Chars
     ACK = '\u0006',
     SI  = '\u000F',
     ETB = '\u0017',
-    CAN = '\u0017',
+    CAN = '\u0018',
     SUB = '\u001A',
     FS  = '\u001C',
     GS  = '\u001D',

@@ -11,10 +11,22 @@ public sealed class IPLCommandNode : Node
     get => Data.TryGetValue("CommandLetter", out object? obj) ? (char) obj : null;
     set => Data["CommandLetter"] = value ?? '\0';
   }
+  /// <summary>The format that this command was created in.</summary>
+  /// <remarks>This is pulled from the "Format" field in the <see cref="NodeContext"/>.</remarks>
+  public int Format
+  {
+    get => Data.TryGetValue("Format", out object? obj) ? (int) obj : 0;
+    set => Data["Format"] = value;
+  }
   public bool Escaped
   {
     get => Data.TryGetValue("Escaped", out object? obj) && obj is true;
     set => Data["Escaped"] = value;
+  }
+  public bool Shifted
+  {
+    get => Data.TryGetValue("Shifted", out object? obj) && obj is true;
+    set => Data["Shifted"] = value;
   }
   public Collection<string> Values
   {

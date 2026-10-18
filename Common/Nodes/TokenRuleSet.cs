@@ -4,7 +4,7 @@
 namespace Common.Nodes;
 public class TokenRuleSet
 {
-  public required Collection<string> TokenSequences { get; init; }
+  public required ObservableCollection<string> TokenSequences { get; init; }
   public string RegexString => TokenSequences.TextJoin("|");
   public RegexOptions RegexOptions { get; init; } = ROIPW | ROML;
   public Regex Regex => new(RegexString, RegexOptions);

@@ -47,28 +47,6 @@ public static class NodeRuleHelper
     Debug.Log(MsgClass.GreenInfo, message, "NodeRuleHelper");
 #endif
   }
-
-  public static void DoXMLOperation (NodeContext context, CaptureToken token, string action, string? assignTo, string? valueFrom, string? className)
-  {
-    NT target = assignTo?.ToNodeTarget() ?? NT.Null;
-    NT source = valueFrom?.ToNodeTarget() ?? NT.Null;
-
-    switch(action)
-    {
-      case "GenerateNode" when className is not null:
-        INode node = context.GenerateNode(target, className);
-        node.AppendToPrefix(token.Value);
-        break;
-      case "AssignNode" when target is not NT.Null && source is not NT.Null:
-        context.AssignNodeTo(context.GetTargetValue(source), target);
-        break;
-      case "AddToNode" when target is not NT.Null && source is not NT.Null:
-        context.AddNodeTo(context.GetTargetValue(source), target);
-        break;
-      default:
-        break;
-    }
-  }
 }
 
 public static class StandardRuleSets
@@ -329,7 +307,7 @@ public static class StandardRuleSets
       Execute = static (context, token) =>
       {
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.Prefix = token.Value;
+        node.AppendToPrefix(token.Value);
         node.CommandLetter = token.Value[0];
 
         if (context.PropKey is "<ESC>" or "\e")
@@ -339,6 +317,34 @@ public static class StandardRuleSets
         }
 
         context.AddNodeTo(node, NT.RootNodes);
+      }
+    };
+
+    public static NodeRule FormatCommand = new()
+    {
+      TokenName = "format",
+      Execute = static (context, token) =>
+      {
+        if (context.Current is not IPLCommandNode cmd)
+        {
+          Debug.Log(MsgClass.Error, "Current is not a command node. Aborting Format Storage.", "StandardParsingSets");
+          throw new InvalidOperationException("Current is not an IPL command node. Token Processing Halted.");
+        }
+
+        // If we erase the currently selected formula clear the context formula also.
+        if (cmd.CommandLetter is 'E' && context.Data["Format"].Like(token.Value))
+        {
+          context.Data["Format"] = "0";
+        }
+
+        // If we set the format, then this command is a part of it too.
+        if (cmd.CommandLetter is 'F')
+        {
+          cmd.Format = int.Parse(token.Value);
+          context.Data["Format"] = token.Value;
+        }
+        cmd.AddValue(token.Value);
+        cmd.AppendToPrefix(token.Value);
       }
     };
 
@@ -355,7 +361,7 @@ public static class StandardRuleSets
       }
     };
 
-    public static NodeRule Escape = new()
+    private static NodeRule EscapeCommand = new()
     {
       TokenName = "esc",
       Execute = static (context, token) =>
@@ -367,6 +373,7 @@ public static class StandardRuleSets
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
         node.AppendToPrefix(token);
         node.Escaped = true;
+        node.Format = int.Parse(context.Data["Format"]);
       }
     };
 
@@ -383,12 +390,21 @@ public static class StandardRuleSets
       }
     };
 
-    [SS("regex")] public const string RxSimpleCommand = "(?'cmd' [R] ) (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string RxEscapedCommand_0 = @"(?'esc' <ESC> | \e ) (?'cmd' [APc] ) (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string RxAdvancedMode = @"(?'esc' <ESC> | \e ) (?'mode' C ) (?'value'0|1)? (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string RxLineCommand = @"(?'line_cmd' [BHLMQSU] ) (?'index' \d+) (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string RxPropCommand_1 = @"(?'prop_cmd' [cdhlw] ) (?'value' -?\d+) (?'end' ;|$|(?=<))";
-    [SS("regex")] public const string RxPropCommand_2 = @"(?'prop_cmd' [cdo] ) (?'value' -?\d+) (?'op' ,) (?'value' [^;<\n,]*) (?'end' ;|$|(?=<))";
+    [SS("regex")] private const string RxEsc = @"(?'esc' <ESC> | \e )";
+    [SS("regex")] private const string RxEnd = "(?'end' ;|$|(?=<))";
+
+    [SS("regex")] public const string RxSimpleCommand = "(?'cmd' R )" + RxEnd;
+    [SS("regex")] public const string RxEscapedCommand_0 = RxEsc + "(?'cmd' [APc] )" + RxEnd;
+    [SS("regex")] public const string RxEmulationMode = RxEsc + "(?'mode' c ) (?'value'0|1)?" + RxEnd;
+    [SS("regex")] public const string RxAdvancedMode = RxEsc + "(?'mode' C ) (?'value'0|1)?" + RxEnd;
+    [SS("regex")] public const string RxFormat = @"(?'cmd' [EF] ) (?'format'\d{1,3})";
+    [SS("regex")] public const string RxPage = RxEsc + "(?'cmd' G ) (?'page'[0-9])";
+    [SS("regex")] public const string RxClearDataCommand = @"(?'can'<CAN>|\u0018)";
+    [SS("regex")] public const string RxPrintCommand = @"(?'etb'<ETB>|\u0017)";
+    [SS("regex")] public const string RxLineCommand = @"(?'line_cmd' [BHLMQSU] ) (?'index' \d+)" + RxEnd;
+    [SS("regex")] public const string RxTextDataProp = "(?'cmd' d ) ()" + RxEnd;
+    [SS("regex")] public const string RxPropCommand_1 = @"(?'prop_cmd' [cdhlw] ) (?'value' -?\d+)" + RxEnd;
+    [SS("regex")] public const string RxPropCommand_2 = @"(?'prop_cmd' [cdo] ) (?'value' -?\d+) (?'op' ,) (?'value' [^;<\n,]*)" + RxEnd;
     [SS("regex")] public const string RxPropCommand_7 =
       """
       (?# Property with 7 Values c17)
@@ -403,6 +419,8 @@ public static class StandardRuleSets
     [SS("regex")] public const string RxBeforeStart = "(?'before' ^(?>((?!<STX>).)*)<STX>)";
     [SS("regex")] public const string RxBetweenMarkers = "(?'between'<ETX>(?>((?!<STX>).)*)<STX>)";
     [SS("regex")] public const string RxAfterEnd = "(?'after'<ETX>(?>((?!<STX>).)*))";
+
+    public static NodeRule Escape { get => escape; set => escape = value; }
   }
   private static class JSON
   {
@@ -476,7 +494,7 @@ public static class StandardRuleSets
           Debug.Log(MsgClass.Warning, "PropKey was not null when assigned.", "StandardRuleSets");
 
         JSONContentNode node = context.GenerateNode<JSONContentNode>(NT.Current);
-       
+
         node.AppendToPrefix(token);
         Debug.Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
       }
@@ -497,7 +515,10 @@ public static class StandardRuleSets
       JSON.RxObject,
       JSON.RxArray,
       JSON.RxWhitespace,
-      JSON.RxOps
+      JSON.RxOps,
+      // Common error finder
+      JSON.RxError,
+
     ]
   };
   public static NodeRuleSet JSONRuleSet { get; } = new()
@@ -513,6 +534,7 @@ public static class StandardRuleSets
       NodeRule.KeepAndIgnore("comment"),
       NodeRule.Discard("qt"),
       NodeRule.Discard("str_value"),
+      // Also look for errors
       NodeRule.SyntaxError("error")
     },
   };
@@ -584,6 +606,8 @@ public static class StandardRuleSets
       IPL.Escape,
       IPL.PropertyCommand,
       IPL.Comma,
+      IPL.FormatCommand,
+      IPL.PrintCommand,
       NodeRule.KeepAndIgnore("before"),
       NodeRule.KeepAndIgnore("after"),
       NodeRule.KeepAndIgnore("between"),

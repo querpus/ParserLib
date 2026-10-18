@@ -4,11 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFParserVisualizer"
-        xmlns:NodeTree="clr-namespace:Common.NodeTree;assembly=Common" x:Class="WPFParserVisualizer.MainWindow"
+        xmlns:Nodes="clr-namespace:Common.Nodes;assembly=Common" x:Class="WPFParserVisualizer.MainWindow"
         mc:Ignorable="d"
         Title="MainWindow"
         Height="400"
         Width="800"
+        DataContext="{DynamicResource ResourceKey=TokenRuleBinding}"
         Background="DarkGray">
   <Window.Resources>
     <Style x:Key="{ComponentResourceKey ResourceId=DataGridSelectAllButtonStyle, TypeInTargetAssembly={x:Type DataGrid}}" TargetType="{x:Type Button}">
@@ -47,10 +48,10 @@
       <ColumnDefinition Width="333*"/>
       <ColumnDefinition Width="67*"/>
     </Grid.ColumnDefinitions>
-    <DataGrid x:Name="dataGrid" Grid.Column="1" Grid.Row="1" d:ItemsSource="{d:SampleData ItemCount=5}">
-      <DataGrid.DataContext>
-        <NodeTree:CaptureTokenizer/>
-      </DataGrid.DataContext>
+    <DataGrid  Grid.Column="1" Grid.Row="1">
+      <DataGrid.Columns>
+        
+      </DataGrid.Columns>
     </DataGrid>
   </Grid>
 </Window>
