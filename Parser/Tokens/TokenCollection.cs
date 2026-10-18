@@ -24,6 +24,7 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
 
   public int Count => _tokens.Count;
   public string Type { get; set; } = SE;
+  public string Delim { get; init; } = " ";
 
   public bool HasType => !(Type is null or "-" or EmptyString || Type.Like("None"));
   public IToken? Parent { get; set; }
@@ -32,7 +33,6 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
   public string ContentNoNewLine => this.ToString();
   string IToken.Content => ToString();
   string? Common.Nodes.IToken.Value => null;
-  public string Delim { get; init; } = SE;
 
   string? Common.Nodes.IToken.Name => Type;
 
@@ -112,13 +112,11 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
     }
     return ret;
   }
-
+  public string Serialize () => _tokens.TextJoin(Delim);
   public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
-  public bool Equals (IToken? other) => other is IMultiToken<IToken> tc && _tokens.SequenceEqual(tc.Children);
+  public bool Equals (IToken? other) => other is TokenCollection tc && _tokens.SequenceEqual(tc._tokens);
   public override bool Equals (object? obj) => obj is not null && obj is TokenCollection tc && Equals(tc);
   public override int GetHashCode () => _tokens.GetHashCode();
-  string ISerializable.Serialize () => Children.Select(c => c.Serialize()).TextJoin(" ");
-
   public static bool operator == (TokenCollection left, TokenCollection right) => left is null ? right is null : left.Equals(right);
   public static bool operator != (TokenCollection left, TokenCollection right) => !(left == right);
   public static bool operator < (TokenCollection left, TokenCollection right) => left is null ? right is not null : left.CompareTo(right) < 0;
