@@ -55,6 +55,8 @@ public sealed class TokenFactory : ITokenizer<IToken>
     RT.ErrorMatch => ErrorMatch,
     _ => ActionBadLog
   };
+
+  TokenRuleSet? ITokenizer<IToken>.Rules { get => throw new NotSupportedException(); init => throw new NotSupportedException(); }
   #endregion
   #region Private Logging Methods
   private static void DebugLog (string msg) => Log(MC.Debug, msg, nameof(TokenFactory));

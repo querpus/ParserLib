@@ -1,9 +1,38 @@
+using Common.Nodes;
+
 namespace Parser.Inference;
 
-public class InferenceNode (IT type, string content)
+public static class InferenceNodeFactory
 {
-  public string Content { get; } = content;
-  public IT Type { get; init; } = type;
+  public static InferenceNode Produce (XMLElementNode root)
+  {
+    InferenceNode result;
+    if (root.Attributes.TryGetValue("initial", out ISerializable? value) && $"{value}".Like("or"))
+    {
+      result = new InferenceNodeGroup(IT.Or);
+    }
+    if (root.Attributes.TryGetValue("initial", out ISerializable? value2) && $"{value2}".Like("and"))
+    {
+      result = new InferenceNodeGroup(IT.And);
+    }
+    if ()
+
+    foreach ()
+
+    return result;
+  }
+}
+
+public class InferenceNode
+{
+  public string Content { get; }
+  public IT Type { get; }
+
+  public InferenceNode (IT type, string content)
+  {
+    Content = content;
+    Type = type;
+  }
 
   /// <summary>Checks a file and determines if it satisfies the inference node.</summary>
   /// <param name="filepath">Path to the file.</param>
@@ -60,7 +89,7 @@ public class InferenceNode (IT type, string content)
     }
     else
     {
-      useSize = Type.HasFlag(IT.FileSize) ? true : throw new InvalidFileInferenceException();
+      useSize = type(IT.FileSize) ? true : throw new InvalidFileInferenceException();
     }
 
     bool result = false;

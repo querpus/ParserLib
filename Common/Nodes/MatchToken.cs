@@ -22,6 +22,10 @@ public readonly struct MatchToken : IToken
   {
     string header = $"{Name}[{MatchIndex}] = {Value.ToString(true)}" + Chars.LFs;
     string content = SE;
+
+    if (GroupData is null)
+      return header;
+
     foreach (var prop in GroupData)
     {
       content += $"  {prop.Key} = ";

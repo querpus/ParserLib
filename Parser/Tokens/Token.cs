@@ -19,24 +19,24 @@ public sealed class Token : IToken, IPrintable
   string? Common.Nodes.IToken.Name => Type;
   Range Common.Nodes.IToken.Position => new(Index, LastPosition);
 
-  int IComparable.CompareTo(object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
-  public override string ToString() => $"{Type} : {Content}";
-  public string ToString(int indent) => $"{Type} : {Content}";
-  public void Print(int indent)
+  int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
+  public override string ToString () => $"{Type} : {Content}";
+  public string ToString (int indent) => $"{Type} : {Content}";
+  public void Print (int indent)
   {
     LogPart(MsgClass.Forced, $"{Type}");
     LogPart(MsgClass.BlueInfo, " : ");
-    LogPart(MsgClass.GreenInfo, ((IToken)this).ContentNoNewLine);
+    LogPart(MsgClass.GreenInfo, ((IToken) this).ContentNoNewLine);
   }
-  public override bool Equals(object? obj) => obj is IToken rt && Equals(rt);
-  public override int GetHashCode() => HashCode.Combine(Content, Index, Type);
-  public int CompareTo(IIndexSortable? other) => Index.CompareTo(other?.Index);
-  public bool Equals(IToken? other) => GetHashCode() == other?.GetHashCode();
-  public string Serialize() => Content;
-  public static bool operator ==(Token left, IToken right) => left is null ? right is null : left.Equals(right);
-  public static bool operator !=(Token left, IToken right) => !(left == right);
-  public static bool operator <(Token left, IToken right) => left is null ? right is not null : left.CompareTo(right) < 0;
-  public static bool operator <=(Token left, IToken right) => left is null || left.CompareTo(right) <= 0;
-  public static bool operator >(Token left, IToken right) => left?.CompareTo(right) > 0;
-  public static bool operator >=(Token left, IToken right) => left is null ? right is null : left.CompareTo(right) >= 0;
+  public override bool Equals (object? obj) => obj is IToken rt && Equals(rt);
+  public override int GetHashCode () => HashCode.Combine(Content, Index, Type);
+  public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
+  public bool Equals (IToken? other) => GetHashCode() == other?.GetHashCode();
+  public string Serialize () => Content;
+  public static bool operator == (Token left, IToken right) => left is null ? right is null : left.Equals(right);
+  public static bool operator != (Token left, IToken right) => !(left == right);
+  public static bool operator < (Token left, IToken right) => left is null ? right is not null : left.CompareTo(right) < 0;
+  public static bool operator <= (Token left, IToken right) => left is null || left.CompareTo(right) <= 0;
+  public static bool operator > (Token left, IToken right) => left?.CompareTo(right) > 0;
+  public static bool operator >= (Token left, IToken right) => left is null ? right is null : left.CompareTo(right) >= 0;
 }

@@ -5,7 +5,7 @@ using NT = Common.Nodes.NodeTarget;
 
 namespace Common.Nodes;
 
-public class NodeContext
+public class NodeContext : IPrintable
 {
   #region Private Methods
   private static NT ExtractFields (NT target, scoped out NT extracted)
@@ -82,11 +82,12 @@ public class NodeContext
       _ => throw new InvalidOperationException(),
     };
 #pragma warning restore IDE0059 // Unnecessary assignment of a value
-  } 
+  }
   #endregion
   /// <summary>Set this to <see langword="true"/> if there must be a single node that everything is within.
   /// Set this to <see langword="false"/> if there can be multiple top-level objects.</summary>
   public required bool SingleRoot { get; init; }
+  /// <summary>The name of the current property.</summary>
   public string? PropKey { get; set; }
   /// <summary>Gets the stack of nodes used to track the current node hierarchy during traversal or processing.</summary>
   /// <remarks>Init-only and initialized to an empty stack.</remarks>
@@ -118,7 +119,7 @@ public class NodeContext
     AddNodeTo(node, target);
     NodeStack.Push(node);
   }
-  public void ReplaceParent (INode node, NT target_for_pop, NT target_for_push)
+  public void ReplaceParent (INode node, NT target_for_pop = NT.Null, NT target_for_push = NT.AnyRootOrParent)
   {
     if (HasParent)
     {
@@ -141,11 +142,28 @@ public class NodeContext
   /// <remarks>If you do not need the node, you can use <see cref="NT.Null"/> to prevent any assignment.</remarks>
   public INode PopTo (NT target)
   {
+    if (NodeStack.IsEmpty)
+    {
+      throw new InvalidOperationException("NodeStack is empty, cannot pop.");
+    }
     INode node = NodeStack.Pop();
     SetTargetValue(target, node);
     return node;
   }
-  /// <summary>Adds the node <paramref name="node"/> to the node at <paramref name="target"/></summary>
+  public TNode PopTo<TNode> (NT target) where TNode : class, INode
+  {
+    if (NodeStack.IsEmpty)
+    {
+      throw new InvalidOperationException("NodeStack is empty, cannot pop.");
+    }
+    if (NodeStack.Pop() is not TNode node)
+    {
+      throw new InvalidOperationException($"Node is not {nameof(TNode)}.");
+    }
+    SetTargetValue(target, node);
+    return node;
+  }
+  /// <summary>Adds the <paramref name="node"/> to the node at <paramref name="target"/> as a child</summary>
   /// <param name="node">The child node.</param>
   /// <param name="target">The target of the parent node.</param>
   /// <remarks>Additional targets will be have the node added to, except for <see cref="NT.AnyRootOrParent"/>.
@@ -212,12 +230,12 @@ public class NodeContext
   /// <param name="target">The target node and field.</param>
   /// <param name="token">The token to append.</param>
   /// <exception cref="InvalidOperationException">Both Suffix and Prefix were included in <paramref name="target"/> or an invalid <paramref name="target"/> was specified.</exception>
-  public void AppendTokenTo (NT target, CaptureToken token)
+  public void AppendTokenTo (NT target, IToken token)
   {
     NT stripped = ExtractFields(target, out NT fields);
     dynamic? dyn_node = GetTargetValue(stripped);
 
-    if (dyn_node is INode node && fields != NT.Null)
+    if (dyn_node is INode node && fields != NT.Null && token.Value is not null)
     {
       if (fields is NT.Prefix)
       {
@@ -263,7 +281,7 @@ public class NodeContext
   {
     if (target is NT.Null)
     {
-      Debug.Log(MsgClass.Warning, $"Clearing the null node target. This is not ever neccessary.", this);
+      Debug.Log(MsgClass.Warning, "Clearing the null node target. This is not ever neccessary.", this);
       return;
     }
     if (target.HasAnyFlag(NT.TokenGroup|NT.TokenValue|NT.Prefix|NT.Suffix))
@@ -306,5 +324,12 @@ public class NodeContext
       default:
         throw new InvalidOperationException($"Improper XML element {action}");
     }
+  }
+
+  public void Print (int indent)
+  {
+    Debug.Log(MsgClass.Warning, "Root:", this);
+    Root?.Print(2 + indent);
+    Debug.Log(MsgClass.Warning, "Header:", this);
   }
 }

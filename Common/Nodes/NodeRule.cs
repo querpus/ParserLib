@@ -7,16 +7,16 @@ public class NodeRule
 {
   public string? TokenName { get; init; }
   public string? ExactText { get; init; }
-  public static void DefaultAction (NodeContext context, CaptureToken token) => Debug.Log(MsgClass.GreenInfo, $"No Execution Defined for '{token.Name}'", "NodeRule");
-  public Action<NodeContext, CaptureToken> Execute { get; init; } = DefaultAction;
+  public static void DefaultAction (NodeContext context, IToken token) => Debug.Log(MsgClass.GreenInfo, $"No Execution Defined for '{token.Name}'", "NodeRule");
+  public Action<NodeContext, IToken> Execute { get; init; } = DefaultAction;
   public static NodeRule KeepAndIgnore (string groupName, bool appendToPrefix = false, bool appendToSuffix = false) => new()
   {
     TokenName = groupName,
     Execute = (context, token) =>
     {
       if (!context.HasCurrent) return;
-      if (appendToPrefix) context.Current.AppendToPrefix(token.Value);
-      if (appendToSuffix) context.Current.AppendToSuffix(token.Value);
+      if (appendToPrefix && token.Value is not null) context.Current.AppendToPrefix(token.Value);
+      if (appendToSuffix && token.Value is not null) context.Current.AppendToSuffix(token.Value);
     }
   };
   public static NodeRule Discard (string groupName, bool appendToPrefix = false, bool appendToSuffix = false, string replace_with = EmptyString) => new()
@@ -56,13 +56,4 @@ public class NodeRule
       }
     }
   };
-}
-
-public class ValidationException : Exception
-{
-  public ValidationException () { }
-
-  public ValidationException (string? message) : base(message) { }
-
-  public ValidationException (string? message, Exception?innerException) : base(message, innerException) { }
 }

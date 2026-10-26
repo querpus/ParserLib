@@ -7,15 +7,23 @@ using static Common.Debug;
 namespace Common.Nodes;
 
 /// <summary>Creates a token for every capture with the group name as the type within every match. Multiple captures are additional tokens.</summary>
-public class CaptureTokenizer : ITokenizer<CaptureToken>
+public class CaptureTokenizer : ITokenizer<CaptureToken>, ITokenizer<IToken>
 {
   public Collection<CaptureToken> Tokens { get; } = [];
-  public required TokenRuleSet Rules { get; init; }
+  public TokenRuleSet? Rules { get; init; }
   public int Count => Tokens.Count;
+
+  Collection<IToken> ITokenizer<IToken>.Tokens => [.. Tokens.Cast<IToken>()];
+
   public void Reset () => Tokens.Clear();
   public Collection<CaptureToken> Tokenize (string input)
   {
     Reset();
+
+    if (Rules is null)
+    {
+      throw new InvalidOperationException("No token rules.");
+    }
 
     if (Rules.TokenSequences.Count == 0)
     {
@@ -48,4 +56,6 @@ public class CaptureTokenizer : ITokenizer<CaptureToken>
     }
     return Tokens;
   }
+
+  Collection<IToken> ITokenizer<IToken>.Tokenize (string input) => [.. Tokenize(input).Cast<IToken>()];
 }

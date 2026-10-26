@@ -1,6 +1,3 @@
-using System.Collections.ObjectModel;
-using System.Xml.Linq;
-
 using Common.Nodes;
 
 using Parser.Exceptions;
@@ -83,6 +80,28 @@ internal static class Program
   }
   internal static void TestSelectionLoop ()
   {
+    string file_xsd_specification = File.ReadAllText(FinishPath(Paths.xsd_specification));
+    string file_xml_operation = File.ReadAllText(FinishPath(Paths.xml_operation));
+    string file_json_launch = File.ReadAllText(FinishPath(Paths.json_launch));
+    string file_xml_errors = File.ReadAllText(FinishPath(Paths.xml_errors));
+    string file_ipl_label = File.ReadAllText(FinishPath(Paths.ipl_label));
+
+    static void prompt_continue ()
+    {
+      Log(MsgClass.Prompt, "Press enter to continue.", This);
+      _ = GetInput();
+    }
+
+    static void generic_test<TTokenizer> (string file, NodeRuleSet node_rules, TokenRuleSet token_rules) where TTokenizer : ITokenizer<IToken>, new()
+    {
+      TTokenizer cTokenizer = new() { Rules = token_rules };
+      var cTokens = cTokenizer.Tokenize(file);
+      TokenProcessor cProcessor = new(cTokens, node_rules);
+      cProcessor.Process();
+      cTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
+      prompt_continue();
+    }
+
   Start:
     Console.Clear();
     Log(MsgClass.Prompt, "Select a test. (wad/xml/mapinfo/acs/ini)", This);
@@ -93,61 +112,47 @@ internal static class Program
         switch (GetInput())
         {
           case "CAPTURE":
-            CaptureTokenizer cTokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
-            var cTokens = cTokenizer.Tokenize(File.ReadAllText(FinishPath(ResZDoom.xml_acs)));
-            cTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
+            generic_test<CaptureTokenizer>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<CaptureTokenizer>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<CaptureTokenizer>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            break;
+          case "GROUP":
+            generic_test<GroupTokenizer>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<GroupTokenizer>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<GroupTokenizer>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
             break;
           case "XPARSER":
             InitialTest("xml", Paths.xml_operation);
             InitialTest(SpecXML.Spec, Paths.xml_errors);
             InitialTest(SpecXML.Spec, ResZDoom.xml_acs);
+            prompt_continue();
             break;
           case "MATCH":
             MatchTokenizer mTokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
-            var mTokens = mTokenizer.Tokenize(File.ReadAllText(FinishPath(ResZDoom.xml_acs)));
+            var mTokens = mTokenizer.Tokenize(file_xsd_specification);
             mTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
+            prompt_continue();
             break;
           default:
             Log(MsgClass.Error, "Invalid choice.", This);
             break;
         }
-        string newxml_data = File.ReadAllText(FinishPath(Paths.xml_operation));
-        //DocumentEntity parsed = EntityFactory.FromString(newxml_data, DefaultParsingSets.XML);
-        XElement x_elem = XElement.Load(FinishPath(Paths.xml_operation));
-        //DocumentEntity parsedxelem = EntityFactory.FromXElement(x_elem, null);
-        //Log(MsgClass.Debug, parsed.RootNode?.ToString() ?? SE, "Program");
-        //Log(MsgClass.Debug, parsedxelem.RootNode?.ToString() ?? SE, "Program");
-        _ = GetInput();
         break;
-      case "NEWXML2":
-        string xmldata2 = File.ReadAllText(FinishPath(Paths.xml_operation));
-        CaptureTokenizer tokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
-        Collection<CaptureToken> tokens = tokenizer.Tokenize(xmldata2);
-        TokenProcessor processor = new(tokens, StandardRuleSets.XMLRuleSet);
-        processor.Process();
-        var context = processor.Context;
-        Log(MsgClass.Debug, $"{context?.Root}", "Program");
-        Log(MsgClass.BlueInfo, $"{tokens}", "Program");
-        Log(MsgClass.Prompt, "Press enter to return to test selection.", "Program");
-        _ = GetInput();
-        break;
-      case "NEWJSON":
-        string newjson_data = File.ReadAllText(FinishPath(Paths.json_launch));
-        //DocumentEntity parsed1 = EntityFactory.FromString(newjson_data, DefaultParsingSets.JSON);
-        //Log(MsgClass.Debug, parsed1.RootNode?.ToString() ?? SE, "Program");
-        _ = GetInput();
-        break;
-      case "NEWJSON2":
-        string json = File.ReadAllText(FinishPath(Paths.json_launch));
-        CaptureTokenizer tokenizer2 = new() { Rules = StandardRuleSets.JSONTokenRuleSet };
-        Collection<CaptureToken> tokens2 = tokenizer2.Tokenize(json);
-        TokenProcessor processor2 = new(tokens2, StandardRuleSets.JSONRuleSet);
-        processor2.Process();
-        var context2 = processor2.Context;
-        Log(MsgClass.Debug, $"{context2?.Root}", "Program");
-        Log(MsgClass.BlueInfo, $"{tokens2}", "Program");
-        Log(MsgClass.Prompt, "Press enter to return to test selection.", "Program");
-        _ = GetInput();
+      case "JSON":
+        Log(MsgClass.Prompt, "Select a version. (capture/xparser)", This);
+        switch (GetInput())
+        {
+          case "CAPTURE":
+            generic_test<CaptureTokenizer>(file_json_launch, StandardRuleSets.JSONRuleSet, StandardRuleSets.JSONTokenRuleSet);
+            break;
+          case "XPARSER":
+            InitialTest(SpecJSON.Spec, Paths.json_error);
+            InitialTest(SpecJSON.Spec, Paths.json_launch);
+            break;
+          default:
+            Log(MsgClass.Error, "Invalid choice.", This);
+            break;
+        }
         break;
       case "WAD":
         InitialTest("wad", ResWAD.wad_rpg03);
@@ -180,15 +185,23 @@ internal static class Program
         InitialTest(SpecZDoom.ZScript, ResZDoom.zs_demon);
         break;
       case "IPL":
-        InitialTest(SpecIPL.Spec, Paths.ipl_simple);
-        InitialTest(SpecIPL.Spec, Paths.ipl_label);
+        Log(MsgClass.Prompt, "Select a version. (capture/xparser)", This);
+        switch (GetInput())
+        {
+          case "CAPTURE":
+            generic_test<CaptureTokenizer>(file_ipl_label, StandardRuleSets.IPLRuleSet, StandardRuleSets.IPLTokenRuleSet);
+            break;
+          case "XPARSER":
+            InitialTest(SpecIPL.Spec, Paths.ipl_simple);
+            InitialTest(SpecIPL.Spec, Paths.ipl_label);
+            break;
+          default:
+            Log(MsgClass.Error, "Invalid choice.", This);
+            break;
+        }
         break;
       case "EXIT" or "QUIT":
         throw new QuitException();
-      case "JSON":
-        InitialTest(SpecJSON.Spec, Paths.json_error);
-        InitialTest(SpecJSON.Spec, Paths.json_launch);
-        break;
       case "":
         Log(MsgClass.Warning, "Nothing selected, enter a test, or type exit or quit to exit the program.", This);
         break;

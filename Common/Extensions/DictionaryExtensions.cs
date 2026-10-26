@@ -17,7 +17,7 @@ public static class DictionaryExtensions
   public static void Add<TKey, TValue> (this SortedDictionary<TKey, TValue> dic, KeyValuePair<TKey, TValue> item) where TKey : notnull =>
     dic?.Add(item.Key, item.Value);
   public static void AddRange<TKey, TValue> (this Dictionary<TKey, TValue> dic, IDictionary<TKey, TValue> items) where TKey : notnull =>
-    dic.AddRange(items);
+    dic.AddRange(items.AsEnumerable());
   public static void AddRange<TKey, TValue> (this Dictionary<TKey, TValue> dic, IEnumerable<KeyValuePair<TKey, TValue>> items) where TKey : notnull
   {
     if (items is null)

@@ -831,9 +831,6 @@
             <returns>A string representation of this token's data.</returns>
             <remarks>Format: {Group}[{CaptureIndex}] = {Value}</remarks>
         </member>
-        <member name="T:Common.Nodes.MatchTokenizer">
-            <summary>Creates a token for every match with the groups as properties within every match. Multiple captures are stored as a Collection under the group name.</summary>
-        </member>
         <member name="T:Common.Nodes.CaptureTokenizer">
             <summary>Creates a token for every capture with the group name as the type within every match. Multiple captures are additional tokens.</summary>
         </member>
@@ -852,6 +849,10 @@
         </member>
         <member name="P:Common.Nodes.IPLCommandNode.CommandLetter">
             <summary>Gets the content of this node.</summary>
+        </member>
+        <member name="P:Common.Nodes.IPLCommandNode.Format">
+            <summary>The format that this command was created in.</summary>
+            <remarks>This is pulled from the "Format" field in the <see cref="T:Common.Nodes.NodeContext"/>.</remarks>
         </member>
         <member name="P:Common.Nodes.IToken.Value">
             <summary>The value of this token. This will be <see langword="null"/> if the token is composed of multiple tokens.</summary>
@@ -878,9 +879,15 @@
             <summary>Displays a brief summary of this token's data.</summary>
             <returns>A string representation of this token's data.</returns>
         </member>
+        <member name="T:Common.Nodes.MatchTokenizer">
+            <summary>Creates a token for every match with the groups as properties within every match. Multiple captures are stored as a Collection under the group name.</summary>
+        </member>
         <member name="P:Common.Nodes.NodeContext.SingleRoot">
             <summary>Set this to <see langword="true"/> if there must be a single node that everything is within.
             Set this to <see langword="false"/> if there can be multiple top-level objects.</summary>
+        </member>
+        <member name="P:Common.Nodes.NodeContext.PropKey">
+            <summary>The name of the current property.</summary>
         </member>
         <member name="P:Common.Nodes.NodeContext.NodeStack">
             <summary>Gets the stack of nodes used to track the current node hierarchy during traversal or processing.</summary>
@@ -898,9 +905,13 @@
         <member name="P:Common.Nodes.NodeContext.Header">
             <summary>Document Header.</summary>
         </member>
-        <member name="M:Common.Nodes.NodeContext.PushAndAddTo(Common.Nodes.INode)">
+        <member name="P:Common.Nodes.NodeContext.Data">
+            <summary>Dictionary for storing additional data that must be carried throughout the processing of the nodes.</summary>
+        </member>
+        <member name="M:Common.Nodes.NodeContext.PushAndAddTo(Common.Nodes.INode,Common.Nodes.NodeTarget)">
             <summary>Pushes a node to the top of the node stack, and adds it as a child of the previous node on the stack.</summary>
             <param name="node">The child node to push.</param>
+            <param name="target">The node to add this node to as a child.</param>
             <remarks>This assigns the root node if the stack is empty.</remarks>
         </member>
         <member name="M:Common.Nodes.NodeContext.PopTo(Common.Nodes.NodeTarget)">
@@ -910,7 +921,7 @@
             <remarks>If you do not need the node, you can use <see cref="F:Common.Nodes.NodeTarget.Null"/> to prevent any assignment.</remarks>
         </member>
         <member name="M:Common.Nodes.NodeContext.AddNodeTo(Common.Nodes.INode,Common.Nodes.NodeTarget)">
-            <summary>Adds the node <paramref name="node"/> to the node at <paramref name="target"/></summary>
+            <summary>Adds the <paramref name="node"/> to the node at <paramref name="target"/> as a child</summary>
             <param name="node">The child node.</param>
             <param name="target">The target of the parent node.</param>
             <remarks>Additional targets will be have the node added to, except for <see cref="F:Common.Nodes.NodeTarget.AnyRootOrParent"/>.
@@ -918,7 +929,7 @@
             if that fails then add it to the root object, or add it to the <see cref="F:Common.Nodes.NodeTarget.RootNodes"/> list.</remarks>
             <exception cref="T:System.InvalidOperationException">No node was added to any target.</exception>
         </member>
-        <member name="M:Common.Nodes.NodeContext.AppendTokenTo(Common.Nodes.NodeTarget,Common.Nodes.CaptureToken)">
+        <member name="M:Common.Nodes.NodeContext.AppendTokenTo(Common.Nodes.NodeTarget,Common.Nodes.IToken)">
             <summary>Appends the currrent token to the prefix field or the suffix field on the target node.</summary>
             <param name="target">The target node and field.</param>
             <param name="token">The token to append.</param>

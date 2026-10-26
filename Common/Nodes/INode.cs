@@ -4,7 +4,7 @@
 namespace Common.Nodes;
 
 /// <summary>An interface for storing nodes.</summary>
-public interface INode : ISerializable, IEquatable<INode>
+public interface INode : ISerializable, IEquatable<INode>, IPrintable
 {
   Collection<ISerializable> Children { get; }
   Dictionary<string, ISerializable> Properties { get; }

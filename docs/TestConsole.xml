@@ -42,7 +42,7 @@
         </member>
         <member name="P:TestConsole.Paths.ipl_label">
             <summary>
-              Looks up a localized string similar to ParserLib\Parser\Samples\label.ipl.
+              Looks up a localized string similar to ParserLib\Specification.IPL\Samples\label.ipl.
             </summary>
         </member>
         <member name="P:TestConsole.Paths.ipl_simple">
@@ -72,7 +72,7 @@
         </member>
         <member name="P:TestConsole.Paths.xsd_specification">
             <summary>
-              Looks up a localized string similar to ParserLib\Specification.XML\Schemas\specification.xsd.
+              Looks up a localized string similar to ParserLib\Parser\Schemas\Spec.xsd.
             </summary>
         </member>
     </members>

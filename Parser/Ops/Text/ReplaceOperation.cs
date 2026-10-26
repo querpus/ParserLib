@@ -11,12 +11,10 @@ namespace Parser.Ops.Text;
 /// Inputs: <see langword="string"/>, <see cref="IEnumerable{T}"/>(<see langword="string"/>)<br/>
 /// Output: <c>Same as input</c>
 /// </code><br/>
-/// Statuses:
-/// <code>
-/// <see cref="OpStatus.Pass"/>: Operation completed successfully.
-/// <see cref="OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.
-/// <see cref="OpStatus.FailNoSuchVarName"/>: The data at the key was missing.
-/// </code>
+/// Statuses:<br/>
+/// <see cref="OpStatus.Pass"/>: Operation completed successfully.<br/>
+/// <see cref="OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.<br/>
+/// <see cref="OpStatus.FailNoSuchVarName"/>: The data at the key was missing.<br/>
 /// </remarks>
 public class ReplaceOperation : Operation
 {
@@ -41,7 +39,7 @@ public class ReplaceOperation : Operation
       {
         list = [.. list.Select(line => node.ReplaceRegex(line, Spec.RxOpt))];
       }
-      Data[OutputKey] = list.ToCollection();
+      Data[OutputKey] = list;
       Status = OpStatus.Pass;
     }
     else

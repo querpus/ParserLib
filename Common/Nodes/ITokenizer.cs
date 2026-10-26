@@ -7,5 +7,6 @@ public interface ITokenizer<TToken>
 {
   Collection<TToken> Tokens { get; }
   Collection<TToken> Tokenize (string input);
+  TokenRuleSet? Rules { get; init; }
   int Count => Tokens.Count;
 }

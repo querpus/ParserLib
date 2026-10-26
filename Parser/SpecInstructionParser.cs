@@ -2,6 +2,8 @@
 
 using System.Xml.Linq;
 
+using Common.Nodes;
+
 using Parser.Inference;
 
 namespace Parser;
@@ -43,17 +45,17 @@ public static class SpecInstructionParser
     // ElementEntity prefabs = bRoot.Children.OfType<ElementEntity>().Where(i => i.Name == "Prefabs").At(0);
 
     // if (!bRoot.Name.Is("Definition"))
-    {
-      _ = Err.ThrowNoSpec("Root element must be Definition.");
-    }
+    //{
+    //  _ = Err.ThrowNoSpec("Root element must be Definition.");
+    //}
 
     // if (prefabs is not null)
-    {
-      //   IEnumerable<ElementEntity> prefab_tokenRules_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "TokenRule");
-      //    IEnumerable<ElementEntity> prefab_tokenLookups_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "TokenLookup");
-      //   IEnumerable<ElementEntity> prefab_tokenGroups_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "GroupTokenRule");
-      //    IEnumerable<ElementEntity> prefab_constructs_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "Construct");
-    }
+    //{
+    //   IEnumerable<ElementEntity> prefab_tokenRules_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "TokenRule");
+    //    IEnumerable<ElementEntity> prefab_tokenLookups_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "TokenLookup");
+    //   IEnumerable<ElementEntity> prefab_tokenGroups_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "GroupTokenRule");
+    //    IEnumerable<ElementEntity> prefab_constructs_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "Construct");
+    //}
 
     foreach (XElement specxml in root.Elements(NS + "Spec"))
     {
@@ -64,8 +66,8 @@ public static class SpecInstructionParser
 
       XElement? tokenLookups = specxml.Element(NS + "TokenLookups");
       XElement? tokenRules = specxml.Element(NS + "TokenRules");
-      string name = specxml.Element(NS + "Name").Value;
-      string textfile = specxml.Element(NS + "TextFile").Value;
+      string? name = specxml.Element(NS + "Name")!.Value;
+      string? textfile = specxml.Element(NS + "TextFile")?.Value;
       bool is_textfile = BooleanParse(textfile, false);
       IEnumerable<XElement>? instructionElements = specxml.Element(NS + "Instructions")?.Elements();
 
@@ -81,13 +83,24 @@ public static class SpecInstructionParser
       }
 
       XElement? fileInf = specxml.Element(NS + "FileInferences");
-      ReadOnlyCollection<InferenceNode> inferenceNodes = [];// = ParseFileInferences(fileInf);
+      INode? inf_node_root;
+      ReadOnlyCollection<InferenceNode> inf_final = [];
+      if (fileInf is null)
+      {
+        Log(MsgClass.Warning, $"No file inferences on spec {name}", "SpecInstructionParser");
+      }
+      else
+      {
+        inf_node_root = INodeProcessor.Process<XElementProcessor>(fileInf).Root;
+
+        //TODO: Assign inf_final
+      }
 
       Spec specobj = new()
       {
         Name = name,
         Operations = [.. ops],
-        FileInferences = inferenceNodes,
+        FileInferences = inf_final,
         IsTextFile = is_textfile,
       };
 

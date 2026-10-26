@@ -127,10 +127,10 @@
     <value>ParserLib\Specification.IPL\Samples\6458 batch.txt</value>
   </data>
   <data name="xsd_specification" xml:space="preserve">
-    <value>ParserLib\Specification.XML\Schemas\specification.xsd</value>
+    <value>ParserLib\Parser\Schemas\Spec.xsd</value>
   </data>
   <data name="ipl_label" xml:space="preserve">
-    <value>ParserLib\Parser\Samples\label.ipl</value>
+    <value>ParserLib\Specification.IPL\Samples\label.ipl</value>
   </data>
   <data name="json_error" xml:space="preserve">
     <value>ParserLib\Specification.JSON\Samples\errors.json</value>

@@ -25,7 +25,10 @@
       </ForCount>
       <Terminate success="true"/>
     </Instructions>
-
+    <EntityInfo>
+      <EntityDef>
+      </EntityDef>
+    </EntityInfo>
     <FileInferences initial="and">
       <Extension>pak</Extension>
       <Header>PACK</Header>

@@ -56,5 +56,5 @@ public static class Chars
   /// <summary>Double quote symbol.</summary>
   public const string QTs = "\"";
   #endregion
-  public static readonly ImmutableList<string> NewLines = [CRLF, LFs, CRs, $"{VT}"];
+  public static readonly ImmutableList<string> NewLines = [CRLF, LFs, CRs, "\v"];
 }

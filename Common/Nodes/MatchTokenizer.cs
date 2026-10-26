@@ -8,12 +8,16 @@ public class MatchTokenizer : ITokenizer<MatchToken>
 {
   public const string TokenTypePrefix = "_t_";
   public Collection<MatchToken> Tokens { get; } = [];
-  public required TokenRuleSet Rules { get; init; }
+  public TokenRuleSet? Rules { get; init; }
   public int Count => Tokens.Count;
   public void Reset () => Tokens.Clear();
   public Collection<MatchToken> Tokenize (string input)
   {
     Reset();
+    if (Rules is null)
+    {
+      throw new InvalidOperationException("No token rules.");
+    }
 
     if (Rules.TokenSequences.Count == 0)
     {

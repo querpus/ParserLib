@@ -41,6 +41,10 @@ public abstract class Node : INode
     else
       Suffix += data.Value;
   }
+  public void Print (int indent)
+  {
+
+  }
 }
 
 public struct DataReference : ISerializable

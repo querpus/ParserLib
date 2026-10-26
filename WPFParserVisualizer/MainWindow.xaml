@@ -6,10 +6,9 @@
         xmlns:local="clr-namespace:WPFParserVisualizer"
         xmlns:Nodes="clr-namespace:Common.Nodes;assembly=Common" x:Class="WPFParserVisualizer.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow"
+        Title="Token &amp; Node Review"
         Height="400"
         Width="800"
-        DataContext="{DynamicResource ResourceKey=TokenRuleBinding}"
         Background="DarkGray">
   <Window.Resources>
     <Style x:Key="{ComponentResourceKey ResourceId=DataGridSelectAllButtonStyle, TypeInTargetAssembly={x:Type DataGrid}}" TargetType="{x:Type Button}">
@@ -38,20 +37,51 @@
   </Window.Resources>
   <Grid>
     <Grid.RowDefinitions>
-      <RowDefinition Height="5*"/>
       <RowDefinition Height="20*"/>
-      <RowDefinition Height="1*"/>
+      <RowDefinition Height="29*"/>
+      <RowDefinition Height="25*"/>
+      <RowDefinition Height="295*"/>
+      <RowDefinition Height="15*"/>
     </Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="67*"/>
       <ColumnDefinition Width="333*" MinWidth="28"/>
-      <ColumnDefinition Width="333*"/>
+      <ColumnDefinition Width="12*"/>
+      <ColumnDefinition Width="321*"/>
       <ColumnDefinition Width="67*"/>
     </Grid.ColumnDefinitions>
-    <DataGrid  Grid.Column="1" Grid.Row="1">
+    <DataGrid x:Name="TokenDataGrid"  Grid.Column="1" Grid.Row="3" SelectionChanged="DataGrid_SelectionChanged" Margin="0,0,0,5">
       <DataGrid.Columns>
-        
+
       </DataGrid.Columns>
     </DataGrid>
+    <TreeView x:Name="NodeTreeView" Grid.Column="3" Grid.Row="3" Margin="0,0,0,5"/>
+    <Label x:Name="label" Grid.Column="1" Grid.Row="2" BorderBrush="Black" Content="Tokens" Grid.RowSpan="1"/>
+    <Menu x:Name="menu" Height="NaN" Width="NaN" Grid.ColumnSpan="5">
+      <MenuItem x:Name="FileMenu" Header="File">
+        <MenuItem Header="Add Input File"/>
+        <MenuItem Header="Save Token Data"/>
+        <MenuItem Header="Save Node Data"/>
+        <Separator/>
+        <MenuItem Header="Quit" Click="QuitForm"/>
+      </MenuItem>
+      <MenuItem x:Name="EditMenu" Header="Edit"/>
+      <MenuItem x:Name="FormatMenu" Header="Format">
+        <MenuItem Header="Choose Format"/>
+      </MenuItem>
+    </Menu>
+    <Label x:Name="label_Copy" Grid.Column="3" Grid.Row="2" BorderBrush="Black" Content="Nodes" Grid.RowSpan="1" HorizontalAlignment="Stretch" Height="NaN" VerticalAlignment="Stretch" Width="NaN"/>
+    <ComboBox x:Name="FormatComboBox" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="200" Margin="5,5,5,0" Height="24">
+      <ComboBoxItem Content="XML"/>
+      <ComboBoxItem Content="IPL"/>
+      <ComboBoxItem Content="JSON"/>
+    </ComboBox>
+    <Button x:Name="LoadFormatButton" Grid.Column="1" Content="Load" Height="24" Margin="210,5,55,0" Grid.Row="1" Click="LoadFormatButton_Click"/>
+    <ComboBox x:Name="InputComboBox" Grid.Column="3" Grid.Row="1" HorizontalAlignment="Left" Width="200" Margin="5,5,5,2" Height="24"/>
+    <Button x:Name="LoadInputButton" Grid.Column="3" Content="Load" Height="24" Margin="210,5,43,0" Grid.Row="1" RenderTransformOrigin="5.912,0.627" Click="LoadInputButton_Click"/>
+    <Label x:Name="label_Copy1" Grid.Row="1" BorderBrush="Black" Content="Format" Grid.RowSpan="1" HorizontalAlignment="Right" Height="NaN" VerticalAlignment="Bottom" Width="NaN"/>
+    <Label x:Name="label_Copy2" Grid.Row="1" BorderBrush="Black" Content="Format" Grid.RowSpan="1" HorizontalAlignment="Right" Height="NaN" VerticalAlignment="Bottom" Width="NaN" Grid.Column="2" Margin="0,0,6,0"/>
+    <Label x:Name="label_Copy3" Grid.Row="1" BorderBrush="Black" Content="Input" Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Right" Grid.ColumnSpan="2"/>
+    <StatusBar Grid.Row="4" Grid.ColumnSpan="5"/>
   </Grid>
 </Window>

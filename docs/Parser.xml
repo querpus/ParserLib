@@ -617,12 +617,10 @@
             Inputs: <see langword="string"/>, <see cref="T:System.Collections.Generic.IEnumerable`1"/>(<see langword="string"/>)<br/>
             Output: <c>Same as input</c>
             </code><br/>
-            Statuses:
-            <code>
-            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.
-            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.
-            <see cref="F:Parser.OpStatus.FailNoSuchVarName"/>: The data at the key was missing.
-            </code>
+            Statuses:<br/>
+            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.<br/>
+            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.<br/>
+            <see cref="F:Parser.OpStatus.FailNoSuchVarName"/>: The data at the key was missing.<br/>
             </remarks>
         </member>
         <member name="T:Parser.Ops.Text.SplitOperation">

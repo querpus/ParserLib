@@ -7,20 +7,22 @@ using static Common.Debug;
 namespace Common.Nodes;
 
 /// <summary>Creates a token for every group in each match. Multiple captures are stored as an array of string data.</summary>
-public class GroupTokenizer : ITokenizer<CaptureToken>
+public class GroupTokenizer : ITokenizer<CaptureToken>, ITokenizer<IToken>
 {
   public Collection<CaptureToken> Tokens { get; } = [];
-  public required TokenRuleSet Rules { get; init; }
+  public TokenRuleSet? Rules { get; init; }
   public int Count => Tokens.Count;
+
+  Collection<IToken> ITokenizer<IToken>.Tokens => [.. Tokens.Cast<IToken>()];
+
   public void Reset () => Tokens.Clear();
   public Collection<CaptureToken> Tokenize (string input)
   {
     Reset();
-
+    if (Rules is null)
+      throw new InvalidOperationException("No rules.");
     if (Rules.TokenSequences.Count == 0)
-    {
       throw new InvalidOperationException("No token sequences.");
-    }
 
     var regex = Rules.Regex;
     foreach (Match match in regex.Matches(input))
@@ -48,4 +50,6 @@ public class GroupTokenizer : ITokenizer<CaptureToken>
     }
     return Tokens;
   }
+
+  Collection<IToken> ITokenizer<IToken>.Tokenize (string input) => [.. Tokenize(input).Cast<IToken>()];
 }

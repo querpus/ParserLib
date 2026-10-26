@@ -13,6 +13,8 @@ public enum MenuAreaType
 
 }
 
+public delegate Action<EventArgs> MenuCommand (in EventArgs args);
+
 public static class SampleMenuClass
 {
   public static MenuDefinition Initial = new()
@@ -24,6 +26,7 @@ public static class SampleMenuClass
         Origin = new(0, 4),
         Dimensions = new Size(50, 4),
         Options = ["op 1", "op2", "opthree", "4"],
+        SelectionOptions = [],
       }
     ]
   };
@@ -32,20 +35,23 @@ public static class SampleMenuClass
 
 public class MenuDefinition
 {
+  public int InitialArea { get; init; }
   public required string MenuID { get; init; }
   public Collection<MenuArea> Areas { get; init; } = [];
   public int SelectedArea { get; protected set; }
+  public void Initialize () => SelectedArea = InitialArea;
 }
 
 public abstract class MenuArea
 {
-  protected static void Out (string text, ConsoleColor textcolor, ConsoleColor backcolor)
+  protected static void Out (string text, ConsoleColor textcolor, ConsoleColor backcolor, Point? start = null)
   {
-    Controller.SaveConsoleDataToStack();
+    if (start is not null)
+      Console.SetCursorPosition(start.Value.X, start.Value.Y);
+
     Console.ForegroundColor = textcolor;
     Console.BackgroundColor = backcolor;
     Console.Write(text);
-    Controller.RestoreConsoleData();
   }
 
   public int AreaID { get; set; }
@@ -53,27 +59,35 @@ public abstract class MenuArea
   public Point Origin;
   public Size Dimensions;
   public abstract void Draw ();
-  public virtual bool KeyPress ()
+  public virtual void KeyPress (ConsoleKeyInfo key) { }
+  public virtual void Redraw ()
   {
-    IsDirty = true;
-    return true;
-  }
-  public virtual void Redraw (EventArgs args)
-  {
-    if (!IsDirty)
-      return;
-
     Clear();
     Draw();
   }
   public void Clear () => Controller.Clear(Origin, Dimensions);
 }
 
+public enum MenuStdAction
+{
+  None,
+  OpenMenu,
+  CloseMenu,
+}
+
+public class MenuOption
+{
+  public required string OptionText { get; set; }
+  public MenuStdAction StdAction { get; set; }
+}
+
 public class MenuArea_Select : MenuArea
 {
-  private int _index = 0;
-  public string[] Options { get; init; }
-  public Action<EventArgs>[] SelectionOptions { get; set; }
+  //public static Action CloseMenu { get; } = () => Controller.Current.IsClosing = true;
+
+  private int _index;
+  public required string[] Options { get; init; }
+  public required Action[] SelectionOptions { get; set; }
   public override void Draw ()
   {
     int count_of_menu_items = 0;
@@ -92,72 +106,29 @@ public class MenuArea_Select : MenuArea
       count_of_menu_items++;
     }
   }
-  public override bool KeyPress ()
+  public override void KeyPress (ConsoleKeyInfo key)
   {
-    bool handled = false;
+    if (key.Key is ConsoleKey.UpArrow)
+    {
+      _index = Math.Clamp(_index--, 0, Options.Length);
+      IsDirty = true;
+    }
 
-    // Key checking
+    if (key.Key is ConsoleKey.DownArrow)
+    {
+      _index = Math.Clamp(_index++, 0, Options.Length);
+      IsDirty = true;
+    }
 
-
-    if (!handled)
-      return base.KeyPress();
+    if (key.Key is ConsoleKey.Enter)
+    {
+      SelectionOptions[_index].Invoke();
+      IsDirty = true;
+    }
   }
 }
 
-public interface IState
-{
-  ConsoleColor BackColor { get; }
-  ConsoleColor TextColor { get; }
-  bool IsActive { get; }
-  string? MenuID { get; }
-  int AreaID { get; }
-  Point Position { get; }
-  string TypedData { get; }
-  ConsoleKeyInfo? KeyInfo { get; }
-  ConsoleKeyInfo? LastKeyInfo { get; }
-  bool CursorVisible { get; }
-}
-
-public class MenuState : IState
-{
-  public ConsoleColor BackColor { get; set; }
-  public ConsoleColor TextColor { get; set; }
-  public bool IsActive { get; set; }
-  public string? MenuID { get; set; }
-  public int AreaID { get; set; } = -1;
-  public Point Position { get; set; }
-  public string TypedData { get; set; } = SE;
-  public static MenuState InitialState => new()
-  {
-    AreaID = -1,
-    Position = new(),
-    IsActive = false,
-    TypedData = SE,
-    MenuID = SE,
-    KeyInfo = null,
-  };
-  public ConsoleKeyInfo? KeyInfo { get; set; }
-  public ConsoleKeyInfo? LastKeyInfo { get; set; }
-  public bool CursorVisible { get; set; }
-
-  public void BecomeStale () => KeyInfo = null;
-
-  public static MenuState CopyFrom (IState cur) => new()
-  {
-    AreaID = cur.AreaID,
-    BackColor = cur.BackColor,
-    TextColor = cur.TextColor,
-    CursorVisible = cur.CursorVisible,
-    IsActive = cur.IsActive,
-    KeyInfo = cur.KeyInfo,
-    LastKeyInfo = cur.LastKeyInfo,
-    MenuID = cur.MenuID,
-    Position = cur.Position,
-    TypedData = cur.TypedData
-  };
-}
-
-public class CurrentState : IState
+public class CurrentState
 {
   public ConsoleColor TextColor { get => Console.ForegroundColor; set => Console.ForegroundColor = value; }
   public ConsoleColor BackColor { get => Console.BackgroundColor; set => Console.BackgroundColor = value; }
@@ -177,26 +148,12 @@ public class CurrentState : IState
     get => Console.CursorVisible;
     set => Console.CursorVisible = value;
   }
-
-  public void UpdateFrom (IState cur)
-  {
-    //AreaID = cur.AreaID,
-    BackColor = cur.BackColor;
-    TextColor = cur.TextColor;
-    CursorVisible = cur.CursorVisible;
-    //IsActive = cur.IsActive,
-    KeyInfo = cur.KeyInfo;
-    LastKeyInfo = cur.LastKeyInfo;
-    //MenuID = cur.MenuID;
-    Position = cur.Position;
-    TypedData = cur.TypedData;
-  }
 }
 
 public static class Controller
 {
+  private static bool IsClosing { get; set; }
   public static CurrentState Current { get; set; } = new CurrentState();
-  public static IState? Saved { get; set; } = MenuState.InitialState;
   private static string MaxWidthEmptyString
   {
     get
@@ -214,31 +171,22 @@ public static class Controller
     }
   }
   private static string GetEmptyString (int length) => MaxWidthEmptyString[..length];
-  private static Point CurrentPos
+  public static Point CurrentPos
   {
     get => new(Console.CursorLeft, Console.CursorTop);
     set => Console.SetCursorPosition(value.X, value.Y);
   }
-  private static bool CursorVisible
+  public static bool CursorVisible
   {
     get => Console.CursorVisible;
     set => Console.CursorVisible = value;
   }
   internal static MenuDefinition? CurrentMenu { get; set; }
   public static bool IsActive { get; private set; }
-  public static void SaveConsoleDataToStack () => Saved = MenuState.CopyFrom(Current);
-  public static void RestoreConsoleData ()
-  {
-    if (Saved is not null)
-      Current.UpdateFrom(Saved);
-    else
-      throw new InvalidOperationException();
-    Saved = null;
-  }
+  public static void TriggerClose () => IsClosing = true;
 
   public static void Clear (Point origin, Size dimensions)
   {
-    SaveConsoleDataToStack();
 
     int line_start = origin.Y;
     int line_exclusive_end = origin.Y + dimensions.Height;
@@ -250,22 +198,44 @@ public static class Controller
       Console.SetCursorPosition(col_start, line);
       Console.Write(GetEmptyString(col_length));
     }
-
-    RestoreConsoleData();
   }
   /// <summary>Clears the specified line from the console.</summary>
   /// <param name="line">The line to clear.</param>
   public static void Clear (int line)
   {
-    SaveConsoleDataToStack();
     Console.SetCursorPosition(0, line);
     Console.Write(GetEmptyString(Console.WindowWidth));
-    RestoreConsoleData();
   }
   /// <summary>Clears all the content from the console.</summary>
   public static void Clear () => Console.Clear();
   public static ConsoleColor TextColor { get => Console.ForegroundColor; set => Console.ForegroundColor = value; }
   public static ConsoleColor BackColor { get => Console.BackgroundColor; set => Console.BackgroundColor = value; }
+  private static Dictionary<string, MenuDefinition> MenuLookup { get; } = [];
+  public static void DefineMenu (string key, MenuDefinition menu) => MenuLookup.Add(key, menu);
+  public static void InitializeMenu (string menu)
+  {
+    Console.Clear();
+    MenuDefinition current_menu = MenuLookup[menu];
+    foreach (var area in current_menu.Areas)
+    {
+      area.Draw();
+    }
+
+    current_menu.Initialize();
+
+    MenuArea current_area = current_menu.Areas[current_menu.SelectedArea];
+
+    while (!IsClosing)
+    {
+      var key = Console.ReadKey(true);
+      current_area.KeyPress(key);
+
+      if (current_area.IsDirty)
+      {
+        current_area.Redraw();
+      }
+    }
+  }
 }
 
 /// <summary>The menu controller. Can be static since there is only one console.</summary>

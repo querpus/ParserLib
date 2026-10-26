@@ -15,7 +15,7 @@ public sealed class JSONFactory ()
     string s => new JSONStringValue(s),
     bool b => new JSONBoolValue(b),
     IEnumerable<IProperty<object>> props => new JSONObject() { Properties = (from item in props select new KeyValuePair<string, IJSONNode>(item.Key, TreeLoop(item?.Value) ?? new JSONNullValue())).ToDictionary() },
-    IEnumerable<object> list => new JSONArray() { Values = (from item in list select TreeLoop(item)).ToCollection() },
+    IEnumerable<object> list => new JSONArray() { Values = [.. (from item in list select TreeLoop(item))] },
     _ => new JSONObject() { Properties = (from prop in Input?.GetType().GetProperties(System.Reflection.BindingFlags.Instance) select new KeyValuePair<string, IJSONNode>(prop.Name, TreeLoop(prop?.GetValue(Input)) ?? new JSONNullValue())).ToDictionary() },
   };
 
