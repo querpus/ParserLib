@@ -13,6 +13,7 @@ public interface INode : ISerializable, IEquatable<INode>, IPrintable
   string? Prefix { get; }
   string? Suffix { get; }
   string ChildDelim { get; }
+  string SerializeAsRead ();
   bool IEquatable<INode>.Equals (INode? other) => Equals(other);
   bool Equals (object? obj) => obj is INode node && Prefix == node.Prefix && Children.SequenceEqual(node.Children) && Properties.SequenceEqual(node.Properties) && Data.SequenceEqual(node.Data);
   int GetHashCode () => HashCode.Combine(Prefix, Suffix, Children, Properties, Data);

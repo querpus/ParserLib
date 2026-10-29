@@ -1,12 +1,15 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
+using System.ComponentModel;
+
 using NT = Common.Nodes.NodeTarget;
 
 namespace Common.Nodes;
 
-public class NodeContext : IPrintable
+public class NodeContext : IPrintable, INotifyPropertyChanged
 {
+  public event PropertyChangedEventHandler? PropertyChanged;
   #region Private Methods
   private static NT ExtractFields (NT target, scoped out NT extracted)
   {
@@ -198,7 +201,7 @@ public class NodeContext : IPrintable
     }
     if (target.HasFlag(NT.Parent))
     {
-      if (GetTargetValue(target, null) is INode parent)
+      if (GetTargetValue(target) is INode parent)
       {
         success = true;
         parent.AddChild(node);
@@ -209,7 +212,7 @@ public class NodeContext : IPrintable
       RootNodes.Add(node);
       success = true;
     }
-    if (target.HasFlag(NT.Parent))
+    if (target.HasFlag(NT.Current))
     {
       if (Current is not null)
       {
@@ -284,7 +287,7 @@ public class NodeContext : IPrintable
       Debug.Log(MsgClass.Warning, "Clearing the null node target. This is not ever neccessary.", this);
       return;
     }
-    if (target.HasAnyFlag(NT.TokenGroup|NT.TokenValue|NT.Prefix|NT.Suffix))
+    if (target.HasAnyFlag(NT.Fields))
     {
       Debug.Log(MsgClass.Warning, $"Cannot clear readonly field {target}.", this);
       return;

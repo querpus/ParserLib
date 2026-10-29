@@ -201,6 +201,7 @@ internal static class Program
         }
         break;
       case "EXIT" or "QUIT":
+        Environment.Exit(0);
         throw new QuitException();
       case "":
         Log(MsgClass.Warning, "Nothing selected, enter a test, or type exit or quit to exit the program.", This);

@@ -2,6 +2,8 @@ namespace Parser.Inference;
 
 public class InferenceNodeGroup : InferenceNode
 {
+  public static InferenceNodeGroup NewAnd => new(IT.And);
+  public static InferenceNodeGroup NewOr => new(IT.Or);
   protected Collection<InferenceNode> Nodes { get; } = [];
   public InferenceNodeGroup (IT type) : base(type, SE) { }
   public InferenceNodeGroup (IEnumerable<InferenceNode> nodes, IT type) : base(type, SE) => Nodes = [.. nodes];

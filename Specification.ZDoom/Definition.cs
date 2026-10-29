@@ -119,10 +119,10 @@ public static class Definition
     Name = "zdoom.sndinfo",
     RxOpt = ROML | ROIPW | ROIC | ROEC,
     FileInferences = [
-      new InferenceNodeOr([
+      IfNOr(
         IfN(ExtIs, "sndinfo"),
-        IfN(FName | Is, "sndinfo"),
-      ])
+        IfN(FName | Is, "sndinfo")
+      )
     ],
     IsTextFile = true,
     TokenType = typeof(SndIT),

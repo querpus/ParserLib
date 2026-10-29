@@ -22,8 +22,10 @@ public sealed class XMLElementNode : Node
 
     return result;
   }
+  public bool HasElements => Children.Any(c => c is XMLElementNode);
   /// <summary>Gets the element name and namespace.</summary>
   public string? Name => Data.TryGetValue("Name", out object? value) && value is string name ? name : null;
+  public string? Content => ((IEnumerable<ISerializable>) Children).NotOfTypes<XMLCommentNode, XMLElementNode>().ICount > 0 && value is string name ? name : null;
   /// <summary>Gets the local element name.</summary>
   public string? LocalName => Name?.Contains(':') == true ? Name[(Name.IndexOf(':') + 1)..] : Name;
   /// <summary>Gets the namespace, or <see langword="null"/> if one is not specified on this element.</summary>

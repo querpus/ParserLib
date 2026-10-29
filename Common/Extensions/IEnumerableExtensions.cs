@@ -11,8 +11,10 @@ public static class IEnumerableExtensions
   extension<T> (IEnumerable<T> list)
   {
     public IEnumerable<T> OfTypes<TAllowedType1, TAllowedType2> ()
+      where TAllowedType1 : T
+      where TAllowedType2 : T
     {
-      foreach (T? item in list)
+      foreach (T item in list)
       {
         if (item is TAllowedType1 or TAllowedType2)
           yield return item;
@@ -20,9 +22,19 @@ public static class IEnumerableExtensions
     }
     public IEnumerable<T> NotOfType<TDisallowedType> ()
     {
-      foreach (T? item in list)
+      foreach (T item in list)
       {
         if (item is not TDisallowedType)
+          yield return item;
+      }
+    }
+    public IEnumerable<T> NotOfTypes<TDisallowedType1, TDisallowedType2> ()
+      where TDisallowedType1 : T
+      where TDisallowedType2 : T
+    {
+      foreach (T item in list)
+      {
+        if (item is not TDisallowedType1 and not TDisallowedType2)
           yield return item;
       }
     }

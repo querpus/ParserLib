@@ -10,14 +10,13 @@ public enum MenuAreaType
   None,
   AllowSelection,
   LogArea,
-
 }
 
 public delegate Action<EventArgs> MenuCommand (in EventArgs args);
 
 public static class SampleMenuClass
 {
-  public static MenuDefinition Initial = new()
+  public static MenuDefinition Initial { get; } = new()
   {
     MenuID = "SampleInitial",
     Areas = [

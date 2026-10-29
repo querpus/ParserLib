@@ -4,21 +4,49 @@ namespace Parser.Inference;
 
 public static class InferenceNodeFactory
 {
+  private static InferenceNodeGroup GetGroup (IT type, XMLElementNode root)
+  {
+    IEnumerable<XMLElementNode> children = root.Children.OfType<XMLElementNode>();
+
+    return new InferenceNodeGroup(children.Select(Produce), type);
+  }
   public static InferenceNode Produce (XMLElementNode root)
   {
     InferenceNode result;
-    if (root.Attributes.TryGetValue("initial", out ISerializable? value) && $"{value}".Like("or"))
+    if (root.LocalName == "FileInferences")
     {
-      result = new InferenceNodeGroup(IT.Or);
+      ISerializable? initial = root.Attributes.TryGetValue("initial", out ISerializable? value) ? value : null;
+      bool isAnd = false;
+      if (initial is not null)
+      {
+        isAnd = new QString(initial.Serialize()).Value.Like("And");
+      }
+      else
+      {
+        Log(MsgClass.Warning, "InferenceNode Initial attribute undfined.", "InferenceNodeFactory");
+      }
+
+      IT groupType = isAnd ? IT.And : IT.Or;
+
+      result = GetGroup(groupType, root);
     }
-    if (root.Attributes.TryGetValue("initial", out ISerializable? value2) && $"{value2}".Like("and"))
+    else if (root.LocalName == "Or")
     {
-      result = new InferenceNodeGroup(IT.And);
+      result = GetGroup(IT.Or, root);
     }
-    if ()
-
-    foreach ()
-
+    else if (root.LocalName == "And")
+    {
+      result = GetGroup(IT.And, root);
+    }
+    else
+    {
+      IT type = root.Name switch
+      {
+        "Extension" => IT.Ext
+      };
+      InferenceNode node = new(type, root.Children.Serialize());
+      result = node;
+    }
     return result;
   }
 }
