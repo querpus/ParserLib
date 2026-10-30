@@ -1,7 +1,5 @@
 using Common.Nodes;
 
-using Parser.Tokens;
-
 using static Parser.DefinitionStaticFunctions;
 using static Parser.Tokens.TokenRuleType;
 
@@ -43,6 +41,6 @@ public static class Definition
       new(ITT.SectionWProps, "n:Section pa:Property")],
 
     DefaultRuleSet = IgnoreCase,
-    TokenRuleSet = StandardRuleSets.INI
+    TokenRuleSet = StandardRuleSets.INITokenRuleSet;
   };
 }

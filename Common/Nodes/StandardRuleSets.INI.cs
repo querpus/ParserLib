@@ -1,8 +1,6 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable IDE0055 // Formatting
 
-using static Common.Nodes.NodeRuleHelper;
-
 using NT = Common.Nodes.NodeTarget;
 
 namespace Common.Nodes;

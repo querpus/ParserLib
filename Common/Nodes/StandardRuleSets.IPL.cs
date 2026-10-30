@@ -180,7 +180,7 @@ public static partial class StandardRuleSets
     [SS("regex")] public const string RxPage = RxEsc + "(?'cmd' G ) (?'page'[0-9])";
     [SS("regex")] public const string RxClearDataCommand = @"(?'can'<CAN>|\u0018)";
     [SS("regex")] public const string RxPrintCommand = @"(?'etb'<ETB>|\u0017)";
-    [SS("regex")] public const string RxLineCommand = @"(?'line_cmd' [BHLMQSU] ) (?'index' \d+)" + RxEnd;
+    [SS("regex")] public const string RxLineCommand = @"(?'line_cmd' [BDHLMQSU] ) (?'index' \d+)" + RxEnd;
     [SS("regex")] public const string RxTextDataProp = "(?'prop_cmd' d ) (?'value' 3) (?'op' ,) (?'value' [^;<\\n,]*)" + RxEnd;
     [SS("regex")] public const string RxPropCommand_1 = @"(?'prop_cmd' [cdhlw] ) (?'value' -?\d+)" + RxEnd;
     [SS("regex")] public const string RxPropCommand_2 = @"(?'prop_cmd' [cdo] ) (?'value' -?\d+) (?'op' ,) (?'value' -?\d+)" + RxEnd;

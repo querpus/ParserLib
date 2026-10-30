@@ -8,7 +8,7 @@ namespace Parser;
 
 /// <summary>A class containing the operations, requirements, and instructions for reading a file.</summary>
 /// <remarks>This class is immutable, and should never be altered during operation.</remarks>
-public class Spec : IHasTokenRuleSet
+public class Spec : IHasTokenRuleSet, IHasNodeRuleSet
 {
   /// <summary>The name of this Spec.</summary>
   public required string Name { get; init; }

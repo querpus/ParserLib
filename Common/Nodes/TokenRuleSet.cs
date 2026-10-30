@@ -2,11 +2,6 @@
 #pragma warning disable format // Formatting
 
 namespace Common.Nodes;
-
-public interface IHasTokenRuleSet
-{
-  TokenRuleSet TokenRuleSet { get; }
-}
 public class TokenRuleSet
 {
   public required ObservableCollection<string> TokenSequences { get; init; }

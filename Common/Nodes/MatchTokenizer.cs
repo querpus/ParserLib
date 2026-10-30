@@ -21,27 +21,19 @@ public class MatchTokenizer : ITokenizer<MatchToken>
       throw new InvalidOperationException("No token rules.");
     }
 
-    TokenRuleSet rules;
+    TokenRuleSet? rules =
+      Rules is IHasTokenRuleSet ihtrs
+      ? ihtrs.TokenRuleSet
+      : Rules is TokenRuleSet set
+        ? set
+        : throw new InvalidOperationException("Invalid token rules.");
 
-    if  (Rules is IHasTokenRuleSet ihtrs)
-    {
-      rules = ihtrs.TokenRuleSet;
-    }
-    else if (Rules is TokenRuleSet)
-    {
-      rules = Rules;
-    }
-    else
-    {
-      throw new InvalidOperationException("Invalid token rules.");
-    }
-
-    if (Rules.TokenSequences.Count == 0)
+    if (rules is null || rules.TokenSequences.Count == 0)
     {
       throw new InvalidOperationException("No token sequences.");
     }
 
-    var regex = Rules.Regex;
+    var regex = rules.Regex;
     int matchindex = 0;
     foreach (Match match in regex.Matches(input))
     {

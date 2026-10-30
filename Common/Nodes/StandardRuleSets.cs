@@ -38,6 +38,9 @@ public static partial class StandardRuleSets
   {
     InitialSetup = () => new() { SingleRoot = false },
     Rules = {
+      INI.Section,
+      INI.Property
+    },
   };
   public static TokenRuleSet JSONTokenRuleSet { get; } = new()
   {
