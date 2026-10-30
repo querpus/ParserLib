@@ -10,6 +10,7 @@ public readonly struct CaptureToken : IToken
   public required int CaptureIndex { get; init; }
   public required Range Position { get; init; }
   int IIndexSortable.Index => Position.Start.Value;
+  public int Length => Position.End.Value - Position.Start.Value - 1;
 
   public int CompareTo (IIndexSortable? other) => Position.Start.Value.CompareTo(other?.Index);
   public int CompareTo (object? obj) => CompareTo(obj is IIndexSortable iSort ? iSort : null);

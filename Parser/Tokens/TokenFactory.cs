@@ -10,16 +10,19 @@ namespace Parser.Tokens;
 /// <remarks>Each match is a token.</remarks>
 public sealed class TokenFactory : ITokenizer<IToken>
 {
+  IEnumerable<IToken> ITokenizer<IToken>.Tokenize (string input) => Tokenize(input);
+  IEnumerable<IToken> ITokenizer<IToken>.Tokens => Tokens;
   #region Private Fields
   private const string Area = "TokenFactory";
   private readonly TokenRuleCollection _rules = [];
   private readonly TokenCollection _result = [];
   private TokenRule? _currentRule;
   private Spec _spec;
-  private RT _default_rule;
-  private bool _competed;
+  private int _ruleIndex;
+  private int _ruleIndexAfterCompete;
   #endregion
   #region Public Properties
+  public Spec Spec { get => _spec; init => _spec = value; }
   public string Input { get; private set; } = SE;
   [NotNull]
   public SectionCollection? CannotMatch { get; private set; }
@@ -35,36 +38,34 @@ public sealed class TokenFactory : ITokenizer<IToken>
   public TokenFactory () => SetSpec(XParser.Lib["unknown"]);
   #endregion
   #region Private Helper Properties
-  private bool IgnoreCase => (_currentRule?.Type.HasFlag(RT.IgnoreCase) ?? false) || _default_rule.HasFlag(RT.IgnoreCase);
+  private RT DefaultRule => _spec.DefaultRuleSet;
+  private bool IgnoreCase => (_currentRule?.Type.HasFlag(RT.IgnoreCase) ?? false) || DefaultRule.HasFlag(RT.IgnoreCase);
   private StringComparison IC => IgnoreCase ? SCOIC : SCO;
-  private bool Competes => (_currentRule?.Type.HasFlag(RT.Competitive) ?? false) || _default_rule.HasFlag(RT.Competitive);
-  private bool IgnoredToken => (_currentRule?.Type.HasFlag(RT.IgnoredToken) ?? false) || _default_rule.HasFlag(RT.IgnoredToken);
+  private bool Competes => (_currentRule?.Type.HasFlag(RT.Competitive) ?? false) || DefaultRule.HasFlag(RT.Competitive);
+  private bool IgnoredToken => (_currentRule?.Type.HasFlag(RT.IgnoredToken) ?? false) || DefaultRule.HasFlag(RT.IgnoredToken);
   private bool HasError => _currentRule?.Type.HasFlag(RT.Error) ?? false;
   private RT Type => GetMaskedType(_currentRule?.Type ?? RT.None);
   private string RuleData => _currentRule?.RuleStringData ?? SE;
   private Action RuleAction => Type switch
   {
-    RT when HasError => ActionInvalidLog,
-    RT when Competes && !_competed => RunCompete,
-    RT when Competes && _competed => ActionCompetedLog,
-    RT.None => ActionBadLog,
+    RT when HasError => () => ErrorLog("Error: Invalid rule. Skipping rule."),
+    RT when Competes => RunCompete,
+    RT.None => () => WarnLog("Warning: No type defined. Skipping rule."),
     RT.TokenMatch or RT.TokenExtract or RT.SplitMatch => RegexMatch,
     RT.TokenExact or RT.SplitExact => ExactMatch,
     RT.StoreExtra => StoreExtra,
     RT.StoreOther => StoreOther,
     RT.ErrorMatch => ErrorMatch,
-    _ => ActionBadLog
+    _ => () => WarnLog("Warning: Bad type defined. Skipping rule.")
   };
 
-  TokenRuleSet? ITokenizer<IToken>.Rules { get => throw new NotSupportedException(); init => throw new NotSupportedException(); }
+  dynamic? ITokenizer<IToken>.Rules { get => _spec; init => _spec = (value as Spec) ?? throw new InvalidTokenException("Attempt to assign a null Spec."); }
+
   #endregion
   #region Private Logging Methods
   private static void DebugLog (string msg) => Log(MC.Debug, msg, nameof(TokenFactory));
   private static void WarnLog (string msg) => Log(MC.Warning, msg, nameof(TokenFactory));
   private static void ErrorLog (string msg) => Log(MC.Error, msg, nameof(TokenFactory));
-  private static void ActionInvalidLog () => ErrorLog("Error: Invalid rule. Skipping rule.");
-  private static void ActionCompetedLog () => DebugLog("Already ran competition. Skipping rule.");
-  private static void ActionBadLog () => WarnLog("Warning: Bad type defined. Skipping rule.");
   #endregion
   #region Private Static Methods
   private static string GetRuleRegex (TokenRule rule, int? index = null)
@@ -239,11 +240,29 @@ public sealed class TokenFactory : ITokenizer<IToken>
       _ = Err.ThrowBadResult("You must correct the above listed errors to parse this file.");
     DebugOut();
   }
+  private IEnumerable<(TokenRule Rule, int Index)> GetCompeteBlock ()
+  {
+    Collection<(TokenRule Rule, int Index)> result = [];
+    for (int i = _ruleIndex; i < _rules.Count; i++)
+    {
+      if (_rules[i].Type.HasFlag(RT.Competitive) && _rules[i].RuleStringData is not null)
+      {
+        result.Add((_rules[i], i));
+      }
+      else
+      {
+        _ruleIndexAfterCompete = i;
+        return result;
+      }
+    }
+    _ruleIndexAfterCompete = _rules.Count;
+    return result;
+  }
   private void RunCompete ()
   {
     DebugIn(Area, "RunCompete");
     DebugLog("Running competition.");
-    Collection<(TokenRule Rule, int Index)> contestants = [.. _rules.Where(r => r.Type.HasFlag(RT.Competitive) && r.RuleStringData is not null).Select((r, i) => (r, i))];
+    IEnumerable<(TokenRule Rule, int Index)> contestants = GetCompeteBlock();
     string regexPatterns = contestants.Select(r => GetRuleRegex(r.Rule, r.Index)).TextJoin("|");
     Regex regex = new(regexPatterns, _spec.RxOpt.RemoveBit<RegexOptions>(ROIC));
 
@@ -252,34 +271,30 @@ public sealed class TokenFactory : ITokenizer<IToken>
       int index = GetRuleGroupIndex(match);
       Pos rng = new(match.Index, match.Length);
 
-      _currentRule = contestants[index].Rule;
+      _currentRule = _rules[index];
 
       if (!IgnoredToken)
         MakeAddToken(rng);
 
       CannotMatch.Add(rng);
     }
-    _competed = true;
+    _ruleIndex = _ruleIndexAfterCompete > _ruleIndex ? _ruleIndexAfterCompete : _ruleIndex;
     DebugOut();
   }
   #region Public Methods
-  [MemberNotNull(nameof(_spec), nameof(_default_rule))]
-  public void SetSpec (Spec spec)
-  {
-    _spec = spec;
-    _default_rule = _spec.DefaultRuleSet;
-  }
+  [MemberNotNull(nameof(_spec))]
+  public void SetSpec (Spec spec) => _spec = spec;
   [MemberNotNull(nameof(CannotMatch))]
   public Collection<IToken> Tokenize (string input)
   {
     DebugIn(Area, "Produce");
     _result.Clear();
     CannotMatch = new(input);
-    _competed = false;
     input.ThrowIfNull();
     Input = input;
-    foreach (TokenRule rule in _rules)
+    for (_ruleIndex = 0; _ruleIndex < _rules.Count; _ruleIndex++)
     {
+      TokenRule rule = _rules[_ruleIndex];
       _currentRule = rule;
 
       try

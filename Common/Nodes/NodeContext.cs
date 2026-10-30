@@ -80,7 +80,8 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       NT.Root => Root = value,
       NT.RootNodes when value is not null => assignRootNodes(value),
       NT.RootNodes when value is null => clearRootNodes(value),
-      NT.PropKey => value is string ? PropKey = value : throw new InvalidOperationException(),
+      NT.PropKey when value is not null => value is string ? PropKey = value : throw new InvalidOperationException("PropKey must be assigned a string or null."),
+      NT.PropKey when value is null => PropKey = null,
       NT.TokenGroup or NT.TokenValue => throw new InvalidOperationException("Cannot assign to token properties."),
       _ => throw new InvalidOperationException(),
     };

@@ -2,10 +2,14 @@
 #pragma warning disable format // Formatting
 
 namespace Common.Nodes;
+
+public interface IHasTokenRuleSet
+{
+  TokenRuleSet TokenRuleSet { get; }
+}
 public class TokenRuleSet
 {
   public required ObservableCollection<string> TokenSequences { get; init; }
-  public string RegexString => TokenSequences.TextJoin("|");
   public RegexOptions RegexOptions { get; init; } = ROIPW | ROML;
-  public Regex Regex => new(RegexString, RegexOptions);
+  public Regex Regex => new(TokenSequences.TextJoin("|"), RegexOptions);
 }

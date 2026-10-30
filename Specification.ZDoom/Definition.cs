@@ -28,7 +28,7 @@ public static class Definition
     RxOpt = ROML | ROIPW | ROIC | ROEC,
     Name = "zdoom.zscript",
     Operations = [
-      new TokenizeOperation { InputKey = "text", OutputKey = "tokens" }
+      new TokenizeOperation { InputKey = "text", OutputKey = "tokens", Tokenizer = "xparser" }
     ],
     IsTextFile = true,
     SC = SCOIC,
@@ -77,7 +77,7 @@ public static class Definition
     FileInferences = [IfN(InferenceType.Ext | InferenceType.Like, "udmf")],
     RxOpt = ROML | ROIPW | ROIC | ROEC | ROSL,
     Operations = [
-      new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
+      new TokenizeOperation{ InputKey = "text", OutputKey = "tokens", Tokenizer = "xparser" },
       new TokenAssembleOperation { InputKey = "tokens", OutputKey = "tokens_assembled" },
     ],
     DefaultRuleSet = RT.IgnoreCase,
@@ -134,7 +134,7 @@ public static class Definition
     ],
     GroupTokenRules = [],
     Operations = [
-      new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
+      new TokenizeOperation{ InputKey = "text", OutputKey = "tokens" , Tokenizer = "xparser" },
       new TokenAssembleOperation { InputKey = "tokens", OutputKey = "tokens_assembled" },
     ],
   };
@@ -151,7 +151,7 @@ public static class Definition
       IfN(FName | Is, "mapinfo"),
       IfN(FName | Is, "zmapinfo")],
     Operations = [
-      new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
+      new TokenizeOperation { InputKey = "text", OutputKey = "tokens", Tokenizer = "xparser" },
       new DebugPrintKeyOperation { InputKey = "tokens" },
       new TokenAssembleOperation { InputKey = "tokens", OutputKey = "tokens_assembled" },
       new DebugPrintKeyOperation { InputKey = "tokens_assembled" },
@@ -197,7 +197,7 @@ public static class Definition
     TokenType = typeof(string),
     Name = "zdoom.decorate",
     Operations = [
-      new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
+      new TokenizeOperation{ InputKey = "text", OutputKey = "tokens" , Tokenizer = "xparser" },
       new DebugPrintKeyOperation { InputKey = "tokens" },
       new TokenAssembleOperation { InputKey = "tokens", OutputKey = "tokens_assembled" },
       new DebugPrintKeyOperation { InputKey = "tokens_assembled" },
@@ -237,7 +237,7 @@ public static class Definition
     Name = "zdoom.acs",
     RxOpt = ROML | ROIC | ROIPW | ROEC | ROSL,
     Operations = [
-      new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
+      new TokenizeOperation{ InputKey = "text", OutputKey = "tokens" , Tokenizer = "xparser" },
       new TokenAssembleOperation { InputKey = "tokens", OutputKey = "tokens_assembled" },
       new DebugPrintKeyOperation { InputKey = "tokens_assembled" }
     ],
@@ -246,15 +246,15 @@ public static class Definition
     TokenType = typeof(AT),
     DefaultRuleSet = RT.IgnoreCase,
     TokenCompatLookup = {
-      ["Value"] = ["Int", "Char", "String", "Dec", "Expression", "ExprName", "FunctionCall", "ArrayValue", "ExpressionStandalone"],
-      ["Stmt"] = ["VarDecl", "BasicCmd", "FunctionCallStmt", "VarAssn", "VarInc", "ArrayDecl", "WaitStmt", "VarDeclAssn"],
-      ["FuncStmt"] = ["VarDecl", "BasicCmd", "FunctionCallStmt", "VarAssn", "VarInc", "ArrayDecl", "VarDeclAssn", "ReturnStmt"],
-      ["Block"] = ["IfBlock", "ElseBlock", "ElseIfBlock", "LoopBlock", "SwitchBlock", "ForBlock"],
-      ["MapVar"] = ["global", "world"],
-      ["Loop"] = ["until", "while"],
-      ["Wait"] = ["delay", "tagwait", "scriptwait", "polywait", "NamedScriptWait", "ScriptCallWaitStmt"],
-      ["Name"] = ["PreProcName", "ExprName", "FuncName", "FuncDefName", "ArrVarName", "VarName", "ParamName", "DefineName"],
-      ["Literal"] = ["Int", "String", "Char", "Dec"],
+      ["Value"]     = ["Int", "Char", "String", "Dec", "Expression", "ExprName", "FunctionCall", "ArrayValue", "ExpressionStandalone"],
+      ["Stmt"]      = ["VarDecl", "BasicCmd", "FunctionCallStmt", "VarAssn", "VarInc", "ArrayDecl", "WaitStmt", "VarDeclAssn"],
+      ["FuncStmt"]  = ["VarDecl", "BasicCmd", "FunctionCallStmt", "VarAssn", "VarInc", "ArrayDecl", "VarDeclAssn", "ReturnStmt"],
+      ["Block"]     = ["IfBlock", "ElseBlock", "ElseIfBlock", "LoopBlock", "SwitchBlock", "ForBlock"],
+      ["MapVar"]    = ["global", "world"],
+      ["Loop"]      = ["until", "while"],
+      ["Wait"]      = ["delay", "tagwait", "scriptwait", "polywait", "NamedScriptWait", "ScriptCallWaitStmt"],
+      ["Name"]      = ["PreProcName", "ExprName", "FuncName", "FuncDefName", "ArrVarName", "VarName", "ParamName", "DefineName"],
+      ["Literal"]   = ["Int", "String", "Char", "Dec"],
       ["SimpleJump"] = ["break", "continue", "terminate", "restart"]
     },
     TokenRules = [
@@ -335,17 +335,17 @@ public static class Definition
       new(RT.None, "Preprocessor",                "x:Pre ti:PreProcName{i(mport|nclude)|library} v:String"),
 
       // Statements
-      new(RT.None, "VarDecl",                "t:Type n:VarName x:Sc"),
-      new(RT.None, "VarDeclAssn",            "t:Type n:VarName x:Eq v:Value x:Sc"),
-      new(RT.None, "VarAssn",                "l:(ArrayValue|ExprName) c:(Eq|Assign) r:Value x:Sc"),
-      new(RT.None, "ArrayDecl",              "t:Type n:ArrVarName vm:ArrayDim x:Sc"),
-      new(RT.None, "BasicCmd",               "n:SimpleJump x:Sc"),
-      new(RT.None, "ReturnStmt",             "n:Return x:Sc"),
-      new(RT.None, "ReturnStmt",             "n:Return v:Value x:Sc"),
-      new(RT.None, "WaitStmt",               "t:Wait x:Po p:Value x:Pc x:Sc"),
-      new(RT.None, "FunctionCallStmt",       "d:FunctionCall x:Sc"),
-      new(RT.None, "CaseLabel",              "x:Case n:Value x:Co"),
-      new(RT.None, "CaseLabel",              "n:Default x:Co"),
+      new(RT.None, "VarDecl",                     "t:Type n:VarName x:Sc"),
+      new(RT.None, "VarDeclAssn",                 "t:Type n:VarName x:Eq v:Value x:Sc"),
+      new(RT.None, "VarAssn",                     "l:(ArrayValue|ExprName) c:(Eq|Assign) r:Value x:Sc"),
+      new(RT.None, "ArrayDecl",                   "t:Type n:ArrVarName vm:ArrayDim x:Sc"),
+      new(RT.None, "BasicCmd",                    "n:SimpleJump x:Sc"),
+      new(RT.None, "ReturnStmt",                  "n:Return x:Sc"),
+      new(RT.None, "ReturnStmt",                  "n:Return v:Value x:Sc"),
+      new(RT.None, "WaitStmt",                    "t:Wait x:Po p:Value x:Pc x:Sc"),
+      new(RT.None, "FunctionCallStmt",            "d:FunctionCall x:Sc"),
+      new(RT.None, "CaseLabel",                   "x:Case n:Value x:Co"),
+      new(RT.None, "CaseLabel",                   "n:Default x:Co"),
 
       new(RT.Recursive, "IfBlock",                "x:If x:Po v:Value x:Pc x:Bo sa:(Stmt|Block) x:Bc"),
       new(RT.Recursive, "IfBlock",                "x:If x:Po v:Value x:Pc s:(Stmt|Block)"),
@@ -393,7 +393,7 @@ public static class Definition
       .. TokenRule.MakeSingleCharRules("=,;", RT.TokenExact ,new MdlT[] { MdlT.Eq, MdlT.Cm, MdlT.Sc }),
     ],
     Operations = [
-      new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
+      new TokenizeOperation{ InputKey = "text", OutputKey = "tokens" , Tokenizer = "xparser" },
       new DebugPrintKeyOperation { InputKey = "tokens" },
       new TokenAssembleOperation { InputKey = "tokens", OutputKey = "token_groups" },
       new DebugPrintKeyOperation { InputKey = "token_groups" },
@@ -422,7 +422,7 @@ public static class Definition
       .. TokenRule.MakeSingleCharRules("=,;", RT.TokenExact ,new MdlT[] { MdlT.Eq, MdlT.Cm, MdlT.Sc }),
     ],
     Operations = [
-      new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
+      new TokenizeOperation { InputKey = "text", OutputKey = "tokens", Tokenizer="xparser" },
       new DebugPrintKeyOperation { InputKey = "tokens" },
       new TokenAssembleOperation { InputKey = "tokens", OutputKey = "token_groups" },
       new DebugPrintKeyOperation { InputKey = "token_groups" },

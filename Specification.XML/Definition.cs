@@ -1,6 +1,8 @@
 #pragma warning disable RE0001 // Invalid regex pattern
 #pragma warning disable CA1720 // Identifier contains type name
 
+using Common.Nodes;
+
 using Parser;
 using Parser.Ops;
 using Parser.Ops.Text;
@@ -83,12 +85,14 @@ public static class Definition
       ["ValidContent"] = ["Content", "ElementSingleWithNamespace", "ElementSingle", "ElementPair"]
     },
     Operations = [
-      new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
+      new TokenizeOperation { InputKey = "text", OutputKey = "tokens", Tokenizer = "xparser"},
       new DebugPrintKeyOperation { InputKey = "tokens" },
       new FilterTokenOperation { InputKey="tokens", OutputKey="tokens_filtered", StrType="Whitespace" },
       new DebugPrintKeyOperation { InputKey = "tokens_filtered" },
       new TokenAssembleOperation { InputKey = "tokens_filtered", OutputKey = "tokens_assembled" },
       new DebugPrintKeyOperation { InputKey = "tokens_assembled" },
     ],
+    NodeRuleSet = StandardRuleSets.XMLRuleSet,
+    TokenRuleSet = StandardRuleSets.XMLTokenRuleSet
   };
 }

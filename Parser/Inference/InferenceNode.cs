@@ -51,17 +51,8 @@ public static class InferenceNodeFactory
   }
 }
 
-public class InferenceNode
+public record InferenceNode (IT Type, string Content)
 {
-  public string Content { get; }
-  public IT Type { get; }
-
-  public InferenceNode (IT type, string content)
-  {
-    Content = content;
-    Type = type;
-  }
-
   /// <summary>Checks a file and determines if it satisfies the inference node.</summary>
   /// <param name="filepath">Path to the file.</param>
   /// <returns><see langword="true"/> if the node is satisfied, <see langword="false"/> otherwise.</returns>

@@ -6,9 +6,11 @@ namespace Common.Nodes;
 /// <summary>Creates a token for every match with the groups as properties within every match. Multiple captures are stored as a Collection under the group name.</summary>
 public class MatchTokenizer : ITokenizer<MatchToken>
 {
+  IEnumerable<MatchToken> ITokenizer<MatchToken>.Tokenize (string input) => Tokenize(input);
+  IEnumerable<MatchToken> ITokenizer<MatchToken>.Tokens => Tokens;
   public const string TokenTypePrefix = "_t_";
   public Collection<MatchToken> Tokens { get; } = [];
-  public TokenRuleSet? Rules { get; init; }
+  public dynamic? Rules { get; init; }
   public int Count => Tokens.Count;
   public void Reset () => Tokens.Clear();
   public Collection<MatchToken> Tokenize (string input)
@@ -17,6 +19,21 @@ public class MatchTokenizer : ITokenizer<MatchToken>
     if (Rules is null)
     {
       throw new InvalidOperationException("No token rules.");
+    }
+
+    TokenRuleSet rules;
+
+    if  (Rules is IHasTokenRuleSet ihtrs)
+    {
+      rules = ihtrs.TokenRuleSet;
+    }
+    else if (Rules is TokenRuleSet)
+    {
+      rules = Rules;
+    }
+    else
+    {
+      throw new InvalidOperationException("Invalid token rules.");
     }
 
     if (Rules.TokenSequences.Count == 0)

@@ -127,32 +127,9 @@ public class MenuArea_Select : MenuArea
   }
 }
 
-public class CurrentState
-{
-  public ConsoleColor TextColor { get => Console.ForegroundColor; set => Console.ForegroundColor = value; }
-  public ConsoleColor BackColor { get => Console.BackgroundColor; set => Console.BackgroundColor = value; }
-  public bool IsActive => Controller.IsActive;
-  public string? MenuID => Controller.CurrentMenu?.MenuID;
-  public int AreaID => Controller.CurrentMenu?.SelectedArea ?? -1;
-  public Point Position
-  {
-    get => new(Console.CursorLeft, Console.CursorTop);
-    set => Console.SetCursorPosition(value.X, value.Y);
-  }
-  public string TypedData { get; set; } = SE;
-  public ConsoleKeyInfo? KeyInfo { get; set; }
-  public ConsoleKeyInfo? LastKeyInfo { get; set; }
-  public bool CursorVisible
-  {
-    get => Console.CursorVisible;
-    set => Console.CursorVisible = value;
-  }
-}
-
 public static class Controller
 {
   private static bool IsClosing { get; set; }
-  public static CurrentState Current { get; set; } = new CurrentState();
   private static string MaxWidthEmptyString
   {
     get

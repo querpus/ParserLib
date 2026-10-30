@@ -860,6 +860,9 @@
         <member name="P:Common.Nodes.IToken.Name">
             <summary>The name or type of this token.</summary>
         </member>
+        <member name="P:Common.Nodes.ITokenizer`1.Rules">
+            <summary>The rules that this tokenizer requires to process data.</summary>
+        </member>
         <member name="P:Common.Nodes.JSONContentNode.Content">
             <summary>This contains the quoted string, unquoted boolean, null, undefined, or unquoted number.</summary>
         </member>
@@ -987,6 +990,12 @@
         </member>
         <member name="F:Common.Nodes.NodeTarget.Fields">
             <summary>The readonly fields that cannot be assigned to.</summary>
+        </member>
+        <member name="P:Common.Nodes.INodeProcessor.Context">
+            <summary></summary>
+        </member>
+        <member name="M:Common.Nodes.INodeProcessor.Process">
+            <summary>Processes and creates the <see cref="P:Common.Nodes.INodeProcessor.Context"/>.</summary>
         </member>
         <member name="P:Common.Nodes.XMLCommentNode.Content">
             <summary>Gets the content of this node.</summary>

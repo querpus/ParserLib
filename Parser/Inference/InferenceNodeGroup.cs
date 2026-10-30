@@ -1,6 +1,6 @@
 namespace Parser.Inference;
 
-public class InferenceNodeGroup : InferenceNode
+public record InferenceNodeGroup : InferenceNode
 {
   public static InferenceNodeGroup NewAnd => new(IT.And);
   public static InferenceNodeGroup NewOr => new(IT.Or);

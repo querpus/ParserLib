@@ -1,3 +1,5 @@
+using System.Linq;
+
 using Common.Nodes;
 
 using Parser.Exceptions;
@@ -30,6 +32,11 @@ internal static class Program
   internal static Library LibRef { get; set; }
   #endregion
   #region Basic Methods
+  internal static void PressEnterToContinue ()
+  {
+    Log(MsgClass.Prompt, "Press enter to continue.", This);
+    _ = GetInput();
+  }
   [MemberNotNull(nameof(UserInput))]
   internal static string GetInput () => UserInput = Console.ReadLine()?.ToUpperInvariant() ?? SE;
   internal static string FinishPath (string path) => Directory.Exists(CheckPath) ? $@"{LaptopPath}\{path}" : $@"{DesktopPath}\{path}";
@@ -86,52 +93,46 @@ internal static class Program
     string file_xml_errors = File.ReadAllText(FinishPath(Paths.xml_errors));
     string file_ipl_label = File.ReadAllText(FinishPath(Paths.ipl_label));
 
-    static void prompt_continue ()
-    {
-      Log(MsgClass.Prompt, "Press enter to continue.", This);
-      _ = GetInput();
-    }
-
-    static void generic_test<TTokenizer> (string file, NodeRuleSet node_rules, TokenRuleSet token_rules) where TTokenizer : ITokenizer<IToken>, new()
+    static void generic_test<TTokenizer, TToken> (string file, NodeRuleSet node_rules, TokenRuleSet token_rules) where TTokenizer : ITokenizer<TToken>, new() where TToken : IToken
     {
       TTokenizer cTokenizer = new() { Rules = token_rules };
       var cTokens = cTokenizer.Tokenize(file);
-      TokenProcessor cProcessor = new(cTokens, node_rules);
+      TokenProcessor cProcessor = new(cTokens.Cast<IToken>(), node_rules);
       cProcessor.Process();
       cTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
-      prompt_continue();
+      PressEnterToContinue();
     }
 
   Start:
     Console.Clear();
-    Log(MsgClass.Prompt, "Select a test. (wad/xml/mapinfo/acs/ini)", This);
+    Log(MsgClass.Prompt, "Select a test. (wad/xml/mapinfo/acs/ini/json/ipl)", This);
     switch (GetInput())
     {
       case "XML":
-        Log(MsgClass.Prompt, "Select a version. (capture/group/match/linq/xparser)", This);
+        Log(MsgClass.Prompt, "Select a version. (capture/group/match/xparser)", This);
         switch (GetInput())
         {
           case "CAPTURE":
-            generic_test<CaptureTokenizer>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            generic_test<CaptureTokenizer>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            generic_test<CaptureTokenizer>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<CaptureTokenizer, CaptureToken>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<CaptureTokenizer, CaptureToken>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<CaptureTokenizer, CaptureToken>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
             break;
           case "GROUP":
-            generic_test<GroupTokenizer>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            generic_test<GroupTokenizer>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            generic_test<GroupTokenizer>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<GroupTokenizer, CaptureToken>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<GroupTokenizer, CaptureToken>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<GroupTokenizer, CaptureToken>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
             break;
           case "XPARSER":
             InitialTest("xml", Paths.xml_operation);
             InitialTest(SpecXML.Spec, Paths.xml_errors);
             InitialTest(SpecXML.Spec, ResZDoom.xml_acs);
-            prompt_continue();
+            PressEnterToContinue();
             break;
           case "MATCH":
             MatchTokenizer mTokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
             var mTokens = mTokenizer.Tokenize(file_xsd_specification);
             mTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
-            prompt_continue();
+            PressEnterToContinue();
             break;
           default:
             Log(MsgClass.Error, "Invalid choice.", This);
@@ -143,7 +144,7 @@ internal static class Program
         switch (GetInput())
         {
           case "CAPTURE":
-            generic_test<CaptureTokenizer>(file_json_launch, StandardRuleSets.JSONRuleSet, StandardRuleSets.JSONTokenRuleSet);
+            generic_test<CaptureTokenizer, CaptureToken>(file_json_launch, StandardRuleSets.JSONRuleSet, StandardRuleSets.JSONTokenRuleSet);
             break;
           case "XPARSER":
             InitialTest(SpecJSON.Spec, Paths.json_error);
@@ -189,7 +190,7 @@ internal static class Program
         switch (GetInput())
         {
           case "CAPTURE":
-            generic_test<CaptureTokenizer>(file_ipl_label, StandardRuleSets.IPLRuleSet, StandardRuleSets.IPLTokenRuleSet);
+            generic_test<CaptureTokenizer, CaptureToken>(file_ipl_label, StandardRuleSets.IPLRuleSet, StandardRuleSets.IPLTokenRuleSet);
             break;
           case "XPARSER":
             InitialTest(SpecIPL.Spec, Paths.ipl_simple);

@@ -1,5 +1,6 @@
 using Parser;
 using Parser.Ops.Text;
+using Parser.Tokens;
 
 using static Parser.DefinitionStaticFunctions;
 
@@ -77,7 +78,8 @@ public static class Definition
       new TokenizeOperation
       {
         InputKey = "text",
-        OutputKey = "tokens"
+        OutputKey = "tokens",
+        Tokenizer = "xparser"
       },
       new TokenAssembleOperation
       {

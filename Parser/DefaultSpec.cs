@@ -35,7 +35,8 @@ public static class DefaultSpec
       new TokenizeOperation
       {
         InputKey = "text",
-        OutputKey = "tokens"
+        OutputKey = "tokens",
+        Tokenizer = "xparser"
       },
       // TODO: Complete this operation for spec parsing.
       new SpecProcessOperation

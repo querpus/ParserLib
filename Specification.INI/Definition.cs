@@ -1,3 +1,7 @@
+using Common.Nodes;
+
+using Parser.Tokens;
+
 using static Parser.DefinitionStaticFunctions;
 using static Parser.Tokens.TokenRuleType;
 
@@ -23,7 +27,7 @@ public static class Definition
     TokenType = typeof(ITT),
 
     Operations = [
-      new TokenizeOperation { InputKey = "text", OutputKey = "tokens" },
+      new TokenizeOperation { InputKey = "text", OutputKey = "tokens", Tokenizer = "xparser" },
       new TokenAssembleOperation { InputKey = "tokens", OutputKey = "tokens_assembled" },
     ],
 
@@ -39,5 +43,6 @@ public static class Definition
       new(ITT.SectionWProps, "n:Section pa:Property")],
 
     DefaultRuleSet = IgnoreCase,
+    TokenRuleSet = StandardRuleSets.INI
   };
 }

@@ -1,6 +1,7 @@
 #pragma warning disable CA1710 // Rename Parser.Library to end in either 'Dictionary' or 'Collection'
 
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 using Common.Nodes;
 

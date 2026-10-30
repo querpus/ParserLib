@@ -96,8 +96,7 @@ public sealed class XParser
   {
     Data = new() { Parser = this };
     Spec = spec;
-    Spec.SetAsActive();
-    NextOpIndex = 1;
+    NextOpIndex = 0;
   }
   private void AdvanceOperation ()
   {

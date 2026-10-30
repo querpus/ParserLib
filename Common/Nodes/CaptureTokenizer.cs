@@ -9,11 +9,13 @@ namespace Common.Nodes;
 /// <summary>Creates a token for every capture with the group name as the type within every match. Multiple captures are additional tokens.</summary>
 public class CaptureTokenizer : ITokenizer<CaptureToken>, ITokenizer<IToken>
 {
+  IEnumerable<CaptureToken> ITokenizer<CaptureToken>.Tokenize(string input) => Tokenize(input);
+  IEnumerable<CaptureToken> ITokenizer<CaptureToken>.Tokens => Tokens;
   public Collection<CaptureToken> Tokens { get; } = [];
-  public TokenRuleSet? Rules { get; init; }
+  public dynamic? Rules { get; init; }
   public int Count => Tokens.Count;
 
-  Collection<IToken> ITokenizer<IToken>.Tokens => [.. Tokens.Cast<IToken>()];
+  IEnumerable<IToken> ITokenizer<IToken>.Tokens => [.. Tokens.Cast<IToken>()];
 
   public void Reset () => Tokens.Clear();
   public Collection<CaptureToken> Tokenize (string input)
@@ -57,5 +59,5 @@ public class CaptureTokenizer : ITokenizer<CaptureToken>, ITokenizer<IToken>
     return Tokens;
   }
 
-  Collection<IToken> ITokenizer<IToken>.Tokenize (string input) => [.. Tokenize(input).Cast<IToken>()];
+  IEnumerable<IToken> ITokenizer<IToken>.Tokenize (string input) => [.. Tokenize(input).Cast<IToken>()];
 }

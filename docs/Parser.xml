@@ -205,19 +205,6 @@
             <returns><see langword="true"/> if the node is satisfied, <see langword="false"/> otherwise.</returns>
             <exception cref="T:Parser.Exceptions.InvalidFileInferenceException"></exception>
         </member>
-        <member name="T:Parser.Inference.InferenceNodeOr">
-            <summary>Logically ORs the nodes this node contains.</summary>
-            <param name="nodes">The nodes this node contains.</param>
-        </member>
-        <member name="M:Parser.Inference.InferenceNodeOr.#ctor(System.Collections.Generic.IEnumerable{Parser.Inference.InferenceNode})">
-            <summary>Logically ORs the nodes this node contains.</summary>
-            <param name="nodes">The nodes this node contains.</param>
-        </member>
-        <member name="M:Parser.Inference.InferenceNodeOr.CheckFile(System.String)">
-            <summary>Check if the file at the specified location matches this node.</summary>
-            <param name="filepath">The path to the file to check.</param>
-            <returns><see langword="true"/> if the file matches the node, <see langword="false"/> otherwise.</returns>
-        </member>
         <member name="P:Parser.Library.SpecInferences">
             <summary>The singleton instance of this object.</summary>
         </member>
@@ -649,7 +636,7 @@
             <br/>
             </remarks>
         </member>
-        <member name="T:Parser.Ops.Text.TokenizeOperation">
+        <member name="T:Parser.Ops.Text.TokenizeOperation`1">
             <summary>Tokenizes a string or list of strings.</summary>
         </member>
         <member name="P:Parser.Ops.WhileOperation.Condition">
@@ -744,10 +731,7 @@
         </member>
         <member name="T:Parser.Spec">
             <summary>A class containing the operations, requirements, and instructions for reading a file.</summary>
-            <remarks>This class is immutable, and should never be altered during operation, aside from the <see langword="static"/> property <see cref="P:Parser.Spec.Active"/>.</remarks>
-        </member>
-        <member name="P:Parser.Spec.Active">
-            <summary>The currently active specififcation. Used for objects that cannot see the parser.</summary>
+            <remarks>This class is immutable, and should never be altered during operation.</remarks>
         </member>
         <member name="P:Parser.Spec.Name">
             <summary>The name of this Spec.</summary>
@@ -783,28 +767,6 @@
         </member>
         <member name="P:Parser.Spec.GroupTokenRules">
             <summary>Group token rules for the token assembly operation.</summary>
-        </member>
-        <member name="M:Parser.Spec.SetAsActive">
-            <summary>Marks this instance as the active specification.</summary>
-            <remarks>Subsequent operations that depend on the active object will reference this instance after calling
-            this method. If another instance was previously active, it will be replaced.</remarks>
-        </member>
-        <member name="M:Parser.Spec.GetTokenTypeValue(System.String)">
-            <summary>Gets the <see cref="T:System.Enum"/> or value of the token type.</summary>
-            <param name="tokenType">The name of the token type.</param>
-            <remarks>This is dependent on defining <see cref="P:Parser.Spec.TokenType"/> in the defined <see cref="T:Parser.Spec"/>.</remarks>
-            <returns>The value of the token type.</returns>
-            <exception cref="T:System.ArgumentException">Tokentype is not valid.</exception>
-            <exception cref="T:System.InvalidOperationException"></exception>
-            <exception cref="T:System.ArgumentNullException"></exception>
-            <exception cref="T:System.OverflowException"></exception>
-        </member>
-        <member name="M:Parser.Spec.GetTokenTypeString(System.Object)">
-            <summary>Gets the name of the token type.</summary>
-            <param name="tokenType">The value of the token type.</param>
-            <returns>The name of the token type.</returns>
-            <exception cref="T:System.InvalidCastException"></exception>
-            <exception cref="T:Parser.Exceptions.SpecNotDefinedException"><see cref="P:Parser.Spec.TokenType"/> was not defined in the <see cref="T:Parser.Spec"/>.</exception>
         </member>
         <member name="T:Parser.Tokens.ChkToken">
             <summary>Builds a <see cref="T:Parser.Tokens.ChkToken"/> from a <see langword="string"/>.<br/>

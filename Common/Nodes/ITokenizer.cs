@@ -3,10 +3,11 @@
 #pragma warning disable IDE1006 // Naming Styles
 
 namespace Common.Nodes;
-public interface ITokenizer<TToken>
+public interface ITokenizer<out TToken> where TToken : IToken
 {
-  Collection<TToken> Tokens { get; }
-  Collection<TToken> Tokenize (string input);
-  TokenRuleSet? Rules { get; init; }
-  int Count => Tokens.Count;
+  IEnumerable<TToken> Tokens { get; }
+  IEnumerable<TToken> Tokenize (string input);
+  /// <summary>The rules that this tokenizer requires to process data.</summary>
+  dynamic? Rules { get; init; }
+  int Count => Tokens.ICount;
 }

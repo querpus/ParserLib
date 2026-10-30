@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Windows.Controls;
 
 namespace WPFParserVisualizer;
 
@@ -34,9 +35,6 @@ public partial class MainWindow : Window
 
   public MainWindow () => InitializeComponent();
 
-  public void LoadXMLCaptureFormat () =>
-    Format = new(StandardRuleSets.XMLRuleSet, new CaptureTokenizer { Rules = StandardRuleSets.XMLTokenRuleSet });
-
   private void DataGrid_SelectionChanged (object sender, System.Windows.Controls.SelectionChangedEventArgs e)
   {
 
@@ -63,6 +61,7 @@ public partial class MainWindow : Window
     {
       var tokens = Format.Tokenizer.Tokenize(InputText).Cast<IToken>();
       var proc = new TokenProcessor(tokens, Format.NodeRuleSet);
+      (ProgramStatus.Items[0] as Label)?.Content = "Processing Tokens...";
       proc.Process();
     }
   }

@@ -1,5 +1,7 @@
 using System.Xml.Linq;
 
+using Common.Nodes;
+
 using Parser.Condition;
 using Parser.Ops.Text;
 
@@ -89,6 +91,7 @@ public static class OperationFactory
       string endian = GetS("endian", element);
       string encoding = GetS("encoding", element);
       string pattern = GetS("pattern", element);
+      string tokenizer = GetS("tokenizer", element);
 
       bool strict = GetB("strict", element);
       bool binary = GetB("binary", element);
@@ -175,7 +178,8 @@ public static class OperationFactory
         "Tokenize" => new TokenizeOperation
         {
           InputKey = input_var,
-          OutputKey = output_var
+          OutputKey = output_var,
+          Tokenizer = tokenizer
         },
         "TokenAssemble" => new TokenAssembleOperation
         {
