@@ -16,13 +16,13 @@
               <xs:element name="TokenRules" type="RuleList" minOccurs="0" maxOccurs="1"/>
               <xs:element name="GroupTokenRules" type="RuleList" minOccurs="0" maxOccurs="1"/>
               <xs:element name="TokenLookups" type="TokenLookupsType" minOccurs="0" maxOccurs="1"/>
-              <xs:element name="EntityInfo">
+              <!--<xs:element name="EntityInfo">
                 <xs:complexType>
                   <xs:sequence>
                     <xs:element name="EntityDef" maxOccurs="unbounded" type="EntityDefType"/>
                   </xs:sequence>
                 </xs:complexType>
-              </xs:element>
+              </xs:element>-->
               <xs:element name="Instructions" minOccurs="0" type="InnerInstructionSet" maxOccurs="1"/>
               <xs:element name="FileInferences" minOccurs="0" type="FileInferencesType" maxOccurs="1"/>
             </xs:all>

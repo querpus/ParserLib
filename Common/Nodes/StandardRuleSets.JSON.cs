@@ -34,7 +34,7 @@ public static partial class StandardRuleSets
       ("ArrayTypeChange", RxErrorTypeChangeInArray),
       ("ArrayTypeChangeNoComma", RxErrorTypeChangeInArrayAndNoComma),
     ];
-    [SS("regex")] public static readonly string RxError = Assembly.GenerateRegexForErrorChecking(ErrorList);
+    [SS("regex")] public static readonly string RxError = GenerateRegexForErrorChecking(ErrorList);
 
     public static readonly NodeRule ObjectOpen = new()
     {
@@ -89,4 +89,40 @@ public static partial class StandardRuleSets
       }
     };
   }
+  public static TokenRuleSet JSONTokenRuleSet { get; } = new()
+  {
+    RegexOptions = ROCI | ROEC | ROIPW | ROML,
+    TokenSequences =
+  [
+    JSON.RxKey,
+      JSON.RxString,
+      JSON.RxNumber,
+      JSON.RxBool,
+      JSON.RxNull,
+      JSON.RxComment,
+      JSON.RxObject,
+      JSON.RxArray,
+      JSON.RxWhitespace,
+      JSON.RxOps,
+      // Common error finder
+      JSON.RxError,
+    ]
+  };
+  public static NodeRuleSet JSONRuleSet { get; } = new()
+  {
+    InitialSetup = () => new() { SingleRoot = true },
+    Rules = {
+      JSON.ObjectOpen,
+      JSON.ObjectClose,
+      JSON.PropertyName,
+      JSON.StringValue,
+      NodeRule.KeepAndIgnore("op", true),
+      NodeRule.KeepAndIgnore("ws"),
+      NodeRule.KeepAndIgnore("comment"),
+      NodeRule.Discard("qt"),
+      NodeRule.Discard("str_value"),
+      // Also look for errors
+      NodeRule.SyntaxError("error")
+    },
+  };
 }

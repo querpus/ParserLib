@@ -23,7 +23,12 @@ public class TokenizeOperation : Operation
       }
       else if (Tokenizer.Like(["capture", "cap"]))
       {
-        CaptureTokenizer ctoken = new() { Rules = Spec };
+        CaptureTokenizer ctokenizer = new() { Rules = Spec };
+        Data[OutputKey] = ctokenizer.Tokenize(input);
+      }
+      else
+      {
+        throw Err.ThrowBadDef("Invalid value for tokenizer type.");
       }
       Status = OpStatus.Pass;
     }

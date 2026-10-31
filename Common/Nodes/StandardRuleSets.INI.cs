@@ -35,5 +35,29 @@ public static partial class StandardRuleSets
         Debug.Log(MsgClass.GreenInfo, $"Property Defined: {node.Key} / {node.Value}", "StandardRuleSets");
       }
     };
+    [SS("regex")] private const string RxDQuotedString = @""" ([^\n\r\v\\""]|\\.)* """;
+    [SS("regex")] private const string RxSQuotedString = @"' ([^\n\r\v\\]|\\.)* '";
+    [SS("regex")] private const string RxWSNoNewLine = @"[^\S\n\v\r]*";
+    [SS("regex")] public const string RxProperty = $@"(?'Key'[^;=\s][^;=\n\r\v]*(?<!\s)|{RxDQuotedString}|{RxSQuotedString}) {RxWSNoNewLine} (?'Eq'=) {RxWSNoNewLine} (?'Value'[^;\n]* (?<!\s) )";
+    [SS("regex")] public const string RxComment = "(?'Comment';.*$)";
+    [SS("regex")] public const string RxSection = @"(?'Ao'\[) (?'SectionName'.* ) (?'Ac'\])";
   }
+  public static NodeRuleSet INIRuleSet { get; } = new()
+  {
+    InitialSetup = () => new() { SingleRoot = false },
+    Rules = {
+      INI.Section,
+      INI.Property
+    },
+  };
+  public static TokenRuleSet INITokenRuleSet { get; } = new()
+  {
+    RegexOptions = ROCI | ROEC | ROIPW | ROML | ROIC,
+    TokenSequences =
+    [
+      INI.RxComment,
+      INI.RxProperty,
+      INI.RxSection,
+    ]
+  };
 }

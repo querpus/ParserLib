@@ -41,6 +41,6 @@ public static class Definition
       new(ITT.SectionWProps, "n:Section pa:Property")],
 
     DefaultRuleSet = IgnoreCase,
-    TokenRuleSet = StandardRuleSets.INITokenRuleSet;
+    TokenRuleSet = StandardRuleSets.INITokenRuleSet,
   };
 }

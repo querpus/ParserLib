@@ -185,4 +185,40 @@ public static partial class StandardRuleSets
     [SS("regex")] public const string RxComment = @"(?'comment'<!-- ((?!--)[\s\S])* -->)";
     #endregion Regex Sequences
   }
+  public static TokenRuleSet XMLTokenRuleSet { get; } = new()
+  {
+    RegexOptions = ROCI | ROEC | ROIPW | ROML,
+    TokenSequences =
+  [
+    XML.RxComment,
+      XML.RxElementHeader,
+      XML.RxElementSingle,
+      XML.RxElementClose,
+      XML.RxElementOpen,
+      XML.RxContent
+  ]
+  };
+  public static NodeRuleSet XMLRuleSet { get; } = new()
+  {
+    InitialSetup = () => new() { SingleRoot = true },
+    Rules = {
+      XML.ElementOpen,
+      XML.ElementOpenEnd,
+      XML.ElementClose,
+      XML.ElementCloseEnd,
+      XML.ElementSingle,
+      XML.ElementSingleEnd,
+      XML.ElementHeader,
+      XML.ElementHeaderEnd,
+      XML.TagName,
+      XML.AttributeName,
+      XML.AttributeValue,
+      XML.Content,
+      NodeRule.KeepAndIgnore("comment"),
+      NodeRule.KeepAndIgnore("ws"),
+      NodeRule.KeepAndIgnore("a_qt", true),
+      NodeRule.KeepAndIgnore("a_eq", true),
+      NodeRule.KeepAndIgnore("a_end", true),
+    },
+  };
 }

@@ -11,7 +11,7 @@
               <element name="CaseInsensitive" type="boolean" minOccurs="0" maxOccurs="1"/>
               <element name="RegexDotMatchesNewline" type="boolean" minOccurs="0" maxOccurs="1"/>
               <element name="RegexMultiline" minOccurs="0" maxOccurs="1" type="boolean"/>
-              <element name="EntityInfo">
+              <!--<element name="EntityInfo">
                 <complexType>
                   <sequence>
                     <element name="Group" maxOccurs="unbounded">
@@ -39,7 +39,7 @@
                     </element>
                   </sequence>
                 </complexType>
-              </element>
+              </element>-->
               <element name="Instructions" minOccurs="0" type="et:InnerInstructionSet" maxOccurs="1"/>
               <element name="FileInferences" minOccurs="0" type="et:FileInferencesType" maxOccurs="1"/>
             </all>

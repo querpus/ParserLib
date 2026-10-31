@@ -199,4 +199,51 @@ public static partial class StandardRuleSets
     [SS("regex")] public const string RxBetweenMarkers = "(?'between'<ETX>(?>((?!<STX>).)*)<STX>)";
     [SS("regex")] public const string RxAfterEnd = "(?'after'<ETX>(?>((?!<STX>).)*))";
   }
+  public static TokenRuleSet IPLTokenRuleSet { get; } = new()
+  {
+    RegexOptions = ROIPW | ROML | ROEC,
+    TokenSequences = [
+      IPL.RxAdvancedMode,
+      IPL.RxEmulationMode,
+      IPL.RxPrintMode,
+
+      IPL.RxPrintCommand,
+      IPL.RxClearDataCommand,
+
+      IPL.RxEscapedCommand_0,
+
+      IPL.RxFormat,
+      IPL.RxPage,
+
+      IPL.RxLineCommand,
+
+      IPL.RxTextDataProp,
+      IPL.RxPropCommand_1,
+      IPL.RxPropCommand_2,
+      IPL.RxPropCommand_7,
+
+      IPL.RxBeforeStart,
+      IPL.RxBetweenMarkers,
+      IPL.RxAfterEnd,
+    ]
+  };
+  public static NodeRuleSet IPLRuleSet { get; } = new()
+  {
+    InitialSetup = () => new() { SingleRoot = false },
+    Rules = [
+      IPL.LineCommand,
+      IPL.BasicCommand,
+      IPL.LineIndex,
+      IPL.CmdEnd,
+      IPL.EscapeCommand,
+      IPL.PropertyCommand,
+      IPL.Comma,
+      IPL.FormatCommand,
+      IPL.PrintCommand,
+      NodeRule.KeepAndIgnore("before"),
+      NodeRule.KeepAndIgnore("after"),
+      NodeRule.KeepAndIgnore("between"),
+      NodeRule.ReplaceEmpty("end", appendToSuffix: true, if_empty_insert_text: ";"),
+    ]
+  };
 }

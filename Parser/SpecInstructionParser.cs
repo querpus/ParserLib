@@ -66,9 +66,9 @@ public static class SpecInstructionParser
 
       XElement? tokenLookups = specxml.Element(NS + "TokenLookups");
       XElement? tokenRules = specxml.Element(NS + "TokenRules");
+      XElement? tokenRuleSet = specxml.Element(NS + "TokenRuleSet");
       string? name = specxml.Element(NS + "Name")!.Value;
-      string? textfile = specxml.Element(NS + "TextFile")?.Value;
-      bool is_textfile = BooleanParse(textfile, false);
+      bool is_textfile = BooleanParse(specxml.Element(NS + "TextFile")?.Value, false);
       IEnumerable<XElement>? instructionElements = specxml.Element(NS + "Instructions")?.Elements();
 
       Collection<IOperation> ops = [];

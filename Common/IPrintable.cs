@@ -1,7 +1,5 @@
 //#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-using System.Runtime.CompilerServices;
-
 namespace Common;
 
 /// <summary>Defines a contract for objects that can output their content in a printable format with a specified indentation
