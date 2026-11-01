@@ -10,7 +10,12 @@ public static class CharExtensions
   /// <param name="c">The character to check.</param>
   extension(char c)
   {
-    public char Display => c.In(NUL, ' ') ? (char) (9216 + c) : c;
+    public char Display => c switch
+    {
+      < SP => (char) ('␀' + c),
+      DEL => '␡',
+      _ => c
+    };
     public bool IsAlphanumeric () =>
       c.IsLC || c.IsUC || c.In('0'..'9');
     /// <summary>Checks if this character is lowercase a thru z.</summary>

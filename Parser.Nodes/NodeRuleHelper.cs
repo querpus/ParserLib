@@ -25,7 +25,7 @@ public static class NodeRuleHelper
       "Header" => NT.Header,
       "TokenGroup" => NT.TokenGroup,
       "TokenValue" => NT.TokenValue,
-      _ => NT.Null,
+      _ => NT.None,
     };
   }
   public static void ErrorIfNull ([NotNull] object? current)

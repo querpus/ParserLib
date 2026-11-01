@@ -3,7 +3,6 @@
 using System.Xml.Linq;
 
 using Parser.Inference;
-using Parser.Nodes;
 
 namespace Parser;
 
@@ -42,10 +41,11 @@ public static class SpecInstructionParser
       {
         Name = GetRequiredString(specElement, "Name"),
         IsTextFile = GetBool(specElement, "TextFile"),
-        RxOpt = GetRegexOptions(specElement),
+        RxOpt = ParseRegex(specElement.Element(Ns + "RegexOptions")?.Value ?? ""),
+        DefaultRuleSet = ParseRuleTypes(specElement.Element(Ns + "DefaultRuleSet")?.Value ?? ""),
         TokenRules = ParseRules(specElement.Element(Ns + "TokenRules")),
         GroupTokenRules = ParseRules(specElement.Element(Ns + "GroupTokenRules")),
-        TokenCompatLookup = ParseTokenLookups(specElement.Element(Ns + "TokenLookups")),
+        //TokenCompatLookup = ParseTokenLookups(specElement.Element(Ns + "TokenLookups")),
         FileInferences = [InferenceNodeFactory.Produce(specElement.Element(Ns + "FileInferences"))],
         Operations = [.. specElement.Element(Ns + "Instructions")?.Elements()?.Select(OperationFactory.Produce).Where(c => c is not null).Cast<IOperation>() ?? []]
       };
@@ -94,8 +94,24 @@ public static class SpecInstructionParser
     return result;
   }
 
+  private static RegexOptions ParseRegexOption (string opt) => opt switch
+  {
+    "IgnoreCase" => RegexOptions.IgnoreCase,
+    "Multiline" => RegexOptions.Multiline,
+    "Singleline" => RegexOptions.Singleline,
+    "IgnorePatternWhitespace" => RegexOptions.IgnorePatternWhitespace,
+    "ExplicitCapture" => RegexOptions.ExplicitCapture,
+    _ => throw Err.ThrowBadDef($"Invalid regex option {opt}")
+  };
+
+  private static RegexOptions ParseRegex (string value) => value.
+    Split(' ', SSORT).
+    Aggregate(
+      RegexOptions.None,
+      (current, token) => current | ParseRegexOption(token));
+
   private static RT ParseRuleTypes (string value) => value.
-    Split(' ').
+    Split(' ', SSORT).
     Aggregate(
       RT.None,
       (current, token) => current | (Enum.TryParse(token, true, out RT result) ? result : throw Err.ThrowBadDef($"Invalid value {value}")));

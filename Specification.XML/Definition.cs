@@ -58,7 +58,7 @@ public static class Definition
       new(Competitive, "Comment", "<!--((?!--).)*-->"),
       new (TokenMatch, "Content", "(?<= >)[^<]+(?=<)"),
       new (TokenComment, "None", @"(?<=\>)\s+(?=\<)"),
-      .. TokenRule.MakeSingleCharRules("<>/?;&:=!-", TokenExact, new Collection<string>() { "Ao", "Ac", "Sl", "Qm", "Sc", "An", "Co", "Eq", "Em", "Hy" }),
+      .. TokenRule.MakeSingleCharRules("<>/?;&:=!-", TokenExact, "Ao", "Ac", "Sl", "Qm", "Sc", "An", "Co", "Eq", "Em", "Hy" ),
       new (TokenMatch, "NamespaceAttr", @"\bxmlns\b"),
       new (TokenMatch, "AttrKey", @"\b\w+\b(?=\s*\=)"),
       new (TokenMatch, "Namespace", @"(?<= <\/?\s* )\b\w+\b(?=\:)"),

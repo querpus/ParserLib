@@ -2,7 +2,7 @@
 #pragma warning disable format // Formatting
 
 namespace Parser.Nodes;
-public interface IRule<IToken> : IEquatable<IToken>
+public interface IRule<TToken> : IEquatable<TToken>
 {
-  bool IsSatisfiedBy (IToken token);
+  bool IsSatisfiedBy (TToken token);
 }

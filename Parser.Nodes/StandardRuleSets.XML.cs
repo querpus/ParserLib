@@ -29,8 +29,8 @@ public static partial class StandardRuleSets
       Execute = static (context, token) =>
       {
         context.WarnIfNotNull(NT.Current);
-        _ = context.PopTo<XMLElementNode>(NT.Current);
-        context.AppendTokenTo(NT.Current, token);
+        var node = context.PopTo<XMLElementNode>(NT.Current);
+        node.AppendToSuffix(token);
         DebugMessage($"Beginning Close Validation, Popping Current. Stack count:{context.NodeStack.Count}");
       }
     };
@@ -92,7 +92,7 @@ public static partial class StandardRuleSets
         ErrorIfNull(context.Current);
         ErrorIfNull(token.Value);
 
-        if (context.Current.Prefix?.Contains(token.Value) ?? false)
+        if (context.Current.Prefix?.Contains(token.Value, SCO) ?? false)
         {
           context.Current.AppendToSuffix(token.Value);
         }
@@ -150,11 +150,11 @@ public static partial class StandardRuleSets
         ErrorIfNull(token.Value);
         if (token.Value.IsWhitespace)
         {
-          Debug.Log(MsgClass.Warning, "Ignoring whitespace.", "StandardRuleSets");
+          Log(MsgClass.Warning, "Ignoring whitespace.", "StandardRuleSets");
         }
         else if (context.IsRoot)
         {
-          Debug.Log(MsgClass.Warning, "Ignoring out of root content.", "StandardRuleSets");
+          Log(MsgClass.Warning, "Ignoring out of root content.", "StandardRuleSets");
         }
         else
         {

@@ -41,9 +41,9 @@ public sealed class XMLElementNode : Node
   }
 
   /// <summary>Gets the local element name.</summary>
-  public string? LocalName => Name?.Contains(':') == true ? Name[(Name.IndexOf(':') + 1)..] : Name;
+  public string? LocalName => Name?.Contains(':', SCO) == true ? Name[(Name.IndexOf(':', SCO) + 1)..] : Name;
   /// <summary>Gets the namespace, or <see langword="null"/> if one is not specified on this element.</summary>
   /// <remarks>This does not account for globally set or namespaces set by this element's parents.</remarks>
-  public string? Namespace => Name?.Contains(':') == true ? Name[..Name.IndexOf(':')] : null;
+  public string? Namespace => Name?.Contains(':', SCO) == true ? Name[..Name.IndexOf(':', SCO)] : null;
   public Dictionary<string, ISerializable> Attributes => Properties;
 }

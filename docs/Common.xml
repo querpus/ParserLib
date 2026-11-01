@@ -85,6 +85,9 @@
         <member name="F:Common.Chars.QT">
             <summary>Double quote symbol.</summary>
         </member>
+        <member name="F:Common.Chars.SP">
+            <summary>Space</summary>
+        </member>
         <member name="F:Common.Chars.CRLF">
             <summary>Standard line ending.</summary>
         </member>

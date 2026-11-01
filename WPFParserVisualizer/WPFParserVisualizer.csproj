@@ -13,6 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Parser.Nodes\Parser.Nodes.csproj" />
     <ProjectReference Include="..\Parser\Parser.csproj" />
     <ProjectReference Include="..\Specification.INI\Specification.INI.csproj" />
     <ProjectReference Include="..\Specification.IPL\Specification.IPL.csproj" />

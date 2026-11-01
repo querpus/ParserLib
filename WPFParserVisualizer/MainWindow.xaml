@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFParserVisualizer"
-        xmlns:Nodes="clr-namespace:Common.Nodes;assembly=Common" x:Class="WPFParserVisualizer.MainWindow"
+        xmlns:Nodes="clr-namespace:Parser.Nodes;assembly=Parser.Nodes" x:Class="WPFParserVisualizer.MainWindow"
         mc:Ignorable="d"
         Title="Token &amp; Node Review"
         Height="400"

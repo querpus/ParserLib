@@ -31,7 +31,7 @@ public class Spec : IHasTokenRuleSet, IHasNodeRuleSet
   public StringComparison SC { get; init; } = SCO;
 
   /// <summary>Define the names of equilivent groups of tokens.</summary>
-  public Dictionary<dynamic, Collection<dynamic>> TokenCompatLookup { get; init; } = [];
+  public Dictionary<string, Collection<string>> TokenCompatLookup { get; init; } = [];
   /// <summary>The default rule that is added to every rule definition.</summary>
   /// <remarks>Useful for adding ignore case to the entire defintion.</remarks>
   public RT DefaultRuleSet { get; init; } = RT.None;

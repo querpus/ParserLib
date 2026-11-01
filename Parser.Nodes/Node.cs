@@ -1,8 +1,6 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-
-
 namespace Parser.Nodes;
 public abstract class Node : INode
 {
@@ -20,7 +18,7 @@ public abstract class Node : INode
   {
     string result = Prefix ?? SE;
     bool first = true;
-    foreach (var child in Children)
+    foreach (ISerializable child in Children)
     {
       if (first)
       {
@@ -76,7 +74,9 @@ public abstract class Node : INode
   }
 }
 
+#pragma warning disable CA1815 // Override equals and operator equals on value types
 public struct DataReference : ISerializable
+#pragma warning restore CA1815 // Override equals and operator equals on value types
 {
   public INode LinkedNode { get; set; }
   public string Key { get; set; }

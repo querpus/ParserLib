@@ -15,7 +15,6 @@ global using static Common.Names;
 global using static Parser.DefinitionStaticFunctions;
 
 global using Debug = Common.Debug;
-global using JTT = Specification.JSON.JSONTokenType;
 
 using System.Reflection;
 using System.Resources;

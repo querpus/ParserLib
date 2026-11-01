@@ -29,7 +29,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
 
     dynamic? initial = stripped switch
     {
-      NT.Null => null,
+      NT.None => null,
       NT.Current => Current,
       NT.Parent => Parent,
       NT.Header => Header,
@@ -44,7 +44,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
 
     return extracted switch
     {
-      NT.Null => initial,
+      NT.None => initial,
       NT.Prefix => initial?.Prefix,
       NT.Suffix => initial?.Suffix,
       _ => throw new InvalidOperationException("Cannot have prefix and suffix flags both on a 'get' operation."),
@@ -62,7 +62,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       RootNodes.Clear();
       return value;
     }
-    if (ExtractAllFields(target, out NT fields) is not NT.Null && fields > NT.Null)
+    if (ExtractAllFields(target, out NT fields) is not NT.None && fields > NT.None)
     {
       throw new InvalidOperationException($"Cannot set the field {fields} in this way.");
     }
@@ -74,7 +74,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
     dynamic? c = target switch
     {
-      NT.Null => value,
+      NT.None => value,
       NT.Current => Current = value,
       NT.Parent or NT.AnyRootOrParent => throw new InvalidOperationException("Cannot assign to parent. Must push. Parent is just top of node stack."),
       NT.Header => Header = value,
@@ -124,7 +124,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     AddNodeTo(node, target);
     NodeStack.Push(node);
   }
-  public void ReplaceParent (INode node, NT target_for_pop = NT.Null, NT target_for_push = NT.AnyRootOrParent)
+  public void ReplaceParent (INode node, NT target_for_pop = NT.None, NT target_for_push = NT.AnyRootOrParent)
   {
     if (HasParent)
     {
@@ -144,7 +144,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   /// <summary>Pops a node from the node stack, and assigns it to the target field.</summary>
   /// <param name="target">The field to assign the popped node to.</param>
   /// <returns>The node that was taken off the top of the stack.</returns>
-  /// <remarks>If you do not need the node, you can use <see cref="NT.Null"/> to prevent any assignment.</remarks>
+  /// <remarks>If you do not need the node, you can use <see cref="NT.None"/> to prevent any assignment.</remarks>
   public INode PopTo (NT target)
   {
     if (NodeStack.IsEmpty)
@@ -240,7 +240,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     NT stripped = ExtractFields(target, out NT fields);
     dynamic? dyn_node = GetTargetValue(stripped);
 
-    if (dyn_node is INode node && fields != NT.Null && token.Value is not null)
+    if (dyn_node is INode node && fields != NT.None && token.Value is not null)
     {
       if (fields is NT.Prefix)
       {
@@ -284,7 +284,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   }
   public void ClearNode (NT target)
   {
-    if (target is NT.Null)
+    if (target is NT.None)
     {
       Debug.Log(MsgClass.Warning, "Clearing the null node target. This is not ever neccessary.", this);
       return;
@@ -305,8 +305,8 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
 
   public static void DoXMLOperation (NodeContext context, CaptureToken token, string action, string? assignTo, string? valueFrom, string? className)
   {
-    NT target = assignTo?.ToNodeTarget() ?? NT.Null;
-    NT source = valueFrom?.ToNodeTarget() ?? NT.Null;
+    NT target = assignTo?.ToNodeTarget() ?? NT.None;
+    NT source = valueFrom?.ToNodeTarget() ?? NT.None;
 
     switch (action)
     {
@@ -314,16 +314,16 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
         INode node = context.GenerateNode(target, className);
         node.AppendToPrefix(token.Value);
         break;
-      case "AssignNodeTo" when target is not NT.Null && source is not NT.Null:
+      case "AssignNodeTo" when target is not NT.None && source is not NT.None:
         context.AssignNodeTo(context.GetTargetValue(source), target);
         break;
-      case "AddToNodeAt" when target is not NT.Null && source is not NT.Null:
+      case "AddToNodeAt" when target is not NT.None && source is not NT.None:
         context.AddNodeTo(context.GetTargetValue(source), target);
         break;
-      case "PushNodeToStack" when source is not NT.Null:
+      case "PushNodeToStack" when source is not NT.None:
         context.AddNodeTo(context.GetTargetValue(source), target);
         break;
-      case "PopNodeTo" when target is not NT.Null:
+      case "PopNodeTo" when target is not NT.None:
         _ = context.PopTo(target);
         break;
       default:

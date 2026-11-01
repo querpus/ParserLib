@@ -7,7 +7,7 @@
         <xs:element name="Prefabs" minOccurs="0" maxOccurs="1" type="PrefabSection"/>
         <xs:element name="Spec" minOccurs="1" maxOccurs="unbounded">
           <xs:complexType>
-            <xs:all maxOccurs="1">
+            <xs:all maxOccurs="1" minOccurs="1">
               <xs:element name="Name" type="NonEmptyTokenType" minOccurs="1" maxOccurs="1"/>
               <xs:element name="TextFile" type="xs:boolean" minOccurs="1" maxOccurs="1" default="false"/>
               <xs:element name="CaseInsensitive" type="xs:boolean" minOccurs="0" maxOccurs="1" default="false"/>
@@ -16,6 +16,7 @@
               <xs:element name="TokenRules" type="RuleList" minOccurs="0" maxOccurs="1"/>
               <xs:element name="GroupTokenRules" type="RuleList" minOccurs="0" maxOccurs="1"/>
               <xs:element name="TokenLookups" type="TokenLookupsType" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="DefaultRuleSet" type="RuleTypeList" minOccurs="0" maxOccurs="1"/>
               <!--<xs:element name="EntityInfo">
                 <xs:complexType>
                   <xs:sequence>

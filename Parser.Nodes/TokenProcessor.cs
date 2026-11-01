@@ -75,7 +75,7 @@ public class TokenProcessor : INodeProcessor
   {
     _tokens = tokens;
     Input = tokens;
-    Tokens = [.. tokens];
+    Tokens = [.. tokens.Order()];
     RuleSet = ruleset;
   }
 

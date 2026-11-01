@@ -9,7 +9,7 @@ public enum NodeTarget
 {
   /// <summary>No target, do not store in a field.</summary>
   /// <remarks>This will throw an exception if you specify this as a source node.</remarks>
-  Null = 0,
+  None = 0,
   /// <summary>This node's parent. This is the top of the node stack.</summary>
   /// <remarks>This field cannot be assigned. Use Push and Pop to travel up or down the hierarchy.</remarks>
   Parent = 1,

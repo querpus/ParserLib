@@ -146,6 +146,9 @@
         <member name="P:Parser.DefaultSpec.TextByLines">
             <summary>Splits a <see langword="string"/> on newlines into a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see langword="string"/> objects.</summary>
         </member>
+        <member name="P:Parser.DefaultSpec.Unknown">
+            <summary>Splits a <see langword="string"/> on newlines into a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see langword="string"/> objects.</summary>
+        </member>
         <member name="T:Parser.DefinitionStaticFunctions">
             <summary>This is a static class for <see cref="T:Parser.Spec"/> definitions.</summary>
         </member>
@@ -636,7 +639,7 @@
             <br/>
             </remarks>
         </member>
-        <member name="T:Parser.Ops.Text.TokenizeOperation`1">
+        <member name="T:Parser.Ops.Text.TokenizeOperation">
             <summary>Tokenizes a string or list of strings.</summary>
         </member>
         <member name="P:Parser.Ops.WhileOperation.Condition">
@@ -891,14 +894,14 @@
             <param name="typeToAssign">The type to assign to the assembled token.</param>
             <param name="ruleStringData">The assembly definition.</param>
         </member>
-        <member name="M:Parser.Tokens.TokenRule.MakeSingleCharRules(System.String,Parser.Tokens.TokenRuleType,System.Object)">
+        <member name="M:Parser.Tokens.TokenRule.MakeSingleCharRules(System.String,Parser.Tokens.TokenRuleType,System.Collections.ObjectModel.Collection{System.String})">
             <summary>Makes a series of single character TokenExact styled rules.</summary>
             <param name="chars">The characters to use.</param>
             <param name="type">The rule type. Should be TokenExact or SplitExact, plus any necessary modifiers.</param>
             <param name="typeToAssign">The type to assign. May be a single object applied to all, or a list of objects the same length as <paramref name="chars"/>.</param>
             <returns>An array of TokenRules.</returns>
         </member>
-        <member name="M:Parser.Tokens.TokenRule.MakeWordMatchRules(System.Boolean,System.Collections.ObjectModel.Collection{System.ValueTuple{System.String,System.Object}})">
+        <member name="M:Parser.Tokens.TokenRule.MakeWordMatchRules(System.Boolean,System.Collections.ObjectModel.Collection{System.ValueTuple{System.String,System.String}})">
             <summary>Creates an array of token rules representing keywords.</summary>
             <returns>A list of TokenMatch rules that properly exempt ranges.</returns>
         </member>

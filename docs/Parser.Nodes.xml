@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Parser.Nodes</name>
+    </assembly>
+    <members>
+        <member name="M:Parser.Nodes.CaptureToken.ToString">
+            <summary>Displays a brief summary of this token's data.</summary>
+            <returns>A string representation of this token's data.</returns>
+            <remarks>Format: {Group}[{CaptureIndex}] = {Value}</remarks>
+        </member>
+        <member name="T:Parser.Nodes.CaptureTokenizer">
+            <summary>Creates a token for every capture with the group name as the type within every match. Multiple captures are additional tokens.</summary>
+        </member>
+        <member name="T:Parser.Nodes.GroupTokenizer">
+            <summary>Creates a token for every group in each match. Multiple captures are stored as an array of string data.</summary>
+        </member>
+        <member name="T:Parser.Nodes.INode">
+            <summary>An interface for storing nodes.</summary>
+        </member>
+        <member name="P:Parser.Nodes.INode.Prefix">
+            <summary>Gets the origin of the parsed entity.</summary>
+        </member>
+        <member name="M:Parser.Nodes.INode.AddChild(Parser.Nodes.INode)">
+            <summary>Adds a child to the children list.</summary>
+            <param name="child">The child to add.</param>
+        </member>
+        <member name="P:Parser.Nodes.IPLCommandNode.CommandLetter">
+            <summary>Gets the content of this node.</summary>
+        </member>
+        <member name="P:Parser.Nodes.IPLCommandNode.Format">
+            <summary>The format that this command was created in.</summary>
+            <remarks>This is pulled from the "Format" field in the <see cref="T:Parser.Nodes.NodeContext"/>.</remarks>
+        </member>
+        <member name="P:Parser.Nodes.IToken.Value">
+            <summary>The value of this token. This will be <see langword="null"/> if the token is composed of multiple tokens.</summary>
+        </member>
+        <member name="P:Parser.Nodes.IToken.Name">
+            <summary>The name or type of this token.</summary>
+        </member>
+        <member name="P:Parser.Nodes.ITokenizer`1.Rules">
+            <summary>The rules that this tokenizer requires to process data.</summary>
+        </member>
+        <member name="P:Parser.Nodes.JSONContentNode.Content">
+            <summary>This contains the quoted string, unquoted boolean, null, undefined, or unquoted number.</summary>
+        </member>
+        <member name="P:Parser.Nodes.MatchToken.Value">
+            <summary>The full match text.</summary>
+        </member>
+        <member name="P:Parser.Nodes.MatchToken.Name">
+            <summary>The name or type of this token.</summary>
+        </member>
+        <member name="P:Parser.Nodes.MatchToken.MatchIndex">
+            <summary>The match index within the <see cref="T:System.Text.RegularExpressions.MatchCollection"/>.</summary>
+        </member>
+        <member name="P:Parser.Nodes.MatchToken.GroupData">
+            <summary>The data from the match groups.</summary>
+        </member>
+        <member name="M:Parser.Nodes.MatchToken.ToString">
+            <summary>Displays a brief summary of this token's data.</summary>
+            <returns>A string representation of this token's data.</returns>
+        </member>
+        <member name="T:Parser.Nodes.MatchTokenizer">
+            <summary>Creates a token for every match with the groups as properties within every match. Multiple captures are stored as a Collection under the group name.</summary>
+        </member>
+        <member name="P:Parser.Nodes.NodeContext.SingleRoot">
+            <summary>Set this to <see langword="true"/> if there must be a single node that everything is within.
+            Set this to <see langword="false"/> if there can be multiple top-level objects.</summary>
+        </member>
+        <member name="P:Parser.Nodes.NodeContext.PropKey">
+            <summary>The name of the current property.</summary>
+        </member>
+        <member name="P:Parser.Nodes.NodeContext.NodeStack">
+            <summary>Gets the stack of nodes used to track the current node hierarchy during traversal or processing.</summary>
+            <remarks>Init-only and initialized to an empty stack.</remarks>
+        </member>
+        <member name="P:Parser.Nodes.NodeContext.Current">
+            <summary>The currently selected node. (Child Node)</summary>
+        </member>
+        <member name="P:Parser.Nodes.NodeContext.RootNodes">
+            <summary>The root nodes when <see cref="P:Parser.Nodes.NodeContext.SingleRoot"/> is <see langword="false"/>.</summary>
+        </member>
+        <member name="P:Parser.Nodes.NodeContext.Root">
+            <summary>The root node.</summary>
+        </member>
+        <member name="P:Parser.Nodes.NodeContext.Header">
+            <summary>Document Header.</summary>
+        </member>
+        <member name="P:Parser.Nodes.NodeContext.Data">
+            <summary>Dictionary for storing additional data that must be carried throughout the processing of the nodes.</summary>
+        </member>
+        <member name="M:Parser.Nodes.NodeContext.PushAndAddTo(Parser.Nodes.INode,Parser.Nodes.NodeTarget)">
+            <summary>Pushes a node to the top of the node stack, and adds it as a child of the previous node on the stack.</summary>
+            <param name="node">The child node to push.</param>
+            <param name="target">The node to add this node to as a child.</param>
+            <remarks>This assigns the root node if the stack is empty.</remarks>
+        </member>
+        <member name="M:Parser.Nodes.NodeContext.PopTo(Parser.Nodes.NodeTarget)">
+            <summary>Pops a node from the node stack, and assigns it to the target field.</summary>
+            <param name="target">The field to assign the popped node to.</param>
+            <returns>The node that was taken off the top of the stack.</returns>
+            <remarks>If you do not need the node, you can use <see cref="F:Parser.Nodes.NodeTarget.None"/> to prevent any assignment.</remarks>
+        </member>
+        <member name="M:Parser.Nodes.NodeContext.AddNodeTo(Parser.Nodes.INode,Parser.Nodes.NodeTarget)">
+            <summary>Adds the <paramref name="node"/> to the node at <paramref name="target"/> as a child</summary>
+            <param name="node">The child node.</param>
+            <param name="target">The target of the parent node.</param>
+            <remarks>Additional targets will be have the node added to, except for <see cref="F:Parser.Nodes.NodeTarget.AnyRootOrParent"/>.
+            This combination flag attempts to add it to the parent object,
+            if that fails then add it to the root object, or add it to the <see cref="F:Parser.Nodes.NodeTarget.RootNodes"/> list.</remarks>
+            <exception cref="T:System.InvalidOperationException">No node was added to any target.</exception>
+        </member>
+        <member name="M:Parser.Nodes.NodeContext.AppendTokenTo(Parser.Nodes.NodeTarget,Parser.Nodes.IToken)">
+            <summary>Appends the currrent token to the prefix field or the suffix field on the target node.</summary>
+            <param name="target">The target node and field.</param>
+            <param name="token">The token to append.</param>
+            <exception cref="T:System.InvalidOperationException">Both Suffix and Prefix were included in <paramref name="target"/> or an invalid <paramref name="target"/> was specified.</exception>
+        </member>
+        <member name="T:Parser.Nodes.NodeTarget">
+            <summary>The node to be designated a target or referred to as a source.</summary>
+            <remarks>You can use the 'OR' operator to specify a field within a node, or to make multiple assignments.</remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.None">
+            <summary>No target, do not store in a field.</summary>
+            <remarks>This will throw an exception if you specify this as a source node.</remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.Parent">
+            <summary>This node's parent. This is the top of the node stack.</summary>
+            <remarks>This field cannot be assigned. Use Push and Pop to travel up or down the hierarchy.</remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.Current">
+            <summary>The currently selected node.</summary>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.Header">
+            <summary>The document header field.</summary>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.Root">
+            <summary>The root document field.</summary>
+            <remarks>Use this if the document requires a single root node.</remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.RootNodes">
+            <summary>The root document collection.</summary>
+            <remarks>Use this if the document doesn't require a single root node.</remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.AnyRootOrParent">
+            <summary>Write to parent, if the parent doesn't exist, write to root or add to rootnodes.</summary>
+            <remarks>This has special logic when adding a node, it only assigns once, not to all of the target locations.</remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.PropKey">
+            <summary>The property name field.</summary>
+            <remarks>This is a <see langword="string"/> field.</remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.TokenGroup">
+            <summary>The token group (aka. Token Type or Token Name)</summary>
+            <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.TokenValue">
+            <summary>The token value (aka. Token Content)</summary>
+            <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.Prefix">
+            <summary>Access the Prefix field of a node.</summary>
+            <remarks>Read only. This is a <see langword="string"/> field that must be modified with the <see cref="M:Parser.Nodes.INode.AppendToPrefix(System.String)"/> method or its overloads.</remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.Suffix">
+            <summary>Access the Suffix field of a node.</summary>
+            <remarks>Read only. This is a <see langword="string"/> field that must be modified with the <see cref="M:Parser.Nodes.INode.AppendToSuffix(System.String)"/> method or its overloads.</remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.Fields">
+            <summary>The readonly fields that cannot be assigned to.</summary>
+        </member>
+        <member name="P:Parser.Nodes.INodeProcessor.Context">
+            <summary></summary>
+        </member>
+        <member name="M:Parser.Nodes.INodeProcessor.Process">
+            <summary>Processes and creates the <see cref="P:Parser.Nodes.INodeProcessor.Context"/>.</summary>
+        </member>
+        <member name="P:Parser.Nodes.XMLCommentNode.Content">
+            <summary>Gets the content of this node.</summary>
+        </member>
+        <member name="P:Parser.Nodes.XMLContentNode.Content">
+            <summary>Gets or sets the content of this node.</summary>
+        </member>
+        <member name="P:Parser.Nodes.XMLElementNode.Name">
+            <summary>Gets the element name and namespace.</summary>
+        </member>
+        <member name="P:Parser.Nodes.XMLElementNode.LocalName">
+            <summary>Gets the local element name.</summary>
+        </member>
+        <member name="P:Parser.Nodes.XMLElementNode.Namespace">
+            <summary>Gets the namespace, or <see langword="null"/> if one is not specified on this element.</summary>
+            <remarks>This does not account for globally set or namespaces set by this element's parents.</remarks>
+        </member>
+    </members>
+</doc>

@@ -1,5 +1,7 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 
+using System.Collections.Immutable;
+
 using Parser.Nodes;
 
 using MC = Common.MsgClass;
@@ -17,12 +19,19 @@ public sealed class TokenFactory : ITokenizer<IToken>
   private readonly TokenRuleCollection _rules = [];
   private readonly TokenCollection _result = [];
   private TokenRule? _currentRule;
-  private Spec _spec;
   private int _ruleIndex;
   private int _ruleIndexAfterCompete;
   #endregion
   #region Public Properties
-  public Spec Spec { get => _spec; init => _spec = value; }
+  public Spec Spec
+  {
+    get;
+    set
+    {
+      _rules.AddRange(value.TokenRules);
+      field = value;
+    }
+  }
   public string Input { get; private set; } = SE;
   [NotNull]
   public SectionCollection? CannotMatch { get; private set; }
@@ -32,13 +41,16 @@ public sealed class TokenFactory : ITokenizer<IToken>
   #region Constructors
   public TokenFactory (Spec spec, IEnumerable<TokenRule>? rules = null)
   {
-    SetSpec(spec);
+    Spec = spec;
     _rules.AddRange(rules ?? spec.TokenRules);
   }
-  public TokenFactory () => SetSpec(XParser.Lib["unknown"]);
+  public TokenFactory ()
+  {
+    Spec = XParser.Lib["unknown"];
+  }
   #endregion
   #region Private Helper Properties
-  private RT DefaultRule => _spec.DefaultRuleSet;
+  private RT DefaultRule => Spec.DefaultRuleSet;
   private bool IgnoreCase => (_currentRule?.Type.HasFlag(RT.IgnoreCase) ?? false) || DefaultRule.HasFlag(RT.IgnoreCase);
   private StringComparison IC => IgnoreCase ? SCOIC : SCO;
   private bool Competes => (_currentRule?.Type.HasFlag(RT.Competitive) ?? false) || DefaultRule.HasFlag(RT.Competitive);
@@ -59,7 +71,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
     _ => () => WarnLog("Warning: Bad type defined. Skipping rule.")
   };
 
-  dynamic? ITokenizer<IToken>.Rules { get => _spec; init => _spec = (value as Spec) ?? throw new InvalidTokenException("Attempt to assign a null Spec."); }
+  dynamic? ITokenizer<IToken>.Rules { get => Spec; init => Spec = (value as Spec) ?? throw new InvalidTokenException("Attempt to assign a null Spec."); }
 
   #endregion
   #region Private Logging Methods
@@ -116,7 +128,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
       Index = match.Start,
       Content = singleChar ? $"{Input[match.Start]}" : Input[match.Start..(match.End + 1)],
       Type = rule.TypeToAssign,
-      Spec = _spec
+      Spec = Spec
     };
 
     _result.Add(token);
@@ -188,7 +200,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
   {
     DebugIn(Area, "RegexMatch");
     DebugLog("Token matching starting, from input string.");
-    Regex regex = new(RuleData, IgnoreCase ? _spec.RxOpt | ROIC : _spec.RxOpt);
+    Regex regex = new(RuleData, IgnoreCase ? Spec.RxOpt | ROIC : Spec.RxOpt);
 
     MatchCollection mc = regex.Matches(Input);
 
@@ -217,7 +229,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
   {
     DebugIn(Area, "ErrorMatch");
     DebugLog("Error matching starting, from input string.");
-    Regex regex = new(RuleData, IgnoreCase ? _spec.RxOpt | ROIC : _spec.RxOpt);
+    Regex regex = new(RuleData, IgnoreCase ? Spec.RxOpt | ROIC : Spec.RxOpt);
 
     MatchCollection mc = regex.Matches(Input);
     bool failUponEnding = false;
@@ -240,7 +252,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
       _ = Err.ThrowBadResult("You must correct the above listed errors to parse this file.");
     DebugOut();
   }
-  private IEnumerable<(TokenRule Rule, int Index)> GetCompeteBlock ()
+  private Collection<(TokenRule Rule, int Index)> GetCompeteBlock ()
   {
     Collection<(TokenRule Rule, int Index)> result = [];
     for (int i = _ruleIndex; i < _rules.Count; i++)
@@ -264,7 +276,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
     DebugLog("Running competition.");
     IEnumerable<(TokenRule Rule, int Index)> contestants = GetCompeteBlock();
     string regexPatterns = contestants.Select(r => GetRuleRegex(r.Rule, r.Index)).TextJoin("|");
-    Regex regex = new(regexPatterns, _spec.RxOpt.RemoveBit<RegexOptions>(ROIC));
+    Regex regex = new(regexPatterns, Spec.RxOpt.RemoveBit<RegexOptions>(ROIC));
 
     foreach (Match match in regex.Matches(Input))
     {
@@ -282,10 +294,8 @@ public sealed class TokenFactory : ITokenizer<IToken>
     DebugOut();
   }
   #region Public Methods
-  [MemberNotNull(nameof(_spec))]
-  public void SetSpec (Spec spec) => _spec = spec;
   [MemberNotNull(nameof(CannotMatch))]
-  public Collection<IToken> Tokenize (string input)
+  public ImmutableList<IToken> Tokenize (string input)
   {
     DebugIn(Area, "Produce");
     _result.Clear();
@@ -294,8 +304,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
     Input = input;
     for (_ruleIndex = 0; _ruleIndex < _rules.Count; _ruleIndex++)
     {
-      TokenRule rule = _rules[_ruleIndex];
-      _currentRule = rule;
+      _currentRule = _rules[_ruleIndex];
 
       try
       {

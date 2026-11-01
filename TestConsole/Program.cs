@@ -93,12 +93,13 @@ internal static class Program
     string file_xml_errors = File.ReadAllText(FinishPath(Paths.xml_errors));
     string file_ipl_label = File.ReadAllText(FinishPath(Paths.ipl_label));
 
-    static void generic_test<TTokenizer, TToken> (string file, NodeRuleSet node_rules, TokenRuleSet token_rules) where TTokenizer : ITokenizer<TToken>, new() where TToken : IToken
+    static void generic_test<TTokenizer> (string file, NodeRuleSet node_rules, TokenRuleSet token_rules) where TTokenizer : ITokenizer<IToken>, new()
     {
       TTokenizer cTokenizer = new() { Rules = token_rules };
-      IEnumerable<TToken> cTokens = cTokenizer.Tokenize(file);
-      TokenProcessor cProcessor = new(cTokens.Cast<IToken>(), node_rules);
+      IEnumerable<IToken> cTokens = cTokenizer.Tokenize(file);
+      TokenProcessor cProcessor = new(cTokens, node_rules);
       cProcessor.Process();
+      cProcessor.Context.AllNodes
       cTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
       PressEnterToContinue();
     }
