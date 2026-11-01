@@ -3,7 +3,7 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <Authors>John Taylor</Authors>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <DocumentationFile>..\docs\$(MSBuildProjectName).xml</DocumentationFile>
+    <DocumentationFile>$(SolutionDir)docs\$(MSBuildProjectName).xml</DocumentationFile>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <ErrorReport>send</ErrorReport>

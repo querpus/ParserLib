@@ -67,18 +67,28 @@ public class XElementProcessor : INodeProcessor
   }
 }
 
-public class TokenProcessor (IEnumerable<IToken> tokens, NodeRuleSet ruleset) : INodeProcessor
+public class TokenProcessor : INodeProcessor
 {
-  public dynamic? Input { get; init; } = tokens;
-  public IEnumerable<IToken> Tokens { get; } = [.. tokens];
-  public NodeRuleSet RuleSet { get; } = ruleset;
+  private readonly IEnumerable<IToken> _tokens;
+
+  public TokenProcessor (IEnumerable<IToken> tokens, NodeRuleSet ruleset)
+  {
+    _tokens = tokens;
+    Input = tokens;
+    Tokens = [.. tokens];
+    RuleSet = ruleset;
+  }
+
+  public dynamic? Input { get; init; }
+  public IEnumerable<IToken> Tokens { get; }
+  public NodeRuleSet RuleSet { get; }
   public NodeContext? Context { get; private set; }
   public void Process ()
   {
     var start_time = DateTime.Now;
     Context = RuleSet.InitialSetup();
     int count = 0;
-    foreach (IToken token in tokens.Where(t => t.Name is not null).Order())
+    foreach (IToken token in _tokens.Where(t => t.Name is not null).Order())
     {
       if (!RuleSet.RulesByGroup.TryGetValue(token.Name!, out NodeRule? rule))
       {

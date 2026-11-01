@@ -1,7 +1,7 @@
 #pragma warning disable RE0001 // Invalid regex pattern
 #pragma warning disable CA1720 // Identifier contains type name
 
-using Common.Nodes;
+using Parser.Nodes;
 
 using Parser;
 using Parser.Ops;

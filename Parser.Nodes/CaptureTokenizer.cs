@@ -5,18 +5,16 @@
 namespace Parser.Nodes;
 
 /// <summary>Creates a token for every capture with the group name as the type within every match. Multiple captures are additional tokens.</summary>
-public class CaptureTokenizer : ITokenizer<CaptureToken>, ITokenizer<IToken>
+public class CaptureTokenizer : ITokenizer<CaptureToken>
 {
   IEnumerable<CaptureToken> ITokenizer<CaptureToken>.Tokenize(string input) => Tokenize(input);
   IEnumerable<CaptureToken> ITokenizer<CaptureToken>.Tokens => Tokens;
-  public Collection<CaptureToken> Tokens { get; } = [];
+  public IImmutableList<CaptureToken> Tokens { get; private set; } = [];
   public dynamic? Rules { get; init; }
   public int Count => Tokens.Count;
 
-  IEnumerable<IToken> ITokenizer<IToken>.Tokens => [.. Tokens.Cast<IToken>()];
-
-  public void Reset () => Tokens.Clear();
-  public Collection<CaptureToken> Tokenize (string input)
+  public void Reset () => Tokens = [];
+  public IEnumerable<CaptureToken> Tokenize (string input)
   {
     Reset();
 
@@ -48,7 +46,7 @@ public class CaptureTokenizer : ITokenizer<CaptureToken>, ITokenizer<IToken>
               CaptureIndex = i,
               Position = cap.Index..(cap.Index + cap.Length)
             };
-            Tokens.Add(token);
+            Tokens = Tokens.Add(token);
             Log(MsgClass.GreenInfo, $"{token}", this);
           }
         }
@@ -56,6 +54,4 @@ public class CaptureTokenizer : ITokenizer<CaptureToken>, ITokenizer<IToken>
     }
     return Tokens;
   }
-
-  IEnumerable<IToken> ITokenizer<IToken>.Tokenize (string input) => [.. Tokenize(input).Cast<IToken>()];
 }

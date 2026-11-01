@@ -1,8 +1,8 @@
+using System.Collections.ObjectModel;
 using System.Linq;
 
-using Common.Nodes;
-
 using Parser.Exceptions;
+using Parser.Nodes;
 
 using ResWAD = Specification.WAD.Properties.Resources;
 using ResZDoom = Specification.ZDoom.Properties.Resources;
@@ -96,7 +96,7 @@ internal static class Program
     static void generic_test<TTokenizer, TToken> (string file, NodeRuleSet node_rules, TokenRuleSet token_rules) where TTokenizer : ITokenizer<TToken>, new() where TToken : IToken
     {
       TTokenizer cTokenizer = new() { Rules = token_rules };
-      var cTokens = cTokenizer.Tokenize(file);
+      IEnumerable<TToken> cTokens = cTokenizer.Tokenize(file);
       TokenProcessor cProcessor = new(cTokens.Cast<IToken>(), node_rules);
       cProcessor.Process();
       cTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
@@ -130,7 +130,7 @@ internal static class Program
             break;
           case "MATCH":
             MatchTokenizer mTokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
-            var mTokens = mTokenizer.Tokenize(file_xsd_specification);
+            Collection<MatchToken> mTokens = mTokenizer.Tokenize(file_xsd_specification);
             mTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
             PressEnterToContinue();
             break;
