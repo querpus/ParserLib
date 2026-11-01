@@ -4,7 +4,7 @@
     <Name>xml</Name>
     <TextFile>true</TextFile>
     <CaseInsensitive>false</CaseInsensitive>
-    <EntityInfo>
+    <!--<EntityInfo>
       <EntityDef>
         <MatchRule group="element"/>
         <Structure>
@@ -29,7 +29,30 @@
           <Property name="IsHeader" class="bool" value="false"/>
         </Structure>
       </EntityDef>
-    </EntityInfo>
+    </EntityInfo>-->
+    <TokenRules>
+      <Rule>
+        <Data>
+          "[^">&lt;]*"
+        </Data>
+        <Type>Competitive</Type>
+        <TypeToAssign>DString</TypeToAssign>
+      </Rule>
+      <Rule>
+        <Type>Competitive</Type>
+        <TypeToAssign>SString</TypeToAssign>
+        <Data>
+          '[^'>&lt;]*'
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>Competitive IgnoredToken</Type>
+        <TypeToAssign>Comment</TypeToAssign>
+        <Data>
+          &lt;!--((?!--).)*-->
+        </Data>
+      </Rule>
+    </TokenRules>
     <GroupTokenRules>
       <Rule>
         <Type>None</Type>
@@ -89,12 +112,7 @@
       <Rule>
         <Type>Recursive</Type>
         <TypeToAssign>ElementPair</TypeToAssign>
-        <Data> d:ElementStart va:ValidContent x:ElementEnd </Data>
-      </Rule>
-      <Rule>
-        <Type>Recursive</Type>
-        <TypeToAssign>ElementPair</TypeToAssign>
-        <Data>d:ElementStartWithNamespace va:ValidContent x:ElementEndWithNamespace</Data>
+        <Data>d:ElementStart va:ValidContent x:ElementEnd</Data>
       </Rule>
     </GroupTokenRules>
     <Instructions>
@@ -105,10 +123,10 @@
       <Terminate success="true"/>
     </Instructions>
     <FileInferences initial="or">
-      <Extension>ini</Extension>
-      <Extension>vnc</Extension>
-      <Extension>url</Extension>
-      <Extension>inf</Extension>
+      <Extension>xml</Extension>
+      <Extension>xaml</Extension>
+      <Extension>csproj</Extension>
+      <Extension>props</Extension>
     </FileInferences>
   </Spec>
 </Definition>

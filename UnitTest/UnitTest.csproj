@@ -39,6 +39,7 @@
   <ItemGroup>
     <!-- <ProjectReference Include="..\..\Plant VNC\VNCChecker.csproj" /> -->
     <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Parser.Nodes\Parser.Nodes.csproj" />
     <!-- <ProjectReference Include="..\FormObjectViewer\FormObjectViewer.csproj" /> -->
     <ProjectReference Include="..\Parser\Parser.csproj" />
     <ProjectReference Include="..\Specification.INI\Specification.INI.csproj" />
@@ -48,6 +49,7 @@
     <ProjectReference Include="..\Specification.WAD\Specification.WAD.csproj" />
     <ProjectReference Include="..\Specification.XML\Specification.XML.csproj" />
     <ProjectReference Include="..\Specification.ZDoom\Specification.ZDoom.csproj" />
+    <ProjectReference Include="..\Terminal.Menu\Terminal.Menu.csproj" />
     <!-- <ProjectReference Include="..\TestConsole\TestConsole.csproj" /> -->
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-using Common.Nodes;
+using Parser.Nodes;
 
 namespace Parser.Inference;
 

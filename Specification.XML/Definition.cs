@@ -82,7 +82,7 @@ public static class Definition
     TokenCompatLookup = {
       ["String"] = ["DString", "SString"],
       ["Attribute"] = ["DocumentNamespace", "AttributeWithNamespace"],
-      ["ValidContent"] = ["Content", "ElementSingleWithNamespace", "ElementSingle", "ElementPair"]
+      ["ValidContent"] = ["Content", "ElementSingle", "ElementPair"]
     },
     Operations = [
       new TokenizeOperation { InputKey = "text", OutputKey = "tokens", Tokenizer = "xparser"},

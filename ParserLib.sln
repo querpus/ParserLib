@@ -102,6 +102,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "iCloud Drafts", "iCloud Dra
 		..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\xml.json = ..\..\iCloudDrive\iCloud~com~agiletortoise~Drafts5\Library\Syntaxes\xml.json
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parser.Nodes", "Parser.Nodes\Parser.Nodes.csproj", "{4D01F0F0-3746-40C1-BBE7-75296BB76738}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -181,6 +183,10 @@ Global
 		{877C5452-FB25-46EE-ADA0-1504BFBE13F3}.Debug|x64.Build.0 = Debug|x64
 		{877C5452-FB25-46EE-ADA0-1504BFBE13F3}.Release|x64.ActiveCfg = Release|x64
 		{877C5452-FB25-46EE-ADA0-1504BFBE13F3}.Release|x64.Build.0 = Release|x64
+		{4D01F0F0-3746-40C1-BBE7-75296BB76738}.Debug|x64.ActiveCfg = Debug|x64
+		{4D01F0F0-3746-40C1-BBE7-75296BB76738}.Debug|x64.Build.0 = Debug|x64
+		{4D01F0F0-3746-40C1-BBE7-75296BB76738}.Release|x64.ActiveCfg = Release|x64
+		{4D01F0F0-3746-40C1-BBE7-75296BB76738}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
