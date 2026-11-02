@@ -68,7 +68,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     }
     if (GetTargetValue(target) is not null && target is not NT.RootNodes and NT.AnyRootOrParent)
     {
-      Debug.Log(MsgClass.Warning, $"{target} was not null before assignment.", this);
+      Log(MsgClass.Warning, $"{target} was not null before assignment.", this);
     }
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
@@ -112,6 +112,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   public bool HasParent => NodeStack.Count > 0;
   [MemberNotNullWhen(true, nameof(Current))]
   public bool HasCurrent => Current is not null;
+  public IEnumerable<INode> Nodes { get; private set; } = [];
   /// <summary>Dictionary for storing additional data that must be carried throughout the processing of the nodes.</summary>
   public Dictionary<string, string> Data { get; } = [];
 
@@ -134,11 +135,11 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     if (IsRoot)
     {
       PushAndAddTo(node, target_for_push);
-      Debug.Log(MsgClass.GreenInfo, $"Replaced Parent and added to {target_for_push}.", this);
+      Log(MsgClass.GreenInfo, $"Replaced Parent and added to {target_for_push}.", this);
     }
     else
     {
-      Debug.Log(MsgClass.Warning, "Warning: Context was not at root when pushing line command.", this);
+      Log(MsgClass.Warning, "Warning: Context was not at root when pushing line command.", this);
     }
   }
   /// <summary>Pops a node from the node stack, and assigns it to the target field.</summary>
@@ -266,6 +267,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     WarnIfNotNull(target);
     TNode node = new();
     SetTargetValue(target, node);
+    Nodes = Nodes.Append(node);
     return node;
   }
   public INode GenerateNode (NT target, string className)
@@ -273,34 +275,35 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     WarnIfNotNull(target);
     INode? node = className.CreateClass() as INode ?? throw new InvalidOperationException();
     SetTargetValue(target, node);
+    Nodes = Nodes.Append(node);
     return node;
   }
   public void WarnIfNotNull (NT target)
   {
     if (GetTargetValue(target) is not null)
     {
-      Debug.Log(MsgClass.Warning, $"{target} was not null before assignment.", this);
+      Log(MsgClass.Warning, $"{target} was not null before assignment.", this);
     }
   }
   public void ClearNode (NT target)
   {
     if (target is NT.None)
     {
-      Debug.Log(MsgClass.Warning, "Clearing the null node target. This is not ever neccessary.", this);
+      Log(MsgClass.Warning, "Clearing the null node target. This is not ever neccessary.", this);
       return;
     }
     if (target.HasAnyFlag(NT.Fields))
     {
-      Debug.Log(MsgClass.Warning, $"Cannot clear readonly field {target}.", this);
+      Log(MsgClass.Warning, $"Cannot clear readonly field {target}.", this);
       return;
     }
     if (GetTargetValue(target) is null)
     {
-      Debug.Log(MsgClass.Warning, $"{target} was already null.", this);
+      Log(MsgClass.Warning, $"{target} was already null.", this);
       return;
     }
     SetTargetValue(target, null);
-    Debug.Log(MsgClass.GreenInfo, $"Node stored in {target} was cleared.", this);
+    Log(MsgClass.GreenInfo, $"Node stored in {target} was cleared.", this);
   }
 
   public static void DoXMLOperation (NodeContext context, CaptureToken token, string action, string? assignTo, string? valueFrom, string? className)
@@ -333,8 +336,8 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
 
   public void Print (int indent)
   {
-    Debug.Log(MsgClass.Warning, "Root:", this);
+    Log(MsgClass.Warning, "Root:", this);
     Root?.Print(2 + indent);
-    Debug.Log(MsgClass.Warning, "Header:", this);
+    Log(MsgClass.Warning, "Header:", this);
   }
 }

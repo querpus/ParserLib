@@ -19,7 +19,7 @@ public static partial class StandardRuleSets
         context.ReplaceParent(node);
         node.Data["Name"] = token.Value![1..^1];
         context.ClearNode(NT.Current);
-        Debug.Log(MsgClass.GreenInfo, $"Section Defined: {token.Value}", "StandardRuleSets");
+        Log(MsgClass.GreenInfo, $"Section Defined: {token.Value}", "StandardRuleSets");
       }
     };
     public static NodeRule Property = new()
@@ -32,7 +32,7 @@ public static partial class StandardRuleSets
         string[] halves = token.Value!.Split("=");
         node.Data["Key"] = halves[0];
         node.Data["Value"] = halves[1];
-        Debug.Log(MsgClass.GreenInfo, $"Property Defined: {node.Key} / {node.Value}", "StandardRuleSets");
+        Log(MsgClass.GreenInfo, $"Property Defined: {node.Key} / {node.Value}", "StandardRuleSets");
       }
     };
     [SS("regex")] private const string RxDQuotedString = @""" ([^\n\r\v\\""]|\\.)* """;

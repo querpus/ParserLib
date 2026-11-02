@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -12,6 +13,23 @@ using SpecXML = Specification.XML.Definition;
 using SpecZDoom = Specification.ZDoom.Definition;
 
 namespace TestConsole;
+
+internal interface ITokenizerPipeline
+{
+  IEnumerable<INode> Process (string input, TokenRuleSet rules, NodeRuleSet node_rules);
+}
+
+internal class CaptureTokenizerPipeline : ITokenizerPipeline
+{
+  public IEnumerable<INode> Process (string input, TokenRuleSet rules, NodeRuleSet node_rules)
+  {
+    CaptureTokenizer tokenizer = new() { Rules = rules };
+    IEnumerable<IToken> tokens = tokenizer.Tokenize(input);
+    INodeProcessor processor = new CaptureTokenProcessor(tokens, node_rules);
+    processor.Process();
+    return processor.Context.Nodes;
+  }
+}
 
 internal static class Program
 {
@@ -97,9 +115,8 @@ internal static class Program
     {
       TTokenizer cTokenizer = new() { Rules = token_rules };
       IEnumerable<IToken> cTokens = cTokenizer.Tokenize(file);
-      TokenProcessor cProcessor = new(cTokens, node_rules);
+      CaptureTokenProcessor cProcessor = new(cTokens, node_rules);
       cProcessor.Process();
-      cProcessor.Context.AllNodes
       cTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
       PressEnterToContinue();
     }
@@ -114,14 +131,14 @@ internal static class Program
         switch (GetInput())
         {
           case "CAPTURE":
-            generic_test<CaptureTokenizer, CaptureToken>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            generic_test<CaptureTokenizer, CaptureToken>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            generic_test<CaptureTokenizer, CaptureToken>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<CaptureTokenizer>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<CaptureTokenizer>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<CaptureTokenizer>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
             break;
           case "GROUP":
-            generic_test<GroupTokenizer, CaptureToken>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            generic_test<GroupTokenizer, CaptureToken>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            generic_test<GroupTokenizer, CaptureToken>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<GroupTokenizer>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<GroupTokenizer>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
+            generic_test<GroupTokenizer>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
             break;
           case "XPARSER":
             InitialTest("xml", Paths.xml_operation);
@@ -145,7 +162,7 @@ internal static class Program
         switch (GetInput())
         {
           case "CAPTURE":
-            generic_test<CaptureTokenizer, CaptureToken>(file_json_launch, StandardRuleSets.JSONRuleSet, StandardRuleSets.JSONTokenRuleSet);
+            generic_test<CaptureTokenizer>(file_json_launch, StandardRuleSets.JSONRuleSet, StandardRuleSets.JSONTokenRuleSet);
             break;
           case "XPARSER":
             InitialTest(SpecJSON.Spec, Paths.json_error);
@@ -191,7 +208,7 @@ internal static class Program
         switch (GetInput())
         {
           case "CAPTURE":
-            generic_test<CaptureTokenizer, CaptureToken>(file_ipl_label, StandardRuleSets.IPLRuleSet, StandardRuleSets.IPLTokenRuleSet);
+            generic_test<CaptureTokenizer>(file_ipl_label, StandardRuleSets.IPLRuleSet, StandardRuleSets.IPLTokenRuleSet);
             break;
           case "XPARSER":
             InitialTest(SpecIPL.Spec, Paths.ipl_simple);

@@ -8,16 +8,16 @@ using static Common.Debug;
 namespace Parser.Nodes;
 
 /// <summary>Creates a token for every group in each match. Multiple captures are stored as an array of string data.</summary>
-public class GroupTokenizer : ITokenizer<CaptureToken>
+public class GroupTokenizer : ITokenizer<IToken>
 {
-  IEnumerable<CaptureToken> ITokenizer<CaptureToken>.Tokenize (string input) => Tokenize(input);
-  IEnumerable<CaptureToken> ITokenizer<CaptureToken>.Tokens => Tokens;
-  public Collection<CaptureToken> Tokens { get; } = [];
+  IEnumerable<IToken> ITokenizer<IToken>.Tokenize (string input) => Tokenize(input);
+  IEnumerable<IToken> ITokenizer<IToken>.Tokens => Tokens;
+  public Collection<IToken> Tokens { get; } = [];
   public dynamic? Rules { get; init; }
   public int Count => Tokens.Count;
 
   public void Reset () => Tokens.Clear();
-  public Collection<CaptureToken> Tokenize (string input)
+  public Collection<IToken> Tokenize (string input)
   {
     Reset();
     if (Rules is null)

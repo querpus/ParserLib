@@ -33,7 +33,7 @@ public sealed class IPLCommandNode : Node
   public Collection<string> Values
   {
     get => Data.TryGetValue("Values", out object? obj) ? obj as Collection<string> ?? [] : (Collection<string>) (Data["Values"] = new Collection<string>());
-    set => Values.AddRange(value);
+    init => Values.AddRange(value);
   }
   public void AddValue (string value) => Values.Add(value);
 }

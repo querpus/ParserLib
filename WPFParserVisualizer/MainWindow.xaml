@@ -11,6 +11,10 @@
         Width="800"
         Background="DarkGray">
   <Window.Resources>
+    <Nodes:NodeRuleSet x:Name="CurrentRuleSet" x:Key="CurrentRuleSet" x:FieldModifier="public"/>
+    <Nodes:TokenRuleSet x:Name="CurrentTokenRuleSet" x:Key="CurrentTokenRuleSet" x:FieldModifier="public"/>
+    <Nodes:CaptureTokenizer x:Name="CurrentTokenizer" x:Key="CurrentTokenizer" x:FieldModifier="public"/>
+    <Nodes:NodeContext x:Name="CurrentNodeContext" x:Key="CurrentNodeContext" x:FieldModifier="public"/>
   </Window.Resources>
   <Grid>
     <Grid.RowDefinitions>
@@ -30,7 +34,7 @@
     <DataGrid x:Name="TokenDataGrid" Grid.Column="1" Grid.Row="3" SelectionChanged="DataGrid_SelectionChanged" Margin="0,0,0,5">
       <DataGrid.Columns>
 
-        <DataGridTextColumn Binding="{Binding Mode=OneWay, Path=Name}" Width="75" Header="Token Type"/>
+        <!--<DataGridTextColumn Binding="{StaticResource ResourceKey=CurrentTokenizer}" Width="75" Header="Token Type"/>-->
         <DataGridTextColumn Binding="{Binding Mode=OneWay, Path=Position.Start.Value}" Width="40" Header="Index"/>
         <DataGridTextColumn Binding="{Binding Mode=OneWay, Path=Length}" Width="40" Header="LG"/>
         <DataGridTextColumn Binding="{Binding Mode=OneWay, Path=Value}" Width="*" Header="Token Value"/>

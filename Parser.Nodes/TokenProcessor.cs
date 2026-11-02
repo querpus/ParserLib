@@ -36,7 +36,7 @@ public class XElementProcessor : INodeProcessor
     Context = new() { SingleRoot = true, Root = GetNodes(Input) };
     var end_time = DateTime.Now;
     TimeSpan duration = end_time - start_time;
-    Debug.Log(MsgClass.Debug, $"XElement Processing Complete: processed in {duration}.", this);
+    Log(MsgClass.Debug, $"XElement Processing Complete: processed in {duration}.", this);
   }
 
   private static XMLElementNode GetNodes (XElement element)
@@ -67,11 +67,11 @@ public class XElementProcessor : INodeProcessor
   }
 }
 
-public class TokenProcessor : INodeProcessor
+public class CaptureTokenProcessor : INodeProcessor
 {
   private readonly IEnumerable<IToken> _tokens;
 
-  public TokenProcessor (IEnumerable<IToken> tokens, NodeRuleSet ruleset)
+  public CaptureTokenProcessor (IEnumerable<IToken> tokens, NodeRuleSet ruleset)
   {
     _tokens = tokens;
     Input = tokens;
@@ -92,7 +92,7 @@ public class TokenProcessor : INodeProcessor
     {
       if (!RuleSet.RulesByGroup.TryGetValue(token.Name!, out NodeRule? rule))
       {
-        Debug.Log(MsgClass.Warning, $"Token ID ({token.Name}) is not handled.", this);
+        Log(MsgClass.Warning, $"Token ID ({token.Name}) is not handled.", this);
         continue;
       }
       rule.Execute(Context, token);
@@ -100,6 +100,6 @@ public class TokenProcessor : INodeProcessor
     }
     var end_time = DateTime.Now;
     TimeSpan duration = end_time - start_time;
-    Debug.Log(MsgClass.Debug, $"Token Processing Complete: {count} tokens processed in {duration}.", this);
+    Log(MsgClass.Debug, $"Token Processing Complete: {count} tokens processed in {duration}.", this);
   }
 }

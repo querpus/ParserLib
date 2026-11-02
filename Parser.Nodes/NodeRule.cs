@@ -9,7 +9,7 @@ public class NodeRule
 {
   public string? TokenName { get; init; }
   public string? ExactText { get; init; }
-  public static void DefaultAction (NodeContext context, IToken token) => Debug.Log(MsgClass.GreenInfo, $"No Execution Defined for '{token.Name}'", "NodeRule");
+  public static void DefaultAction (NodeContext context, IToken token) => Log(MsgClass.GreenInfo, $"No Execution Defined for '{token.Name}'", "NodeRule");
   public Action<NodeContext, IToken> Execute { get; init; } = DefaultAction;
   public static NodeRule KeepAndIgnore (string groupName, bool appendToPrefix = false, bool appendToSuffix = false) => new()
   {
@@ -49,11 +49,11 @@ public class NodeRule
     {
       if (!throw_error)
       {
-        Debug.Log(MsgClass.Warning, "Warning: " + error_message, "NodeRule");
+        Log(MsgClass.Warning, "Warning: " + error_message, "NodeRule");
       }
       else
       {
-        Debug.Log(MsgClass.Error, "Error: " + error_message, "NodeRule");
+        Log(MsgClass.Error, "Error: " + error_message, "NodeRule");
         throw new ValidationException("Error: " + error_message);
       }
     }

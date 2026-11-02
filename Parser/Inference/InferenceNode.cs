@@ -16,8 +16,8 @@ public static class InferenceNodeFactory
   {
     if (element is null)
       return new InferenceNodeGroup(IT.Or);
-    var tokens = new CaptureTokenizer().Tokenize(element.ToString()).Cast<Nodes.IToken>();
-    var tp = new TokenProcessor(tokens, StandardRuleSets.XMLRuleSet);
+    var tokens = new CaptureTokenizer().Tokenize(element.ToString());
+    var tp = new CaptureTokenProcessor(tokens, StandardRuleSets.XMLRuleSet);
     tp.Process();
     return Produce(tp.Context?.Root as XMLElementNode);
   }

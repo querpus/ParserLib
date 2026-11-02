@@ -32,7 +32,7 @@ public static class NodeRuleHelper
   {
     if (current is null)
     {
-      Debug.Log(MsgClass.Error, "Node was null. Cannot Add Content.", "StandardRuleSets");
+      Log(MsgClass.Error, "Node was null. Cannot Add Content.", "StandardRuleSets");
       throw new InvalidOperationException("Node was null. Cannot Add Content.");
     }
   }
@@ -40,7 +40,7 @@ public static class NodeRuleHelper
   public static void DebugMessage (string message)
   {
 #if DEBUG
-    Debug.Log(MsgClass.GreenInfo, message, "NodeRuleHelper");
+    Log(MsgClass.GreenInfo, message, "NodeRuleHelper");
 #endif
   }
 }

@@ -1,3 +1,7 @@
+using System.Collections.Immutable;
+
+using Specification.ZDoom;
+
 namespace UnitTest;
 
 public class ACSTests
@@ -25,10 +29,10 @@ public class ACSTests
   [InlineData(Statement6)]
   public void ACS_PieceParse (string to_parse)
   {
-    TokenFactory tokenFactory = new(Specification.ZDoom.Definition.ACS);
-    TokenAssembler tokenAssembler = new(Specification.ZDoom.Definition.ACS);
+    TokenFactory tokenFactory = new(Definition.ACS);
+    TokenAssembler tokenAssembler = new(Definition.ACS);
 
-    Collection<IToken> tokens = tokenFactory.Tokenize(to_parse);
+    ImmutableList<IToken> tokens = tokenFactory.Tokenize(to_parse);
     Assert.NotEmpty(tokens);
     TokenAssemblyResult tc = tokenAssembler.Execute([.. tokens]);
     _ = Assert.Single(tc.Hierarchy);
@@ -38,9 +42,9 @@ public class ACSTests
   [InlineData("var + (564 * 45) / func_call(expr + other_expr) == 74")]
   public void ACS_ExpressionParse (string to_parse)
   {
-    TokenFactory tokenFactory = new(Specification.ZDoom.Definition.ACS);
-    TokenAssembler tokenAssembler = new(Specification.ZDoom.Definition.ACS);
-    Collection<IToken> tokens = tokenFactory.Tokenize(to_parse);
+    TokenFactory tokenFactory = new(Definition.ACS);
+    TokenAssembler tokenAssembler = new(Definition.ACS);
+    ImmutableList<IToken> tokens = tokenFactory.Tokenize(to_parse);
     Assert.NotEmpty(tokens);
     TokenAssemblyResult tc = tokenAssembler.Execute([.. tokens]);
     _ = Assert.Single(tc.Hierarchy);

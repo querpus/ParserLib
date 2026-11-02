@@ -34,7 +34,7 @@ public static partial class StandardRuleSets
         }
         else
         {
-          Debug.Log(MsgClass.Warning, "Warning: Context was not at root when pushing line command.", "StandardRuleSets");
+          Log(MsgClass.Warning, "Warning: Context was not at root when pushing line command.", "StandardRuleSets");
         }
       }
     };
@@ -91,7 +91,7 @@ public static partial class StandardRuleSets
         ErrorIfNull(token.Value);
         if (context.Current is not IPLCommandNode cmd)
         {
-          Debug.Log(MsgClass.Error, "Current is not a command node. Aborting Format Storage.", "StandardParsingSets");
+          Log(MsgClass.Error, "Current is not a command node. Aborting Format Storage.", "StandardParsingSets");
           throw new InvalidOperationException("Current is not an IPL command node. Token Processing Halted.");
         }
 

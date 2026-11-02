@@ -125,7 +125,7 @@ public static partial class StandardRuleSets
         ErrorIfNull(context.Current);
         context.Current?.AppendToPrefix(" " + token.Value);
         context.PropKey = token.Value;
-        Debug.Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
+        Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
       }
     };
     public static readonly NodeRule AttributeValue = new()
