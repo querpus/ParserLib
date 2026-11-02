@@ -3,7 +3,7 @@
 
 namespace Parser.Nodes;
 
-public readonly struct CaptureToken : IToken
+public readonly struct CaptureToken : IToken, IEquatable<IToken>
 {
   public string Value { get; init; }
   public required string? Name { get; init; }
@@ -19,4 +19,15 @@ public readonly struct CaptureToken : IToken
   /// <remarks>Format: {Group}[{CaptureIndex}] = {Value}</remarks>
   public override string ToString () => $"{Name}[{CaptureIndex}] = {Value}";
   public string Serialize () => Value;
+
+  public override bool Equals (object? obj) =>
+    obj is IToken token && Equals(token);
+  public override int GetHashCode () => HashCode.Combine(Name, Value, Position);
+  public bool Equals (IToken? other) =>
+    other is not null &&
+    Name == other.Name &&
+    Value == other.Value &&
+    Position.Equals(other.Position);
+  public static bool operator == (CaptureToken left, CaptureToken right) => left.Equals(right);
+  public static bool operator != (CaptureToken left, CaptureToken right) => !(left == right);
 }

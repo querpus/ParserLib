@@ -19,7 +19,7 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
     _specs.Add(DefaultSpec.TextByLines.Name, DefaultSpec.TextByLines);
     _specs.Add(DefaultSpec.Unknown.Name, DefaultSpec.Unknown);
   }
-  public Spec this[string key] { get => _specs[key.ToLower()]; set => _specs[key.ToLower()] = value; }
+  public Spec this[string key] { get => _specs[key.ToLower(CIIC)]; set => _specs[key.ToLower(CIIC)] = value; }
   public Spec? Lookup (string? name) => name is not null && ContainsKey(name) ? _specs[name] : null;
   public Spec LookupOrDefault (string? name)
   {
@@ -73,7 +73,7 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
           {
             Spec? check = prop.GetValue(null) as Spec;
             check.ThrowIfNull();
-            lib._specs[check.Name.ToLower()] = check;
+            lib._specs[check.Name.ToLower(CIIC)] = check;
           }
         }
       }
@@ -83,7 +83,7 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
     {
       foreach (Spec spec in SpecInstructionParser.LoadSpecFile(path))
       {
-        lib._specs[spec.Name.ToLower()] = spec;
+        lib._specs[spec.Name.ToLower(CIIC)] = spec;
       }
     }
 
@@ -108,11 +108,11 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
     return null;
   }
 
-  public void Add (string key, Spec value) => _specs.Add(key.ToLower(), value);
+  public void Add (string key, Spec value) => _specs.Add(key.ToLower(CIIC), value);
   public void AddRange (IEnumerable<KeyValuePair<string, Spec>> list) => _specs.AddRange(list);
-  public bool ContainsKey (string key) => _specs.ContainsKey(key.ToLower());
+  public bool ContainsKey (string key) => _specs.ContainsKey(key.ToLower(CIIC));
   public bool TryGetValue (string key, [MaybeNullWhen(false)] out Spec value) => _specs.TryGetValue(key.ToLower(CIIC), out value);
-  public void Add (KeyValuePair<string, Spec> item) => _specs.Add(item.Key.ToLower(), item.Value);
+  public void Add (KeyValuePair<string, Spec> item) => _specs.Add(item.Key.ToLower(CIIC), item.Value);
   IEnumerator IEnumerable.GetEnumerator () => _specs.GetEnumerator();
   public void Print (int indent)
   {

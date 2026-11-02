@@ -42,11 +42,13 @@ public sealed class TokenFactory : ITokenizer<IToken>
   public TokenFactory (Spec spec, IEnumerable<TokenRule>? rules = null)
   {
     Spec = spec;
+    _rules = spec.TokenRules;
     _rules.AddRange(rules ?? spec.TokenRules);
   }
   public TokenFactory ()
   {
     Spec = XParser.Lib["unknown"];
+    _rules = Spec.TokenRules;
   }
   #endregion
   #region Private Helper Properties

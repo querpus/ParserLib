@@ -1,9 +1,8 @@
-using System.Collections.Immutable;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 using Parser.Exceptions;
 using Parser.Nodes;
+using Parser.Tokens;
 
 using ResWAD = Specification.WAD.Properties.Resources;
 using ResZDoom = Specification.ZDoom.Properties.Resources;
@@ -19,13 +18,13 @@ internal interface ITokenizerPipeline
   IEnumerable<INode> Process (string input, TokenRuleSet rules, NodeRuleSet node_rules);
 }
 
-internal class CaptureTokenizerPipeline : ITokenizerPipeline
+internal sealed class CaptureTokenizerPipeline : ITokenizerPipeline
 {
   public IEnumerable<INode> Process (string input, TokenRuleSet rules, NodeRuleSet node_rules)
   {
     CaptureTokenizer tokenizer = new() { Rules = rules };
-    IEnumerable<IToken> tokens = tokenizer.Tokenize(input);
-    INodeProcessor processor = new CaptureTokenProcessor(tokens, node_rules);
+    IEnumerable<Parser.Nodes.IToken> tokens = tokenizer.Tokenize(input);
+    CaptureTokenProcessor processor = new(tokens, node_rules);
     processor.Process();
     return processor.Context.Nodes;
   }
