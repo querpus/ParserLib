@@ -187,7 +187,7 @@ public sealed class TokenAssembler
     DebugOut();
     return _constructed_items;
   }
-  public TokenAssemblyResult Execute (TokenCollection tokens)
+  public TokenAssemblyResult Execute (IEnumerable<IToken> tokens)
   {
     DebugIn(Area, "Execute");
     _tokens = [.. tokens.Order()];

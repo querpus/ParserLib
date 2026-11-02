@@ -45,6 +45,8 @@ public static class Chars
   public const char SQ = '\'';
   /// <summary>Double quote symbol.</summary>
   public const char QT = '"';
+  /// <summary>Space</summary>
+  public const char SP = ' ';
   #endregion
   #region String Constants
   /// <summary>Standard line ending.</summary>

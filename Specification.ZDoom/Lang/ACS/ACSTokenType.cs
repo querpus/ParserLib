@@ -6,10 +6,10 @@ using System;
 
 namespace Specification.ZDoom.Lang.ACS;
 
-public struct ACSTokenData (ACSStructureType structure, AT token) : IEquatable<ACSTokenData>
+public struct ACSTokenData (ACSStructureType structure, string token) : IEquatable<ACSTokenData>
 {
   public ACSStructureType Structure { get; set; } = structure;
-  public string Token { get; set; } = token.ToString();
+  public string Token { get; set; } = token;
 
   public override readonly int GetHashCode () => HashCode.Combine(Structure, Token);
   public override readonly bool Equals ([NotNullWhen(true)] object? obj) => obj is ACSTokenData atd && Equals(atd);

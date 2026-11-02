@@ -145,7 +145,7 @@ public sealed class ChkToken
       if (spec.TokenCompatLookup.Keys.Any(i => i.ToString().Equals(item, SCOIC)))
       {
         dynamic key = spec.TokenCompatLookup.Keys.Single(i => i.ToString().Equals(item, SCOIC));
-        Collection<object> list = spec.TokenCompatLookup[key];
+        Collection<string> list = spec.TokenCompatLookup[key];
         foreach (string? s in list.Select(obj => obj.ToString()))
         {
           if (s is null) continue;

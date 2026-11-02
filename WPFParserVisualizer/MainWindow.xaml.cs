@@ -1,4 +1,4 @@
-using Common.Nodes;
+using Parser.Nodes;
 
 using static Common.Names;
 
@@ -10,7 +10,7 @@ using System.Windows.Controls;
 
 namespace WPFParserVisualizer;
 
-public record class CurrentFormat (NodeRuleSet NodeRuleSet, ITokenizer<CaptureToken> Tokenizer);
+public record class CurrentFormat (NodeRuleSet NodeRuleSet, ITokenizer<IToken> Tokenizer);
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
@@ -30,7 +30,7 @@ public partial class MainWindow : Window
   public string InputPath { get; set; } = SE;
   public string InputText { get; set; } = SE;
   public NodeRuleSet? NodeRuleSet => Format?.NodeRuleSet;
-  public ITokenizer<CaptureToken>? Tokenizer => Format?.Tokenizer;
+  public ITokenizer<IToken>? Tokenizer => Format?.Tokenizer;
   public Collection<IToken> Tokens => Tokenizer is null ? [] : [.. Tokenizer.Tokens.Cast<IToken>()];
 
   public MainWindow () => InitializeComponent();
@@ -60,7 +60,7 @@ public partial class MainWindow : Window
     if (Format is not null)
     {
       var tokens = Format.Tokenizer.Tokenize(InputText).Cast<IToken>();
-      var proc = new TokenProcessor(tokens, Format.NodeRuleSet);
+      var proc = new CaptureTokenProcessor(tokens, Format.NodeRuleSet);
       (ProgramStatus.Items[0] as Label)?.Content = "Processing Tokens...";
       proc.Process();
     }

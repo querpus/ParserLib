@@ -1,7 +1,5 @@
 #pragma warning disable RE0001 // Invalid regex pattern
 
-using static Specification.JSON.JSONTokenType;
-
 using RT = Parser.Tokens.TokenRuleType;
 
 namespace Specification.JSON;
@@ -31,26 +29,26 @@ public static class Definition
     IsTextFile = true,
     SC = SCO,
     GroupTokenRules = [
-      new(RT.Recursive, Property, "n:Str x:Co v:Value"),
-      new(RT.Recursive, JTT.Array, "x:Ao va:Value x:Ac"),
-      new(RT.Recursive, JTT.Object, "x:Bo va:Property x:Bc"),
+      new(RT.Recursive, "Property", "n:Str x:Co v:Value"),
+      new(RT.Recursive, "Array", "x:Ao va:Value x:Ac"),
+      new(RT.Recursive, "Object", "x:Bo va:Property x:Bc"),
     ],
-    TokenType = typeof(JTT),
+    TokenType = typeof(string),
     TokenCompatLookup = {
-      [Value] = [Null, Bool, JTT.Array, Undef, Num, Str, JTT.Object],
+      ["Value"] = ["Null", "Bool", "Array", "Undef", "Num", "Str", "Object"],
     },
     TokenRules = [
-      new(RT.Competitive, Str, $"\"{Gp(@"[^\\]|\\.").Any.Lazy}\""),
-      new(RT.TokenMatch, Num, @"-?(\d+(\.\d*)?|\.\d+)"),
+      new(RT.Competitive, "Str", $"\"{Gp(@"[^\\]|\\.").Any.Lazy}\""),
+      new(RT.TokenMatch, "Num", @"-?(\d+(\.\d*)?|\.\d+)"),
       .. TokenRule.MakeWordMatchRules(false, [
-        ("true", Bool),
-        ("false", Bool),
-        ("null", Null),
-        ("undefined", Undef)
+        ("true", "Bool"),
+        ("false", "Bool"),
+        ("null", "Null"),
+        ("undefined", "Undef")
       ]),
-      .. TokenRule.MakeSingleCharRules("{}[]:,", RT.TokenExact, new Collection<JTT>() {Bo,Bc,Ao,Ac,Co,Cm}),
-      new(RT.ErrorMatch, None, @"}(?=[^}]*\z)\s*(?<error_pos>\S[\s\S]*?)\s*\z"),
-      new(RT.ErrorMatch, None, @"[]}](?=[^}\][{]*[\]\}])\s*(?<error_pos>\,)\s*[\}\]]"),
+      .. TokenRule.MakeSingleCharRules("{}[]:,", RT.TokenExact, "Bo", "Bc", "Ao", "Ac", "Co", "Cm"),
+      new(RT.ErrorMatch, "None", @"}(?=[^}]*\z)\s*(?<error_pos>\S[\s\S]*?)\s*\z"),
+      new(RT.ErrorMatch, "None", @"[]}](?=[^}\][{]*[\]\}])\s*(?<error_pos>\,)\s*[\}\]]"),
       ]
   };
 }

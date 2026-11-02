@@ -124,19 +124,11 @@
             <summary>Assembled: An array dimension.</summary>
             <remarks><c>[43]</c> or <c>[x]</c></remarks>
         </member>
-        <member name="T:Specification.ZDoom.Lang.SndInfo.SndInfoCmdExt">
-            <summary>Static class providing extensions for strings.</summary>
-        </member>
-        <member name="M:Specification.ZDoom.Lang.SndInfo.SndInfoCmdExt.ToSndInfoCmd(System.String)">
-            <summary>Gets the <see cref="T:Specification.ZDoom.Lang.SndInfo.SndInfoTokenType"/> object that the given <see cref="T:System.String"/> represents.</summary>
-            <param name="cmd">The <see cref="T:System.String"/> to interpret.</param>
-            <returns>A <see cref="T:Specification.ZDoom.Lang.SndInfo.SndInfoTokenType"/> enum that represents the given <see cref="T:System.String"/>.</returns>
-        </member>
         <member name="T:Specification.ZDoom.Lang.SndInfo.SndInfoCommand">
             <summary>An abstract sndinfo command.</summary>
             <param name="cmd">The type of command.</param>
         </member>
-        <member name="M:Specification.ZDoom.Lang.SndInfo.SndInfoCommand.#ctor(Specification.ZDoom.Lang.SndInfo.SndInfoTokenType)">
+        <member name="M:Specification.ZDoom.Lang.SndInfo.SndInfoCommand.#ctor(System.String)">
             <summary>An abstract sndinfo command.</summary>
             <param name="cmd">The type of command.</param>
         </member>
@@ -166,7 +158,7 @@
             <param name="cmd">The command.</param>
             <param name="values">The values.</param>
         </member>
-        <member name="M:Specification.ZDoom.Lang.SndInfo.ValueCommand.#ctor(Specification.ZDoom.Lang.SndInfo.SndInfoTokenType,System.Collections.Generic.IEnumerable{System.String})">
+        <member name="M:Specification.ZDoom.Lang.SndInfo.ValueCommand.#ctor(System.String,System.Collections.Generic.IEnumerable{System.String})">
             <summary>Stores a command and its parameters.</summary>
             <param name="cmd">The command.</param>
             <param name="values">The values.</param>

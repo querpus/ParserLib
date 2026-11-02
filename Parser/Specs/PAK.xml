@@ -18,17 +18,17 @@
         <ReadData output_var="lump_size" type="int" cursor_var="current_pos"/>
         <ReadData output_var="lump_data" content_var="bytes" type="binary" length_var="lump_size" position_var="lump_offset"/>
         <AddItem list_var="directory" type="PositionalDataBlock">
-          <Property name="Index" content_var="lump_offset"/>
+          <Property name="Offset" content_var="lump_offset"/>
           <Property name="Name" content_var="lump_name"/>
           <Property name="Data" content_var="lump_data"/>
         </AddItem>
       </ForCount>
       <Terminate success="true"/>
     </Instructions>
-    <EntityInfo>
+    <!--<EntityInfo>
       <EntityDef>
       </EntityDef>
-    </EntityInfo>
+    </EntityInfo>-->
     <FileInferences initial="and">
       <Extension>pak</Extension>
       <Header>PACK</Header>

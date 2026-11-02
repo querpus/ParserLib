@@ -1,4 +1,4 @@
-using Common.Nodes;
+using Parser.Nodes;
 
 namespace Parser.Tokens;
 
@@ -32,11 +32,11 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
   public int Index => _tokens.Count > 0 ? _tokens[0].Index : -1;
   public string ContentNoNewLine => this.ToString();
   string IToken.Content => ToString();
-  string? Common.Nodes.IToken.Value => null;
+  string? Parser.Nodes.IToken.Value => null;
 
-  string? Common.Nodes.IToken.Name => Type;
+  string? Parser.Nodes.IToken.Name => Type;
 
-  Range Common.Nodes.IToken.Position => Children.Count switch
+  Range Parser.Nodes.IToken.Position => Children.Count switch
   {
     < 1 => new(-1, -1),
     1 => Children[0].Position,

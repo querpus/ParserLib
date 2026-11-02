@@ -1,7 +1,7 @@
 #pragma warning disable RE0001 // Invalid regex pattern
 #pragma warning disable CA1720 // Identifier contains type name
 
-using Common.Nodes;
+using Parser.Nodes;
 
 using Parser;
 using Parser.Ops;
@@ -58,7 +58,7 @@ public static class Definition
       new(Competitive, "Comment", "<!--((?!--).)*-->"),
       new (TokenMatch, "Content", "(?<= >)[^<]+(?=<)"),
       new (TokenComment, "None", @"(?<=\>)\s+(?=\<)"),
-      .. TokenRule.MakeSingleCharRules("<>/?;&:=!-", TokenExact, new Collection<string>() { "Ao", "Ac", "Sl", "Qm", "Sc", "An", "Co", "Eq", "Em", "Hy" }),
+      .. TokenRule.MakeSingleCharRules("<>/?;&:=!-", TokenExact, "Ao", "Ac", "Sl", "Qm", "Sc", "An", "Co", "Eq", "Em", "Hy" ),
       new (TokenMatch, "NamespaceAttr", @"\bxmlns\b"),
       new (TokenMatch, "AttrKey", @"\b\w+\b(?=\s*\=)"),
       new (TokenMatch, "Namespace", @"(?<= <\/?\s* )\b\w+\b(?=\:)"),
@@ -82,7 +82,7 @@ public static class Definition
     TokenCompatLookup = {
       ["String"] = ["DString", "SString"],
       ["Attribute"] = ["DocumentNamespace", "AttributeWithNamespace"],
-      ["ValidContent"] = ["Content", "ElementSingleWithNamespace", "ElementSingle", "ElementPair"]
+      ["ValidContent"] = ["Content", "ElementSingle", "ElementPair"]
     },
     Operations = [
       new TokenizeOperation { InputKey = "text", OutputKey = "tokens", Tokenizer = "xparser"},

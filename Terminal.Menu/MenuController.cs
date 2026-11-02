@@ -158,7 +158,7 @@ public static class Controller
     set => Console.CursorVisible = value;
   }
   internal static MenuDefinition? CurrentMenu { get; set; }
-  public static bool IsActive { get; private set; }
+  public static bool IsActive { get; }
   public static void TriggerClose () => IsClosing = true;
 
   public static void Clear (Point origin, Size dimensions)

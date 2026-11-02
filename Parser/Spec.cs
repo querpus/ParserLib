@@ -1,6 +1,6 @@
 #pragma warning disable CA1822 // Mark members as static
 
-using Common.Nodes;
+using Parser.Nodes;
 
 using Parser.Inference;
 
@@ -8,7 +8,7 @@ namespace Parser;
 
 /// <summary>A class containing the operations, requirements, and instructions for reading a file.</summary>
 /// <remarks>This class is immutable, and should never be altered during operation.</remarks>
-public class Spec : IHasTokenRuleSet
+public class Spec : IHasTokenRuleSet, IHasNodeRuleSet
 {
   /// <summary>The name of this Spec.</summary>
   public required string Name { get; init; }
@@ -31,7 +31,7 @@ public class Spec : IHasTokenRuleSet
   public StringComparison SC { get; init; } = SCO;
 
   /// <summary>Define the names of equilivent groups of tokens.</summary>
-  public Dictionary<dynamic, Collection<dynamic>> TokenCompatLookup { get; init; } = [];
+  public Dictionary<string, Collection<string>> TokenCompatLookup { get; init; } = [];
   /// <summary>The default rule that is added to every rule definition.</summary>
   /// <remarks>Useful for adding ignore case to the entire defintion.</remarks>
   public RT DefaultRuleSet { get; init; } = RT.None;

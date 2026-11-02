@@ -1,9 +1,6 @@
 #pragma warning disable CA1710 // Rename Parser.Library to end in either 'Dictionary' or 'Collection'
 
 using System.Xml.Linq;
-using System.Xml.XPath;
-
-using Common.Nodes;
 
 using Parser.Inference;
 
@@ -11,14 +8,7 @@ namespace Parser;
 
 public static class SpecInstructionParser
 {
-  private static readonly XNamespace NS = "Parser/Spec";
-
-  private static bool BooleanParse (string? text, bool value_on_fail) => text is null
-      ? value_on_fail
-      : !text.Like(["false", "0", "no"]) && (text.Like(["true", "1", "yes"])
-      ? true
-      : throw Err.ThrowNoSpec($"Bad Boolean Value Encountered: {text}"));
-
+  private static readonly XNamespace Ns = "Parser/Spec";
   public static IEnumerable<Spec> LoadSpecFile (string path)
   {
     if (Path.GetExtension(path).Like("xml"))
@@ -35,79 +25,94 @@ public static class SpecInstructionParser
   }
   public static IEnumerable<Spec> LoadSpecXML (string path)
   {
-    Collection<Spec> specs = [];
-
-    Log(MsgClass.Debug, $"Loading spec xml file '{path}'", "SpecInstructionParser");
+    ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
     XDocument doc = XDocument.Load(path);
-    XElement root = doc.Root ?? throw Err.ThrowNoSpec("Spec XML is not good.");
-    //DocumentEntity aRoot = EntityFactory.FromXElement(root, null);
-    // ElementEntity bRoot = (ElementEntity) (aRoot.RootNode ?? throw new InvalidDataException("Root node should not be null."));
-    // ElementEntity prefabs = bRoot.Children.OfType<ElementEntity>().Where(i => i.Name == "Prefabs").At(0);
 
-    // if (!bRoot.Name.Is("Definition"))
-    //{
-    //  _ = Err.ThrowNoSpec("Root element must be Definition.");
-    //}
+    IEnumerable<XElement> specElements =
+        doc.Root?
+            .Elements(Ns + "Spec")
+        ?? throw new InvalidDataException(
+            "Definition does not contain a Spec element.");
 
-    // if (prefabs is not null)
-    //{
-    //   IEnumerable<ElementEntity> prefab_tokenRules_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "TokenRule");
-    //    IEnumerable<ElementEntity> prefab_tokenLookups_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "TokenLookup");
-    //   IEnumerable<ElementEntity> prefab_tokenGroups_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "GroupTokenRule");
-    //    IEnumerable<ElementEntity> prefab_constructs_list = prefabs.Children.OfType<ElementEntity>().Where(i => i.Name == "Construct");
-    //}
-
-    foreach (XElement specxml in root.Elements(NS + "Spec"))
+    foreach (XElement specElement in specElements)
     {
-      XElement? xname = specxml.Element(NS + "Name");
-
-      if (xname is null || string.IsNullOrEmpty(xname.Value))
-        Err.ThrowNoSpec("Invalid XML - No Name in Spec.");
-
-      XElement? tokenLookups = specxml.Element(NS + "TokenLookups");
-      XElement? tokenRules = specxml.Element(NS + "TokenRules");
-      string? name = specxml.Element(NS + "Name")!.Value;
-      string? textfile = specxml.Element(NS + "TextFile")?.Value;
-      bool is_textfile = BooleanParse(textfile, false);
-      IEnumerable<XElement>? instructionElements = specxml.Element(NS + "Instructions")?.Elements();
-
-      Collection<IOperation> ops = [];
-      foreach (XElement element in instructionElements ?? [])
+      yield return new Spec
       {
-        IOperation? op = OperationFactory.Produce(element);
-
-        if (op is not null)
-          ops.Add(op);
-        else
-          Log(MsgClass.Warning, $"{element.Name} was null, investigate.", "SpecInstructionParser");
-      }
-
-      XElement? fileInf = specxml.Element(NS + "FileInferences");
-      INode? inf_node_root;
-      ReadOnlyCollection<InferenceNode> inf_final = [];
-      if (fileInf is null)
-      {
-        Log(MsgClass.Warning, $"No file inferences on spec {name}", "SpecInstructionParser");
-      }
-      else
-      {
-        inf_node_root = INodeProcessor.Process<XElementProcessor>(fileInf).Root;
-
-        //TODO: Assign inf_final
-      }
-
-      Spec specobj = new()
-      {
-        Name = name,
-        Operations = [.. ops],
-        FileInferences = inf_final,
-        IsTextFile = is_textfile,
+        Name = GetRequiredString(specElement, "Name"),
+        IsTextFile = GetBool(specElement, "TextFile"),
+        RxOpt = ParseRegex(specElement.Element(Ns + "RegexOptions")?.Value ?? ""),
+        DefaultRuleSet = ParseRuleTypes(specElement.Element(Ns + "DefaultRuleSet")?.Value ?? ""),
+        TokenRules = ParseRules(specElement.Element(Ns + "TokenRules")),
+        GroupTokenRules = ParseRules(specElement.Element(Ns + "GroupTokenRules")),
+        //TokenCompatLookup = ParseTokenLookups(specElement.Element(Ns + "TokenLookups")),
+        FileInferences = [InferenceNodeFactory.Produce(specElement.Element(Ns + "FileInferences"))],
+        Operations = [.. specElement.Element(Ns + "Instructions")?.Elements()?.Select(OperationFactory.Produce).Where(c => c is not null).Cast<IOperation>() ?? []]
       };
+    }
+  }
+  private static string GetRequiredString (XElement parent, string name) =>
+    parent.Element(Ns + name)?.Value.Trim()
+        ?? throw new InvalidDataException($"Missing required element '{name}'.");
 
-      specs.Add(specobj);
+  private static bool GetBool (XElement parent, string name, bool defaultIfAbsent = false, bool defaultIfEmpty = true)
+  {
+    XElement? node = parent.Element(Ns + name);
+
+    if (node is null) // Absent
+      return defaultIfAbsent;
+
+    if (node.Value.IsEmpty) // Empty
+      return defaultIfEmpty;
+
+    return bool.Parse(node.Value);
+  }
+
+  private static TokenRuleCollection ParseRules (XElement? rulesElement)
+  {
+    TokenRuleCollection result = [];
+
+    if (rulesElement == null)
+      return result;
+
+    foreach (XElement rule in rulesElement.Elements(Ns + "Rule"))
+    {
+      string type = rule.Element(Ns + "Type")?.Value ?? "None";
+      string assign = rule.Element(Ns + "TypeToAssign")?.Value ?? "None";
+      string data = rule.Element(Ns + "Data")?.Value.Trim() ?? "";
+
+      try
+      {
+        result.Add(new TokenRule(ParseRuleTypes(type), assign, data));
+      }
+      catch (OperationBadDefinitionException ex)
+      {
+        Log(MsgClass.Warning, $"Failed to parse rule {assign}: {ex.Message}", "SpecInstructionParser");
+      }
     }
 
-    return specs;
+    return result;
   }
+
+  private static RegexOptions ParseRegexOption (string opt) => opt switch
+  {
+    "IgnoreCase" => RegexOptions.IgnoreCase,
+    "Multiline" => RegexOptions.Multiline,
+    "Singleline" => RegexOptions.Singleline,
+    "IgnorePatternWhitespace" => RegexOptions.IgnorePatternWhitespace,
+    "ExplicitCapture" => RegexOptions.ExplicitCapture,
+    _ => throw Err.ThrowBadDef($"Invalid regex option {opt}")
+  };
+
+  private static RegexOptions ParseRegex (string value) => value.
+    Split(' ', SSORT).
+    Aggregate(
+      RegexOptions.None,
+      (current, token) => current | ParseRegexOption(token));
+
+  private static RT ParseRuleTypes (string value) => value.
+    Split(' ', SSORT).
+    Aggregate(
+      RT.None,
+      (current, token) => current | (Enum.TryParse(token, true, out RT result) ? result : throw Err.ThrowBadDef($"Invalid value {value}")));
 }

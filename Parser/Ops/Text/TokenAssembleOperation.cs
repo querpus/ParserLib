@@ -25,7 +25,7 @@ public class TokenAssembleOperation : Operation
   protected override void Execute ()
   {
     TokenAssembler assembler = Rules.IsEmpty ? new(Spec) : new([.. Rules], Spec);
-    if (Data[InputKey] is TokenCollection tc)
+    if (Data[InputKey] is IEnumerable<IToken> tc)
     {
       Data[OutputKey] = assembler.Execute(tc);
       Status = OpStatus.Pass;

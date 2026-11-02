@@ -9,7 +9,7 @@ namespace Specification.ZDoom;
 public static class Definition
 {
   // Common Rules (No Backtracking, Very Efficient Atomic Groups)
-  private static readonly TokenRule s_cLineComment = new(RT.TokenComment, "None", @"(?>\/\/[^\n]*)");
+  private static readonly TokenRule s_cLineComment = new(RT.TokenComment, "None", @"(?>\/\/[^\n\r\v]*)");
   private static readonly TokenRule s_cBlkComment = new(RT.TokenComment, "None", @"(?>\/\*(?>[^*]|\*[^\/])*\*\/)");
   private static readonly TokenRule s_cString = new(RT.Competitive, "String", @"(?>""(?>[^""\\]|\\"")*"")");
   private static readonly TokenRule s_char = new(RT.Competitive, "Char", @"(?>'(?>[^'\\]|\\')*')");
@@ -18,7 +18,8 @@ public static class Definition
   private static readonly TokenRule s_langref = new(RT.Competitive, "LangRef", @"(?>""\$\w+"")");
   private static readonly TokenRule s_classname = new(RT.TokenMatch, "Classname", "Actor|Ammo|Clip|(Red|Blue|Yellow)Card|Health|Armor(Bonus)?|(Blue|Green)Armor|(Caco|Cyber)?demon|Imp|Shells|Rocket(Box)?|(Custom)?Inventory|FastProjectile|DoomPlayer|MapSpot|DoomImp|Zombieman|ShotgunGuy");
   private static readonly TokenRule s_name = new(RT.TokenMatch, "Name", @"[\w]+");
-  private static readonly TokenRule[] s_op_pba = TokenRule.MakeSingleCharRules("[]{}()", RT.TokenExact, new string[] { "Ao", "Ac", "Bo", "Bc", "Po", "Pc" });
+  private static readonly TokenRule s_nameWithDot = new(RT.TokenMatch, "NameWithDot", @"\w+(\.\w+)+");
+  private static readonly TokenRule[] s_op_pba = TokenRule.MakeSingleCharRules("[]{}()", RT.TokenExact, "Ao", "Ac", "Bo", "Bc", "Po", "Pc");
 
   /// <summary>https://regex101.com/r/En5C8c/7</summary>
   [DefinitionExport]
@@ -34,11 +35,10 @@ public static class Definition
     SC = SCOIC,
     TokenCompatLookup = new()
     {
-      [ZT.FrameLump] = [ZT.String, ZT.Name],
-      [ZT.StateCmd] = [ZT.GotoCmd, ZT.LoopCmd, ZT.BasicCmd],
-      [ZT.StateEntry] = [ZT.StateCmd, ZT.State, ZT.FrameDef]
+      ["StateCmd"] = ["GotoCmd", "LoopCmd", "BasicCmd"],
+      ["StateEntry"] = ["StateCmd", "State", "FrameDef"]
     },
-    TokenType = typeof(ZT),
+    TokenType = typeof(string),
     DefaultRuleSet = RT.IgnoreCase,
     TokenRules = [
       s_cLineComment,
@@ -46,7 +46,7 @@ public static class Definition
       s_langref,
       s_cString,
       new(RT.TokenMatch, "FlagName", @"(?<=\+|\-)[\w.]+"),
-      .. TokenRule.MakeSingleCharRules("{}();=,:+-", RT.TokenExact, new ZT[] { ZT.Bo, ZT.Bc, ZT.Po, ZT.Pc, ZT.Sc, ZT.Eq, ZT.Cm, ZT.Co, ZT.Pl, ZT.Mn }),
+      .. TokenRule.MakeSingleCharRules("{}();=,:+-", RT.TokenExact, "Bo", "Bc", "Po", "Pc", "Sc", "Eq", "Cm", "Co", "Pl", "Mn"),
       s_int,
       s_dec,
       .. TokenRule.MakeWordMatchRules(true, [
@@ -61,12 +61,23 @@ public static class Definition
         "states","default",
 
       ]),
+      s_nameWithDot,
       s_classname,
       s_name
     ],
     GroupTokenRules = [
-     new(ZT.FrameDef, "n:(name|String) v:Name v:Num fo:Bright "),
-     new(ZT.AddFlag, "f:Pl n:FlagName")
+      new("ClassHeader_Replaces", "x:Replaces v:(Name|String)"),
+      new("ClassHeader", "x:class n:(Name|String) x:Co t:(Name|String) lo:ClassHeader_Replaces ro:Int"),
+      new("ClassHeader", "x:class n:(Name|String) lo:ClassHeader_Replaces ro:Int"),
+
+      new("FrameDef", "n:(Name|String) v:Name v:Num fo:Bright x:Sc"),
+      new("AddFlag", "f:Pl n:FlagName x:Sc"),
+      new("SubFlag", "s:Mn n:FlagName x:Sc"),
+
+      new("State", "n:Name|NameWithDot x:Co"),
+
+      new("StatesBlock_Open", "x:States x:Bo"),
+      new("StateBlock", "x:StatesBlockOpen sa:StateEntry x:Bc")
       ]
   };
 
@@ -85,31 +96,31 @@ public static class Definition
       s_cString,
       s_cLineComment,
       s_cBlkComment,
-      .. TokenRule.MakeSingleCharRules("{}=;", RT.TokenExact, new UT[] {UT.Bo, UT.Bc, UT.Eq, UT.Sc}),
-      new(RT.TokenMatch, UT.Bool,  @"\b(true|false)\b"),
+      .. TokenRule.MakeSingleCharRules("{}=;", RT.TokenExact, "Bo", "Bc", "Eq", "Sc"),
+      new(RT.TokenMatch, "Bool",  @"\b(true|false)\b"),
       s_dec,
-      .. TokenRule.MakeWordMatchRules(true, UT.Namespace, UT.Vertex, UT.Thing, UT.SideDef, UT.LineDef),
-      new(RT.TokenMatch, UT.Sector, @"\bsector\b(?=[^=}]*\{)"),
-      new(RT.TokenMatch, UT.Name, @"\b[a-z]\w*\b"),
-      new(RT.StoreExtra | RT.IgnoredToken, UT.None, @"\s+"),
-      new(RT.StoreOther, UT.Value, SE)],
+      .. TokenRule.MakeWordMatchRules(true, "Namespace", "Vertex", "Thing", "SideDef", "LineDef"),
+      new(RT.TokenMatch, "Sector", @"\bsector\b(?=[^=}]*\{)"),
+      new(RT.TokenMatch, "Name", @"\b[a-z]\w*\b"),
+      new(RT.StoreExtra | RT.IgnoredToken, "None", @"\s+"),
+      new(RT.StoreOther, "Value", SE)],
     GroupTokenRules = [
-      new(UT.NamespaceDec, "n:Namespace x:Eq v:String x:Sc"),
-      new(UT.Property, "n:Name x:Eq v:Value x:Sc"),
-      new(UT.Structure, "n:Vertex x:Bo pm:Property x:Bc"),
-      new(UT.Structure, "n:Thing x:Bo pm:Property x:Bc"),
-      new(UT.Structure, "n:Sector x:Bo pm:Property x:Bc"),
-      new(UT.Structure, "n:LineDef x:Bo pm:Property x:Bc"),
-      new(UT.Structure, "n:SideDef x:Bo pm:Property x:Bc"),
+      new("NamespaceDec", "n:Namespace x:Eq v:String x:Sc"),
+      new("Property", "n:Name x:Eq v:Value x:Sc"),
+      new("Structure", "n:Vertex x:Bo pm:Property x:Bc"),
+      new("Structure", "n:Thing x:Bo pm:Property x:Bc"),
+      new("Structure", "n:Sector x:Bo pm:Property x:Bc"),
+      new("Structure", "n:LineDef x:Bo pm:Property x:Bc"),
+      new("Structure", "n:SideDef x:Bo pm:Property x:Bc"),
       ],
     SC = SCOIC,
     IsTextFile = true,
-    TokenType = typeof(UT),
-    TokenCompatLookup = new Dictionary<dynamic, Collection<dynamic>>()
+    TokenType = typeof(string),
+    TokenCompatLookup = new Dictionary<string, Collection<string>>()
     {
-      [UT.Keyword] = [UT.Vertex, UT.Thing, UT.Sector, UT.LineDef, UT.SideDef],
-      [UT.Op] = [UT.Eq, UT.Sc, UT.Bo, UT.Bc],
-      [UT.Value] = [UT.Bool, UT.Dec, UT.String],
+      ["Keyword"] = ["Vertex", "Thing", "Sector", "LineDef", "SideDef"],
+      ["Op"] = ["Eq", "Sc", "Bo", "Bc"],
+      ["Value"] = ["Bool", "Dec", "String"],
     },
   };
   /// <summary>This is the specification for the SndInfo ZDoom lump.</summary>
@@ -125,7 +136,7 @@ public static class Definition
       )
     ],
     IsTextFile = true,
-    TokenType = typeof(SndIT),
+    TokenType = typeof(string),
     SC = SCOIC,
     TokenRules = [
       s_cString,
@@ -158,32 +169,32 @@ public static class Definition
     ],
     RxOpt = ROIC | ROEC | ROML,
     IsTextFile = true,
-    TokenType = typeof(MT),
+    TokenType = typeof(string),
     TokenRules = [
       s_langref,
       s_cString,
       s_cLineComment,
       s_cBlkComment,
-      .. TokenRule.MakeSingleCharRules("{}()=;,", RT.TokenExact, MT.Op),
+      .. TokenRule.MakeSingleCharRules("{}()=;,", RT.TokenExact, "Op"),
       .. TokenRule.MakeWordMatchRules(true,
-        MT.Doomednums, MT.AddDefaultMap, MT.GameInfo,
-        MT.Skill, MT.Map, MT.DamageType, MT.Episode,
-        MT.Cluster, MT.Include, MT.Intermission,
-        MT.Cast, MT.Fader, MT.GotoTitle, MT.Image,
-        MT.Scroller, MT.TextScreen, MT.Wiper, MT.Cutscene),
-      new (RT.TokenMatch, MT.PropertyName, @"\b(Background2?|Draw(Conditional)?|Music|Sound|Time|Cast(Class|Name)|AttackSound|FadeType|InitialDelay|Scroll(Direction|Time)|WipeType)\b | \b(\d+|\w+)\b(?=\s*=)"),
+        "Doomednums", "AddDefaultMap", "GameInfo",
+        "Skill", "Map", "DamageType", "Episode",
+        "Cluster", "Include", "Intermission",
+        "Cast", "Fader", "GotoTitle", "Image",
+        "Scroller", "TextScreen", "Wiper", "Cutscene"),
+      new (RT.TokenMatch, "PropertyName", @"\b(Background2?|Draw(Conditional)?|Music|Sound|Time|Cast(Class|Name)|AttackSound|FadeType|InitialDelay|Scroll(Direction|Time)|WipeType)\b | \b(\d+|\w+)\b(?=\s*=)"),
       s_int,
       s_dec,
-      new (RT.TokenMatch, MT.Name, @"\b\w+\b"),
+      new (RT.TokenMatch, "Name", @"\b\w+\b"),
     ],
     GroupTokenRules = [
-      new (MT.Property, "n:PropertyName x:Op{=} v:Value xo:Op{,} vo:Value xo:Op{,} vo:value")
+      new ("Property", "n:PropertyName x:Op{=} v:Value xo:Op{,} vo:Value xo:Op{,} vo:value")
     ],
     SC = SCOIC,
     TokenCompatLookup = {
-      [MT.Value] = [MT.Int, MT.Dec, MT.String, MT.Char, MT.Bool, MT.Name],
-      [MT.String] = [MT.LangRef],
-      [MT.Dec] = [MT.Int]
+      ["Value"] = ["Int", "Dec", "String", "Char", "Bool", "Name"],
+      ["String"] = ["LangRef"],
+      ["Dec"] = ["Int"]
     },
   };
 
@@ -214,15 +225,31 @@ public static class Definition
       .. TokenRule.MakeWordMatchRules(true, "bright"),
       /* Symbols */
       .. s_op_pba,
-      .. TokenRule.MakeSingleCharRules("=+-*/", RT.TokenExact, new string[] {
-        "Eq", "Pl", "Mi", "Mu", "Sl"}),
+      .. TokenRule.MakeSingleCharRules("=+-*/", RT.TokenExact, "Eq", "Pl", "Mi", "Mu", "Sl"),
       new(RT.TokenMatch, "StateName", @"\b[\w\.-]+(?=\:)"),
       new(RT.TokenMatch, "FlagName", @"(?<=[+-])[\w.]+\b"),
       new(RT.TokenMatch, "Sprite_FrameDef", @"^(?<=\s*)""?[\w\/\\\?]{4}""?"),
       new(RT.TokenMatch, "Frame_FrameDef", @"(?<=^\s*""?\w{4}""?)\s+[a-z]+" ),
+
+      s_langref,
+      s_nameWithDot,
+      s_classname,
+      s_name,
+      s_int,
+      s_dec,
     ],
     GroupTokenRules = [
-      new("", "")
+      new("ClassHeader_Replaces", "x:Replaces v:(Name|String)"),
+      new("ClassHeader", "x:actor n:(Name|String) x:Co t:(Name|String) lo:ClassHeader_Replaces ro:Int"),
+      new("ClassHeader", "x:actor n:(Name|String) lo:ClassHeader_Replaces ro:Int"),
+
+      new("FrameDef", "n:(Name|String) v:Name v:Num fo:Bright"),
+      new("AddFlag", "f:Pl n:FlagName"),
+      new("SubFlag", "s:Mn n:FlagName"),
+
+      new("State", "n:Name|NameWithDot x:Co"),
+
+      new("StatesBlock", "x:States x:Bo sa:StateEntry x:Bc")
     ]
   };
 
@@ -235,7 +262,7 @@ public static class Definition
   {
     FileInferences = [IfN(ExtIs, "acs")],
     Name = "zdoom.acs",
-    RxOpt = ROML | ROIC | ROIPW | ROEC | ROSL,
+    RxOpt = ROML | ROIC | ROIPW | ROEC | ROSL | ROCI,
     Operations = [
       new TokenizeOperation{ InputKey = "text", OutputKey = "tokens" , Tokenizer = "xparser" },
       new TokenAssembleOperation { InputKey = "tokens", OutputKey = "tokens_assembled" },
@@ -243,7 +270,7 @@ public static class Definition
     ],
     IsTextFile = true,
     SC = SCOIC,
-    TokenType = typeof(AT),
+    TokenType = typeof(string),
     DefaultRuleSet = RT.IgnoreCase,
     TokenCompatLookup = {
       ["Value"]     = ["Int", "Char", "String", "Dec", "Expression", "ExprName", "FunctionCall", "ArrayValue", "ExpressionStandalone"],
@@ -295,27 +322,27 @@ public static class Definition
       Tm("Binary", @"(&&| \|\| |<<|>>)(?!=)"),
       .. TokenRule.MakeSingleCharRules("+/%|&^*><", RT.TokenExact , "Binary"),
       .. s_op_pba,
-      .. TokenRule.MakeSingleCharRules("=,:;#-", RT.TokenExact , op_token_types),
+      .. TokenRule.MakeSingleCharRules("=,:;#-", RT.TokenExact , [.. op_token_types]),
 
       // Data Types
       Tm("Type", @"\b(int|str|char|bool)\b"),
 
       // Names
-      Tm("FuncDefName", @"(?<=function\s*\w+\s*) (?>[a-z_]\w*)"),
-      Tm("FuncName", @"(?>[a-z_]\w*) (?=\s*\()"),
-      Tm("VarName", @"(?<= (int|str|bool|char) \s+ ( \w+\s*\,\s* )*) (?>[a-z_]\w*) (?!\s*\(|\s*,\s*(int|bool|str|char)) (?=\s*(;|\=|,))"),
-      Tm("ArrVarName", @"(?<= (int|str|bool|char) \s+) (?>[a-z_]\w*) (?!\s*\() (?=\s*(\[))"),
-      Tm("ParamName", @"(?<= (int|str|bool|char) \s+) (?>[a-z_]\w*) (?!\s*\()"),
-      Tm("DefineName", @"(?<= \#\w+\s+) (?>[a-z_]\w*)"),
-      Tm("PreProcName", @"(?<= \#) (?>[a-z]+)"),
-      Tm("ExprName", @"\b[a-z_]\w*\b"),
+      Tm("FuncDefName",   @"(?<= \bfunction\s*\w+\s*) (?>[a-z_]\w*)"),
+      Tm("FuncName",      @"(?>[a-z_]\w*) (?=\s*\()"),
+      Tm("VarName",       @"(?<= \b(int|str|bool|char) \s+ ( \w+\s*\,\s* )*) (?>[a-z_]\w*) (?!\s*\(|\s*,\s*(int|bool|str|char)) (?=\s*(;|\=|,))"),
+      Tm("ArrVarName",    @"(?<= \b(int|str|bool|char) \s+) (?>[a-z_]\w*) (?=\s*\[)"),
+      Tm("ParamName",     @"(?<= \b(int|str|bool|char) \s+) (?>[a-z_]\w*) (?!\s*\()"),
+      Tm("DefineName",    @"(?<= \#\w+\s+) (?>[a-z_]\w*)"),
+      Tm("PreProcName",   @"(?<= \#) (?>[a-z]+)"),
+      Tm("ExprName",      @"\b[a-z_]\w*\b"),
       new TokenRule(RT.StoreExtra | RT.IgnoredToken, "ws", "\\s+"),
-      new TokenRule(RT.StoreOther, "unmatched")
+      new TokenRule(RT.StoreOther, typeToAssign: "unmatched", SE)
     ],
     GroupTokenRules = [
       // Parameter Expressions
-      new(RT.None, "ParamDef",                   "t:Type n:ParamName xo:Cm"),
-      new(RT.None, "PrintParameterValue",        "t:Name{s|i} x:Co qa:Value xo:Cm"),
+      new(              "ParamDef",               "t:Type n:ParamName xo:Cm"),
+      new(              "PrintParameterValue",    "t:Name{s|i} x:Co qa:Value xo:Cm"),
 
       // Expressions
       new(RT.Recursive, "ArrayDim",               "x:Ao v:Value x:Ac"),
@@ -329,23 +356,23 @@ public static class Definition
       new(RT.Recursive, "FunctionCall",           "n:FuncName x:Po q:Value xo:Cm qo:Value xo:Cm qo:Value xo:Cm qo:Value xo:Cm qo:Value xo:Cm qo:Value x:Pc"),
       new(RT.Recursive, "FunctionCall",           "n:FuncName x:Po x:Pc"),
 
-      new(RT.None, "ScriptCallStmt",              "n:ScriptFunc x:Po q:Value x:Cm q:Value xa:Cm qa:Value xa:Cm qa:Value xa:Cm qa:Value x:Pc x:Sc"),
+      new(              "ScriptCallStmt",         "n:ScriptFunc x:Po q:Value x:Cm q:Value xa:Cm qa:Value xa:Cm qa:Value xa:Cm qa:Value x:Pc x:Sc"),
 
-      new(RT.None, "Preprocessor",                "x:Pre ti:PreProcName{(lib)?define} n:DefineName v:Value"),
-      new(RT.None, "Preprocessor",                "x:Pre ti:PreProcName{i(mport|nclude)|library} v:String"),
+      new(              "Preprocessor",           "x:Pre ti:PreProcName{(lib)?define} n:DefineName v:Value"),
+      new(              "Preprocessor",           "x:Pre ti:PreProcName{i(mport|nclude)|library} v:String"),
 
       // Statements
-      new(RT.None, "VarDecl",                     "t:Type n:VarName x:Sc"),
-      new(RT.None, "VarDeclAssn",                 "t:Type n:VarName x:Eq v:Value x:Sc"),
-      new(RT.None, "VarAssn",                     "l:(ArrayValue|ExprName) c:(Eq|Assign) r:Value x:Sc"),
-      new(RT.None, "ArrayDecl",                   "t:Type n:ArrVarName vm:ArrayDim x:Sc"),
-      new(RT.None, "BasicCmd",                    "n:SimpleJump x:Sc"),
-      new(RT.None, "ReturnStmt",                  "n:Return x:Sc"),
-      new(RT.None, "ReturnStmt",                  "n:Return v:Value x:Sc"),
-      new(RT.None, "WaitStmt",                    "t:Wait x:Po p:Value x:Pc x:Sc"),
-      new(RT.None, "FunctionCallStmt",            "d:FunctionCall x:Sc"),
-      new(RT.None, "CaseLabel",                   "x:Case n:Value x:Co"),
-      new(RT.None, "CaseLabel",                   "n:Default x:Co"),
+      new(              "VarDecl",                "t:Type n:VarName x:Sc"),
+      new(              "VarDeclAssn",            "t:Type n:VarName x:Eq v:Value x:Sc"),
+      new(              "VarAssn",                "l:(ArrayValue|ExprName) c:(Eq|Assign) r:Value x:Sc"),
+      new(              "ArrayDecl",              "t:Type n:ArrVarName vm:ArrayDim x:Sc"),
+      new(              "BasicCmd",               "n:SimpleJump x:Sc"),
+      new(              "ReturnStmt",             "n:Return x:Sc"),
+      new(              "ReturnStmt",             "n:Return v:Value x:Sc"),
+      new(              "WaitStmt",               "t:Wait x:Po p:Value x:Pc x:Sc"),
+      new(              "FunctionCallStmt",       "d:FunctionCall x:Sc"),
+      new(              "CaseLabel",              "x:Case n:Value x:Co"),
+      new(              "CaseLabel",              "n:Default x:Co"),
 
       new(RT.Recursive, "IfBlock",                "x:If x:Po v:Value x:Pc x:Bo sa:(Stmt|Block) x:Bc"),
       new(RT.Recursive, "IfBlock",                "x:If x:Po v:Value x:Pc s:(Stmt|Block)"),
@@ -359,15 +386,15 @@ public static class Definition
       new(RT.Recursive, "ForHeader",              "x:For x:Po qo:(VarAssn|VarDeclAssn) x:Sc qo:Value x:Sc qo:Value x:Pc"),
       new(RT.Recursive, "ForBlock",               "d:ForHeader x:Bo sa:(Stmt|Block) x:Bc"),
 
-      new(RT.None, "FunctionHeader",              "x:Function t:(Type|Void) n:FuncDefName x:Po q:Void x:Pc"),
-      new(RT.None, "FunctionHeader",              "x:Function t:(Type|Void) n:FuncDefName x:Po qm:ParamDef x:Pc"),
-      new(RT.None, "FunctionFull",                "d:FunctionHeader x:Bo sa:(FuncStmt|Block) x:Bc"),
+      new(              "FunctionHeader",         "x:Function t:(Type|Void) n:FuncDefName x:Po q:Void x:Pc"),
+      new(              "FunctionHeader",         "x:Function t:(Type|Void) n:FuncDefName x:Po qm:ParamDef x:Pc"),
+      new(              "FunctionFull",           "d:FunctionHeader x:Bo sa:(FuncStmt|Block) x:Bc"),
 
-      new(RT.None, "ScriptHeader",                "x:Script n:Value ti:ScriptType{lightning} x:Po q:ParamDef x:Pc"),
-      new(RT.None, "ScriptHeader",                "x:Script n:Value t:(ScriptType|Return)"),
-      new(RT.None, "ScriptHeader",                "x:Script n:Value x:Po qa:ParamDef x:Pc"),
-      new(RT.None, "ScriptHeader",                "x:Script n:Value x:Po q:Void x:Pc"),
-      new(RT.None, "ScriptFull",                  "d:ScriptHeader x:Bo sa:(Stmt|Block) x:Bc"),
+      new(              "ScriptHeader",           "x:Script n:Value ti:ScriptType{lightning} x:Po q:ParamDef x:Pc"),
+      new(              "ScriptHeader",           "x:Script n:Value t:(ScriptType|Return)"),
+      new(              "ScriptHeader",           "x:Script n:Value x:Po qa:ParamDef x:Pc"),
+      new(              "ScriptHeader",           "x:Script n:Value x:Po q:Void x:Pc"),
+      new(              "ScriptFull",             "d:ScriptHeader x:Bo sa:(Stmt|Block) x:Bc"),
     ],
   };
   [DefinitionExport]
@@ -380,7 +407,7 @@ public static class Definition
     RxOpt = ROML | ROIC | ROIPW | ROEC,
     SC = SCOIC,
     IsTextFile = true,
-    TokenType = typeof(MdlT),
+    TokenType = typeof(string),
     GroupTokenRules = [
       //TODO: Start Group Defs
     ],
@@ -390,7 +417,7 @@ public static class Definition
       s_cLineComment,
       s_cBlkComment,
       .. s_op_pba,
-      .. TokenRule.MakeSingleCharRules("=,;", RT.TokenExact ,new MdlT[] { MdlT.Eq, MdlT.Cm, MdlT.Sc }),
+      .. TokenRule.MakeSingleCharRules("=,;", RT.TokenExact , "Eq", "Cm", "Sc" ),
     ],
     Operations = [
       new TokenizeOperation{ InputKey = "text", OutputKey = "tokens" , Tokenizer = "xparser" },
@@ -410,7 +437,7 @@ public static class Definition
     RxOpt = ROML | ROIC | ROIPW | ROEC,
     SC = SCOIC,
     IsTextFile = true,
-    TokenType = typeof(MdlT),
+    TokenType = typeof(string),
     GroupTokenRules = [
       //TODO: Start Group Defs
     ],
@@ -419,7 +446,7 @@ public static class Definition
       s_cLineComment,
       s_cBlkComment,
       .. s_op_pba,
-      .. TokenRule.MakeSingleCharRules("=,;", RT.TokenExact ,new MdlT[] { MdlT.Eq, MdlT.Cm, MdlT.Sc }),
+      .. TokenRule.MakeSingleCharRules("=,;", RT.TokenExact , "Eq", "Cm", "Sc" ),
     ],
     Operations = [
       new TokenizeOperation { InputKey = "text", OutputKey = "tokens", Tokenizer="xparser" },

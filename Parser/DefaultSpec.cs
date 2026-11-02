@@ -20,6 +20,17 @@ public static class DefaultSpec
     ]
   };
 
+  /// <summary>Splits a <see langword="string"/> on newlines into a <see cref="Collection{T}"/> of <see langword="string"/> objects.</summary>
+  [DefinitionExport]
+  public static Spec Unknown { get; } = new()
+  {
+    FileInferences = [],
+    Name = "Unknown",
+    Operations = [
+      new SplitOperation("text", "result")
+    ]
+  };
+
   public static Spec SpecLoader { get; } = new()
   {
     FileInferences = [new(ExtIs, "spec")],

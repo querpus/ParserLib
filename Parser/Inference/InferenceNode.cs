@@ -1,4 +1,6 @@
-using Common.Nodes;
+using System.Xml.Linq;
+
+using Parser.Nodes;
 
 namespace Parser.Inference;
 
@@ -10,8 +12,20 @@ public static class InferenceNodeFactory
 
     return new InferenceNodeGroup(children.Select(Produce), type);
   }
-  public static InferenceNode Produce (XMLElementNode root)
+  public static InferenceNode Produce (XElement? element)
   {
+    if (element is null)
+      return new InferenceNodeGroup(IT.Or);
+    var tokens = new CaptureTokenizer().Tokenize(element.ToString());
+    var tp = new CaptureTokenProcessor(tokens, StandardRuleSets.XMLRuleSet);
+    tp.Process();
+    return Produce(tp.Context?.Root as XMLElementNode);
+  }
+  public static InferenceNode Produce (XMLElementNode? root)
+  {
+    if (root is null)
+      return new InferenceNodeGroup(IT.Or);
+
     InferenceNode result;
     if (root.LocalName == "FileInferences")
     {
@@ -44,8 +58,7 @@ public static class InferenceNodeFactory
       {
         "Extension" => IT.Ext
       };
-      InferenceNode node = new(type, root.Children.Serialize());
-      result = node;
+      result = new(type, root.Children.Serialize());
     }
     return result;
   }
@@ -59,7 +72,6 @@ public record InferenceNode (IT Type, string Content)
   /// <exception cref="InvalidFileInferenceException"></exception>
   public virtual bool CheckFile (string filepath)
   {
-    DebugIn(nameof(InferenceNode), nameof(CheckFile));
     string getHeader ()
     {
       byte[] bytes;
@@ -82,8 +94,7 @@ public record InferenceNode (IT Type, string Content)
     bool
       useSize = false;
 
-    StringComparison
-      caseCheck = SCOIC;
+    StringComparison caseCheck = SCOIC;
 
     long
       size = new FileInfo(filepath).Length;
@@ -134,6 +145,6 @@ public record InferenceNode (IT Type, string Content)
         result = size < long.Parse(Content, CIIC);
     }
 
-    return not ? !result : result;
+    return result ^ not;
   }
 }
