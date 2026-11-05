@@ -66,7 +66,7 @@ public sealed class ChkToken
       prefix = m.Groups["prefix"].Value;
       assnTo = GetTokenRef(prefix);
     }
-    Collection<string> allowed_types = [];
+    HashSet<string> allowed_types = [];
     string regex_validator = SE;
 
     //Automatically assign ignore case if the spec declares it.
@@ -88,19 +88,19 @@ public sealed class ChkToken
     if (m.Groups.ContainsKey("type_def"))
     {
       foreach (Capture c in m.Groups["type_def"].Captures)
-        allowed_types.Add(c.Value);
+        _ = allowed_types.Add(c.Value);
     }
 
     if (m.Groups.ContainsKey("literal_def"))
       regex_validator = m.Groups["literal_def"].Value;
 
-    Collection<string> expanded_types = spec is null ? allowed_types : AllAllowedTypes(allowed_types, spec);
+    HashSet<string> expanded_types = spec is null ? allowed_types : AllAllowedTypes(allowed_types, spec);
 
     return new()
     {
       CustomPropertyName = prop,
       RegexValidator = regex_validator,
-      AllowedTypes = expanded_types,
+      AllowedTypes = [.. expanded_types],
       TokenRule = rule,
       AssignTo = assnTo,
     };
@@ -136,7 +136,7 @@ public sealed class ChkToken
   /// <param name="types">The initially allowed types.</param>
   /// <param name="spec">The <see cref="Spec"/> to lookup from.</param>
   /// <returns>A list of all the allowed token types.</returns>
-  internal static Collection<string> AllAllowedTypes (IEnumerable<string> types, Spec spec)
+  internal static HashSet<string> AllAllowedTypes (IEnumerable<string> types, Spec spec)
   {
     HashSet<string> all_types_allowed = [.. types];
 
@@ -144,9 +144,8 @@ public sealed class ChkToken
     {
       if (spec.TokenCompatLookup.Keys.Any(i => i.Equals(item, SCOIC)))
       {
-        dynamic key = spec.TokenCompatLookup.Keys.Single(i => i.Equals(item, SCOIC));
-        Collection<string> list = spec.TokenCompatLookup[key];
-        foreach (string? s in list)
+        string key = spec.TokenCompatLookup.Keys.Single(i => i.Equals(item, SCOIC));
+        foreach (string? s in spec.TokenCompatLookup[key])
         {
           if (s is null) continue;
 
@@ -154,7 +153,7 @@ public sealed class ChkToken
 
           if (added)
           {
-            all_types_allowed = [.. AllAllowedTypes(all_types_allowed, spec)];
+            all_types_allowed = AllAllowedTypes(all_types_allowed, spec);
           }
         }
       }

@@ -8,5 +8,4 @@ public interface IToken : IIndexSortable, ISerializable
   string? Value { get; }
   /// <summary>The name or type of this token.</summary>
   string? Name { get; }
-  Range Position { get; }
 }

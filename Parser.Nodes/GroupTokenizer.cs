@@ -3,8 +3,6 @@
 #pragma warning disable IDE1006 // Naming Styles
 
 
-using static Common.Debug;
-
 namespace Parser.Nodes;
 
 /// <summary>Creates a token for every group in each match. Multiple captures are stored as an array of string data.</summary>
@@ -41,7 +39,7 @@ public class GroupTokenizer : ITokenizer<IToken>
               Value = cap.Value,
               Name = groupName,
               CaptureIndex = i,
-              Position = cap.Index..(cap.Index + cap.Length)
+              Index = cap.Index
             };
             Tokens.Add(token);
             Log(MsgClass.GreenInfo, $"{token}", this);

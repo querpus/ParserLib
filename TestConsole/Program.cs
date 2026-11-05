@@ -2,8 +2,8 @@ using System.Collections.ObjectModel;
 
 using Parser.Exceptions;
 using Parser.Nodes;
-using Parser.Tokens;
 
+using IBasicToken = Parser.Nodes.IToken;
 using ResWAD = Specification.WAD.Properties.Resources;
 using ResZDoom = Specification.ZDoom.Properties.Resources;
 using SpecIPL = Specification.IPL.Definition;
@@ -26,7 +26,7 @@ internal sealed class CaptureTokenizerPipeline : ITokenizerPipeline
     IEnumerable<Parser.Nodes.IToken> tokens = tokenizer.Tokenize(input);
     CaptureTokenProcessor processor = new(tokens, node_rules);
     processor.Process();
-    return processor.Context.Nodes;
+    return processor.Context?.Nodes ?? [];
   }
 }
 
@@ -110,10 +110,10 @@ internal static class Program
     string file_xml_errors = File.ReadAllText(FinishPath(Paths.xml_errors));
     string file_ipl_label = File.ReadAllText(FinishPath(Paths.ipl_label));
 
-    static void generic_test<TTokenizer> (string file, NodeRuleSet node_rules, TokenRuleSet token_rules) where TTokenizer : ITokenizer<IToken>, new()
+    static void generic_test<TTokenizer> (string file, NodeRuleSet node_rules, TokenRuleSet token_rules) where TTokenizer : ITokenizer<IBasicToken>, new()
     {
       TTokenizer cTokenizer = new() { Rules = token_rules };
-      IEnumerable<IToken> cTokens = cTokenizer.Tokenize(file);
+      IEnumerable<IBasicToken> cTokens = cTokenizer.Tokenize(file);
       CaptureTokenProcessor cProcessor = new(cTokens, node_rules);
       cProcessor.Process();
       cTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));

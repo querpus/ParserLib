@@ -17,7 +17,6 @@ public sealed class Token : IToken, IPrintable
   public bool HasType => Type is not null;
 
   string? Parser.Nodes.IToken.Name => Type;
-  Range Parser.Nodes.IToken.Position => new(Index, LastPosition);
 
   int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
   public override string ToString () => $"{Type} : {Content}";

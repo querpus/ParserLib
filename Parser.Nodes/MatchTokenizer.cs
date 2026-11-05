@@ -74,7 +74,7 @@ public class MatchTokenizer : ITokenizer<MatchToken>
       {
         Name = name,
         MatchIndex = matchindex,
-        Position = new(match.Index, match.Index + match.Length),
+        Index = match.Index,
         GroupData = groups,
         Value = match.Value
       };

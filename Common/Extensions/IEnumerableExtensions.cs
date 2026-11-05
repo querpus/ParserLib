@@ -43,7 +43,6 @@ public static class IEnumerableExtensions
     /// <param name="index">The index to retrieve.</param>
     /// <returns>The object at position <paramref name="index"/>.</returns>
     public T At (int index) => list.ToArray()[index];
-    public Collection<T> ToCollection () => [.. list];
     public string TextJoin (string separator = EmptyString)
     {
       string result = string.Empty;
@@ -53,8 +52,8 @@ public static class IEnumerableExtensions
 
       foreach (T? item in list)
       {
-        string? itemString = item?.ToString();
-        if (string.IsNullOrEmpty(itemString))
+        string itemString = item?.ToString()!;
+        if (itemString.IsEmpty)
           continue;
 
         if (result.IsNotEmpty)
@@ -73,10 +72,6 @@ public static class IEnumerableExtensions
       }
     }
   }
-  extension(IEnumerable list)
-  {
-    public int ICount => list.AsCollection<object>().Count;
-  }
 
   extension<T> (IReadOnlyCollection<T>? list)
   {
@@ -93,6 +88,8 @@ public static class IEnumerableExtensions
   {
     // IEnumerable
 
+    public int ICount => list.AsCollection<object>().Count;
+
     public string TextJoin (string separator = EmptyString)
     {
       if (list is null)
@@ -101,8 +98,8 @@ public static class IEnumerableExtensions
       string result = SE;
       foreach (object item in list)
       {
-        string? itemString = item?.ToString();
-        if (string.IsNullOrEmpty(itemString))
+        string itemString = item?.ToString()!;
+        if (itemString.IsEmpty)
           continue;
         if (result.IsNotEmpty)
           result += separator;

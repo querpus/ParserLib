@@ -2,7 +2,7 @@
 
 namespace Parser.Tokens;
 
-public interface IToken : IEquatable<IToken>, Parser.Nodes.IToken
+public interface IToken : IEquatable<IToken>, Nodes.IToken
 {
   Spec Spec { get; }
   /// <summary>Assigned at match, cleared if match fails, kept if passes.</summary>

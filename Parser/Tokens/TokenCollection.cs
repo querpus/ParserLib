@@ -32,17 +32,9 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
   public int Index => _tokens.Count > 0 ? _tokens[0].Index : -1;
   public string ContentNoNewLine => this.ToString();
   string IToken.Content => ToString();
-  string? Parser.Nodes.IToken.Value => null;
+  string? Nodes.IToken.Value => null;
 
-  string? Parser.Nodes.IToken.Name => Type;
-
-  Range Parser.Nodes.IToken.Position => Children.Count switch
-  {
-    < 1 => new(-1, -1),
-    1 => Children[0].Position,
-    > 1 => new(Children[0].Position.Start, Children[^1].Position.End)
-  };
-
+  string? Nodes.IToken.Name => Type;
   public void Add (IToken item)
   {
     item.ThrowIfNull();

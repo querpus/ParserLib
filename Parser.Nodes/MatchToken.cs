@@ -10,11 +10,10 @@ public readonly struct MatchToken : IToken
   public required string? Name { get; init; }
   /// <summary>The match index within the <see cref="MatchCollection"/>.</summary>
   public required int MatchIndex { get; init; }
-  public required Range Position { get; init; }
-  int IIndexSortable.Index => Position.Start.Value;
+  public int Index {get; init;}
   /// <summary>The data from the match groups.</summary>
   public Dictionary<string, dynamic> GroupData { get; init; }
-  public int CompareTo (IIndexSortable? other) => Position.Start.Value.CompareTo(other?.Index);
+  public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
   public int CompareTo (object? obj) => CompareTo(obj is IIndexSortable iSort ? iSort : null);
   /// <summary>Displays a brief summary of this token's data.</summary>
   /// <returns>A string representation of this token's data.</returns>

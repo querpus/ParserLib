@@ -140,7 +140,6 @@ public sealed class ComplexToken : IToken, IPrintable, IMultiToken<IToken>
   public required Spec Spec { get; init; }
 
   string? Parser.Nodes.IToken.Name => Type;
-  Range Parser.Nodes.IToken.Position => new(Index, Children[^1].Position.End.Value);
   string? Parser.Nodes.IToken.Value => null;
 
   /// <summary>Calls the action on every piece in this token.</summary>
