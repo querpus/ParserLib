@@ -3,7 +3,7 @@
 
 namespace Parser.Nodes;
 
-public readonly struct CaptureToken : IToken, IEquatable<IToken>
+public readonly struct CaptureToken : IToken, IEquatable<IToken>, IEquatable<CaptureToken>, IComparable<IToken>, IComparable<CaptureToken>
 {
   public string Value { get; init; }
   public required string? Name { get; init; }
@@ -27,6 +27,14 @@ public readonly struct CaptureToken : IToken, IEquatable<IToken>
     Name == other.Name &&
     Value == other.Value &&
     Index.Equals(other.Index);
+  bool IEquatable<CaptureToken>.Equals (CaptureToken other) => Equals(other);
+  int IComparable<IToken>.CompareTo (IToken? other) => CompareTo(other);
+  int IComparable<CaptureToken>.CompareTo (CaptureToken other) => CompareTo(other);
+
   public static bool operator == (CaptureToken left, CaptureToken right) => left.Equals(right);
   public static bool operator != (CaptureToken left, CaptureToken right) => !(left == right);
+  public static bool operator < (CaptureToken left, CaptureToken right) => left.CompareTo(right) < 0;
+  public static bool operator <= (CaptureToken left, CaptureToken right) => left.CompareTo(right) <= 0;
+  public static bool operator > (CaptureToken left, CaptureToken right) => left.CompareTo(right) > 0;
+  public static bool operator >= (CaptureToken left, CaptureToken right) => left.CompareTo(right) >= 0;
 }
