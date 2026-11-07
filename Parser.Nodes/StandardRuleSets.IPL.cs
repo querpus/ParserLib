@@ -60,7 +60,16 @@ public static partial class StandardRuleSets
     public static NodeRule CmdEnd = new()
     {
       TokenName = "end",
-      Execute = static (context, _) => context.ClearNode(NT.Current)
+      Execute = static (context, _) =>
+      {
+        if (context.Current is null)
+        {
+          Log(MsgClass.Warning, "Warning: Current node is null when processing command end.", "StandardRuleSets");
+          return;
+        }
+        context.Current.AppendToPrefix(";");
+        context.ClearNode(NT.Current);
+      }
     };
 
     public static NodeRule BasicCommand = new()
@@ -193,7 +202,7 @@ public static partial class StandardRuleSets
       (?'value' -?\d+) (?'op' ,)
       (?'value' -?\d+) (?'op' ,)
       (?'value' -?\d+) (?'op' ,)
-      (?'value' -?\d+)(?'end' ;|$|(?=<))
+      (?'value' -?\d+) (?'end' ;|$|(?=<))
       """;
     [SS("regex")] public const string RxBeforeStart = "(?'before' ^(?>((?!<STX>).)*)<STX>)";
     [SS("regex")] public const string RxBetweenMarkers = "(?'between'<ETX>(?>((?!<STX>).)*)<STX>)";
@@ -237,13 +246,12 @@ public static partial class StandardRuleSets
       IPL.CmdEnd,
       IPL.EscapeCommand,
       IPL.PropertyCommand,
-      IPL.Comma,
+      NodeRule.KeepAndIgnore("op", exact_text: ",", appendToPrefix: true),
       IPL.FormatCommand,
       IPL.PrintCommand,
-      NodeRule.KeepAndIgnore("before"),
-      NodeRule.KeepAndIgnore("after"),
-      NodeRule.KeepAndIgnore("between"),
-      NodeRule.ReplaceEmpty("end", appendToSuffix: true, if_empty_insert_text: ";"),
+      NodeRule.Discard("before"),
+      NodeRule.Discard("after"),
+      NodeRule.Discard("between"),
     ]
   };
 }

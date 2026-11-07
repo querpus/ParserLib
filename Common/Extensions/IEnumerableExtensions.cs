@@ -43,9 +43,10 @@ public static class IEnumerableExtensions
     /// <param name="index">The index to retrieve.</param>
     /// <returns>The object at position <paramref name="index"/>.</returns>
     public T At (int index) => list.ToArray()[index];
+    public T this[Index i] => list.ToArray()[i];
     public string TextJoin (string separator = EmptyString)
     {
-      string result = string.Empty;
+      string result = SE;
 
       if (list is null)
         return result;

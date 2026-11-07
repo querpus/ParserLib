@@ -81,7 +81,8 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
 
     foreach (string path in Directory.EnumerateFiles("Specs"))
     {
-      foreach (Spec spec in SpecInstructionParser.LoadSpecFile(path))
+      string fpath = Path.GetFullPath(path);
+      foreach (Spec spec in SpecInstructionParser.LoadSpecFile(fpath))
       {
         lib._specs[spec.Name.ToLower(CIIC)] = spec;
       }

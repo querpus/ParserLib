@@ -3,7 +3,6 @@
 
 using System.ComponentModel;
 
-
 using NT = Parser.Nodes.NodeTarget;
 
 namespace Parser.Nodes;
@@ -12,6 +11,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
 {
   public event PropertyChangedEventHandler? PropertyChanged;
   #region Private Methods
+  private void Notify (string property) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
   private static NT ExtractFields (NT target, scoped out NT extracted)
   {
     extracted = target & (NT.Prefix | NT.Suffix);
@@ -55,11 +55,13 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     INode assignRootNodes (dynamic value)
     {
       RootNodes.Add(value);
+      Notify(nameof(RootNodes));
       return value;
     }
     INode? clearRootNodes (dynamic? value)
     {
       RootNodes.Clear();
+      Notify(nameof(RootNodes));
       return value;
     }
     if (ExtractAllFields(target, out NT fields) is not NT.None && fields > NT.None)
@@ -71,8 +73,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       Log(MsgClass.Warning, $"{target} was not null before assignment.", this);
     }
 
-#pragma warning disable IDE0059 // Unnecessary assignment of a value
-    dynamic? c = target switch
+    _ = target switch
     {
       NT.None => value,
       NT.Current => Current = value,
@@ -86,7 +87,6 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       NT.TokenGroup or NT.TokenValue => throw new InvalidOperationException("Cannot assign to token properties."),
       _ => throw new InvalidOperationException(),
     };
-#pragma warning restore IDE0059 // Unnecessary assignment of a value
   }
   #endregion
   /// <summary>Set this to <see langword="true"/> if there must be a single node that everything is within.
@@ -124,22 +124,29 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   {
     AddNodeTo(node, target);
     NodeStack.Push(node);
+    Notify(nameof(NodeStack));
   }
   public void ReplaceParent (INode node, NT target_for_pop = NT.None, NT target_for_push = NT.AnyRootOrParent)
   {
     if (HasParent)
     {
       _ = PopTo(target_for_pop);
-    }
 
-    if (IsRoot)
-    {
-      PushAndAddTo(node, target_for_push);
-      Log(MsgClass.GreenInfo, $"Replaced Parent and added to {target_for_push}.", this);
+      if (IsRoot)
+      {
+        PushAndAddTo(node, target_for_push);
+        Log(MsgClass.GreenInfo, $"Replaced Parent and added to {target_for_push}.", this);
+      }
+      else
+      {
+        Log(MsgClass.Warning, "Warning: Context was not at root when pushing a new parent.", this);
+        PushAndAddTo(node, target_for_push);
+      }
     }
     else
     {
-      Log(MsgClass.Warning, "Warning: Context was not at root when pushing line command.", this);
+      PushAndAddTo(node, target_for_push);
+      Log(MsgClass.GreenInfo, $"Initial Parent set and added to {target_for_push}", this);
     }
   }
   /// <summary>Pops a node from the node stack, and assigns it to the target field.</summary>
@@ -222,9 +229,13 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
         Current.AddChild(node);
         success = true;
       }
-      else
+      else if (!success)
       {
         throw new InvalidOperationException("Current is null");
+      }
+      else
+      {
+        Log(MsgClass.Warning, "Attempted to add to null node 'Current'.", this);
       }
     }
     if (!success)
@@ -261,7 +272,15 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       throw new InvalidOperationException($"Invalid target {target}.");
     }
   }
-  public void AssignNodeTo (INode node, NT target) => SetTargetValue(target, node);
+  public void AssignNodeTo (INode node, NT target)
+  {
+    if (target.HasAnyFlag(NT.Fields))
+    {
+      throw new InvalidOperationException($"Cannot assign node to {target}.");
+    }
+    SetTargetValue(target, node);
+  }
+
   public TNode GenerateNode<TNode> (NT target) where TNode : INode, new()
   {
     WarnIfNotNull(target);
@@ -273,7 +292,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   public INode GenerateNode (NT target, string className)
   {
     WarnIfNotNull(target);
-    INode? node = className.CreateClass() as INode ?? throw new InvalidOperationException();
+    INode? node = className.CreateClass() as INode ?? throw new InvalidOperationException($"{className} is not a proper INode.");
     SetTargetValue(target, node);
     Nodes = Nodes.Append(node);
     return node;
@@ -287,23 +306,53 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   }
   public void ClearNode (NT target)
   {
+    bool attempt = false;
+
     if (target is NT.None)
     {
       Log(MsgClass.Warning, "Clearing the null node target. This is not ever neccessary.", this);
-      return;
+      attempt = true;
     }
     if (target.HasAnyFlag(NT.Fields))
     {
       Log(MsgClass.Warning, $"Cannot clear readonly field {target}.", this);
-      return;
+      attempt = true;
     }
     if (GetTargetValue(target) is null)
     {
       Log(MsgClass.Warning, $"{target} was already null.", this);
-      return;
+      attempt = true;
     }
-    SetTargetValue(target, null);
-    Log(MsgClass.GreenInfo, $"Node stored in {target} was cleared.", this);
+
+    if (target.HasFlag(NT.Parent))
+    {
+      Log(MsgClass.Warning, $"Cannot clear parent. Use pop.", this);
+      attempt = true;
+    }
+    if (target.HasFlag(NT.Current))
+    {
+      Current = null;
+      attempt = true;
+    }
+    if (target.HasFlag(NT.Header))
+    {
+      Header = null;
+      attempt = true;
+    }
+    if (target.HasFlag(NT.Root) && SingleRoot)
+    {
+      Root = null;
+      attempt = true;
+    }
+    if (target.HasFlag(NT.RootNodes) && !SingleRoot)
+    {
+      RootNodes.Clear();
+    }
+
+    if (!attempt)
+      Log(MsgClass.Warning, $"Did not clear {target}.", this);
+    else
+      Log(MsgClass.GreenInfo, $"Node stored in {target} was cleared.", this);
   }
 
   public static void DoXMLOperation (NodeContext context, CaptureToken token, string action, string? assignTo, string? valueFrom, string? className)
@@ -336,8 +385,28 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
 
   public void Print (int indent)
   {
-    Log(MsgClass.Warning, "Root:", this);
-    Root?.Print(2 + indent);
-    Log(MsgClass.Warning, "Header:", this);
+    string sp = new(' ', indent);
+    if (Header is not null)
+    {
+      Log(MsgClass.Warning, $"{sp}Header:", this);
+      Header.Print(2 + indent);
+    }
+    if (Root is not null)
+    {
+      Log(MsgClass.Warning, $"{sp}Root:", this);
+      Root?.Print(2 + indent);
+    }
+  }
+
+  public override string ToString ()
+  {
+    const string prefix = "NodeContext:";
+    string single = SingleRoot ? "[Single]" : "";
+    string propkey = PropKey.IsNotEmpty ? $"(PK:{PropKey})" : "";
+    string current = Current is not null ? $"(Cur:{Current.Serialize()})" : "";
+
+    string[] list = [prefix, single, propkey, current];
+
+    return list.TextJoin(" ");
   }
 }

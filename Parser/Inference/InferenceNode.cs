@@ -16,7 +16,7 @@ public static class InferenceNodeFactory
   {
     if (element is null)
       return new InferenceNodeGroup(IT.Or);
-    var tokens = new CaptureTokenizer().Tokenize(element.ToString());
+    var tokens = new CaptureTokenizer() { Rules = StandardRuleSets.XMLTokenRuleSet }.Tokenize(element.ToString());
     var tp = new CaptureTokenProcessor(tokens, StandardRuleSets.XMLRuleSet);
     tp.Process();
     return Produce(tp.Context?.Root as XMLElementNode);
@@ -56,7 +56,9 @@ public static class InferenceNodeFactory
     {
       IT type = root.Name switch
       {
-        "Extension" => IT.Ext
+        "Extension" => IT.Ext,
+        "Header" => IT.FileHeader,
+        _ => IT.None
       };
       result = new(type, root.Children.Serialize());
     }

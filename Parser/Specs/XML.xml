@@ -116,7 +116,7 @@
       </Rule>
     </GroupTokenRules>
     <Instructions>
-      <Tokenize input_var="text" output_var="tokens"/>
+      <Tokenize input_var="text" output_var="tokens" tokenizer="XParser"/>
       <Print check_var="tokens"/>
       <TokenAssemble input_var="tokens" output_var="token_groups"/>
       <Print check_var="token_groups"/>

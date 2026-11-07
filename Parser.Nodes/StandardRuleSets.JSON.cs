@@ -42,9 +42,43 @@ public static partial class StandardRuleSets
       Execute = static (context, token) =>
       {
         ErrorIfNull(token.Value);
-        JSONObjectNode node = context.GenerateNode<JSONObjectNode>(NT.Current);
-        context.AppendTokenTo(NT.Current, token);
-        context.PushAndAddTo(node, NT.AnyRootOrParent);
+
+        JSONObjectNode node = context.GenerateNode<JSONObjectNode>(NT.None);
+        node.AppendToPrefix(token);
+
+        if (context.Current is JSONArrayNode obj)
+        {
+          context.PushAndAddTo(node, NT.AnyRootOrParent);
+        }
+        else if (context.Current is JSONPropertyNode prop)
+        {
+          prop.Value = node;
+          context.NodeStack.Push(node);
+        }
+
+        DebugMessage("Object Open Token Processed.");
+      }
+    };
+    public static readonly NodeRule ArrayOpen = new()
+    {
+      TokenName = "a_open",
+      Execute = static (context, token) =>
+      {
+        ErrorIfNull(token.Value);
+
+        JSONArrayNode node = context.GenerateNode<JSONArrayNode>(NT.None);
+        node.AppendToPrefix(token);
+
+        if (context.Current is JSONArrayNode obj)
+        {
+          context.PushAndAddTo(node, NT.AnyRootOrParent);
+        }
+        else if (context.Current is JSONPropertyNode prop)
+        {
+          prop.Value = node;
+          context.NodeStack.Push(node);
+        }
+
         DebugMessage("Object Open Token Processed.");
       }
     };
@@ -60,32 +94,55 @@ public static partial class StandardRuleSets
         DebugMessage("Object Close Token Processed.");
       }
     };
+    public static readonly NodeRule ArrayClose = new()
+    {
+      TokenName = "a_close",
+      Execute = static (context, token) =>
+      {
+        ErrorIfNull(token.Value);
+        var node = context.PopTo(NT.Current);
+        node.AppendToSuffix(token.Value);
+        context.ClearNode(NT.Current);
+        DebugMessage("Array Close Token Processed.");
+      }
+    };
 
     public static readonly NodeRule PropertyName = new()
     {
       TokenName = "key_name",
       Execute = static (context, token) =>
       {
-        if (context.PropKey is not null)
-          Log(MsgClass.Warning, "PropKey was not null when assigned.", "StandardRuleSets");
-
-        context.PropKey = token.Value;
-        context.Current?.AppendToPrefix("\n" + token.Value);
-        Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
+        if (token.Value.IsEmpty)
+        {
+          throw new InvalidTokenException("Key cannot be null or empty.");
+        }
+        JSONPropertyNode node = context.GenerateNode<JSONPropertyNode>(NT.Current);
+        node.Key = token.Value;
+        node.AppendToPrefix(token.Value);
+        context.AddNodeTo(node, NT.AnyRootOrParent);
+        Log(MsgClass.GreenInfo, $"Property created with key {node.Key}", "StandardRuleSets");
       }
     };
 
     public static readonly NodeRule StringValue = new()
     {
-      TokenName = "str_value",
+      TokenName = "q_value",
       Execute = static (context, token) =>
       {
-        if (context.PropKey is not null)
-          Log(MsgClass.Warning, "PropKey was not null when assigned.", "StandardRuleSets");
-
-        JSONContentNode node = context.GenerateNode<JSONContentNode>(NT.Current);
-        node.AppendToPrefix(token);
-        Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
+        JSONContentNode node = context.GenerateNode<JSONContentNode>(NT.None);
+        node.Content = new QString(token.Value);
+        if (context.Current is JSONPropertyNode prop)
+        {
+          prop.Value = node;
+        }
+        else if (context.Current is JSONArrayNode array)
+        {
+          array.Children.Add(node);
+        }
+        else
+        {
+          throw new InvalidTokenException("Attempted to assign string value to unknown type.");
+        }
       }
     };
   }
@@ -93,8 +150,8 @@ public static partial class StandardRuleSets
   {
     RegexOptions = ROCI | ROEC | ROIPW | ROML,
     TokenSequences =
-  [
-    JSON.RxKey,
+    [
+      JSON.RxKey,
       JSON.RxString,
       JSON.RxNumber,
       JSON.RxBool,
@@ -114,9 +171,11 @@ public static partial class StandardRuleSets
     Rules = {
       JSON.ObjectOpen,
       JSON.ObjectClose,
+      JSON.ArrayOpen,
+      JSON.ArrayClose,
       JSON.PropertyName,
       JSON.StringValue,
-      NodeRule.KeepAndIgnore("op", true),
+      NodeRule.KeepAndIgnore("op", appendToPrefix: true),
       NodeRule.KeepAndIgnore("ws"),
       NodeRule.KeepAndIgnore("comment"),
       NodeRule.Discard("qt"),

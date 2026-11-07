@@ -11,7 +11,8 @@ public static class SpecInstructionParser
   private static readonly XNamespace Ns = "Parser/Spec";
   public static IEnumerable<Spec> LoadSpecFile (string path)
   {
-    if (Path.GetExtension(path).Like("xml"))
+    string ext = Path.GetExtension(path)[1..];
+    if (ext.Like("xml"))
     {
       return LoadSpecXML(path);
     }

@@ -39,18 +39,15 @@ public class MatchTokenizer : ITokenizer<MatchToken>
     int matchindex = 0;
     foreach (Match match in regex.Matches(input))
     {
-      Dictionary<string, dynamic> groups = [];
-      foreach (string groupName in regex.GetGroupNames())
+      Dictionary<string, OneOrMany<string>> groups = [];
+      string[] names = regex.GetGroupNames();
+      foreach (string groupName in names)
       {
         Group group = match.Groups[groupName];
         if (group.Success && !groupName.Equals("0", SCO))
         {
-          Collection<string> caps = [];
-          for (int i = 0; i < group.Captures.Count; i++)
-          {
-            Capture cap = group.Captures[i];
-            caps.Add(cap.Value);
-          }
+          Collection<string> caps = [.. group.Captures.Select(c => c.Value)];
+
           if (caps.Count > 1)
           {
             groups.Add(groupName, caps);
@@ -65,14 +62,14 @@ public class MatchTokenizer : ITokenizer<MatchToken>
           }
         }
       }
-      string name = SE;
-      if (groups.Any(g => g.Key.StartsWith(TokenTypePrefix, SCOIC)))
+      string name = names.FirstOrDefault(g => g.StartsWith(TokenTypePrefix, SCOIC), SE);
+      if (name.IsNotEmpty)
       {
-        name = groups.First(g => g.Key.StartsWith(TokenTypePrefix, SCOIC)).Value;
+        name = groups[name].Value ?? throw new InvalidTokenException("No suitable token name found.");
       }
       var token = new MatchToken()
       {
-        Name = name,
+        Name = name ?? SE,
         MatchIndex = matchindex,
         Index = match.Index,
         GroupData = groups,

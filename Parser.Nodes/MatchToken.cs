@@ -2,19 +2,21 @@
 #pragma warning disable format // Formatting
 
 namespace Parser.Nodes;
-public readonly struct MatchToken : IToken
+public class MatchToken : IToken
 {
   /// <summary>The full match text.</summary>
-  public string Value { get; init; }
+  public string Value { get; init; } = SE;
   /// <summary>The name or type of this token.</summary>
-  public required string? Name { get; init; }
+  public string Name { get; init; } = "None";
   /// <summary>The match index within the <see cref="MatchCollection"/>.</summary>
-  public required int MatchIndex { get; init; }
+  public int MatchIndex { get; init; }
   public int Index {get; init;}
   /// <summary>The data from the match groups.</summary>
-  public Dictionary<string, dynamic> GroupData { get; init; }
+  public Dictionary<string, OneOrMany<string>> GroupData { get; init; } = [];
   public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
   public int CompareTo (object? obj) => CompareTo(obj is IIndexSortable iSort ? iSort : null);
+  public override bool Equals (object? obj) => obj is MatchToken mt && mt.Name.Like(Name) && mt.Value.Is(Value) && mt.Index == Index;
+  public override int GetHashCode () => HashCode.Combine(Name, Value, Index);
   /// <summary>Displays a brief summary of this token's data.</summary>
   /// <returns>A string representation of this token's data.</returns>
   public override string ToString ()
@@ -29,13 +31,19 @@ public readonly struct MatchToken : IToken
     {
       content += $"  {prop.Key} = ";
 
-      if (prop.Value is string s)
+      OneOrMany<string> pval = prop.Value;
+
+      if (pval.IsSingle)
       {
-        content += s.ToString(true) + Chars.LFs;
+        content += pval.Value.ToString(true) + Chars.LFs;
       }
-      else if (prop.Value is IEnumerable<string> list)
+      else if (pval.IsMany)
       {
-        content += $"[{list.Select(s => s.ToString(true)).TextJoin(", ")}]" + Chars.LFs;
+        content += $"[{pval.Values.Select(s => s.ToString(true)).TextJoin(", ")}]" + Chars.LFs;
+      }
+      else
+      {
+        content += "<no value>";
       }
     }
 

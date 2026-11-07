@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 
 using Parser.Exceptions;
 using Parser.Nodes;
@@ -13,20 +14,30 @@ using SpecZDoom = Specification.ZDoom.Definition;
 
 namespace TestConsole;
 
-internal interface ITokenizerPipeline
+public class TokenSnapshot
 {
-  IEnumerable<INode> Process (string input, TokenRuleSet rules, NodeRuleSet node_rules);
+  public int CurrentTokenIndex;
+  public int TokenCount;
+  public string? CurrentValue;
+  public string? CurrentType;
+  public string? LastTokenValue;
+  public string? LastTokenType;
+  public int NodeCount;
 }
 
-internal sealed class CaptureTokenizerPipeline : ITokenizerPipeline
+public class TokenProcessRunner
 {
-  public IEnumerable<INode> Process (string input, TokenRuleSet rules, NodeRuleSet node_rules)
+  public string? Input { get; private set; }
+  public int StepIndex { get; private set; }
+  public TokenSnapshot? Snapshot { get; private set; }
+  public void Init (string input)
   {
-    CaptureTokenizer tokenizer = new() { Rules = rules };
-    IEnumerable<Parser.Nodes.IToken> tokens = tokenizer.Tokenize(input);
-    CaptureTokenProcessor processor = new(tokens, node_rules);
-    processor.Process();
-    return processor.Context?.Nodes ?? [];
+    Input = input;
+    StepIndex = 0;
+  }
+  public void Step ()
+  {
+
   }
 }
 
@@ -92,11 +103,7 @@ internal static class Program
       ProcessArgs(args);
     }
 
-    try { TestSelectionLoop(); }
-    catch (QuitException)
-    {
-      Log(MsgClass.Warning, "QuitException caught by outer parser.", This);
-    }
+    TestSelectionLoop();
 
     Log(MsgClass.Prompt, "Press enter to exit.", nameof(Program));
     _ = Console.ReadLine();
@@ -122,6 +129,7 @@ internal static class Program
 
   Start:
     Console.Clear();
+    Log(MsgClass.GreenInfo, $"Library contains: {LibRef.Values.Select(s => s.Name).TextJoin(", ")}", This);
     Log(MsgClass.Prompt, "Select a test. (wad/xml/mapinfo/acs/ini/json/ipl)", This);
     switch (GetInput())
     {
@@ -278,7 +286,7 @@ internal static class Program
     ClearLog();
     Log(MsgClass.Warning, $"Starting test of '{Path.GetFileName(file)}' with '{spec.Name}'.", This);
     Parser = new(spec);
-    OpStatus status;
+    OpStatus status = OpStatus.AtStart;
 
     if (spec.IsTextFile)
     {
@@ -287,7 +295,7 @@ internal static class Program
       {
         data = File.ReadAllText(FinishPath(file));
       }
-      catch (IOException)
+      catch (FileNotFoundException)
       {
         Log(MsgClass.Error, "The path at \"" + FinishPath(file) + "\" is not valid.", This);
         data = "";
@@ -297,8 +305,15 @@ internal static class Program
     }
     else
     {
-      byte[] data = File.ReadAllBytes(FinishPath(file));
-      status = Parser.StepThrough(data);
+      try
+      {
+        byte[] data = File.ReadAllBytes(FinishPath(file));
+        status = Parser.StepThrough(data);
+      }
+      catch (FileNotFoundException)
+      {
+        Log(MsgClass.Error, $"File {file} not found.", This);
+      }
     }
     Log(MsgClass.Warning, $"Operations have concluded with status {status}.", This);
     DebugOut();

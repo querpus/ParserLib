@@ -136,6 +136,18 @@
       <xs:enumeration value="UTF32"/>
     </xs:restriction>
   </xs:simpleType>
+  <xs:simpleType name="TokenizerType">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="xparser"/>
+      <xs:enumeration value="XParser"/>
+      <xs:enumeration value="Match"/>
+      <xs:enumeration value="match"/>
+      <xs:enumeration value="capture"/>
+      <xs:enumeration value="Capture"/>
+      <xs:enumeration value="group"/>
+      <xs:enumeration value="Group"/>
+    </xs:restriction>
+  </xs:simpleType>
   <xs:simpleType name="DataKeyType">
     <xs:union memberTypes="NonEmptyTokenType">
       <xs:simpleType>
@@ -312,6 +324,11 @@
     <xs:attribute name="output_var" use="required" type="DataKeyType"/>
     <xs:attribute name="input_var" use="required" type="DataKeyType"/>
   </xs:complexType>
+  <xs:complexType name="TokenizeType">
+    <xs:attribute name="output_var" use="required" type="DataKeyType"/>
+    <xs:attribute name="input_var" use="required" type="DataKeyType"/>
+    <xs:attribute name="tokenizer" use="required" type="TokenizerType"/>
+  </xs:complexType>
   <xs:complexType name="SuccessType">
     <xs:attribute name="success" use="optional" default="true" type="xs:boolean">
       <xs:annotation>
@@ -476,7 +493,7 @@ True by default.
             <xs:attributeGroup ref="PositionAttrGroup"/>
           </xs:complexType>
         </xs:element>
-        <xs:element name="Tokenize" type="InputOutputType">
+        <xs:element name="Tokenize" type="TokenizeType">
           <xs:annotation>
             <xs:documentation>
               Tokenizes the string(s) in input_var and stores the resulting tokens in output_var as a TokenCollection.

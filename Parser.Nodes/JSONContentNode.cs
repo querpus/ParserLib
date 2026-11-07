@@ -14,3 +14,19 @@ public sealed class JSONContentNode : Node
     set => Data["Content"] = value ?? throw new InvalidOperationException("Tried to assign null to Content.");
   }
 }
+
+public sealed class JSONPropertyNode : Node
+{
+  public override string Serialize () => Key;
+  /// <summary>The value of this property.</summary>
+  public INode? Value
+  {
+    get => Data.TryGetValue("Value", out object? obj) ? obj as INode : null;
+    set => Data["Value"] = (object?) value ?? new JSONContentNode() { Content = "null" };
+  }
+  public string Key
+  {
+    get => Data.TryGetValue("Key", out object? obj) ? obj as string ?? SE : SE;
+    set => Data["Key"] = value ?? throw new InvalidOperationException("Tried to assign null to Key.");
+  }
+}

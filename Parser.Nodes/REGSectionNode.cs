@@ -4,7 +4,7 @@
 
 
 namespace Parser.Nodes;
-public sealed class REGSection : Node
+public sealed class REGSectionNode : Node
 {
   public override string Serialize () => "[" + Name + "]";
   public string? Name => Data.TryGetValue("Name", out object? value) && value is string name ? name : null;

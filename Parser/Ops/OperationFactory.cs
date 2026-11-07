@@ -127,7 +127,7 @@ public static class OperationFactory
 
       return lname switch
       {
-        "GotoOpIndex" when target is not DNE and 0 => new JumpOperation { TargetIndex = target },
+        "GotoOpIndex" when target is not DNE and not 0 => new JumpOperation { TargetIndex = target },
         "GotoOpIndex" when target_var.IsNotEmpty => new JumpOperation { TargetIndexVar = target_var },
         "GotoLabel" => new JumpOperation
         {
@@ -164,7 +164,7 @@ public static class OperationFactory
         "MakeCursor" => new MakeCursorOperation
         {
           CursorKey = cursor_var,
-          ListKey = list_var,
+          ContentKey = content_var,
           Position = position == -1 ? 0 : position
         },
         "SetCursorPos" => new SetCursorOperation

@@ -62,24 +62,24 @@ public sealed class TokenFactory : ITokenizer<IToken>
   private string RuleData => _currentRule?.RuleStringData ?? SE;
   private Action RuleAction => Type switch
   {
-    RT when HasError => () => ErrorLog("Error: Invalid rule. Skipping rule."),
+    RT when HasError => () => Log(MC.Error, "Error: Invalid rule. Skipping rule.", this),
     RT when Competes => RunCompete,
-    RT.None => () => WarnLog("Warning: No type defined. Skipping rule."),
+    RT.None => () => Log(MC.Warning, "Warning: No type defined. Skipping rule.", this),
     RT.TokenMatch or RT.TokenExtract or RT.SplitMatch => RegexMatch,
     RT.TokenExact or RT.SplitExact => ExactMatch,
     RT.StoreExtra => StoreExtra,
     RT.StoreOther => StoreOther,
     RT.ErrorMatch => ErrorMatch,
-    _ => () => WarnLog("Warning: Bad type defined. Skipping rule.")
+    _ => () => Log(MC.Warning, "Warning: Bad type defined. Skipping rule.", this)
   };
 
   dynamic? ITokenizer<IToken>.Rules { get => Spec; init => Spec = (value as Spec) ?? throw new InvalidTokenException("Attempt to assign a null Spec."); }
 
   #endregion
   #region Private Logging Methods
-  private static void DebugLog (string msg) => Log(MC.Debug, msg, nameof(TokenFactory));
-  private static void WarnLog (string msg) => Log(MC.Warning, msg, nameof(TokenFactory));
-  private static void ErrorLog (string msg) => Log(MC.Error, msg, nameof(TokenFactory));
+  private void DebugLog (string msg) => Log(MC.Debug, msg, this);
+  private void WarnLog (string msg) => Log(MC.Warning, msg, this);
+  private void ErrorLog (string msg) => Log(MC.Error, msg, this);
   #endregion
   #region Private Static Methods
   private static string GetRuleRegex (TokenRule rule, int? index = null)
@@ -96,7 +96,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
     return index is not null ? $"{casemod}(?'_R{index}'{regex})" : $"{casemod}{regex}";
   }
   private static RT GetMaskedType (RT type) => type.RemoveBitLong<RT>(RT.FlagBits);
-  private static int GetRuleGroupIndex (Match match)
+  private int GetRuleGroupIndex (Match match)
   {
     DebugIn(Area, "GetRuleGroupIndex");
     string num = match.Groups.
@@ -106,7 +106,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
     int result = int.TryParse(num, out int value) ? value : ErrVal;
     if (result == ErrVal)
     {
-      ErrorLog("GetRuleGroupIndex Returned -1");
+      Log(MC.Error, "GetRuleGroupIndex Returned -1", this);
     }
     DebugOut();
     return result;
@@ -244,8 +244,8 @@ public sealed class TokenFactory : ITokenizer<IToken>
       int error_surround_pos = match.Groups.ContainsKey("error_surround") ? match.Groups["error_surround"].Index : -1;
       int error_surround_len = match.Groups.ContainsKey("error_surround") ? match.Groups["error_surround"].Length : -1;
       (int err_line, int err_col) = Input.Get2DPosition(error_pos);
-      string[] lines = Input.Split('\n');
-      int line_max = lines.Length;
+      //string[] lines = Input.Split('\n');
+      //int line_max = lines.Length;
       WarnLog($"Error at line {err_line}, column {err_col}.");
       ErrorPlacement err = new() { Error = match, Text = Input };
       err.WriteError();
@@ -275,7 +275,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
   private void RunCompete ()
   {
     DebugIn(Area, "RunCompete");
-    DebugLog("Running competition.");
+    Log(MC.GreenInfo, "Running competition.", this);
     IEnumerable<(TokenRule Rule, int Index)> contestants = GetCompeteBlock();
     string regexPatterns = contestants.Select(r => GetRuleRegex(r.Rule, r.Index)).TextJoin("|");
     Regex regex = new(regexPatterns, Spec.RxOpt.RemoveBit<RegexOptions>(ROIC));

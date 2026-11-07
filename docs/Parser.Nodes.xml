@@ -44,6 +44,9 @@
         <member name="P:Parser.Nodes.JSONContentNode.Content">
             <summary>This contains the quoted string, unquoted boolean, null, undefined, or unquoted number.</summary>
         </member>
+        <member name="P:Parser.Nodes.JSONPropertyNode.Value">
+            <summary>The value of this property.</summary>
+        </member>
         <member name="P:Parser.Nodes.MatchToken.Value">
             <summary>The full match text.</summary>
         </member>
@@ -115,6 +118,28 @@
             <param name="target">The target node and field.</param>
             <param name="token">The token to append.</param>
             <exception cref="T:System.InvalidOperationException">Both Suffix and Prefix were included in <paramref name="target"/> or an invalid <paramref name="target"/> was specified.</exception>
+        </member>
+        <member name="M:Parser.Nodes.NodeRule.DefaultAction(Parser.Nodes.NodeContext,Parser.Nodes.IToken)">
+            <summary>The default action if none is defined.</summary>
+            <param name="context">The processing context.</param>
+            <param name="token">The token encountered.</param>
+        </member>
+        <member name="M:Parser.Nodes.NodeRule.Discard(System.String,System.String,System.Boolean,System.Boolean,System.String)">
+            <summary>Creates a node rule that discards the token's contents after optionally appending <paramref name="replace_with"/>.</summary>
+            <param name="groupName">The token type to look for.</param>
+            <param name="exact_text">The exact text to look for.</param>
+            <param name="appendToPrefix">When <see langword="true"/>, appends <paramref name="replace_with"/> to the prefix."</param>
+            <param name="appendToSuffix">When <see langword="true"/>, appends <paramref name="replace_with"/> to the suffix.</param>
+            <param name="replace_with">The text to replace the token with. Leave blank or omit to append nothing.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Parser.Nodes.NodeRule.SyntaxError(System.String,System.Boolean,System.String)">
+            <summary>Creates a node rule that displays an error and optionally halts the processing if the token is encountered.</summary>
+            <param name="groupName">The token type to look for.</param>
+            <param name="throw_error">Set to <see langword="true"/> to halt the token processing, <see langword="false"/> simply displays a warning.</param>
+            <param name="error_message">The message to display.</param>
+            <returns>The created node rule.</returns>
+            <exception cref="T:Common.ValidationException">The node rule was matched and <paramref name="throw_error"/> was <see langword="true"/>.</exception>
         </member>
         <member name="T:Parser.Nodes.NodeTarget">
             <summary>The node to be designated a target or referred to as a source.</summary>

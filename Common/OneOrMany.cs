@@ -33,5 +33,9 @@ public class OneOrMany<T> : IOneOrMany<T>
 
   public static implicit operator T? (OneOrMany<T> combo) => combo.Value;
   public static implicit operator ImmutableList<T>? (OneOrMany<T> combo) => [.. combo.Values];
+
+  public static implicit operator OneOrMany<T> (T single) => new() { Value = single };
+  public static implicit operator OneOrMany<T> (Collection<T> many) => new() { Values = many };
+  public static implicit operator OneOrMany<T> (T[] many) => new() { Values = many };
 }
 

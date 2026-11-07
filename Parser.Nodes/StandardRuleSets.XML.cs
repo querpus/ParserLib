@@ -216,9 +216,9 @@ public static partial class StandardRuleSets
       XML.Content,
       NodeRule.KeepAndIgnore("comment"),
       NodeRule.KeepAndIgnore("ws"),
-      NodeRule.KeepAndIgnore("a_qt", true),
-      NodeRule.KeepAndIgnore("a_eq", true),
-      NodeRule.KeepAndIgnore("a_end", true),
+      NodeRule.KeepAndIgnore("a_qt", appendToPrefix: true),
+      NodeRule.KeepAndIgnore("a_eq", appendToPrefix: true),
+      NodeRule.KeepAndIgnore("a_end", appendToPrefix: true),
     },
   };
 }
