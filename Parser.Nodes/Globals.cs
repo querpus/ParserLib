@@ -1,15 +1,12 @@
 global using System;
-global using System.Collections;
 global using System.Collections.Generic;
 global using System.Collections.ObjectModel;
 global using System.Collections.Immutable;
 global using System.Data;
 global using System.Diagnostics.CodeAnalysis;
-global using System.IO;
 global using System.Linq;
 global using System.Reflection;
 global using System.Resources;
-global using System.Text;
 global using System.Text.RegularExpressions;
 
 global using Common;
@@ -19,7 +16,6 @@ global using Common.RegExp;
 global using static Common.Debug;
 global using static Common.Names;
 
-global using DM = Common.DictionaryMode;
 global using Regex = System.Text.RegularExpressions.Regex;
 global using SS = System.Diagnostics.CodeAnalysis.StringSyntaxAttribute;
 

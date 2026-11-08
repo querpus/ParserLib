@@ -10,14 +10,14 @@
       <ReadData output_var="numlumps" type="int" cursor_var="current_pos"/>
       <ReadData output_var="diroffset" type="int" cursor_var="current_pos"/>
       <SetCursorPos cursor_var="current_pos" position_var="diroffset"/>
-      <Initialize initial_var="directory" type="Collection" value_type="PositionalDataBlock"/>
+      <Initialize initial_var="directory" type="Collection" value_type="PositionalDataBlock" />
       <ForCount length_var="numlumps" cursor_var="index">
         <ReadData output_var="lump_pos" content_var="bytes" type="int" cursor_var="current_pos"/>
         <ReadData output_var="lump_size" content_var="bytes" type="int" cursor_var="current_pos"/>
         <ReadData output_var="lump_name" content_var="bytes" type="text" length="8" cursor_var="current_pos"/>
         <ReadData output_var="lump_data" content_var="bytes" type="binary" length_var="lump_size" position_var="lump_pos"/>
         <AddItem list_var="directory" type="PositionalDataBlock">
-          <Property name="Index" content_var="lump_pos"/>
+          <Property name="Offset" content_var="lump_pos"/>
           <Property name="Name" content_var="lump_name"/>
           <Property name="Data" content_var="lump_data"/>
         </AddItem>
@@ -54,7 +54,7 @@
         <ReadData output_var="lump_name" content_var="bytes" type="text" length="16" cursor_var="current_pos"/>
         <ReadData output_var="lump_data" content_var="bytes" type="binary" length_var="lump_size" position_var="lump_pos"/>
         <AddItem list_var="directory" type="PositionalDataBlock">
-          <Property name="Index" content_var="lump_pos"/>
+          <Property name="Offset" content_var="lump_pos"/>
           <Property name="Name" content_var="lump_name"/>
           <Property name="Data" content_var="lump_data"/>
         </AddItem>

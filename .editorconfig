@@ -1,15 +1,23 @@
 root = true
-[*.cs]
-end_of_line = lf
+
+[*]
 indent_size = 2
+indent_style = space
+end_of_line = lf
+charset = utf-8
+
+[*.reg]
+charset = utf-16le
+end_of_line = crlf
+
+[*.cs]
 insert_final_newline = true
 trim_trailing_whitespace = true
-charset = utf-8
 
 csharp_indent_block_contents = true
 csharp_indent_braces = false
 csharp_indent_case_contents = true
-csharp_indent_case_contents_when_block = true
+csharp_indent_case_contents_when_block = false
 csharp_indent_labels = one_less_than_current
 csharp_indent_switch_labels = true
 csharp_new_line_before_catch = true
@@ -318,3 +326,4 @@ dotnet_style_qualification_for_property = false:silent
 dotnet_style_readonly_field = true:warning
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
 roslynator_analyzers_enabled = true
+dotnet_style_prefer_non_hidden_explicit_cast_in_source = true:suggestion

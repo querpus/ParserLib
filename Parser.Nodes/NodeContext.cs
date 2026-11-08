@@ -326,7 +326,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
 
     if (target.HasFlag(NT.Parent))
     {
-      Log(MsgClass.Warning, $"Cannot clear parent. Use pop.", this);
+      Log(MsgClass.Warning, "Cannot clear parent. Use pop.", this);
       attempt = true;
     }
     if (target.HasFlag(NT.Current))

@@ -19,7 +19,7 @@ public class PositionalDataBlock : IIndexSortable
   public int CompareTo (object? obj) => obj is IIndexSortable iis ? CompareTo(iis) : 1;
 
   public override bool Equals (object? obj) => obj is PositionalDataBlock pdb && pdb.Offset == Offset && pdb.Size == Size && Name.Is(pdb.Name);
-  public override int GetHashCode () => HashCode.Combine(Name, Offset, Size);
+  public override int GetHashCode () => IsNull ? 0 : HashCode.Combine(Name, Offset, Data);
 
   public static bool operator == (PositionalDataBlock left, PositionalDataBlock right) => left is null ? right is null : left.Equals(right);
   public static bool operator != (PositionalDataBlock left, PositionalDataBlock right) => !(left == right);

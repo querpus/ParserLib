@@ -1,7 +1,5 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 
-using System.Collections.Immutable;
-
 using Parser.Nodes;
 
 using MC = Common.MsgClass;
@@ -79,7 +77,6 @@ public sealed class TokenFactory : ITokenizer<IToken>
   #region Private Logging Methods
   private void DebugLog (string msg) => Log(MC.Debug, msg, this);
   private void WarnLog (string msg) => Log(MC.Warning, msg, this);
-  private void ErrorLog (string msg) => Log(MC.Error, msg, this);
   #endregion
   #region Private Static Methods
   private static string GetRuleRegex (TokenRule rule, int? index = null)

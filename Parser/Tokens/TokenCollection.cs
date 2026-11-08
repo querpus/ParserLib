@@ -30,7 +30,7 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
   public IToken? Parent { get; set; }
   public IList<IToken> Children => _tokens;
   public int Index => _tokens.Count > 0 ? _tokens[0].Index : -1;
-  public string ContentNoNewLine => this.ToString();
+  public string ContentNoNewLine => this.ToString(true);
   string IToken.Content => ToString();
   string? Nodes.IToken.Value => null;
 
@@ -42,7 +42,7 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
   }
   public void Print (int indent)
   {
-    DebugIn("TokenCollection", nameof(Print));
+    DebugIn(this.TypeName, nameof(Print));
     if (Count == 0)
     {
       LogPart(MsgClass.Error, "Empty Token List Printed. Check Why.");

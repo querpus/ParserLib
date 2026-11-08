@@ -49,6 +49,35 @@ public class MatchToken : IToken
 
     return header + content;
   }
+  public static implicit operator MatchToken (CaptureToken ctoken)
+  {
+    MatchToken mtoken = new()
+    {
+      Name = ctoken.Name ?? "None",
+      Value = ctoken.Value,
+      Index = ctoken.Index,
+      MatchIndex = ctoken.CaptureIndex,
+      GroupData = []
+    };
 
+    if (ctoken.Name is not null)
+    {
+      mtoken.GroupData.Add(ctoken.Name, ctoken.Value);
+    }
+
+    mtoken.GroupData.Add("0", ctoken.Value);
+
+    return mtoken;
+  }
+  public static implicit operator MatchToken (Match match)
+  {
+    MatchToken mtoken = new()
+    {
+      Value = match.Value,
+      Index = match.Index,
+    };
+
+    return mtoken;
+  }
   public string Serialize () => Value;
 }

@@ -123,7 +123,7 @@ internal static class Program
       IEnumerable<IBasicToken> cTokens = cTokenizer.Tokenize(file);
       CaptureTokenProcessor cProcessor = new(cTokens, node_rules);
       cProcessor.Process();
-      cTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
+      cProcessor.Context?.Print(0);
       PressEnterToContinue();
     }
 

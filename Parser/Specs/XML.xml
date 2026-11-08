@@ -54,9 +54,11 @@
       </Rule>
     </TokenRules>
     <GroupTokenRules>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>Attribute</TypeToAssign>
+      <Rule type="None" assign="Attribute">
+        <Token store="Key" type="AttrKey"/>
+        <Token type="Eq"/>
+        <Token store="Value" type="String"/>
+        <
         <Data> n:AttrKey x:Eq v:String </Data>
       </Rule>
       <Rule>

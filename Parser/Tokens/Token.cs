@@ -16,7 +16,7 @@ public sealed class Token : IToken, IPrintable
   public IToken? Parent { get; set; }
   public bool HasType => Type is not null;
 
-  string? Parser.Nodes.IToken.Name => Type;
+  string? Nodes.IToken.Name => Type;
 
   int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
   public override string ToString () => $"{Type} : {Content}";

@@ -50,11 +50,21 @@
         "type": "Key",
         "expr": "(?<= ^\\s*)   ([^\"[\\]\\s\\\\=\\n;]|\\\\.)+"
       },
-
-      "Competitive  QKey    (?<= ^\\s*) \"(([^\"[\\]\\s\\\\=\\n;]|\\\\.)+)\"",
-      "=>                   (?# Continuation to the next line)",
-      "TokenExact   Eq     =",
-      "TokenExtract Section \\[ (?'keep'.*?) \\]"
+      { 
+        "rule": "Competitive",
+        "type": "QKey",
+        "expr": "(?<= ^\\s*) \"(([^\"[\\]\\s\\\\=\\n;]|\\\\.)+)\""
+      },
+      {
+        "rule": "TokenExact",
+        "type": "Eq",
+        "expr": "="
+      },
+      {
+        "rule": "TokenExtract",
+        "type": "Section",
+        "expr": "\\[ (?'keep'.*?) \\]"
+      }
     ],
     "Groups": [
       // Group Constructs

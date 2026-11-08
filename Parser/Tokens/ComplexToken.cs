@@ -1,7 +1,5 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 
-using System.Collections.Immutable;
-
 using Parser.Nodes;
 
 namespace Parser.Tokens;
