@@ -55,7 +55,7 @@ public class XElementProcessor : INodeProcessor
       {
         string attr_name = attr.Name.LocalName;
         string attr_value = attr.Value;
-        result.Attributes.Add(attr_name, new QString(attr_value));
+        result.Attributes.Add(attr_name, new XMLContentNode(attr_value));
       }
     }
     if (!element.Value.IsWhitespace && !element.Value.IsEmpty)

@@ -45,7 +45,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
   }
   public TokenFactory ()
   {
-    Spec = XParser.Lib["unknown"];
+    Spec = XParser.Library["unknown"];
     _rules = Spec.TokenRules;
   }
   #endregion

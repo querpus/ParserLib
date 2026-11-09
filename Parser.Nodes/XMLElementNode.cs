@@ -4,7 +4,7 @@
 namespace Parser.Nodes;
 public sealed class XMLElementNode : Node
 {
-  private static string SerializeAttribute (KeyValuePair<string, ISerializable> kvp) => $"{kvp.Key}={kvp.Value.Serialize()}";
+  private static string SerializeAttribute (KeyValuePair<string, INode> kvp) => $"{kvp.Key}={kvp.Value.Serialize()}";
   private string SerializeAttributes () => Properties.Select(SerializeAttribute).TextJoin(" ");
   public override string Serialize ()
   {
@@ -45,5 +45,5 @@ public sealed class XMLElementNode : Node
   /// <summary>Gets the namespace, or <see langword="null"/> if one is not specified on this element.</summary>
   /// <remarks>This does not account for globally set or namespaces set by this element's parents.</remarks>
   public string? Namespace => Name?.Contains(':', SCO) == true ? Name[..Name.IndexOf(':', SCO)] : null;
-  public Dictionary<string, ISerializable> Attributes => Properties;
+  public Dictionary<string, INode> Attributes => Properties;
 }

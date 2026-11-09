@@ -3,13 +3,14 @@
 
 namespace Parser.Nodes;
 
+/// <summary>A token that represents a single capture of a regular expression.</summary>
 public readonly struct CaptureToken : IToken, IEquatable<IToken>, IEquatable<CaptureToken>, IComparable<IToken>, IComparable<CaptureToken>
 {
   public string Value { get; init; }
   public required string? Name { get; init; }
   public required int CaptureIndex { get; init; }
   public required int Index { get; init; }
-  public int Length => Index + 1;
+  public int Length => Value.Length;
 
   public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
   public int CompareTo (object? obj) => CompareTo(obj is IIndexSortable iSort ? iSort : null);
@@ -31,10 +32,10 @@ public readonly struct CaptureToken : IToken, IEquatable<IToken>, IEquatable<Cap
   int IComparable<IToken>.CompareTo (IToken? other) => CompareTo(other);
   int IComparable<CaptureToken>.CompareTo (CaptureToken other) => CompareTo(other);
 
-  public static bool operator == (CaptureToken left, CaptureToken right) => left.Equals(right);
-  public static bool operator != (CaptureToken left, CaptureToken right) => !(left == right);
-  public static bool operator < (CaptureToken left, CaptureToken right) => left.CompareTo(right) < 0;
-  public static bool operator <= (CaptureToken left, CaptureToken right) => left.CompareTo(right) <= 0;
-  public static bool operator > (CaptureToken left, CaptureToken right) => left.CompareTo(right) > 0;
-  public static bool operator >= (CaptureToken left, CaptureToken right) => left.CompareTo(right) >= 0;
+  public static bool operator == (CaptureToken left, IToken right) => left.Equals(right);
+  public static bool operator != (CaptureToken left, IToken right) => !(left == right);
+  public static bool operator < (CaptureToken left, IToken right) => left.CompareTo(right) < 0;
+  public static bool operator <= (CaptureToken left, IToken right) => left.CompareTo(right) <= 0;
+  public static bool operator > (CaptureToken left, IToken right) => left.CompareTo(right) > 0;
+  public static bool operator >= (CaptureToken left, IToken right) => left.CompareTo(right) >= 0;
 }

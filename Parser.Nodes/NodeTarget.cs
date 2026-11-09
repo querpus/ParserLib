@@ -26,21 +26,15 @@ public enum NodeTarget
   /// <summary>Write to parent, if the parent doesn't exist, write to root or add to rootnodes.</summary>
   /// <remarks>This has special logic when adding a node, it only assigns once, not to all of the target locations.</remarks>
   AnyRootOrParent = Parent | Root | RootNodes,
-  /// <summary>The property name field.</summary>
-  /// <remarks>This is a <see langword="string"/> field.</remarks>
-  PropKey = 32,
   /// <summary>The token group (aka. Token Type or Token Name)</summary>
   /// <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
-  TokenGroup = 64,
+  TokenGroup = 32,
   /// <summary>The token value (aka. Token Content)</summary>
   /// <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
-  TokenValue = 128,
-  /// <summary>Access the Prefix field of a node.</summary>
-  /// <remarks>Read only. This is a <see langword="string"/> field that must be modified with the <see cref="INode.AppendToPrefix(string)"/> method or its overloads.</remarks>
-  Prefix = 256,
-  /// <summary>Access the Suffix field of a node.</summary>
-  /// <remarks>Read only. This is a <see langword="string"/> field that must be modified with the <see cref="INode.AppendToSuffix(string)"/> method or its overloads.</remarks>
-  Suffix = 512,
+  TokenValue = 64,
+  /// <summary>The current context</summary>
+  /// <remarks>Read only. Cannot write to context, only to data keys within it. This is only to retrieve and store data in keys.</remarks>
+  Context = 128,
   /// <summary>The readonly fields that cannot be assigned to.</summary>
-  Fields = TokenGroup | TokenValue | Prefix | Suffix,
+  Fields = TokenGroup | TokenValue | Context,
 }

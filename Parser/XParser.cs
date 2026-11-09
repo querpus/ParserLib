@@ -6,7 +6,7 @@ namespace Parser;
 public sealed class XParser
 {
   [AllowNull]
-  internal static Library Lib;
+  internal static Library Library;
   private const string Area = nameof(XParser);
   private bool ActiveFailure => LastStatus.IsFail && !CurrentOp.ContinueOnFail;
   #region Public Properties
@@ -22,10 +22,10 @@ public sealed class XParser
   public OpStatus LastStatus { get; private set; } = AtStart;
   /// <summary>Gets the file data as a list of bytes.</summary>
   public Spec LocalDefaultSpec =>
-    Data?.HasData != true ? Lib["unknown"] :
-    Data.CanLoad<string>("initial") ? Lib["textbylines"] :
-    Data.CanLoad<Memory<byte>>("initial") ? Lib["binary"] :
-    Lib["unknown"];
+    Data?.HasData != true ? Library["unknown"] :
+    Data.CanLoad<string>("initial") ? Library["textbylines"] :
+    Data.CanLoad<Memory<byte>>("initial") ? Library["binary"] :
+    Library["unknown"];
   public Spec? Spec { get; private set; }
   [NotNull] public Collection<IOperation>? Operations { get; } = [];
   public Dictionary<string, int> Labels { get; } = [];
@@ -45,8 +45,8 @@ public sealed class XParser
   public XParser (Spec spec) => InitializeParser(spec);
   public XParser (string file)
   {
-    string? name = Lib.CheckFile(file);
-    Spec spec = Lib.LookupOrDefault(name);
+    string? name = Library.CheckFile(file);
+    Spec spec = Library.LookupOrDefault(name);
     InitializeParser(spec);
   }
   #endregion
@@ -80,8 +80,8 @@ public sealed class XParser
     {
       Spec = data switch
       {
-        string => Lib["textbylines"],
-        IEnumerable<byte> => Lib["binary"],
+        string => Library["textbylines"],
+        IEnumerable<byte> => Library["binary"],
         _ => throw new InvalidDataException("Data must by a byte array or a string.")
       };
     }

@@ -20,7 +20,6 @@ public static class NodeRuleHelper
       "Parent" => NT.Parent,
       "Root" => NT.Root,
       "Current" => NT.Current,
-      "PropKey" => NT.PropKey,
       "RootNodes" => NT.RootNodes,
       "Header" => NT.Header,
       "TokenGroup" => NT.TokenGroup,

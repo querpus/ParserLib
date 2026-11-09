@@ -28,7 +28,7 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
       Log(MsgClass.Error, "Tried to lookup name of null.", this);
       throw new SpecNotDefinedException("Tried to lookup name of null.");
     }
-    return !TryLookup(name, out Spec? spec) ? XParser.Lib["unknown"] : spec;
+    return !TryLookup(name, out Spec? spec) ? XParser.Library["unknown"] : spec;
   }
   public bool TryLookup (string? name, [NotNullWhen(true)][MaybeNullWhen(false)] out Spec spec)
   {
@@ -50,7 +50,7 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
   {
     DebugIn(Area, "InitializeLibrary");
     Library lib = new();
-    XParser.Lib = lib;
+    XParser.Library = lib;
     domain.ThrowIfNull();
 
     List<Assembly> assemblies = [.. domain.GetAssemblies()];

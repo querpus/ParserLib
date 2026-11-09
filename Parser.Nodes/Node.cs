@@ -4,70 +4,12 @@
 namespace Parser.Nodes;
 public abstract class Node : INode
 {
-  public Collection<ISerializable> Children { get; } = [];
-  public ImmutableList<INode> NodeChildren => [.. Children.OfType<INode>()];
-  public Dictionary<string, ISerializable> Properties { get; } = [];
+  public Collection<INode> Children { get; } = [];
+  public Dictionary<string, INode> Properties { get; } = [];
   public Dictionary<string, object> Data { get; } = [];
-  public virtual string? Prefix { get; set; }
-  public virtual string? Suffix { get; set; }
-  public virtual string ChildDelim { get; set; } = SE;
-  public virtual bool DelimAfterPrefix { get; set; }
-  public override string ToString () => $"Node(Origin: {Prefix ?? "[No Prefix]"}||{Suffix ?? "[No Suffix]"}, Children: {Children.Count}, Properties: {Properties.Count}, Data: {Data.Count})";
+  public override string ToString () => $"Node (C:{Children.Count}, P:{Properties.Count}, D:{Data.Count})";
   public abstract string Serialize ();
-  public virtual string SerializeAsRead ()
-  {
-    string result = Prefix ?? SE;
-    bool first = true;
-    foreach (ISerializable child in Children)
-    {
-      if (first)
-      {
-        if (DelimAfterPrefix)
-          result += ChildDelim;
-        first = false;
-      }
-      else
-      {
-        result += ChildDelim;
-      }
-
-      if (child is INode node)
-        result += node.SerializeAsRead();
-      else
-        result += child.Serialize();
-    }
-
-    return result;
-  }
   public bool Equals (INode? other) => ((INode) this).Equals(other);
-  public void AppendToPrefix (string data)
-  {
-    if (Prefix is null)
-      Prefix = data;
-    else
-      Prefix += data;
-  }
-  public void AppendToPrefix (IToken data)
-  {
-    if (Prefix is null)
-      Prefix = data.Value;
-    else
-      Prefix += data.Value;
-  }
-  public void AppendToSuffix (string data)
-  {
-    if (Suffix is null)
-      Suffix = data;
-    else
-      Suffix += data;
-  }
-  public void AppendToSuffix (IToken data)
-  {
-    if (Suffix is null)
-      Suffix = data.Value;
-    else
-      Suffix += data.Value;
-  }
   protected static void PrintItem (int indent, object item)
   {
     switch (item)
@@ -139,13 +81,4 @@ public abstract class Node : INode
     PrintCollection(indent, "Properties", Properties.ToList(), kvp => kvp.Value, kvp => kvp.Key);
     PrintCollection(indent, "Children", Children);
   }
-}
-
-#pragma warning disable CA1815 // Override equals and operator equals on value types
-public struct DataReference : ISerializable
-#pragma warning restore CA1815 // Override equals and operator equals on value types
-{
-  public INode LinkedNode { get; set; }
-  public string Key { get; set; }
-  public readonly string Serialize () => LinkedNode.Data[Key] is ISerializable its ? its.Serialize() : LinkedNode.Data[Key].ToString() ?? SE;
 }

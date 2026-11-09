@@ -18,7 +18,6 @@ public static partial class StandardRuleSets
       {
         ErrorIfNull(token.Value);
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.Prefix = token.Value;
         node.CommandLetter = token.Value[0];
 
         if (context.HasParent)
@@ -48,7 +47,6 @@ public static partial class StandardRuleSets
         if (context.Current is IPLCommandNode icn)
         {
           icn.AddValue(token.Value);
-          icn.Prefix += token.Value;
         }
         else
         {
@@ -67,7 +65,6 @@ public static partial class StandardRuleSets
           Log(MsgClass.Warning, "Warning: Current node is null when processing command end.", "StandardRuleSets");
           return;
         }
-        context.Current.AppendToPrefix(";");
         context.ClearNode(NT.Current);
       }
     };
@@ -79,13 +76,11 @@ public static partial class StandardRuleSets
       {
         ErrorIfNull(token.Value);
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.AppendToPrefix(token.Value);
         node.CommandLetter = token.Value[0];
 
         if (context.PropKey is "<ESC>" or "\e")
         {
           node.Escaped = true;
-          context.ClearNode(NT.PropKey);
         }
 
         context.AddNodeTo(node, NT.RootNodes);
@@ -117,7 +112,6 @@ public static partial class StandardRuleSets
           context.Data["Format"] = token.Value;
         }
         cmd.AddValue(token.Value);
-        cmd.AppendToPrefix(token.Value);
       }
     };
 
@@ -128,7 +122,6 @@ public static partial class StandardRuleSets
       {
         ErrorIfNull(token.Value);
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.Prefix = token.Value;
         node.CommandLetter = token.Value[0];
 
         context.AddNodeTo(node, NT.Parent);
@@ -138,14 +131,13 @@ public static partial class StandardRuleSets
     public static NodeRule EscapeCommand = new()
     {
       TokenName = "esc",
-      Execute = static (context, token) =>
+      Execute = static (context, _) =>
       {
         if (context.HasCurrent)
         {
           context.ClearNode(NT.Current);
         }
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.AppendToPrefix(token);
         node.Escaped = true;
       }
     };
@@ -153,28 +145,14 @@ public static partial class StandardRuleSets
     public static NodeRule PrintCommand = new()
     {
       TokenName = "etb",
-      Execute = static (context, token) =>
+      Execute = static (context, _) =>
       {
         if (context.HasCurrent)
         {
           context.ClearNode(NT.Current);
         }
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.AppendToPrefix(token);
         node.Escaped = true;
-      }
-    };
-
-    public static NodeRule Comma = new()
-    {
-      TokenName = "op",
-      ExactText = ",",
-      Execute = static (context, token) =>
-      {
-        if (context.HasCurrent)
-          context.Current.AppendToPrefix(token);
-        else
-          throw new InvalidOperationException("No current node to operate on.");
       }
     };
 
@@ -246,9 +224,9 @@ public static partial class StandardRuleSets
       IPL.CmdEnd,
       IPL.EscapeCommand,
       IPL.PropertyCommand,
-      NodeRule.KeepAndIgnore("op", exact_text: ",", appendToPrefix: true),
       IPL.FormatCommand,
       IPL.PrintCommand,
+      NodeRule.Discard("op", exact_text: ","),
       NodeRule.Discard("before"),
       NodeRule.Discard("after"),
       NodeRule.Discard("between"),

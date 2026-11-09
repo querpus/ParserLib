@@ -44,7 +44,6 @@ public static partial class StandardRuleSets
         ErrorIfNull(token.Value);
 
         JSONObjectNode node = context.GenerateNode<JSONObjectNode>(NT.None);
-        node.AppendToPrefix(token);
 
         if (context.Current is JSONArrayNode obj)
         {
@@ -67,7 +66,6 @@ public static partial class StandardRuleSets
         ErrorIfNull(token.Value);
 
         JSONArrayNode node = context.GenerateNode<JSONArrayNode>(NT.None);
-        node.AppendToPrefix(token);
 
         if (context.Current is JSONArrayNode obj)
         {
@@ -89,7 +87,6 @@ public static partial class StandardRuleSets
       {
         ErrorIfNull(token.Value);
         var node = context.PopTo(NT.Current);
-        node.AppendToSuffix(token.Value);
         context.ClearNode(NT.Current);
         DebugMessage("Object Close Token Processed.");
       }
@@ -101,7 +98,6 @@ public static partial class StandardRuleSets
       {
         ErrorIfNull(token.Value);
         var node = context.PopTo(NT.Current);
-        node.AppendToSuffix(token.Value);
         context.ClearNode(NT.Current);
         DebugMessage("Array Close Token Processed.");
       }
@@ -118,7 +114,6 @@ public static partial class StandardRuleSets
         }
         JSONPropertyNode node = context.GenerateNode<JSONPropertyNode>(NT.Current);
         node.Key = token.Value;
-        node.AppendToPrefix(token.Value);
         context.AddNodeTo(node, NT.AnyRootOrParent);
         Log(MsgClass.GreenInfo, $"Property created with key {node.Key}", "StandardRuleSets");
       }
@@ -175,9 +170,9 @@ public static partial class StandardRuleSets
       JSON.ArrayClose,
       JSON.PropertyName,
       JSON.StringValue,
-      NodeRule.KeepAndIgnore("op", appendToPrefix: true),
-      NodeRule.KeepAndIgnore("ws"),
-      NodeRule.KeepAndIgnore("comment"),
+      NodeRule.Discard("op"),
+      NodeRule.Discard("ws"),
+      NodeRule.Discard("comment"),
       NodeRule.Discard("qt"),
       NodeRule.Discard("str_value"),
       // Also look for errors

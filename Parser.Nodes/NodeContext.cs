@@ -12,45 +12,53 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   public event PropertyChangedEventHandler? PropertyChanged;
   #region Private Methods
   private void Notify (string property) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
-  private static NT ExtractFields (NT target, scoped out NT extracted)
+  private INode? GetTargetNode (NT target) => target switch
   {
-    extracted = target & (NT.Prefix | NT.Suffix);
-    return target & ~(NT.Prefix | NT.Suffix);
-  }
-  private static NT ExtractAllFields (NT target, scoped out NT extracted)
+    NT.None => null,
+    NT.Current => Current,
+    NT.Parent => Parent,
+    NT.Header => Header,
+    NT.Root => Root,
+    NT.RootNodes => throw new InvalidNodeException("RootNodes is not a supported node."),
+    NT.Context => throw new InvalidNodeException("Context is not a supported node."),
+    NT.AnyRootOrParent => Parent ?? (SingleRoot ? Root : throw new InvalidNodeException("RootNodes not supported.")),
+    _ => throw new InvalidNodeException($"Cannot access nodetype {target}"),
+  };
+  private object? GetTargetData (NT target, string data_key)
   {
-    extracted = target & (NT.Prefix | NT.Suffix | NT.TokenGroup | NT.TokenValue);
-    return target & ~(NT.Prefix | NT.Suffix | NT.TokenGroup | NT.TokenValue);
-  }
-  private dynamic? GetTargetValue (NT target, CaptureToken? token = null)
-  {
-    NT extracted = target & (NT.Prefix | NT.Suffix);
-    NT stripped = target & ~(NT.Prefix | NT.Suffix);
+    if (target is NT.Context)
+    {
+      return Data.TryGetValue(data_key, out string? data) ? data : null;
+    }
 
-    dynamic? initial = stripped switch
+    INode? initial = target switch
     {
       NT.None => null,
       NT.Current => Current,
       NT.Parent => Parent,
       NT.Header => Header,
       NT.Root => Root,
-      NT.RootNodes => RootNodes,
-      NT.PropKey => PropKey,
-      NT.TokenGroup when token is not null => token.Value.Name,
-      NT.TokenValue when token is not null => token.Value.Value,
-      NT.AnyRootOrParent => (dynamic?) Parent ?? (SingleRoot ? Root : RootNodes),
-      _ => throw new InvalidOperationException(),
+      NT.RootNodes => throw new InvalidNodeException("RootNodes not supported."),
+      NT.AnyRootOrParent => Parent ?? (SingleRoot ? Root : throw new InvalidNodeException("RootNodes not supported.")),
+      _ => throw new InvalidNodeException($"Cannot access nodetype {target}"),
     };
 
-    return extracted switch
+    if (initial is null)
     {
-      NT.None => initial,
-      NT.Prefix => initial?.Prefix,
-      NT.Suffix => initial?.Suffix,
-      _ => throw new InvalidOperationException("Cannot have prefix and suffix flags both on a 'get' operation."),
-    };
+      return null;
+    }
+
+    return initial.Data.TryGetValue(data_key, out object? value) ? value : null;
   }
-  private void SetTargetValue (NT target, dynamic? value)
+  private static string? GetTokenData (NT target, IToken token) => target switch
+  {
+    NT when token is null => throw new InvalidTokenException($"Attempted to read {target} data from null token."),
+    NT.None => null,
+    NT.TokenGroup when token is not null => token.Name,
+    NT.TokenValue when token is not null => token.Value,
+    _ => throw new InvalidNodeException($"{target} is not a supported token property."),
+  };
+  private void SetTargetNode (NT target, INode? value)
   {
     INode assignRootNodes (dynamic value)
     {
@@ -64,11 +72,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       Notify(nameof(RootNodes));
       return value;
     }
-    if (ExtractAllFields(target, out NT fields) is not NT.None && fields > NT.None)
-    {
-      throw new InvalidOperationException($"Cannot set the field {fields} in this way.");
-    }
-    if (GetTargetValue(target) is not null && target is not NT.RootNodes and NT.AnyRootOrParent)
+    if (GetTargetNode(target) is not null && target is not NT.RootNodes and not NT.AnyRootOrParent)
     {
       Log(MsgClass.Warning, $"{target} was not null before assignment.", this);
     }
@@ -82,11 +86,41 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       NT.Root => Root = value,
       NT.RootNodes when value is not null => assignRootNodes(value),
       NT.RootNodes when value is null => clearRootNodes(value),
-      NT.PropKey when value is not null => value is string ? PropKey = value : throw new InvalidOperationException("PropKey must be assigned a string or null."),
-      NT.PropKey when value is null => PropKey = null,
       NT.TokenGroup or NT.TokenValue => throw new InvalidOperationException("Cannot assign to token properties."),
       _ => throw new InvalidOperationException(),
     };
+  }
+  private void SetTargetData (NT target, string data_key, object? value)
+  {
+    if (target is  NT.Context)
+    {
+      if (value is null)
+        _ = Data.Remove(data_key);
+      else if (target is NT.Context && value.GetType().IsAssignableTo(typeof(string)))
+        Data[data_key] = (string) value;
+      return;
+    }
+
+    INode? initial = target switch
+    {
+      NT.None => null,
+      NT.Current => Current,
+      NT.Parent => Parent,
+      NT.Header => Header,
+      NT.Root => Root,
+      NT.RootNodes => throw new InvalidNodeException("RootNodes not supported."),
+      NT.AnyRootOrParent => Parent ?? (SingleRoot ? Root : throw new InvalidNodeException("RootNodes not supported.")),
+      _ => throw new InvalidNodeException($"Cannot access nodetype {target}"),
+    };
+
+    if (initial is null && value is null)
+      return;
+    else if (initial is null)
+      throw new InvalidNodeException($"Node {target} was null.");
+    else if (value is null)
+      _ = initial.Data.Remove(data_key);
+    else
+      initial.Data[data_key] = value;
   }
   #endregion
   /// <summary>Set this to <see langword="true"/> if there must be a single node that everything is within.
@@ -173,7 +207,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     {
       throw new InvalidOperationException($"Node is not {nameof(TNode)}.");
     }
-    SetTargetValue(target, node);
+    SetTargetNode(target, node);
     return node;
   }
   /// <summary>Adds the <paramref name="node"/> to the node at <paramref name="target"/> as a child</summary>
@@ -211,7 +245,8 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     }
     if (target.HasFlag(NT.Parent))
     {
-      if (GetTargetValue(target) is INode parent)
+      INode? parent = GetTargetNode(NT.Parent);
+      if (parent is not null)
       {
         success = true;
         parent.AddChild(node);
@@ -243,42 +278,13 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       throw new InvalidOperationException($"No Node Added to Target {target}.");
     }
   }
-  /// <summary>Appends the currrent token to the prefix field or the suffix field on the target node.</summary>
-  /// <param name="target">The target node and field.</param>
-  /// <param name="token">The token to append.</param>
-  /// <exception cref="InvalidOperationException">Both Suffix and Prefix were included in <paramref name="target"/> or an invalid <paramref name="target"/> was specified.</exception>
-  public void AppendTokenTo (NT target, IToken token)
-  {
-    NT stripped = ExtractFields(target, out NT fields);
-    dynamic? dyn_node = GetTargetValue(stripped);
-
-    if (dyn_node is INode node && fields != NT.None && token.Value is not null)
-    {
-      if (fields is NT.Prefix)
-      {
-        node.AppendToPrefix(token.Value);
-      }
-      else if (fields is NT.Suffix)
-      {
-        node.AppendToSuffix(token.Value);
-      }
-      else
-      {
-        throw new InvalidOperationException("Prevented dual assignment. Single assignment only.");
-      }
-    }
-    else
-    {
-      throw new InvalidOperationException($"Invalid target {target}.");
-    }
-  }
   public void AssignNodeTo (INode node, NT target)
   {
     if (target.HasAnyFlag(NT.Fields))
     {
       throw new InvalidOperationException($"Cannot assign node to {target}.");
     }
-    SetTargetValue(target, node);
+    SetTargetNode(target, node);
   }
 
   public TNode GenerateNode<TNode> (NT target) where TNode : INode, new()
@@ -355,7 +361,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       Log(MsgClass.GreenInfo, $"Node stored in {target} was cleared.", this);
   }
 
-  public static void DoXMLOperation (NodeContext context, CaptureToken token, string action, string? assignTo, string? valueFrom, string? className)
+  public void DoXMLOperation (CaptureToken token, string action, string? assignTo, string? valueFrom, string? className)
   {
     NT target = assignTo?.ToNodeTarget() ?? NT.None;
     NT source = valueFrom?.ToNodeTarget() ?? NT.None;
@@ -363,20 +369,31 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     switch (action)
     {
       case "GenerateNodeTo" when className is not null:
-        INode node = context.GenerateNode(target, className);
-        node.AppendToPrefix(token.Value);
+        INode node = GenerateNode(target, className);
         break;
       case "AssignNodeTo" when target is not NT.None && source is not NT.None:
-        context.AssignNodeTo(context.GetTargetValue(source), target);
+        INode? ant_node = GetTargetNode(source);
+        if (ant_node is not null)
+          AssignNodeTo(ant_node, target);
+        else
+          throw new InvalidNodeException($"Source node is null. Cannot assign {source} node to {target}.");
         break;
       case "AddToNodeAt" when target is not NT.None && source is not NT.None:
-        context.AddNodeTo(context.GetTargetValue(source), target);
+        INode? atna_node = GetTargetNode(source);
+        if (atna_node is not null)
+          AddNodeTo(atna_node, target);
+        else
+          throw new InvalidNodeException($"Source node is null. Cannot assign {source} node to {target}.");
         break;
       case "PushNodeToStack" when source is not NT.None:
-        context.AddNodeTo(context.GetTargetValue(source), target);
+        INode? pnts_node = GetTargetNode(source);
+        if (pnts_node is not null)
+          NodeStack.Push(pnts_node);
+        else
+          throw new InvalidNodeException($"Source node is null. Cannot push {source} node to the stack.");
         break;
       case "PopNodeTo" when target is not NT.None:
-        _ = context.PopTo(target);
+        _ = PopTo(target);
         break;
       default:
         throw new InvalidOperationException($"Improper XML element {action}");

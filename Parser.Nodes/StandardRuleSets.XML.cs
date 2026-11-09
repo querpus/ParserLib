@@ -15,10 +15,9 @@ public static partial class StandardRuleSets
     public static readonly NodeRule ElementOpen = new()
     {
       TokenName = "element_open",
-      Execute = static (context, token) =>
+      Execute = static (context, _) =>
       {
         XMLElementNode node = context.GenerateNode<XMLElementNode>(NT.Current);
-        node.AppendToPrefix(token);
         context.PushAndAddTo(node, NT.AnyRootOrParent);
         DebugMessage($"Element Open Tag Open Encountered. Assigning Current. Pushing Current. Stack count:{context.NodeStack.Count}");
       }
@@ -26,80 +25,68 @@ public static partial class StandardRuleSets
     public static readonly NodeRule ElementClose = new()
     {
       TokenName = "element_close",
-      Execute = static (context, token) =>
+      Execute = static (context, _) =>
       {
         context.WarnIfNotNull(NT.Current);
         var node = context.PopTo<XMLElementNode>(NT.Current);
-        node.AppendToSuffix(token);
         DebugMessage($"Beginning Close Validation, Popping Current. Stack count:{context.NodeStack.Count}");
       }
     };
     public static readonly NodeRule ElementSingle = new()
     {
       TokenName = "element_single",
-      Execute = static (context, token) =>
+      Execute = static (context, _) =>
       {
         XMLElementNode node = context.GenerateNode<XMLElementNode>(NT.Current);
-        node.AppendToPrefix(token);
         context.AddNodeTo(node, NT.Parent);
         DebugMessage("Element Tag Single Encountered. Assigning Current.");
       }
     };
     public static readonly NodeRule ElementSingleEnd = new() {
       TokenName = "tag_close",
-      Execute = static (context, token) =>
+      Execute = static (context, _) =>
       {
-        ErrorIfNull(token.Value);
-        context.Current?.AppendToPrefix(token.Value);
         context.ClearNode(NT.Current);
       }
     };
     public static readonly NodeRule ElementHeader = new() {
       TokenName = "element_header",
-      Execute = static (context, token) =>
-      {
-        ErrorIfNull(token.Value);
-        context.Header = context.GenerateNode<XMLElementNode>(NT.Current);
-        context.Header.AppendToPrefix(token.Value);
-        DebugMessage("Element Tag Header Open Encountered. Assigning Header.");
-      }
+      Execute = static (context, _) =>
+        _ =context.GenerateNode<XMLElementNode>(NT.Current | NT.Header)
     };
     public static readonly NodeRule ElementHeaderEnd = new()
     {
       TokenName = "header_close",
-      Execute = static (context, token) =>
-      {
-        ErrorIfNull(token.Value);
-        context.Current?.AppendToPrefix(token.Value);
-        context.ClearNode(NT.Current);
-      }
+      Execute = static (context, _) =>
+        context.ClearNode(NT.Current)
     };
     public static readonly NodeRule ElementCloseEnd = new()
     {
       TokenName = "close_tag_close",
-      Execute = static (context, token) =>
+      Execute = static (context, _) =>
       {
-        ErrorIfNull(token.Value);
-        context.Current?.AppendToSuffix(token.Value);
         context.ClearNode(NT.Current);
       }
     };
-    public static readonly NodeRule TagName = new()
+    public static readonly NodeRule AddName = new()
     {
-      TokenName = "tag_name",
+      TokenName = "add_name",
       Execute = static (context, token) =>
       {
         ErrorIfNull(context.Current);
         ErrorIfNull(token.Value);
-
-        if (context.Current.Prefix?.Contains(token.Value, SCO) ?? false)
-        {
-          context.Current.AppendToSuffix(token.Value);
-        }
-        else
-        {
-          context.Current.AppendToPrefix(token.Value);
-        }
+        //TODO: Implement using NodeType enums
+        context.Current.AddData("Name", token.Value);
+        DebugMessage("Adding Name to Current.");
+      }
+    };
+    public static readonly NodeRule CheckName = new()
+    {
+      TokenName = "check_name",
+      Execute = static (context, token) =>
+      {
+        ErrorIfNull(context.Current);
+        ErrorIfNull(token.Value);
 
         if (!context.Current.Data.TryGetValue("Name", out object? name_obj))
         {
@@ -123,7 +110,6 @@ public static partial class StandardRuleSets
       {
         ErrorIfNull(token.Value);
         ErrorIfNull(context.Current);
-        context.Current?.AppendToPrefix(" " + token.Value);
         context.PropKey = token.Value;
         Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
       }
@@ -138,8 +124,6 @@ public static partial class StandardRuleSets
         ErrorIfNull(context.PropKey);
         if (context.Current is XMLElementNode xen)
           xen.Attributes.Add(context.PropKey, new QString(token.Value));
-        context.ClearNode(NT.PropKey);
-        context.Current.AppendToPrefix(token.Value);
       }
     };
     public static readonly NodeRule Content = new()
@@ -171,7 +155,6 @@ public static partial class StandardRuleSets
       {
         ErrorIfNull(token.Value);
         ErrorIfNull(context.Current);
-        context.Current.AppendToPrefix(token.Value);
         context.ClearNode(NT.Current);
       }
     };
@@ -210,15 +193,16 @@ public static partial class StandardRuleSets
       XML.ElementSingleEnd,
       XML.ElementHeader,
       XML.ElementHeaderEnd,
-      XML.TagName,
+      XML.AddName,
+      XML.CheckName,
       XML.AttributeName,
       XML.AttributeValue,
       XML.Content,
-      NodeRule.KeepAndIgnore("comment"),
-      NodeRule.KeepAndIgnore("ws"),
-      NodeRule.KeepAndIgnore("a_qt", appendToPrefix: true),
-      NodeRule.KeepAndIgnore("a_eq", appendToPrefix: true),
-      NodeRule.KeepAndIgnore("a_end", appendToPrefix: true),
+      NodeRule.Discard("comment"),
+      NodeRule.Discard("ws"),
+      NodeRule.Discard("a_qt"),
+      NodeRule.Discard("a_eq"),
+      NodeRule.Discard("a_end"),
     },
   };
 }
