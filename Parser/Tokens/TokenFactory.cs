@@ -122,7 +122,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
       singleChar = true;
     }
 
-    Token token = new()
+    n = new()
     {
       Index = match.Start,
       Content = singleChar ? $"{Input[match.Start]}" : Input[match.Start..(match.End + 1)],
@@ -311,7 +311,8 @@ public sealed class TokenFactory : ITokenizer<IToken>
       }
       catch (OperationException e)
       {
-        LogException(e); throw new OperationException("Error found.", e);
+        Log(MsgClass.Error, e.Message, this);
+        throw new OperationException("Error found.", e);
       }
       _result.SortByIndex();
     }

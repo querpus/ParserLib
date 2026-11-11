@@ -32,7 +32,7 @@ public class MatchTokenizer : ITokenizer<MatchToken>
 
     if (rules is null || rules.TokenSequences.Count == 0)
     {
-      throw new InvalidOperationException("No token sequences.");
+      throw new InvalidOperationException("No token rules.");
     }
 
     var regex = rules.Regex;

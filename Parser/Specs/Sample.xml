@@ -13,7 +13,7 @@
     <Name>wad_test</Name>
     <TextFile>false</TextFile>
     <Instructions>
-      <Tokenize input_var="text" output_var="tokens"/>
+      <Tokenize input_var="text" output_var="tokens" tokenizer="XParser"/>
       <Label name="Start"/>
       <MakeCursor cursor_var="current_pos" position="0"/>
       <GotoOpIndex target="2"/>
