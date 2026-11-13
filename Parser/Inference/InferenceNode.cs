@@ -29,7 +29,7 @@ public static class InferenceNodeFactory
     InferenceNode result;
     if (root.LocalName == "FileInferences")
     {
-      ISerializable? initial = root.Attributes.TryGetValue("initial", out ISerializable? value) ? value : null;
+      ISerializable? initial = root.Attributes.TryGetValue("initial", out INode? value) ? value : null;
       bool isAnd = false;
       if (initial is not null)
       {

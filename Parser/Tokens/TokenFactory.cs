@@ -122,7 +122,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
       singleChar = true;
     }
 
-    n = new()
+    Token token = new()
     {
       Index = match.Start,
       Content = singleChar ? $"{Input[match.Start]}" : Input[match.Start..(match.End + 1)],

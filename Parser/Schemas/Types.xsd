@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="Parser/Spec" xml:lang="en-us">
+<xs:schema targetNamespace="Parser/Spec"
+           attributeFormDefault="unqualified"
+           elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:xml="http://www.w3.org/XML/1998/namespace"
+           xmlns="Parser/Spec"
+           xml:lang="en-us">
   <!-- Simple Types TODO: Finish Documentation -->
   <xs:simpleType name="NonEmptyTokenType">
     <xs:annotation>
@@ -12,6 +18,11 @@
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="InitializeType">
+    <xs:annotation>
+      <xs:documentation>
+        Initializes a collection, set, lookup, or dictionary and assigns it to a key.
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="NonEmptyTokenType">
       <xs:enumeration value="Collection">
         <xs:annotation>
@@ -170,9 +181,25 @@
       </xs:simpleType>
     </xs:union>
   </xs:simpleType>
-  <xs:simpleType name="RuleTypeToken">
+  <xs:simpleType name="GroupRuleTypeToken">
+    <xs:annotation>
+      <xs:documentation>
+        The type of rule. This is used for group rules.
+      </xs:documentation>
+    </xs:annotation>
     <xs:restriction base="xs:token">
       <xs:enumeration value="None"/>
+      <xs:enumeration value="Recursive"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="TokenRuleTypeToken">
+    <xs:annotation>
+      <xs:documentation>
+        The type of rule. This is used for token rules.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <!--<xs:enumeration value="None"/>-->
       <!-- Token Rule Types -->
       <xs:enumeration value="Competitive"/>
       <xs:enumeration value="TokenMatch"/>
@@ -191,16 +218,18 @@
       <!-- Flags -->
       <xs:enumeration value="IgnoreCase"/>
       <xs:enumeration value="IgnoredToken"/>
-      <xs:enumeration value="Opt"/>
-      <xs:enumeration value="Mult"/>
-      <xs:enumeration value="Recursive"/>
+      <!--<xs:enumeration value="Opt"/>-->
+      <!--<xs:enumeration value="Mult"/>-->
+      <!--<xs:enumeration value="Recursive"/>-->
       <!-- Opt & Mult -->
-      <xs:enumeration value="Any"/>
-      
+      <!--<xs:enumeration value="Any"/>-->
     </xs:restriction>
   </xs:simpleType>
-  <xs:simpleType name="RuleTypeList">
-    <xs:list itemType="RuleTypeToken"/>
+  <xs:simpleType name="TokenRuleTypeList">
+    <xs:list itemType="TokenRuleTypeToken"/>
+  </xs:simpleType>
+  <xs:simpleType name="GroupRuleTypeList">
+    <xs:list itemType="GroupRuleTypeToken"/>
   </xs:simpleType>
   <xs:simpleType name="RegexOptionListType">
     <xs:list itemType="RegexOptionType"/>
@@ -210,6 +239,8 @@
       <xs:enumeration value="CaseInsensitive"/>
       <xs:enumeration value="MultiLine"/>
       <xs:enumeration value="DotMatchesNewline"/>
+      <xs:enumeration value="RightToLeft"/>
+      <xs:enumeration value=""/>
     </xs:restriction>
   </xs:simpleType>
   <!-- Groups TODO: Finish Documentation -->
@@ -255,7 +286,7 @@
     <xs:attribute name="exact" type="NonEmptyTokenType" use="optional"/>
     <xs:attribute name="ignorecase" type="xs:boolean" use="optional"/>
   </xs:complexType>
-  <xs:complexType name="EntityDefType">
+  <!--<xs:complexType name="EntityDefType">
     <xs:sequence>
       <xs:choice minOccurs="1" maxOccurs="unbounded">
         <xs:element name="MatchRule" type="MatchType" minOccurs="1" maxOccurs="unbounded"/>
@@ -265,7 +296,7 @@
         <xs:element name="CmdSequence" type="InnerInstructionSet" minOccurs="1" maxOccurs="unbounded"/>
       </xs:choice>
     </xs:sequence>
-  </xs:complexType>
+  </xs:complexType>-->
   <xs:complexType name="StructureContentType">
     <xs:attribute name="class" type="NonEmptyTokenType" use="required"/>
   </xs:complexType>
@@ -345,10 +376,10 @@ True by default.
         <xs:complexType>
           <xs:sequence>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-              <xs:element name="TokenRule" type="NamedRuleDef" minOccurs="1" maxOccurs="unbounded"/>
+              <xs:element name="TokenRule" type="NamedTokenRuleDef" minOccurs="1" maxOccurs="unbounded"/>
               <xs:element name="TokenLookup" type="NamedTokenLookupType" minOccurs="1" maxOccurs="unbounded"/>
-              <xs:element name="GroupTokenRule" type="NamedRuleDef" minOccurs="1" maxOccurs="unbounded"/>
-              <xs:element name="CmdSequence" type="InnerInstructionSet" minOccurs="1" maxOccurs="unbounded"/>
+              <xs:element name="GroupTokenRule" type="NamedGroupRuleDef" minOccurs="1" maxOccurs="unbounded"/>
+              <xs:element name="CmdSequence" type="NamedInnerInstructionSet" minOccurs="1" maxOccurs="unbounded"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>
@@ -579,20 +610,43 @@ True by default.
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="NamedRuleDef">
+  <xs:complexType name="NamedTokenRuleDef">
     <xs:complexContent>
-      <xs:extension base="RuleDef">
-        <xs:attribute name="name" type="xs:ID" id="ruledef" use="required"/>
+      <xs:extension base="TokenRuleDef">
+        <xs:attribute name="name" type="xs:ID" id="tokenruledef" use="required"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="RuleDef">
+  <xs:complexType name="NamedGroupRuleDef">
+    <xs:complexContent>
+      <xs:extension base="GroupRuleDef">
+        <xs:attribute name="name" type="xs:ID" id="groupruledef" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <!--<xs:complexType name="RuleDef">
     <xs:all>
-      <xs:element name="TypeToAssign" minOccurs="0" maxOccurs="1" type="xs:token" default="None"/>
+      <xs:element name="TypeToAssign" minOccurs="0" maxOccurs="1" type="xs:token"/>
       <xs:element name="Type" type="RuleTypeList" minOccurs="1" maxOccurs="1"/>
-      <xs:element name="Data" minOccurs="0" maxOccurs="1" default="" type="xs:string"/>
+      <xs:element name="Data" minOccurs="0" maxOccurs="1" type="xs:string"/>
     </xs:all>
     <xs:attribute name="ref" type="xs:IDREF" id="ruledefref" use="optional"/>
+  </xs:complexType>-->
+  <xs:complexType name="GroupRuleDef">
+    <xs:sequence>
+      <xs:element name="Data" minOccurs="1" maxOccurs="1" type="xs:string"/>
+    </xs:sequence>
+    <xs:attribute name="assign" type="xs:token" use="optional"/>
+    <xs:attribute name="type" type="GroupRuleTypeList" use="optional"/>
+    <xs:attribute name="ref" type="xs:IDREF" id="groupruledefref" use="optional"/>
+  </xs:complexType>
+  <xs:complexType name="TokenRuleDef">
+    <xs:sequence>
+      <xs:element name="Data" minOccurs="1" maxOccurs="1" type="xs:string"/>
+    </xs:sequence>
+    <xs:attribute name="assign" type="xs:token" use="optional"/>
+    <xs:attribute name="type" type="TokenRuleTypeList" use="required"/>
+    <xs:attribute name="ref" type="xs:IDREF" id="tokenruledefref" use="optional"/>
   </xs:complexType>
   <xs:complexType name="NamedTokenLookupType">
     <xs:complexContent>
@@ -601,9 +655,19 @@ True by default.
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="RuleList">
+  <!--<xs:complexType name="RuleList">
     <xs:sequence>
       <xs:element name="Rule" type="RuleDef" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>-->
+  <xs:complexType name="TokenRuleList">
+    <xs:sequence>
+      <xs:element name="Rule" type="TokenRuleDef" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="GroupRuleList">
+    <xs:sequence>
+      <xs:element name="Rule" type="GroupRuleDef" maxOccurs="unbounded" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="TokenLookupType">
@@ -618,14 +682,14 @@ True by default.
       <xs:element name="TokenLookup" type="TokenLookupType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="NamedComplexTokenType">
+  <!--<xs:complexType name="NamedComplexTokenType">
     <xs:complexContent>
       <xs:extension base="ComplexTokenType">
         <xs:attribute name="name" type="xs:token" use="required"/>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="ComplexTokenType">
+  </xs:complexType>-->
+  <!--<xs:complexType name="ComplexTokenType">
     <xs:sequence>
       <xs:element name="Name" maxOccurs="1" minOccurs="0" type="ComplexTokenType"/>
       <xs:element name="Type" maxOccurs="1" minOccurs="0" type="ComplexTokenType"/>
@@ -660,7 +724,7 @@ True by default.
       </xs:choice>
     </xs:sequence>
     <xs:attributeGroup ref="ComplexTokenAttrGroup"/>
-  </xs:complexType>
+  </xs:complexType>-->
   <!-- Attribute Groups TODO: Finish Documentation -->
   <xs:attributeGroup name="ComplexTokenAttrGroup">
     <xs:attribute name="tokentype" type="xs:token"/>
@@ -774,6 +838,22 @@ Referenced data should be an integer equal to or greater than 0.
             <xs:annotation>
               <xs:documentation>
                 Reads a sequence of 4 bytes, stored internally as an int.
+                If the endian attribute is not defined, this uses little-endian order.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="long">
+            <xs:annotation>
+              <xs:documentation>
+                Reads a sequence of 8 bytes, stored internally as a long integer (64 bit).
+                If the endian attribute is not defined, this uses little-endian order.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="int64">
+            <xs:annotation>
+              <xs:documentation>
+                Reads a sequence of 8 bytes, stored internally as a long integer (64 bit).
                 If the endian attribute is not defined, this uses little-endian order.
               </xs:documentation>
             </xs:annotation>

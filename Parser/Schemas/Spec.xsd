@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="Parser/Spec" xmlns:tns="Parser/Spec">
+<xs:schema
+    targetNamespace="Parser/Spec"
+    attributeFormDefault="unqualified"
+    elementFormDefault="qualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xml="http://www.w3.org/XML/1998/namespace"
+    xmlns="Parser/Spec">
   <xs:include schemaLocation="Types.xsd"/>
-  <xs:element name="Definition">
+  <xs:element name="Definition" >
+    <xs:annotation>
+      <xs:documentation>
+        The root node. Should contain the optional Prefabs element first, then Spec elements following it. There must be at least 1 spec in the file.
+      </xs:documentation>
+    </xs:annotation>
     <xs:complexType>
       <xs:sequence>
         <xs:element name="Prefabs" minOccurs="0" maxOccurs="1" type="PrefabSection"/>
@@ -9,14 +20,20 @@
           <xs:complexType>
             <xs:all maxOccurs="1" minOccurs="1">
               <xs:element name="Name" type="NonEmptyTokenType" minOccurs="1" maxOccurs="1"/>
-              <xs:element name="TextFile" type="xs:boolean" minOccurs="1" maxOccurs="1" default="false"/>
-              <xs:element name="CaseInsensitive" type="xs:boolean" minOccurs="0" maxOccurs="1" default="false"/>
-              <xs:element name="RegexDotMatchesNewline" type="xs:boolean" minOccurs="0" maxOccurs="1" default="false"/>
-              <xs:element name="RegexMultiline" minOccurs="0" maxOccurs="1" type="xs:boolean" default="true"/>
-              <xs:element name="TokenRules" type="RuleList" minOccurs="0" maxOccurs="1"/>
-              <xs:element name="GroupTokenRules" type="RuleList" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="TextFile" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+              <xs:element name="CaseInsensitive" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="RegexDotMatchesNewline" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="RegexMultiline" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
+              <xs:element name="TokenRules" type="TokenRuleList" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="GroupTokenRules" type="GroupRuleList" minOccurs="0" maxOccurs="1"/>
               <xs:element name="TokenLookups" type="TokenLookupsType" minOccurs="0" maxOccurs="1"/>
-              <xs:element name="DefaultRuleSet" type="RuleTypeList" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="DefaultRuleSet" type="TokenRuleTypeList" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                  <xs:documentation>
+                    This specifies the default rule options applied to every token rule. This does not affect group rules.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
               <!--<xs:element name="EntityInfo">
                 <xs:complexType>
                   <xs:sequence>
@@ -24,24 +41,30 @@
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>-->
-              <xs:element name="Instructions" minOccurs="0" type="InnerInstructionSet" maxOccurs="1"/>
-              <xs:element name="FileInferences" minOccurs="0" type="FileInferencesType" maxOccurs="1"/>
+              <xs:element name="Instructions" minOccurs="1" type="InnerInstructionSet" maxOccurs="1"/>
+              <xs:element name="FileInferences" minOccurs="0" type="FileInferencesType" maxOccurs="1">
+                <xs:annotation>
+                  <xs:documentation>
+                    Specifies the rules to auto-detect this file type.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
             </xs:all>
           </xs:complexType>
           <xs:key name="OpLabelKey">
-            <xs:selector xpath=".//tns:Label"/>
+            <xs:selector xpath=".//Label"/>
             <xs:field xpath="@name"/>
           </xs:key>
           <xs:key name="TokenCompatKey">
-            <xs:selector xpath=".//tns:TokenLookups/tns:TokenLookup"/>
+            <xs:selector xpath=".//TokenLookups/TokenLookup"/>
             <xs:field xpath="@alias"/>
           </xs:key>
           <xs:key name="SpecKey">
-            <xs:selector xpath=".//tns:Spec"/>
-            <xs:field xpath="tns:Name"/>
+            <xs:selector xpath=".//Spec"/>
+            <xs:field xpath="Name"/>
           </xs:key>
           <xs:keyref refer="OpLabelKey" name="GotoLabelConstraint">
-            <xs:selector xpath=".//tns:GotoLabel"/>
+            <xs:selector xpath=".//GotoLabel"/>
             <xs:field xpath="@name"/>
           </xs:keyref>
         </xs:element>

@@ -39,7 +39,6 @@ public static partial class StandardRuleSets
       {
         XMLElementNode node = context.GenerateNode<XMLElementNode>(NT.Current);
         context.AddNodeTo(node, NT.Parent);
-        DebugMessage("Element Tag Single Encountered. Assigning Current.");
       }
     };
     public static readonly NodeRule ElementSingleEnd = new() {
@@ -51,8 +50,10 @@ public static partial class StandardRuleSets
     };
     public static readonly NodeRule ElementHeader = new() {
       TokenName = "element_header",
-      Execute = static (context, _) =>
-        _ =context.GenerateNode<XMLElementNode>(NT.Current | NT.Header)
+      Execute = static (context, t) =>
+      {
+        _ = context.GenerateNode<XMLElementNode>(NT.Current | NT.Header);
+      }
     };
     public static readonly NodeRule ElementHeaderEnd = new()
     {

@@ -53,7 +53,7 @@
         </Data>
       </Rule>
     </TokenRules>
-    <Constructs>
+    <!--<Constructs>
       <Object class="XMLAttribute">
         <Token property="Key" type="AttrKey"/>
         <Token type="Eq"/>
@@ -62,7 +62,7 @@
       <Object class="XMLElementOpen">
         <Token type=""/>
       </Object>
-    </Constructs>
+    </Constructs>-->
     <GroupTokenRules>
       <Rule assign="Attribute">
         <Data> n:AttrKey x:Eq v:String </Data>

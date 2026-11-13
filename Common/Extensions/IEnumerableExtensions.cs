@@ -93,7 +93,7 @@ public static class IEnumerableExtensions
 
     public string TextJoin (string separator = EmptyString)
     {
-      if (list is null)
+      if (list.IsEmpty)
         return SE;
 
       string result = SE;
@@ -114,6 +114,11 @@ public static class IEnumerableExtensions
   extension([NotNullWhen(false)] IEnumerable? list)
   {
     public bool IsEmpty => list is null || list.AsCollection<object>().Count == 0;
+  }
+
+  extension([NotNullWhen(true)] IEnumerable? list)
+  {
+    public bool IsNotEmpty => list?.AsCollection<object>().Count > 0;
   }
 
   extension(IEnumerable<string> list)

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Definition xmlns="Parser/Spec"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
+<Definition xmlns="Parser/Spec"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:xml="http://www.w3.org/XML/1998/namespace"
+            xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
   <Spec>
     <Name>pak</Name>
     <TextFile>false</TextFile>

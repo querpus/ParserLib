@@ -40,7 +40,7 @@
     </GroupTokenRules>
     <Instructions>
       <Label name="Start"/>
-      <Tokenize input_var="text" output_var="tokens"/>
+      <Tokenize input_var="text" output_var="tokens" tokenizer="xparser"/>
       <Print check_var="tokens"/>
       <TokenAssemble input_var="tokens" output_var="token_groups"/>
       <Print check_var="tokengroups"/>
@@ -52,13 +52,13 @@
       <Extension>url</Extension>
       <Extension>inf</Extension>
     </FileInferences>
-    <EntityInfo>
+    <!--<EntityInfo>
       <EntityDef>
         <MatchRule group="key"/>
         <Structure>
           
         </Structure>
       </EntityDef>
-    </EntityInfo>
+    </EntityInfo>-->
   </Spec>
 </Definition>

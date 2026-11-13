@@ -105,6 +105,23 @@ public static class ObjectExtensions
   extension<T> (Stack<T> stack)
   {
     public bool IsNotEmpty => !stack.IsEmpty;
+    public string GetHierarchy (Func<T, string> string_method, string delim)
+    {
+      if (stack.IsEmpty)
+        return "<Empty Stack>";
+
+      string result = "";
+
+      foreach (var item in stack)
+      {
+        if (result.IsEmpty)
+          result = string_method(item);
+        else
+          result += delim + string_method(item);
+      }
+
+      return result;
+    }
   }
   extension(NumberStyles styles)
   {
