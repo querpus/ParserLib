@@ -14,10 +14,9 @@ public static partial class StandardRuleSets
       TokenName = "section",
       Execute = static (context, token) =>
       {
-        INISectionNode node = context.GenerateNode<INISectionNode>(NT.Current);
-        context.AddNodeTo(node, NT.RootNodes);
-        context.ReplaceParent(node);
-        node.Data["Name"] = token.Value![1..^1];
+        INISectionNode node = context.GenerateNode<INISectionNode>(NT.Current | NT.Parent);
+        
+        context.(NT.Current, "Name", token.Value![1..^1]);
         context.ClearNode(NT.Current);
         Log(MsgClass.GreenInfo, $"Section Defined: {token.Value}", "StandardRuleSets");
       }

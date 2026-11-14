@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content CopyToOutputDirectory="Always" Include="Specs\*.xml" />
+    <Content CopyToOutputDirectory="Always" Include="Specs\*.*" />
   </ItemGroup>
 
   <ItemGroup>

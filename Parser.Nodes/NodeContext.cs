@@ -18,13 +18,17 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
   }
 
-  internal INode? GetTargetNode (NT target, bool do_not_throw)
+  internal INode? GetTargetNode (NT target, bool do_not_throw_for_root_nodes, bool never_throw_ever = false)
   {
     try
     {
       return GetTargetNode(target);
     }
-    catch (NotSupportedException)
+    catch (NotSupportedException) when (do_not_throw_for_root_nodes)
+    {
+      return null;
+    }
+    catch (InvalidNodeException) when (never_throw_ever)
     {
       return null;
     }
@@ -245,29 +249,6 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     AddNodeTo(node, target);
     NodeStack.Push(node);
     Notify(nameof(NodeStack));
-  }
-  public void ReplaceParent (INode node, NT target_for_pop = NT.None, NT target_for_push = NT.Parent)
-  {
-    if (HasParent)
-    {
-      _ = PopTo(target_for_pop);
-
-      if (IsRoot)
-      {
-        PushAndAddTo(node, target_for_push);
-        Log(MsgClass.GreenInfo, $"Replaced Parent and added to {target_for_push}.", this);
-      }
-      else
-      {
-        Log(MsgClass.Warning, "Warning: Context was not at root when pushing a new parent.", this);
-        PushAndAddTo(node, target_for_push);
-      }
-    }
-    else
-    {
-      PushAndAddTo(node, target_for_push);
-      Log(MsgClass.GreenInfo, $"Initial Parent set and added to {target_for_push}", this);
-    }
   }
   /// <summary>Pops a node from the node stack, and assigns it to the target field.</summary>
   /// <param name="target">The field to assign the popped node to.</param>

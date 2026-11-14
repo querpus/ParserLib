@@ -408,3 +408,4 @@ FodyWeavers.xsd
 
 *.csproj.lscache
 ~%*.xlsm
+/Parser.Nodes/NodeContext.Old.cs
