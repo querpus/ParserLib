@@ -30,6 +30,21 @@ public static class BitArrayExtensions
       for (int i = start; i < start + length; i++)
         array.Set(i, true);
     }
+    public void SetRange (Range range) => array.SetRange(range.Start, range.End);
+    public void SetRange (Index start, Index end)
+    {
+      for (
+        int i = start.IsFromEnd
+          ? array.Length - start.Value
+          : start.Value;
+        i <= (end.IsFromEnd
+          ? array.Length - end.Value
+          : end.Value);
+        i++)
+      {
+        array.Set(i, true);
+      }
+    }
     public void SetRange (Pos pos)
     {
       for (int i = pos.Start; i < pos.Start + pos.Length; i++)

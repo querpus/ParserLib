@@ -2,28 +2,34 @@
 #pragma warning disable format // Formatting
 
 using static Parser.Nodes.NodeTarget;
+using NT = Parser.Nodes.NodeTarget;
 
 namespace Parser.Nodes;
 public static class NodeTargetExtensions
 {
-  extension (NodeTarget nt)
+  extension (NT nt)
   {
-
-    public NodeTarget[] GetTargets (NodeTarget inclusive_mask = None, NodeTarget exclusive_mask = None)
+    public string DataType => nt switch
+    {
+      None => "null",
+      NT when nt.HasAnyFlag(TokenGroup | TokenValue) => "string",
+      Context => "context"
+    };
+    public NT[] GetTargets (NT inclusive_mask = None, NT exclusive_mask = None)
     {
       if (inclusive_mask > None)
         nt &= inclusive_mask;
       if (exclusive_mask > None)
         nt &= ~exclusive_mask;
-      return [.. Enum.GetValues<NodeTarget>().Where(r => (nt & r) == r && r != None)];
+      return [.. Enum.GetValues<NT>().Where(r => (nt & r) == r && r != None)];
     }
 
     /// <summary>Write to parent, if the parent doesn't exist, add to rootnodes.</summary>
-    public static NodeTarget RootOrParent => Parent | Root;
+    public static NT RootOrParent => Parent | Root;
     /// <summary>Properties that store a node or nodes for single-root documents.</summary>
-    public static NodeTarget NodeProperties => Current | Parent | Header | Root | Temp;
+    public static NT NodeProperties => Current | Parent | Header | Root | Temp;
     /// <summary>The readonly fields that nodes cannot be assigned to.</summary>
-    public static NodeTarget Fields => TokenGroup | TokenValue | Context;
+    public static NT Fields => TokenGroup | TokenValue | Context;
   }
 }
 
@@ -48,13 +54,29 @@ public enum NodeTarget
   /// <summary>This property is cleared after every node execution.</summary>
   /// <remarks>Does not persist between node executions.</remarks>
   Temp = 1 << 4,
-  /// <summary>The token group (aka. Token Type or Token Name)</summary>
+  /// <summary>The currently read token group (aka. token type or token name)</summary>
   /// <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
   TokenGroup = 1 << 5,
-  /// <summary>The token value (aka. Token Content)</summary>
+  /// <summary>The currently read token value (aka. Token Content)</summary>
   /// <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
   TokenValue = 1 << 6,
   /// <summary>The current context</summary>
   /// <remarks>Read only. Cannot write to context, only to data keys within it. This is only to retrieve and store data in keys.</remarks>
   Context = 1 << 7,
+  /// <summary>A modifier that indicates to look at the node's data.</summary>
+  /// <remarks>This will always be coupled with an <see cref="INode"/> property.</remarks>
+  Data = 1 << 8,
+  /// <summary>A modifier that indicates to look at the node's children.</summary>
+  /// <remarks>This will always be coupled with an <see cref="INode"/> property.<br/>
+  /// <b>TKey</b> will always be a <see langword="string"/>, <b>TValue</b> could be anything except <see langword="null"/>.<br/>
+  /// A <see langword="null"/> entry to <see cref="INode.Data"/> will clear the key.
+  /// </remarks>
+  Children = 1 << 9,
+  /// <summary>A modifier that indicates to look at the node's properties.</summary>
+  /// <example><c>Current|Properties</c> - The properties <see cref="Dictionary{TKey,TValue}"/> of the <see cref="NodeContext.Current"/> context property.</example>
+  /// <remarks>
+  /// This will always be coupled with an <see cref="INode"/> property.<br/>
+  /// <b>TKey</b> will always be a <see langword="string"/>, <b>TValue</b> will always be a type of <see cref="INode"/>
+  /// </remarks>
+  Properties = 1 << 10,
 }

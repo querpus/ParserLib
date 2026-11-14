@@ -2,29 +2,15 @@
 #pragma warning disable format // Formatting
 
 namespace Common;
-public sealed class CaseInsensitiveEqualityComparer : IEqualityComparer<string>, IEqualityComparer, IComparer<string>
+public sealed class CaseInsensitiveEqualityComparer : EqualityComparer<string>, IEqualityComparer<char>
 {
-  private CaseInsensitiveEqualityComparer () { }
-  public StringComparison ComparisonType { get; init; } = StringComparison.OrdinalIgnoreCase;
-  public static CaseInsensitiveEqualityComparer Ordinal { get; } = new CaseInsensitiveEqualityComparer();
-  public static CaseInsensitiveEqualityComparer Invariant { get; } = new CaseInsensitiveEqualityComparer()
-  {
-    ComparisonType = StringComparison.InvariantCultureIgnoreCase
-  };
-  public bool Equals (string? x, string? y) => string.Equals(x, y, ComparisonType);
-  public new bool Equals (object? x, object? y) =>
-    x is string sx && y is string sy
-      ? Equals(sx, sy)
-      : x is null && y is null;
-  public int GetHashCode (string obj) => obj.GetHashCode(ComparisonType);
-  public int GetHashCode (object obj) => obj switch
-  {
-    null => 0,
-    string x => x.GetHashCode(ComparisonType),
-    char[] arr => new string(arr).GetHashCode(ComparisonType),
-    _ => obj.GetHashCode()
-  };
-  public int Compare (string? x, string? y) => x is not null
-    ? x.CompareTo(y, ComparisonType)
-    : y is null ? 0 : -1;
+  private CaseInsensitiveEqualityComparer (StringComparison sc) => ComparisonType = sc;
+  public StringComparison ComparisonType { get; init; }
+  public static CaseInsensitiveEqualityComparer Ordinal { get; } = new(SCOIC);
+  public static CaseInsensitiveEqualityComparer Invariant { get; } = new(SCIIC);
+  public override bool Equals (string? x, string? y) => string.Equals(x, y, ComparisonType);
+  public bool Equals (char x, char y) => $"{x}".Equals($"{y}", ComparisonType);
+  public int Compare (string? x, string? y) => x is not null ? x.CompareTo(y, ComparisonType) : y is null ? 0 : -1;
+  public override int GetHashCode ([DisallowNull] string obj) => obj.GetHashCode(ComparisonType);
+  public int GetHashCode ([DisallowNull] char obj) => obj;
 }

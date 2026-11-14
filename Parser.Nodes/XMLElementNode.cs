@@ -29,11 +29,11 @@ public sealed class XMLElementNode : Node
   {
     get
     {
-      var content_nodes = Children.NotOfTypes<ISerializable, XMLCommentNode, XMLElementNode>();
+      var content_nodes = Children.OfType<XMLContentNode>();
 
       if (content_nodes.Any())
       {
-        string content = content_nodes.Select(node => node.Serialize()).TextJoin("").Trim();
+        string content = content_nodes.TextJoin(;
         return content.Length > 0 ? content :  null;
       }
       return null;

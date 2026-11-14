@@ -36,8 +36,11 @@ public static class IConvertibleExtensions
     public T RemoveBitLong<T> (IConvertible bit) where T : IConvertible => (T) (IConvertible) ((long) i & ~(long) bit);
   }
 
+  /// <summary>More IConvertible Extensions</summary>
+  /// <param name="value">The value to mask.</param>
   extension(IConvertible value)
   {
     public T Mask<T> (IConvertible mask) where T : IConvertible => (T) (IConvertible) ((int) value & (int) mask);
+    public T MaskLong<T> (IConvertible mask) where T : IConvertible => (T) (IConvertible) ((long) value & (long) mask);
   }
 }

@@ -55,15 +55,29 @@ public static class SpanExtensions
     {
       Encoding getEncoding () => encoding switch
       {
+        "ASCII" => Encoding.ASCII,
         "UTF7" or "UTF8" => Encoding.UTF8,
         "UTF16" when endianness.Like("Big") => Encoding.BigEndianUnicode,
         "UTF16" => Encoding.Unicode,
-        "UTF32" => Encoding.UTF32,
-        _ => Encoding.UTF8,
+        "UTF32" when endianness.Like("Little") => Encoding.UTF32,
+        _ => Encoding.ASCII,
       };
 
       return new(getEncoding().GetChars(buffer.ToArray()));
     }
+  }
+
+  extension(Encoding enconding)
+  {
+    public static Encoding GetEncoding (string encoding, string ) => encoding switch
+    {
+      "ASCII" => Encoding.ASCII,
+      "UTF7" or "UTF8" => Encoding.UTF8,
+      "UTF16" when endianness.Like("Big") => Encoding.BigEndianUnicode,
+      "UTF16" => Encoding.Unicode,
+      "UTF32" when endianness.Like("Little") => Encoding.UTF32,
+      _ => Encoding.ASCII,
+    };
   }
 
   extension(Memory<byte> buffer)

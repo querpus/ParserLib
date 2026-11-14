@@ -1,6 +1,9 @@
 using System.Runtime.CompilerServices;
 
 using static Common.Chars;
+using static Common.MsgClass;
+
+using M = Common.MsgClass;
 
 namespace Common;
 
@@ -35,7 +38,7 @@ public static class Debug
       throw;
     }
   }
-  private static void DoLogHead (MsgClass cls, string classname, string method)
+  private static void DoLogHead (M cls, string classname, string method)
   {
     string format = $"{classname}.{method} : ";
 
@@ -44,29 +47,32 @@ public static class Debug
 
     DoLog(format, GetBackColor(cls), GetTextColor(cls), true);
   }
-  private static void DoLogHead (MsgClass cls, string caller) =>
+  private static void DoLogHead (M cls, string caller) =>
     DoLog($"{caller} : ", GetBackColor(cls), GetTextColor(cls), true);
-  private static ConsoleColor GetTextColor (MsgClass msg) => msg switch
+  private static ConsoleColor GetTextColor (M msg) => msg switch
   {
-    MsgClass.Debug or MsgClass.BlueInfo => C_Blue,
-    MsgClass.Forced => C_Cyan,
-    MsgClass.Error or MsgClass.Critical or MsgClass.Hidden => C_Black,
-    MsgClass.Warning => C_Yellow,
-    MsgClass.GreenInfo => C_Green,
-    MsgClass.Prompt => ConsoleColor.DarkMagenta,
+    M.Debug or BlueInfo => C_Blue,
+    Forced or BlueValue => C_Cyan,
+    Error or Critical or Hidden => C_Black,
+    Warning => C_Yellow,
+    GreenInfo => C_Green,
+    Prompt => ConsoleColor.DarkMagenta,
     _ => C_White
   };
-  private static ConsoleColor GetBackColor (MsgClass msg) => msg switch
+  /// <summary>Gets the </summary>
+  /// <param name="msg"></param>
+  /// <returns></returns>
+  private static ConsoleColor GetBackColor (M msg) => msg switch
   {
-    MsgClass.Error => C_DarkRed,
-    MsgClass.Critical => C_Red,
+    Error => C_DarkRed,
+    Critical => C_Red,
     _ => C_Black,
   };
   private static void PurgeStackTo (int depth)
   {
     while (CallStack.Count > depth + 1)
       CallStack.Drop();
-    Log(MsgClass.Debug, "Purged back to here.", nameof(Debug));
+    Log(M.Debug, "Purged back to here.", nameof(Debug));
   }
   private static void PurgeStackTo (string key)
   {
@@ -76,7 +82,7 @@ public static class Debug
     }
     else
     {
-      Log(MsgClass.Debug, $"No Catch Defined under {key}.", nameof(Debug));
+      Log(M.Debug, $"No Catch Defined under {key}.", nameof(Debug));
     }
   }
   #endregion
@@ -107,11 +113,11 @@ public static class Debug
   public static void ClearLog () => Console.Clear();
   /// <summary>Only writes the location of the log, and does not add a newline.</summary>
   /// <param name="cls">The color if not default.</param>
-  public static void LogHead (MsgClass cls = MsgClass.Debug) => DoLogHead(cls, ThisClass, ThisMethod);
+  public static void LogHead (M cls = M.Debug) => DoLogHead(cls, ThisClass, ThisMethod);
   /// <summary>Logs a portion of a line to the output stream, and does not append a line feed.</summary>
   /// <param name="cls">The message class of this part.</param>
   /// <param name="part">The text content.</param>
-  public static void LogPart (MsgClass cls, string part) =>
+  public static void LogPart (M cls, string part) =>
     DoLog(part, GetBackColor(cls), GetTextColor(cls), true);
   /// <summary>Writes a newline to the output stream.</summary>
   /// <param name="back">The background color.<br/>Default is black.</param>
@@ -122,12 +128,12 @@ public static class Debug
   /// <param name="message">The message text.</param>
   /// <param name="caller">The name of the caller of this method.</param>
   /// <param name="method">The name of this method.</param>
-  public static void Log (MsgClass msgClass, string message, string caller, [CallerMemberName] string method = "")
+  public static void Log (M msgClass, string message, string caller, [CallerMemberName] string method = "")
   {
     if (method.IsEmpty)
-      DoLogHead(MsgClass.Debug, caller);
+      DoLogHead(M.Debug, caller);
     else
-      DoLogHead(MsgClass.Debug, caller, method);
+      DoLogHead(M.Debug, caller, method);
     LogPart(msgClass, message);
     NewLine();
   }
@@ -137,9 +143,9 @@ public static class Debug
   /// <param name="message">The message text.</param>
   /// <param name="caller">The object calling this method.</param>
   /// <param name="method">The name of this method.</param>
-  public static void Log (MsgClass msgClass, string message, object caller, [CallerMemberName] string method = "") => Log(msgClass, message, caller.TypeName, method);
+  public static void Log (M msgClass, string message, object caller, [CallerMemberName] string method = "") => Log(msgClass, message, caller.TypeName, method);
   /// <summary>Logs an exception that was handled internally.</summary>
   /// <param name="e">The exception to log.</param>
   public static void LogException (Exception e) =>
-    Log(MsgClass.Error, ThisClass, ThisMethod, e?.Message ?? SE);
+    Log(Error, ThisClass, ThisMethod, e?.Message ?? SE);
 }

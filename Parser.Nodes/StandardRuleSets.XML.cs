@@ -111,7 +111,9 @@ public static partial class StandardRuleSets
       {
         ErrorIfNull(token.Value);
         ErrorIfNull(context.Current);
-        context.PropKey = token.Value;
+
+        XML
+
         Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
       }
     };
@@ -124,7 +126,7 @@ public static partial class StandardRuleSets
         ErrorIfNull(context.Current);
         ErrorIfNull(context.PropKey);
         if (context.Current is XMLElementNode xen)
-          xen.Attributes.Add(context.PropKey, new QString(token.Value));
+          xen.Attributes.Add(context.PropKey, new XMLContentNode() { Content = token.Value });
       }
     };
     public static readonly NodeRule Content = new()
