@@ -60,6 +60,11 @@
               Looks up a localized string similar to ParserLib\Specification.JSON\Samples\launchSettings.json.
             </summary>
         </member>
+        <member name="P:TestConsole.Paths.json_stations">
+            <summary>
+              Looks up a localized string similar to ParserLib\Specification.JSON\Samples\stations.json.
+            </summary>
+        </member>
         <member name="P:TestConsole.Paths.xml_errors">
             <summary>
               Looks up a localized string similar to ParserLib\Specification.XML\Samples\errors.xml.

@@ -14,11 +14,11 @@ public static partial class StandardRuleSets
     public static NodeRule LineCommand = new()
     {
       TokenName = "line_cmd",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
+        ErrorIfNull(context.Token.Content);
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.CommandLetter = token.Value[0];
+        node.CommandLetter = context.Token.Content[0];
 
         if (context.HasParent)
         {
@@ -28,7 +28,7 @@ public static partial class StandardRuleSets
 
         if (context.IsRoot)
         {
-          context.PushAndAddTo(node, NT.AnyRootOrParent);
+          context.PushAndAddTo(node, NT.RootOrParent);
           DebugMessage("Pushing new line command.");
         }
         else
@@ -41,12 +41,12 @@ public static partial class StandardRuleSets
     public static NodeRule LineIndex = new()
     {
       TokenName = "index",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
+        ErrorIfNull(context.Token.Content);
         if (context.Current is IPLCommandNode icn)
         {
-          icn.AddValue(token.Value);
+          icn.AddValue(context.Token.Content);
         }
         else
         {
@@ -58,7 +58,7 @@ public static partial class StandardRuleSets
     public static NodeRule CmdEnd = new()
     {
       TokenName = "end",
-      Execute = static (context, _) =>
+      Execute = static (context) =>
       {
         if (context.Current is null)
         {
@@ -72,27 +72,26 @@ public static partial class StandardRuleSets
     public static NodeRule BasicCommand = new()
     {
       TokenName = "cmd",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
+        ErrorIfNull(context.Token.Content);
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.CommandLetter = token.Value[0];
+        node.CommandLetter = context.Token.Content[0];
 
-        if (context.PropKey is "<ESC>" or "\e")
+        if (context.Data["Esc"] is "<ESC>" or "\e")
         {
           node.Escaped = true;
         }
 
-        context.AddNodeTo(node, NT.RootNodes);
+        context.RootNodes.Add(node);
       }
     };
 
     public static NodeRule FormatCommand = new()
     {
       TokenName = "format",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
         if (context.Current is not IPLCommandNode cmd)
         {
           Log(MsgClass.Error, "Current is not a command node. Aborting Format Storage.", "StandardParsingSets");
@@ -100,7 +99,7 @@ public static partial class StandardRuleSets
         }
 
         // If we erase the currently selected formula clear the context formula also.
-        if (cmd.CommandLetter is 'E' && context.Data["Format"].Like(token.Value))
+        if (cmd.CommandLetter is 'E' && context.Data["Format"].Like(context.Token.Content))
         {
           context.Data["Format"] = "0";
         }
@@ -108,21 +107,21 @@ public static partial class StandardRuleSets
         // If we set the format, then this command is a part of it too.
         if (cmd.CommandLetter is 'F')
         {
-          cmd.Format = int.Parse(token.Value, CIIC);
-          context.Data["Format"] = token.Value;
+          cmd.Format = int.Parse(context.Token.Content, CIIC);
+          context.Data["Format"] = context.Token.Content;
         }
-        cmd.AddValue(token.Value);
+        cmd.AddValue(context.Token.Content);
       }
     };
 
     public static NodeRule PropertyCommand = new()
     {
       TokenName = "prop_cmd",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
+        ErrorIfNull(context.Token.Content);
         IPLCommandNode node = context.GenerateNode<IPLCommandNode>(NT.Current);
-        node.CommandLetter = token.Value[0];
+        node.CommandLetter = context.Token.Content[0];
 
         context.AddNodeTo(node, NT.Parent);
       }
@@ -131,7 +130,7 @@ public static partial class StandardRuleSets
     public static NodeRule EscapeCommand = new()
     {
       TokenName = "esc",
-      Execute = static (context, _) =>
+      Execute = static (context) =>
       {
         if (context.HasCurrent)
         {
@@ -145,7 +144,7 @@ public static partial class StandardRuleSets
     public static NodeRule PrintCommand = new()
     {
       TokenName = "etb",
-      Execute = static (context, _) =>
+      Execute = static (context) =>
       {
         if (context.HasCurrent)
         {

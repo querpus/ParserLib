@@ -1,8 +1,6 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-
-
 namespace Parser.Nodes;
 
 /// <summary>An interface for storing nodes.</summary>
@@ -19,5 +17,6 @@ public interface INode : ISerializable, IEquatable<INode>, IPrintable
   void AddChild (INode child) => Children.Add(child);
   void AddChildren (IEnumerable<INode> children) => children.Foreach(Children.Add);
   void AddData (string key, object data) => Data[key] = data;
+  void AddData (KeyValuePair<string, object> kvp) => Data[kvp.Key] = kvp.Value;
   void AddData (Dictionary<string, object> data) => Data.AddRange(data);
 }

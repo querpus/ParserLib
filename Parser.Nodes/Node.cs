@@ -4,9 +4,12 @@
 namespace Parser.Nodes;
 public abstract class Node : INode
 {
-  public Collection<INode> Children { get; } = [];
-  public Dictionary<string, INode> Properties { get; } = [];
-  public Dictionary<string, object> Data { get; } = [];
+  public Collection<INode> Children { get; init; } = [];
+  public Dictionary<string, INode> Properties { get; init; } = [];
+  public Dictionary<string, object> Data { get; init; } = [];
+
+  bool IPrintable.HasHeaderLine => true;
+
   public override string ToString () => $"Node (C:{Children.Count}, P:{Properties.Count}, D:{Data.Count})";
   public abstract string Serialize ();
   public bool Equals (INode? other) => ((INode) this).Equals(other);

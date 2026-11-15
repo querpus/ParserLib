@@ -4,6 +4,9 @@
         <name>Parser.Nodes</name>
     </assembly>
     <members>
+        <member name="T:Parser.Nodes.CaptureToken">
+            <summary>A token that represents a single capture of a regular expression.</summary>
+        </member>
         <member name="M:Parser.Nodes.CaptureToken.ToString">
             <summary>Displays a brief summary of this token's data.</summary>
             <returns>A string representation of this token's data.</returns>
@@ -15,11 +18,18 @@
         <member name="T:Parser.Nodes.GroupTokenizer">
             <summary>Creates a token for every group in each match. Multiple captures are stored as an array of string data.</summary>
         </member>
+        <member name="T:Parser.Nodes.IMultiToken">
+            <summary>This is a token that is a list of tokens. This is useful for regex <see cref="T:System.Text.RegularExpressions.Group"/> Tokenizers and regex <see cref="T:System.Text.RegularExpressions.Match"/> Tokenizers.</summary>
+        </member>
+        <member name="P:Parser.Nodes.IMultiToken.Delim">
+            <summary>The delimeter to use when getting the <see langword="string"/> value of this token from its children.</summary>
+        </member>
+        <member name="P:Parser.Nodes.IMultiToken.Content">
+            <summary>The text content of this token.</summary>
+            <value>This will be the combined contents of all tokens for <see cref = "T:Parser.Nodes.IMultiToken" /> tokens.</value>
+        </member>
         <member name="T:Parser.Nodes.INode">
             <summary>An interface for storing nodes.</summary>
-        </member>
-        <member name="P:Parser.Nodes.INode.Prefix">
-            <summary>Gets the origin of the parsed entity.</summary>
         </member>
         <member name="M:Parser.Nodes.INode.AddChild(Parser.Nodes.INode)">
             <summary>Adds a child to the children list.</summary>
@@ -32,11 +42,16 @@
             <summary>The format that this command was created in.</summary>
             <remarks>This is pulled from the "Format" field in the <see cref="T:Parser.Nodes.NodeContext"/>.</remarks>
         </member>
-        <member name="P:Parser.Nodes.IToken.Value">
-            <summary>The value of this token. This will be <see langword="null"/> if the token is composed of multiple tokens.</summary>
+        <member name="T:Parser.Nodes.IToken">
+            <summary>The most basic token interface.</summary>
         </member>
-        <member name="P:Parser.Nodes.IToken.Name">
+        <member name="P:Parser.Nodes.IToken.Content">
+            <summary>The value of this token. This is all of the text that this token consumed.</summary>
+        </member>
+        <member name="P:Parser.Nodes.IToken.Type">
             <summary>The name or type of this token.</summary>
+            <remarks>This will be "None" by default.</remarks>
+            <value>A value of "None", "-", or "" means there was no type assigned, likely due to it not needing to have one.</value>
         </member>
         <member name="P:Parser.Nodes.ITokenizer`1.Rules">
             <summary>The rules that this tokenizer requires to process data.</summary>
@@ -47,10 +62,10 @@
         <member name="P:Parser.Nodes.JSONPropertyNode.Value">
             <summary>The value of this property.</summary>
         </member>
-        <member name="P:Parser.Nodes.MatchToken.Value">
+        <member name="P:Parser.Nodes.MatchToken.Content">
             <summary>The full match text.</summary>
         </member>
-        <member name="P:Parser.Nodes.MatchToken.Name">
+        <member name="P:Parser.Nodes.MatchToken.Type">
             <summary>The name or type of this token.</summary>
         </member>
         <member name="P:Parser.Nodes.MatchToken.MatchIndex">
@@ -66,12 +81,13 @@
         <member name="T:Parser.Nodes.MatchTokenizer">
             <summary>Creates a token for every match with the groups as properties within every match. Multiple captures are stored as a Collection under the group name.</summary>
         </member>
+        <member name="M:Parser.Nodes.NodeContext.SetToken(Parser.Nodes.IToken)">
+            <summary>Sets the current token. Should only be called from the node processor.</summary>
+            <param name="token">The current token.</param>
+        </member>
         <member name="P:Parser.Nodes.NodeContext.SingleRoot">
             <summary>Set this to <see langword="true"/> if there must be a single node that everything is within.
             Set this to <see langword="false"/> if there can be multiple top-level objects.</summary>
-        </member>
-        <member name="P:Parser.Nodes.NodeContext.PropKey">
-            <summary>The name of the current property.</summary>
         </member>
         <member name="P:Parser.Nodes.NodeContext.NodeStack">
             <summary>Gets the stack of nodes used to track the current node hierarchy during traversal or processing.</summary>
@@ -87,7 +103,10 @@
             <summary>The root node.</summary>
         </member>
         <member name="P:Parser.Nodes.NodeContext.Header">
-            <summary>Document Header.</summary>
+            <summary>The document header.</summary>
+        </member>
+        <member name="P:Parser.Nodes.NodeContext.Parent">
+            <summary>The top of the <see cref="P:Parser.Nodes.NodeContext.NodeStack"/>.</summary>
         </member>
         <member name="P:Parser.Nodes.NodeContext.Data">
             <summary>Dictionary for storing additional data that must be carried throughout the processing of the nodes.</summary>
@@ -108,30 +127,26 @@
             <summary>Adds the <paramref name="node"/> to the node at <paramref name="target"/> as a child</summary>
             <param name="node">The child node.</param>
             <param name="target">The target of the parent node.</param>
-            <remarks>Additional targets will be have the node added to, except for <see cref="F:Parser.Nodes.NodeTarget.AnyRootOrParent"/>.
+            <remarks>
+            Additional targets will be have the node added to.
             This combination flag attempts to add it to the parent object,
-            if that fails then add it to the root object, or add it to the <see cref="F:Parser.Nodes.NodeTarget.RootNodes"/> list.</remarks>
+            if that fails then add it to the root object, or add it to the <see cref="P:Parser.Nodes.NodeContext.RootNodes"/> list.
+            </remarks>
             <exception cref="T:System.InvalidOperationException">No node was added to any target.</exception>
         </member>
-        <member name="M:Parser.Nodes.NodeContext.AppendTokenTo(Parser.Nodes.NodeTarget,Parser.Nodes.IToken)">
-            <summary>Appends the currrent token to the prefix field or the suffix field on the target node.</summary>
-            <param name="target">The target node and field.</param>
-            <param name="token">The token to append.</param>
-            <exception cref="T:System.InvalidOperationException">Both Suffix and Prefix were included in <paramref name="target"/> or an invalid <paramref name="target"/> was specified.</exception>
+        <member name="M:Parser.Nodes.NodeContext.Print(System.Int32)">
+            <summary>Prints the summary of this node context out to the standard output stream.</summary>
+            <param name="indent">The number of spaces to indent the lines after the title.</param>
         </member>
-        <member name="M:Parser.Nodes.NodeRule.DefaultAction(Parser.Nodes.NodeContext,Parser.Nodes.IToken)">
+        <member name="M:Parser.Nodes.NodeRule.DefaultAction(Parser.Nodes.NodeContext)">
             <summary>The default action if none is defined.</summary>
             <param name="context">The processing context.</param>
-            <param name="token">The token encountered.</param>
         </member>
-        <member name="M:Parser.Nodes.NodeRule.Discard(System.String,System.String,System.Boolean,System.Boolean,System.String)">
-            <summary>Creates a node rule that discards the token's contents after optionally appending <paramref name="replace_with"/>.</summary>
+        <member name="M:Parser.Nodes.NodeRule.Discard(System.String,System.String)">
+            <summary>Creates a node rule that discards the token's contents.</summary>
             <param name="groupName">The token type to look for.</param>
             <param name="exact_text">The exact text to look for.</param>
-            <param name="appendToPrefix">When <see langword="true"/>, appends <paramref name="replace_with"/> to the prefix."</param>
-            <param name="appendToSuffix">When <see langword="true"/>, appends <paramref name="replace_with"/> to the suffix.</param>
-            <param name="replace_with">The text to replace the token with. Leave blank or omit to append nothing.</param>
-            <returns></returns>
+            <returns>The created node rule.</returns>
         </member>
         <member name="M:Parser.Nodes.NodeRule.SyntaxError(System.String,System.Boolean,System.String)">
             <summary>Creates a node rule that displays an error and optionally halts the processing if the token is encountered.</summary>
@@ -140,6 +155,30 @@
             <param name="error_message">The message to display.</param>
             <returns>The created node rule.</returns>
             <exception cref="T:Common.ValidationException">The node rule was matched and <paramref name="throw_error"/> was <see langword="true"/>.</exception>
+        </member>
+        <member name="M:Parser.Nodes.NodeTargetExtensions.get_RootOrParent">
+            <inheritdoc cref="P:Parser.Nodes.NodeTargetExtensions.&lt;G&gt;$5518E6172550A9A60944A8FDF8CF06CF.RootOrParent"/>
+        </member>
+        <member name="M:Parser.Nodes.NodeTargetExtensions.get_NodeProperties">
+            <inheritdoc cref="P:Parser.Nodes.NodeTargetExtensions.&lt;G&gt;$5518E6172550A9A60944A8FDF8CF06CF.NodeProperties"/>
+        </member>
+        <member name="M:Parser.Nodes.NodeTargetExtensions.get_Fields">
+            <inheritdoc cref="P:Parser.Nodes.NodeTargetExtensions.&lt;G&gt;$5518E6172550A9A60944A8FDF8CF06CF.Fields"/>
+        </member>
+        <member name="M:Parser.Nodes.NodeTargetExtensions.get_Mods">
+            <inheritdoc cref="P:Parser.Nodes.NodeTargetExtensions.&lt;G&gt;$5518E6172550A9A60944A8FDF8CF06CF.Mods"/>
+        </member>
+        <member name="P:Parser.Nodes.NodeTargetExtensions.&lt;G&gt;$5518E6172550A9A60944A8FDF8CF06CF.RootOrParent">
+            <summary>Write to parent, if the parent doesn't exist, add to rootnodes.</summary>
+        </member>
+        <member name="P:Parser.Nodes.NodeTargetExtensions.&lt;G&gt;$5518E6172550A9A60944A8FDF8CF06CF.NodeProperties">
+            <summary>Properties that store a node or nodes for single-root documents.</summary>
+        </member>
+        <member name="P:Parser.Nodes.NodeTargetExtensions.&lt;G&gt;$5518E6172550A9A60944A8FDF8CF06CF.Fields">
+            <summary>The readonly fields that nodes cannot be assigned to.</summary>
+        </member>
+        <member name="P:Parser.Nodes.NodeTargetExtensions.&lt;G&gt;$5518E6172550A9A60944A8FDF8CF06CF.Mods">
+            <summary>The modifiers to select what to look at when pulling data.</summary>
         </member>
         <member name="T:Parser.Nodes.NodeTarget">
             <summary>The node to be designated a target or referred to as a source.</summary>
@@ -161,38 +200,42 @@
         </member>
         <member name="F:Parser.Nodes.NodeTarget.Root">
             <summary>The root document field.</summary>
-            <remarks>Use this if the document requires a single root node.</remarks>
+            <remarks>This references the <see cref="P:Parser.Nodes.NodeContext.RootNodes"/> collection if <see cref="P:Parser.Nodes.NodeContext.SingleRoot"/> is <see langword="false"/>.</remarks>
         </member>
-        <member name="F:Parser.Nodes.NodeTarget.RootNodes">
-            <summary>The root document collection.</summary>
-            <remarks>Use this if the document doesn't require a single root node.</remarks>
-        </member>
-        <member name="F:Parser.Nodes.NodeTarget.AnyRootOrParent">
-            <summary>Write to parent, if the parent doesn't exist, write to root or add to rootnodes.</summary>
-            <remarks>This has special logic when adding a node, it only assigns once, not to all of the target locations.</remarks>
-        </member>
-        <member name="F:Parser.Nodes.NodeTarget.PropKey">
-            <summary>The property name field.</summary>
-            <remarks>This is a <see langword="string"/> field.</remarks>
+        <member name="F:Parser.Nodes.NodeTarget.Temp">
+            <summary>This property is cleared after every node execution.</summary>
+            <remarks>Does not persist between node executions.</remarks>
         </member>
         <member name="F:Parser.Nodes.NodeTarget.TokenGroup">
-            <summary>The token group (aka. Token Type or Token Name)</summary>
+            <summary>The currently read token group (aka. token type or token name)</summary>
             <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
         </member>
         <member name="F:Parser.Nodes.NodeTarget.TokenValue">
-            <summary>The token value (aka. Token Content)</summary>
+            <summary>The currently read token value (aka. Token Content)</summary>
             <remarks>Read only. Cannot write to token. This is a <see langword="string"/> field.</remarks>
         </member>
-        <member name="F:Parser.Nodes.NodeTarget.Prefix">
-            <summary>Access the Prefix field of a node.</summary>
-            <remarks>Read only. This is a <see langword="string"/> field that must be modified with the <see cref="M:Parser.Nodes.INode.AppendToPrefix(System.String)"/> method or its overloads.</remarks>
+        <member name="F:Parser.Nodes.NodeTarget.Context">
+            <summary>The current context</summary>
+            <remarks>Read only. Cannot write to context, only to data keys within it. This is only to retrieve and store data in keys.</remarks>
         </member>
-        <member name="F:Parser.Nodes.NodeTarget.Suffix">
-            <summary>Access the Suffix field of a node.</summary>
-            <remarks>Read only. This is a <see langword="string"/> field that must be modified with the <see cref="M:Parser.Nodes.INode.AppendToSuffix(System.String)"/> method or its overloads.</remarks>
+        <member name="F:Parser.Nodes.NodeTarget.Data">
+            <summary>A modifier that indicates to look at the node's data.</summary>
+            <remarks>This will always be coupled with an <see cref="T:Parser.Nodes.INode"/> property.</remarks>
         </member>
-        <member name="F:Parser.Nodes.NodeTarget.Fields">
-            <summary>The readonly fields that cannot be assigned to.</summary>
+        <member name="F:Parser.Nodes.NodeTarget.Children">
+            <summary>A modifier that indicates to look at the node's children.</summary>
+            <remarks>This will always be coupled with an <see cref="T:Parser.Nodes.INode"/> property.<br/>
+            <b>TKey</b> will always be a <see langword="string"/>, <b>TValue</b> could be anything except <see langword="null"/>.<br/>
+            A <see langword="null"/> entry to <see cref="P:Parser.Nodes.INode.Data"/> will clear the key.
+            </remarks>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.Properties">
+            <summary>A modifier that indicates to look at the node's properties.</summary>
+            <example><c>Current|Properties</c> - The properties <see cref="T:System.Collections.Generic.Dictionary`2"/> of the <see cref="P:Parser.Nodes.NodeContext.Current"/> context property.</example>
+            <remarks>
+            This will always be coupled with an <see cref="T:Parser.Nodes.INode"/> property.<br/>
+            <b>TKey</b> will always be a <see langword="string"/>, <b>TValue</b> will always be a type of <see cref="T:Parser.Nodes.INode"/>
+            </remarks>
         </member>
         <member name="P:Parser.Nodes.INodeProcessor.Context">
             <summary></summary>

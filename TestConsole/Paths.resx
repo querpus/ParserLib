@@ -150,4 +150,7 @@
   <data name="xml_errors" xml:space="preserve">
     <value>ParserLib\Specification.XML\Samples\errors.xml</value>
   </data>
+  <data name="json_stations" xml:space="preserve">
+    <value>ParserLib\Specification.JSON\Samples\stations.json</value>
+  </data>
 </root>

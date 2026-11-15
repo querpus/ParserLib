@@ -126,4 +126,6 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
   IEnumerable<string> IReadOnlyDictionary<string, Spec>.Keys => _specs.Keys;
   public IEnumerable<Spec> Values => _specs.Values;
   public int Count => _specs.Count;
+
+  bool IPrintable.HasHeaderLine => true;
 }

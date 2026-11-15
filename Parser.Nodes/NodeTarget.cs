@@ -7,13 +7,19 @@ using NT = Parser.Nodes.NodeTarget;
 namespace Parser.Nodes;
 public static class NodeTargetExtensions
 {
-  extension (NT nt)
+  extension(NT nt)
   {
     public string DataType => nt switch
     {
       None => "null",
       NT when nt.HasAnyFlag(TokenGroup | TokenValue) => "string",
-      Context => "context"
+      NT when nt.HasFlag(Data) => "Dictionary<string,object>",
+      NT when nt.HasFlag(Properties) => "Dictionary<string,INode>",
+      NT when nt.HasFlag(Children) => "Collection<INode>",
+      Header or Temp or Current or Parent => "INode",
+      Root => "dynamic",
+      Context => "NodeContext",
+      _ => "null"
     };
     public NT[] GetTargets (NT inclusive_mask = None, NT exclusive_mask = None)
     {
@@ -30,6 +36,8 @@ public static class NodeTargetExtensions
     public static NT NodeProperties => Current | Parent | Header | Root | Temp;
     /// <summary>The readonly fields that nodes cannot be assigned to.</summary>
     public static NT Fields => TokenGroup | TokenValue | Context;
+    /// <summary>The modifiers to select what to look at when pulling data.</summary>
+    public static NT Mods => Data | Children | Properties;
   }
 }
 
@@ -79,4 +87,5 @@ public enum NodeTarget
   /// <b>TKey</b> will always be a <see langword="string"/>, <b>TValue</b> will always be a type of <see cref="INode"/>
   /// </remarks>
   Properties = 1 << 10,
+  Add = 1 << 11,
 }

@@ -805,6 +805,12 @@
             <param name="spec">The <see cref="T:Parser.Spec"/> to lookup from.</param>
             <returns>A list of all the allowed token types.</returns>
         </member>
+        <member name="T:Parser.Tokens.ComplexToken">
+            <summary>A token made up of other tokens that have roles within this one.</summary>
+        </member>
+        <member name="P:Parser.Tokens.ComplexToken.TokenPieces">
+            <summary>The dictionary of tokens making up this complex token.</summary>
+        </member>
         <member name="P:Parser.Tokens.ComplexToken.Value">
             <summary>Value is simply the first item in the ValueList.</summary>
         </member>

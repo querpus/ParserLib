@@ -4,11 +4,13 @@ using Parser.Nodes;
 
 namespace Parser.Tokens;
 
-public sealed class ComplexToken : IToken, IPrintable, IMultiToken<IToken>
+/// <summary>A token made up of other tokens that have roles within this one.</summary>
+public sealed class ComplexToken : IToken, IMultiToken
 {
   public string Delim { get; init; } = " ";
   private readonly Dictionary<TokenRef, IToken> _token_pieces = [];
   public TokenRef? AssignTo { get; set; }
+  /// <summary>The dictionary of tokens making up this complex token.</summary>
   public Dictionary<TokenRef, IToken?> TokenPieces
   {
     init => _token_pieces = [.. value];
@@ -35,7 +37,7 @@ public sealed class ComplexToken : IToken, IPrintable, IMultiToken<IToken>
   public ImmutableList<IToken>? Statements => GetPieces(TokenRef.StatementList);
   public ImmutableList<IToken>? Values => GetPieces(TokenRef.ValueList);
 
-  public string Content => Children.Select(i => i.Content).TextJoin(" ");
+  public string Content => Children.Select(i => i.Content).TextJoin(Delim);
   public IReadOnlyCollection<TokenRef> PiecesPresent => [.. _token_pieces.Keys.Where(kvp => kvp.IsUsed(_token_pieces))];
   public string Type { get; set; } = SE;
   public bool HasType => Type.IsNotEmpty && !Type.Like("None") && !Type.Like("-");
@@ -45,7 +47,7 @@ public sealed class ComplexToken : IToken, IPrintable, IMultiToken<IToken>
   public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
   public bool Equals (IToken? other) => other is ComplexToken ct && Children.SequenceEqual(ct.Children);
   public IToken? GetPiece (TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) ? value : null;
-  public ImmutableList<IToken>? GetPieces (TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) && value is IMultiToken<IToken> multi ? [.. multi.Children] : null;
+  public ImmutableList<IToken>? GetPieces (TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) && value is IMultiToken multi ? [.. multi.Children.Cast<IToken>()] : null;
   public string? GetPieceContent (TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) ? value.Content : null;
   public bool HasPieceType (TokenRef piece_type) => piece_type.IsUsed(_token_pieces);
   public bool HasPieceTypes (TokenRef[] piece_types) => piece_types.All(p => p.IsUsed(_token_pieces));
@@ -132,13 +134,14 @@ public sealed class ComplexToken : IToken, IPrintable, IMultiToken<IToken>
     ["ValueList"] = Values,
     ["StatementList"] = Statements,
   };
-  int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
-  string IToken.ContentNoNewLine => Children.Select(child => child.ToString()).TextJoin().Replace(["\n", "\r"], ["<LF>", "<CR>"]);
 
   public required Spec Spec { get; init; }
 
-  string? Parser.Nodes.IToken.Name => Type;
-  string? Parser.Nodes.IToken.Value => null;
+  string Nodes.IToken.Content => Content;
+
+  bool IPrintable.HasHeaderLine => true;
+
+  IList<Nodes.IToken> IMultiToken.Children => [.. Children.Cast<IToken>()];
 
   /// <summary>Calls the action on every piece in this token.</summary>
   /// <param name="action">The action to call.</param>
@@ -165,16 +168,16 @@ public sealed class ComplexToken : IToken, IPrintable, IMultiToken<IToken>
   public override string ToString () => ToString(0);
   public void Print (int indent)
   {
-    string ind_str = new(' ', indent);
-    LogPart(MsgClass.Forced, Type);
+    string sp = new(' ', indent);
+    LogPart(MsgClass.BlueValue, Type);
     EachPart(kvp =>
     {
       if (kvp.Value is IToken tok)
       {
         NewLine();
-        LogPart(MsgClass.Hidden, ind_str);
-        LogPart(MsgClass.Warning, kvp.Key);
-        LogPart(MsgClass.BlueInfo, " : ");
+        LogPart(MsgClass.Hidden, sp);
+        LogPart(MsgClass.GreenInfo, kvp.Key);
+        LogPart(MsgClass.Warning, " : ");
         tok.Print(indent + 2);
       }
     });
@@ -214,4 +217,6 @@ public sealed class ComplexToken : IToken, IPrintable, IMultiToken<IToken>
     Type = Type,
   };
   string ISerializable.Serialize () => Children.Select(c => c.Serialize()).TextJoin("");
+  int IComparable.CompareTo (object? obj) => obj is IIndexSortable iis ? CompareTo(iis) : -1;
+  void IMultiToken.Add (Nodes.IToken token) => Children.Add((IToken) token);
 }

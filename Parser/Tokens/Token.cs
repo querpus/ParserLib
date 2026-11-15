@@ -2,7 +2,7 @@
 
 namespace Parser.Tokens;
 
-public sealed class Token : IToken, IPrintable
+public sealed class Token : IToken
 {
   public string Delim { get; init; } = " ";
   public TokenRef? AssignTo { get; set; }
@@ -16,16 +16,18 @@ public sealed class Token : IToken, IPrintable
   public IToken? Parent { get; set; }
   public bool HasType => Type is not null;
 
-  string? Nodes.IToken.Name => Type;
+  string Nodes.IToken.Type => Type;
+
+  bool IPrintable.HasHeaderLine => false;
 
   int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
   public override string ToString () => $"{Type} : {Content}";
   public string ToString (int indent) => $"{Type} : {Content}";
   public void Print (int indent)
   {
-    LogPart(MsgClass.Forced, $"{Type}");
-    LogPart(MsgClass.BlueInfo, " : ");
-    LogPart(MsgClass.GreenInfo, ((IToken) this).ContentNoNewLine);
+    LogPart(MsgClass.BlueValue, $"{Type}");
+    LogPart(MsgClass.Warning, " : ");
+    LogPart(MsgClass.GreenInfo, ((IToken) this).ContentNoNewLine.ToString(true));
   }
   public override bool Equals (object? obj) => obj is IToken rt && Equals(rt);
   public override int GetHashCode () => HashCode.Combine(Content, Index, Type);

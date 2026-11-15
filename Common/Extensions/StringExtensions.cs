@@ -17,7 +17,7 @@ public static class StringExtensions
     /// <param name="other">The text to compare to.</param>
     /// <returns><see langword="true"/> if the values match, otherwise <see langword="false"/></returns>
     public bool Is (string? other) => (text.IsEmpty && other.IsEmpty) || (text?.Equals(other, SCO) ?? false);
-    public bool IsAny (IEnumerable<string> other) => (text.IsEmpty && other.IsEmpty) || text.Any(other, Equals);
+    public bool IsAny (IEnumerable<string> other) => (text.IsEmpty && other.IsEmpty) || text.Any(Equals, other);
     public string Remove (string regex, RegexOptions options = RegexOptions.None) => text is null ? SE : SysRegex.Replace(text, regex, SE, options);
     public string Remove (int changed_pos, int changed_length) => text is null ? SE : text.Replace(changed_pos, changed_length);
     public string RemoveChars (string chars) => new(text?.Where(item => !chars.Contains(item, SCO)).ToArray());
@@ -71,7 +71,9 @@ public static class StringExtensions
   {
     public bool IsAlphanumeric => s.All(item => item.IsAlphanumeric());
     public bool IsControl => s.All(item => item.IsCtrl);
-    public bool IsWhitespace => s.All(item => item.IsWhitespace());
+    /// <summary>Checks to see if the string contains only whitespace.</summary>
+    /// <remarks>This is <see langword="true"/> if the string is empty, but <see langword="false"/> if the string is <see langword="null"/>.</remarks>
+    public bool IsWhitespace => s?.All(item => item.IsWhitespace()) ?? false;
     public bool IsNumber => decimal.TryParse(s, out decimal _);
     public int FirstIndexOfAny (IEnumerable<string> checkFor, int startAt, StringComparison sc, out int found_len)
     {
@@ -169,15 +171,18 @@ public static class StringExtensions
         s = s.Replace(lf, replaceWith, SCO);
       return s;
     }
-    public string XMLEscape ()
+    public string XMLSafe
     {
-      s ??= SE;
-      s = s.Replace("&", "&amp;", SCO);
-      s = s.Replace("'", "&apos;", SCO);
-      s = s.Replace("\"", "&quot;", SCO);
-      s = s.Replace("<", "&lt;", SCO);
-      s = s.Replace(">", "&gt;", SCO);
-      return s;
+      get
+      {
+        s ??= SE;
+        s = s.Replace("&", "&amp;", SCO);
+        s = s.Replace("'", "&apos;", SCO);
+        s = s.Replace("\"", "&quot;", SCO);
+        s = s.Replace("<", "&lt;", SCO);
+        s = s.Replace(">", "&gt;", SCO);
+        return s;
+      }
     }
     public string ReplaceIfContainsGroup (Match match, string group, string replaceWith) =>
       match?.Groups.ContainsKey(group) == true ? s.Replace(match, replaceWith) : s;
@@ -194,12 +199,8 @@ public static class StringExtensions
       list.Any(s2 => s.Equals(s2, sc));
     public bool EqualsAll (StringComparison sc = SCO, params Collection<string> list) =>
       list.All(s2 => s.Equals(s2, sc));
-    public bool StartsWithAny (IEnumerable<string> list, StringComparison sc = SCO) =>
-      list.Any(s2 => s.StartsWith(s2, sc));
     public bool StartsWithAny (StringComparison sc = SCO, params IEnumerable<string> list) =>
       list.Any(s2 => s.StartsWith(s2, sc));
-    public bool EndsWithAny (IEnumerable<string> list, StringComparison sc = SCO) =>
-      list.Any(s2 => s.EndsWith(s2, sc));
     public bool EndsWithAny (StringComparison sc = SCO, params IEnumerable<string> list) =>
       list.Any(s2 => s.EndsWith(s2, sc));
   }
@@ -279,23 +280,23 @@ public static class StringExtensions
     /// <summary>Shorthand for case insensitive ordinal comparison.</summary>
     /// <param name="text">This text.</param>
     /// <param name="other">The other text.</param>
-    /// <returns><see langword="true"/> if the values match, otherwise <see langword="false"/>.<br/>
-    /// If either <paramref name="other"/> or <paramref name="text"/> are <see langword="null"/>, this method will return <see langword="false"/>.</returns>
+    /// <returns><see langword="true"/> if the values match, otherwise <see langword="false"/>.</returns>
+    /// <remarks>If either <paramref name="other"/> or <paramref name="text"/> are <see langword="null"/>, this method will return <see langword="false"/>.</remarks>
     public bool Like ([NotNullWhen(true)] string? other) => text?.Equals(other, SCOIC) ?? false;
-    public bool Like (IEnumerable<string> other) => (text.IsEmpty && other.IsEmpty) || (text?.Any(other, Like) ?? false);
-    public bool Any (IEnumerable<string>? other, Func<string, string?, bool> func) => other?.Any(item => func(item, text)) ?? false;
+    /// <summary>Shorthand for case insensitive ordinal comparison.</summary>
+    /// <param name="text">This text.</param>
+    /// <param name="other">The other text.</param>
+    /// <returns><see langword="true"/> if any of the values match, otherwise <see langword="false"/>.</returns>
+    /// <remarks>If either <paramref name="other"/> is empty, or <paramref name="text"/> is <see langword="null"/>, this method will return <see langword="false"/>.</remarks>
+    public bool Like (params IEnumerable<string> other) => !text.IsEmpty && (text?.Any(Like, other) ?? false);
+    public bool Any (Func<string, string?, bool> func, params IEnumerable<string>? other) => other?.Any(item => func(item, text)) ?? false;
   }
   /// <summary>string extensions</summary>
   /// <param name="text">The <see langword="string"/> to check.</param>
   extension([NotNullWhen(true)] string text)
   {
     public bool ContainsAny (IEnumerable<string> other, StringComparison sc = SCO) => other.Any(x => text.Contains(x, sc));
-  }
-  /// <summary>string extensions</summary>
-  /// <param name="s">The <see langword="string"/> to check.</param>
-  extension([NotNullWhen(true)] string? s)
-  {
-    public bool ContainsNewLine () => s is not null && (s.Contains('\n', SCO) || s.Contains('\r', SCO));
+    public bool ContainsNewLine () => text?.ContainsAny(Chars.NewLines, SCO) == true;
   }
   /// <summary>string extensions</summary>
   /// <param name="lines">The <see langword="string"/>[] to check.</param>
@@ -322,8 +323,8 @@ public static class StringExtensions
 
   extension(string data)
   {
-    public T ToEnum<T> () where T : notnull => (T) Enum.Parse(typeof(T), data);
-    public int ToEnum (Type type) => (int) Enum.Parse(type, data);
+    public T ToEnum<T> () where T : struct => Enum.Parse<T>(data);
+    public int ToInt<T> (Type type) => (int) Enum.Parse(type, data);
   }
 
   extension([SS("regex")] string rx)

@@ -2,8 +2,6 @@
 #pragma warning disable format // Formatting
 #pragma warning disable IDE1006 // Naming Styles
 
-
-
 namespace Parser.Nodes;
 public interface ITokenizer<out TToken> where TToken : IToken
 {

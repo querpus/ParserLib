@@ -51,9 +51,16 @@ public static class SpanExtensions
     public int AsIntBE => buffer.ToInt32(true);
     public long ToInt64 (bool big_endian = false) => Calc<long>(big_endian, buffer);
     public long AsLong => buffer.ToInt64();
-    public string ByteArrToString (string? encoding = null, string? endianness = null)
+    public string ByteArrToString (string? encoding = null, string? endianness = null) =>
+      new(Encoding.GetEncoding(encoding, endianness).GetChars(buffer.ToArray()));
+  }
+
+  extension(Encoding enconding)
+  {
+    public static Encoding GetEncoding (string? encoding, string? endianness = null)
     {
-      Encoding getEncoding () => encoding switch
+      endianness ??= "Little";
+      return encoding switch
       {
         "ASCII" => Encoding.ASCII,
         "UTF7" or "UTF8" => Encoding.UTF8,
@@ -62,22 +69,7 @@ public static class SpanExtensions
         "UTF32" when endianness.Like("Little") => Encoding.UTF32,
         _ => Encoding.ASCII,
       };
-
-      return new(getEncoding().GetChars(buffer.ToArray()));
     }
-  }
-
-  extension(Encoding enconding)
-  {
-    public static Encoding GetEncoding (string encoding, string ) => encoding switch
-    {
-      "ASCII" => Encoding.ASCII,
-      "UTF7" or "UTF8" => Encoding.UTF8,
-      "UTF16" when endianness.Like("Big") => Encoding.BigEndianUnicode,
-      "UTF16" => Encoding.Unicode,
-      "UTF32" when endianness.Like("Little") => Encoding.UTF32,
-      _ => Encoding.ASCII,
-    };
   }
 
   extension(Memory<byte> buffer)

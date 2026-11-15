@@ -133,6 +133,15 @@ namespace TestConsole {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ParserLib\Specification.JSON\Samples\stations.json.
+        /// </summary>
+        public static string json_stations {
+            get {
+                return ResourceManager.GetString("json_stations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ParserLib\Specification.XML\Samples\errors.xml.
         /// </summary>
         public static string xml_errors {

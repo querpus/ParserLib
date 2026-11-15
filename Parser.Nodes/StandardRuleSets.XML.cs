@@ -15,17 +15,17 @@ public static partial class StandardRuleSets
     public static readonly NodeRule ElementOpen = new()
     {
       TokenName = "element_open",
-      Execute = static (context, _) =>
+      Execute = static (context) =>
       {
         XMLElementNode node = context.GenerateNode<XMLElementNode>(NT.Current);
-        context.PushAndAddTo(node, NT.AnyRootOrParent);
+        context.PushAndAddTo(node, NT.RootOrParent);
         DebugMessage($"Element Open Tag Open Encountered. Assigning Current. Pushing Current. Stack count:{context.NodeStack.Count}");
       }
     };
     public static readonly NodeRule ElementClose = new()
     {
       TokenName = "element_close",
-      Execute = static (context, _) =>
+      Execute = static (context) =>
       {
         context.WarnIfNotNull(NT.Current);
         var node = context.PopTo<XMLElementNode>(NT.Current);
@@ -35,7 +35,7 @@ public static partial class StandardRuleSets
     public static readonly NodeRule ElementSingle = new()
     {
       TokenName = "element_single",
-      Execute = static (context, _) =>
+      Execute = static (context) =>
       {
         XMLElementNode node = context.GenerateNode<XMLElementNode>(NT.Current);
         context.AddNodeTo(node, NT.Parent);
@@ -43,99 +43,88 @@ public static partial class StandardRuleSets
     };
     public static readonly NodeRule ElementSingleEnd = new() {
       TokenName = "tag_close",
-      Execute = static (context, _) =>
-      {
-        context.ClearNode(NT.Current);
-      }
+      Execute = static (context) =>
+        context.ClearNode(NT.Current)
     };
     public static readonly NodeRule ElementHeader = new() {
       TokenName = "element_header",
-      Execute = static (context, t) =>
-      {
-        _ = context.GenerateNode<XMLElementNode>(NT.Current | NT.Header);
-      }
+      Execute = static (context) =>
+        context.GenerateNode<XMLElementNode>(NT.Current | NT.Header)
     };
     public static readonly NodeRule ElementHeaderEnd = new()
     {
       TokenName = "header_close",
-      Execute = static (context, _) =>
+      Execute = static (context) =>
         context.ClearNode(NT.Current)
     };
     public static readonly NodeRule ElementCloseEnd = new()
     {
       TokenName = "close_tag_close",
-      Execute = static (context, _) =>
-      {
-        context.ClearNode(NT.Current);
-      }
+      Execute = static (context) =>
+        context.ClearNode(NT.Current)
     };
     public static readonly NodeRule AddName = new()
     {
       TokenName = "add_name",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
         ErrorIfNull(context.Current);
-        ErrorIfNull(token.Value);
         //TODO: Implement using NodeType enums
-        context.Current.AddData("Name", token.Value);
+        context.Current.AddData("Name", context.Token.Content);
         DebugMessage("Adding Name to Current.");
       }
     };
     public static readonly NodeRule CheckName = new()
     {
       TokenName = "check_name",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
         ErrorIfNull(context.Current);
-        ErrorIfNull(token.Value);
 
         if (!context.Current.Data.TryGetValue("Name", out object? name_obj))
         {
-          context.Current.AddData("Name", token.Value);
+          context.Current.AddData("Name", context.Token.Content);
           DebugMessage("Adding Name to Current.");
         }
-        else if (name_obj is string prev && prev.Equals(token.Value, SCO))
+        else if (name_obj is string prev && prev.Equals(context.Token.Content, SCO))
         {
           DebugMessage("Validation Passed");
         }
         else
         {
-          throw new ValidationException($"XML Closing Tag Mismatched: <{name_obj as string}></{token.Value}>");
+          throw new ValidationException($"XML Closing Tag Mismatched: <{name_obj as string}></{context.Token.Content}>");
         }
       }
     };
     public static readonly NodeRule AttributeName = new()
     {
       TokenName = "a_name",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
         ErrorIfNull(context.Current);
 
-        XML
+        context.Data["PropKey"] = context.Token.Content;
 
-        Log(MsgClass.GreenInfo, "Assigning PropKey.", "StandardRuleSets");
       }
     };
     public static readonly NodeRule AttributeValue = new()
     {
       TokenName = "a_value",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
         ErrorIfNull(context.Current);
-        ErrorIfNull(context.PropKey);
+        ErrorIfNull(context.Data["PropKey"]);
         if (context.Current is XMLElementNode xen)
-          xen.Attributes.Add(context.PropKey, new XMLContentNode() { Content = token.Value });
+          xen.Attributes.Add(context.Data["PropKey"], new XMLContentNode() { Content = context.Token.Content });
       }
     };
     public static readonly NodeRule Content = new()
     {
       TokenName = "content",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
-        if (token.Value.IsWhitespace)
+        string token = context.Token.Content;
+        if (token.IsWhitespace)
         {
           Log(MsgClass.Warning, "Ignoring whitespace.", "StandardRuleSets");
         }
@@ -146,7 +135,7 @@ public static partial class StandardRuleSets
         else
         {
           XMLContentNode node = context.GenerateNode<XMLContentNode>(NT.Current);
-          node.Content = token.Value;
+          node.Content = token;
           context.AddNodeTo(node, NT.Parent);
         }
       }
@@ -154,9 +143,8 @@ public static partial class StandardRuleSets
     public static readonly NodeRule ElementOpenEnd = new()
     {
       TokenName = "open_tag_close",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
         ErrorIfNull(context.Current);
         context.ClearNode(NT.Current);
       }

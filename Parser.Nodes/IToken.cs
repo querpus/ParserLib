@@ -2,10 +2,14 @@
 #pragma warning disable format // Formatting
 
 namespace Parser.Nodes;
-public interface IToken : IIndexSortable, ISerializable
+/// <summary>The most basic token interface.</summary>
+public interface IToken : IIndexSortable, ISerializable, IPrintable
 {
-  /// <summary>The value of this token. This will be <see langword="null"/> if the token is composed of multiple tokens.</summary>
-  string? Value { get; }
+  /// <summary>The value of this token. This is all of the text that this token consumed.</summary>
+  string Content { get; }
   /// <summary>The name or type of this token.</summary>
-  string? Name { get; }
+  /// <remarks>This will be "None" by default.</remarks>
+  /// <value>A value of "None", "-", or "" means there was no type assigned, likely due to it not needing to have one.</value>
+  string Type { get; }
+  bool HasType => Type?.Like("None", "-", SE) == false;
 }

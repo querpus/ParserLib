@@ -14,7 +14,7 @@ public class QString : ISerializable, IEquatable<string>, IComparable<string>
   }
   public QString (string? value)
   {
-    if (value?.StartsWithAny(["\"", "'"]) == true && value[0] == value[^1])
+    if (value?.StartsWithAny(SCO, "\"", "'") == true && value[0] == value[^1])
     {
       Value = value[1..^1];
       Quote = $"{value[0]}";

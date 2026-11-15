@@ -39,15 +39,13 @@ public static partial class StandardRuleSets
     public static readonly NodeRule ObjectOpen = new()
     {
       TokenName = "o_open",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
-
         JSONObjectNode node = context.GenerateNode<JSONObjectNode>(NT.None);
 
         if (context.Current is JSONArrayNode obj)
         {
-          context.PushAndAddTo(node, NT.AnyRootOrParent);
+          context.PushAndAddTo(node, NT.RootOrParent);
         }
         else if (context.Current is JSONPropertyNode prop)
         {
@@ -61,15 +59,13 @@ public static partial class StandardRuleSets
     public static readonly NodeRule ArrayOpen = new()
     {
       TokenName = "a_open",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
-
         JSONArrayNode node = context.GenerateNode<JSONArrayNode>(NT.None);
 
         if (context.Current is JSONArrayNode obj)
         {
-          context.PushAndAddTo(node, NT.AnyRootOrParent);
+          context.PushAndAddTo(node, NT.RootOrParent);
         }
         else if (context.Current is JSONPropertyNode prop)
         {
@@ -83,9 +79,8 @@ public static partial class StandardRuleSets
     public static readonly NodeRule ObjectClose = new()
     {
       TokenName = "o_close",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
         var node = context.PopTo(NT.Current);
         context.ClearNode(NT.Current);
         DebugMessage("Object Close Token Processed.");
@@ -94,9 +89,8 @@ public static partial class StandardRuleSets
     public static readonly NodeRule ArrayClose = new()
     {
       TokenName = "a_close",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        ErrorIfNull(token.Value);
         var node = context.PopTo(NT.Current);
         context.ClearNode(NT.Current);
         DebugMessage("Array Close Token Processed.");
@@ -106,15 +100,16 @@ public static partial class StandardRuleSets
     public static readonly NodeRule PropertyName = new()
     {
       TokenName = "key_name",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
-        if (token.Value.IsEmpty)
+        string token = context.Token.Content;
+        if (token.IsEmpty)
         {
           throw new InvalidTokenException("Key cannot be null or empty.");
         }
         JSONPropertyNode node = context.GenerateNode<JSONPropertyNode>(NT.Current);
-        node.Key = token.Value;
-        context.AddNodeTo(node, NT.AnyRootOrParent);
+        node.Key = token;
+        context.AddNodeTo(node, NT.RootOrParent);
         Log(MsgClass.GreenInfo, $"Property created with key {node.Key}", "StandardRuleSets");
       }
     };
@@ -122,10 +117,10 @@ public static partial class StandardRuleSets
     public static readonly NodeRule StringValue = new()
     {
       TokenName = "q_value",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
         JSONContentNode node = context.GenerateNode<JSONContentNode>(NT.None);
-        node.Content = new QString(token.Value);
+        node.Content = new QString(context.Token.Content);
         if (context.Current is JSONPropertyNode prop)
         {
           prop.Value = node;

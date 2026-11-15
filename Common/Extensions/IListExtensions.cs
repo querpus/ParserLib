@@ -69,11 +69,13 @@ public static class IListExtensions
       list.RemoveAt(list.Count - 1);
     }
 
-    // Stack Functions for IList<T>
+    /// <summary>Performs a peek as if this was a stack.</summary>
+    /// <returns>The value at the top of the stack. If the list is empty, this returns <see langword="null"/> or <see langword="default"/>.</returns>
     public T? Peek () => list.IsEmpty ? default : list[^1];
     /// <summary>Performs a 'pop' action, but discards the popped item.</summary>
     public void Drop () => list?.RemoveLast();
     /// <summary>Performs a 'pop' action like a stack would.</summary>
+    /// <returns>The value that was popped from the stack. If the list is empty, this returns <see langword="null"/> or <see langword="default"/>.</returns>
     public T? Pop ()
     {
       if (list.IsEmpty)

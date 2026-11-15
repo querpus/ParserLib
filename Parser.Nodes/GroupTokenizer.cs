@@ -2,7 +2,6 @@
 #pragma warning disable format // Formatting
 #pragma warning disable IDE1006 // Naming Styles
 
-
 namespace Parser.Nodes;
 
 /// <summary>Creates a token for every group in each match. Multiple captures are stored as an array of string data.</summary>
@@ -36,8 +35,8 @@ public class GroupTokenizer : ITokenizer<IToken>
             Capture cap = group.Captures[i];
             CaptureToken token = new()
             {
-              Value = cap.Value,
-              Name = groupName,
+              Content = cap.Value,
+              Type = groupName,
               CaptureIndex = i,
               Index = cap.Index
             };

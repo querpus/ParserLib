@@ -7,12 +7,6 @@ public interface IToken : IEquatable<IToken>, Nodes.IToken
   Spec Spec { get; }
   /// <summary>Assigned at match, cleared if match fails, kept if passes.</summary>
   TokenRef? AssignTo { get; set; }
-  string Type { get; }
-  bool HasType { get; }
-  IToken? Parent { get; set; }
-  string Content { get; }
-  string? Parser.Nodes.IToken.Value => Content;
-  string ContentNoNewLine => Content.Replace(["\n", "\r"], ["<LF>", "<CR>"]);
+  string ContentNoNewLine => Content.Replace(["\n", "\r"], ["<LF>", "<CR>"]).ToString(true);
   string ToString (int indent);
-  void Print (int indent);
 }

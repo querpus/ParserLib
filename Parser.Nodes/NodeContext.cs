@@ -19,13 +19,28 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       Notify("NodeStack");
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
   }
-  protected internal INode? GetTargetNode (NT target, bool do_not_throw_for_root_nodes, bool never_throw_ever = false)
+  protected internal INode? GetTargetNode (NT target, bool do_not_throw_for_root_nodes = false, bool never_throw_ever = false)
   {
     try
     {
-      return GetTargetNode(target);
+      var targets = target.GetTargets(inclusive_mask: NT.NodeProperties);
+
+      if (targets.Length > 1 && target != NT.RootOrParent)
+        throw new InvalidNodeException($"Cannot access multiple node types. ({target})");
+
+      return target switch
+      {
+        NT when target.HasFlag(NT.RootOrParent) => Parent ?? (SingleRoot ? Root : throw new NotSupportedException("RootNodes not supported.")),
+        NT.None => null,
+        NT.Current => Current,
+        NT.Parent => Parent,
+        NT.Header => Header,
+        NT.Root => SingleRoot ? Root : throw new NotSupportedException("RootNodes not supported."),
+        NT.Temp => Temp,
+        _ => throw new InvalidNodeException($"Unknown node type. ({target})"),
+      };
     }
-    catch (NotSupportedException) when (do_not_throw_for_root_nodes)
+    catch (NotSupportedException) when (do_not_throw_for_root_nodes || never_throw_ever)
     {
       return null;
     }
@@ -33,25 +48,6 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     {
       return null;
     }
-  }
-  protected internal INode? GetTargetNode (NT target)
-  {
-    var targets = target.GetTargets(inclusive_mask: NT.NodeProperties);
-
-    if (targets.Length > 1 && target != NT.RootOrParent)
-      throw new InvalidNodeException($"Cannot access multiple node types. ({target})");
-
-    return target switch
-    {
-      NT when target.HasFlag(NT.RootOrParent) => Parent ?? (SingleRoot ? Root : throw new NotSupportedException("RootNodes not supported.")),
-      NT.None => null,
-      NT.Current => Current,
-      NT.Parent => Parent,
-      NT.Header => Header,
-      NT.Root => SingleRoot ? Root : throw new NotSupportedException("RootNodes not supported."),
-      NT.Temp => Temp,
-      _ => throw new InvalidNodeException($"Unknown node type. ({target})"),
-    };
   }
   protected internal object? GetTargetData (NT target, string data_key)
   {
@@ -88,19 +84,120 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   {
     not NT.None when token is null => throw new InvalidTokenException($"Attempted to read {target} data from null token."),
     NT.None => null,
-    NT.TokenGroup => token.Name,
-    NT.TokenValue => token.Value,
+    NT.TokenGroup => token.Type,
+    NT.TokenValue => token.Content,
     _ => throw new InvalidNodeException($"{target} is not a supported token property."),
   };
-  protected internal object GetTarget (NT target)
+  protected internal object? GetTarget (NT target)
   {
+    #region Tokens and Context
+    if (target is NT.TokenGroup)
+    {
+      return Token.Type;
+    }
+    if (target is NT.TokenValue)
+    {
+      return Token.Content;
+    }
+    if (target is (NT.Context | NT.Data))
+    {
+      return Data;
+    }
 
+    if (target.HasAnyFlag(NT.Fields))
+    {
+      Log(MsgClass.Warning, $"Invalid reference to target ({target}).", this);
+      return null;
+    }
+    #endregion
+
+    NT nodes = target.Mask<NT>(NT.NodeProperties);
+    NT mods = target.Mask<NT>(NT.Mods);
+
+    object getmod (INode node) => mods switch
+    {
+      NT.Properties => node.Properties,
+      NT.Data => node.Data,
+      NT.Children => node.Children,
+      NT.None => node,
+    };
+
+    INode? node = GetTargetNode(nodes, never_throw_ever: true);
+
+    if (node is null)
+    {
+      Log(MsgClass.Warning, $"No node to target. ({target})", this);
+      return null;
+    }
+    else
+    {
+      return getmod(node);
+    }
+  }
+  private void WarnNoWrite (ref NT target, NT invalid_mask)
+  {
+    NT masked = target.Mask<NT>(invalid_mask);
+    if (masked > 0)
+    {
+      Log(MsgClass.Warning, $"Attempted write to read only field ({masked})", this);
+    }
+    target = target.RemoveBit<NT>(invalid_mask);
+  }
+  protected internal void SetTarget (NT target, object data)
+  {
+    WarnNoWrite(ref target, NT.TokenGroup);
+    WarnNoWrite(ref target, NT.TokenValue);
+
+    if (!target.HasFlag(NT.Data))
+    {
+      WarnNoWrite(ref target, NT.Context);
+    }
+
+    NT[] nodes = target.Mask<NT>(NT.NodeProperties).GetTargets();
+
+    if (target.HasFlag(NT.Root | NT.Add) && !SingleRoot && data is INode node)
+    {
+      RootNodes.Add(node);
+    }
+
+    if (target.HasFlag(NT.Children|NT.Add) && data is INode add_node)
+    {
+      foreach (var nt in nodes)
+      {
+        if (nt is NT.Root && !SingleRoot)
+        {
+          continue;
+        }
+
+        INode? add_to_node = GetTargetNode(nt, never_throw_ever: true);
+
+        add_to_node?.AddChild(add_node);
+      }
+    }
+    else if (target.HasFlag(NT.Properties | NT.Add) && data is KeyValuePair<string, INode> prop)
+    {
+      foreach (var nt in nodes)
+      {
+        INode? add_to_node = GetTargetNode(nt, never_throw_ever: true);
+
+        add_to_node?.Properties.Add(prop);
+      }
+    }
+    else if (target.HasFlag(NT.Data | NT.Add) && data is KeyValuePair<string, object> kvp)
+    {
+      foreach (var nt in nodes)
+      {
+        INode? add_to_node = GetTargetNode(nt, never_throw_ever: true);
+
+        add_to_node?.AddData(kvp);
+      }
+    }
   }
   protected internal INode? SetRoot (INode? value)
   {
     if (value is null)
     {
-      Log(MsgClass.Warning, $"Attempted to set the root to null.", this);
+      Log(MsgClass.Warning, "Attempted to set the root to null.", this);
       return value;
     }
 
@@ -127,7 +224,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   {
     if (value is null)
     {
-      Log(MsgClass.Warning, $"Attempted to set the parent to null.", this);
+      Log(MsgClass.Warning, "Attempted to set the parent to null.", this);
     }
     else if (ReferenceEquals(value, Parent))
     {
@@ -140,7 +237,11 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       Notify(nameof(NodeStack));
       if (HasParent)
       {
-        Log(MsgClass.Warning, $"Replacing parent did not reach the root. ", this);
+        Log(MsgClass.Warning, "Replacing parent did not reach the root. ", this);
+      }
+      else
+      {
+        Notify("HasParent");
       }
     }
     else if (HasParent)
@@ -152,7 +253,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     }
     else
     {
-      Log(MsgClass.Warning, $"No parent defined, NodeStack was empty. Assign Root First.", this);
+      Log(MsgClass.Warning, "No parent defined, NodeStack was empty. Assign Root First.", this);
       NodeStack.Push(value);
       Notify("NodeStack");
     }
@@ -263,12 +364,25 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   {
     if (write_if_true_condition)
     {
-      object src = GetTarget(source);
+      object? src = GetTarget(source) ?? throw new InvalidNodeException($"The value at {source} was null. Data write to {target} failed.");
+      SetTarget(target, src);
     }
     else
     {
       //Do not execute (conditional).
     }
+  }
+
+  #endregion
+  #region Public Methods for Node Processors
+
+  /// <summary>Sets the current token. Should only be called from the node processor.</summary>
+  /// <param name="token">The current token.</param>
+  [MemberNotNull(nameof(Token))]
+  public void SetToken (IToken token)
+  {
+    Token = token;
+    Notify("Token");
   }
 
   #endregion
@@ -278,7 +392,8 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   /// <summary>Gets the stack of nodes used to track the current node hierarchy during traversal or processing.</summary>
   /// <remarks>Init-only and initialized to an empty stack.</remarks>
   public Stack<INode> NodeStack { get; init; } = [];
-  public IToken Token { get; private set; }
+  [NotNull]
+  public IToken? Token { get; private set; }
   /// <summary>The currently selected node. (Child Node)</summary>
   public INode? Current { get; set; }
   /// <summary>The root nodes when <see cref="SingleRoot"/> is <see langword="false"/>.</summary>
@@ -299,6 +414,8 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   /// <summary>Dictionary for storing additional data that must be carried throughout the processing of the nodes.</summary>
   public Dictionary<string, string> Data { get; } = [];
   public INode? Temp { get; private set; }
+
+  bool IPrintable.HasHeaderLine => true;
 
   /// <summary>Pushes a node to the top of the node stack, and adds it as a child of the previous node on the stack.</summary>
   /// <param name="node">The child node to push.</param>
@@ -340,9 +457,11 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   /// <summary>Adds the <paramref name="node"/> to the node at <paramref name="target"/> as a child</summary>
   /// <param name="node">The child node.</param>
   /// <param name="target">The target of the parent node.</param>
-  /// <remarks>Additional targets will be have the node added to, except for <see cref="NT.RootOrParent"/>.
+  /// <remarks>
+  /// Additional targets will be have the node added to.
   /// This combination flag attempts to add it to the parent object,
-  /// if that fails then add it to the root object, or add it to the <see cref="NT.RootNodes"/> list.</remarks>
+  /// if that fails then add it to the root object, or add it to the <see cref="RootNodes"/> list.
+  /// </remarks>
   /// <exception cref="InvalidOperationException">No node was added to any target.</exception>
   public void AddNodeTo (INode node, NT target)
   {
@@ -468,7 +587,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       Log(MsgClass.GreenInfo, $"Node stored in {target} was cleared.", this);
   }
 
-  internal void DoXMLOperation (CaptureToken token, string action, string? assignTo, string? valueFrom, string? className)
+  protected virtual void DoXMLOperation (string action, string? assignTo, string? valueFrom, string? className)
   {
     NT target = assignTo?.ToNodeTarget() ?? NT.None;
     NT source = valueFrom?.ToNodeTarget() ?? NT.None;
@@ -476,7 +595,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     switch (action)
     {
       case "GenerateNodeTo" when className is not null:
-        INode node = GenerateNode(target, className);
+        _ = GenerateNode(target, className);
         break;
       case "AssignNodeTo" when target is not NT.None && source is not NT.None:
         INode? ant_node = GetTargetNode(source);
@@ -512,7 +631,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   public void Print (int indent)
   {
     LogPart(MsgClass.Warning, "NodeContext (Count:");
-    LogPart(MsgClass.BlueValue, Nodes.ICount})");
+    LogPart(MsgClass.BlueValue, Nodes.ICount);
     string sp = new(' ', indent);
     if (Header is not null)
     {

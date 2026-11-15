@@ -68,9 +68,9 @@ public sealed class TokenAssembler
 
     foreach (IToken token in tokens_to_assemble)
     {
-      token.Parent = complex_token;
-      if (token.AssignTo is TokenRef tr)
+      if (token.AssignTo is not null)
       {
+        TokenRef tr = token.AssignTo.Value;
         complex_token.AddPieceType(tr, token);
       }
     }

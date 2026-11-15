@@ -2,8 +2,6 @@
 #pragma warning disable format // Formatting
 #pragma warning disable IDE1006 // Naming Styles
 
-
-
 namespace Parser.Nodes;
 /// <summary>Creates a token for every match with the groups as properties within every match. Multiple captures are stored as a Collection under the group name.</summary>
 public class MatchTokenizer : ITokenizer<MatchToken>
@@ -69,11 +67,11 @@ public class MatchTokenizer : ITokenizer<MatchToken>
       }
       var token = new MatchToken()
       {
-        Name = name ?? SE,
+        Type = name ?? SE,
         MatchIndex = matchindex,
         Index = match.Index,
         GroupData = groups,
-        Value = match.Value
+        Content = match.Value
       };
       Tokens.Add(token);
       matchindex++;

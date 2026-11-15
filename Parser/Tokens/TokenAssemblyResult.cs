@@ -8,6 +8,7 @@ namespace Parser.Tokens;
 /// <param name="Hierarchy">The whole assembly in a full hierarchy.</param>
 public record class TokenAssemblyResult (TokenCollection Tokens, TokenCollection Parents, TokenCollection Hierarchy) : IPrintable
 {
+  bool IPrintable.HasHeaderLine => false;
   public override string ToString () => Tokens + "\n\n\n" + Parents + "\n\n\n" + Hierarchy;
   public void Print (int indent)
   {

@@ -12,23 +12,23 @@ public static partial class StandardRuleSets
     public static NodeRule Section = new()
     {
       TokenName = "section",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
         INISectionNode node = context.GenerateNode<INISectionNode>(NT.Current | NT.Parent);
-        
-        context.WriteData(NT.Current, "Name", token.Value![1..^1]);
+
+        context.SetTargetData(NT.Current, "Name", context.Token.Content[1..^1]);
         context.ClearNode(NT.Current);
-        Log(MsgClass.GreenInfo, $"Section Defined: {token.Value}", "StandardRuleSets");
+        Log(MsgClass.GreenInfo, $"Section Defined: {context.Token.Content}", "StandardRuleSets");
       }
     };
     public static NodeRule Property = new()
     {
       TokenName = "property",
-      Execute = static (context, token) =>
+      Execute = static (context) =>
       {
         INIPropertyNode node = context.GenerateNode<INIPropertyNode>(NT.Current);
         context.AddNodeTo(node, NT.Parent);
-        string[] halves = token.Value!.Split("=");
+        string[] halves = context.Token.Content.Split("=");
         node.Data["Key"] = halves[0];
         node.Data["Value"] = halves[1];
         Log(MsgClass.GreenInfo, $"Property Defined: {node.Key} / {node.Value}", "StandardRuleSets");

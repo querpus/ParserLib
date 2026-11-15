@@ -39,8 +39,8 @@ public class CaptureTokenizer : ITokenizer<IToken>
             Capture cap = group.Captures[i];
             CaptureToken token = new()
             {
-              Value = cap.Value,
-              Name = groupName,
+              Content = cap.Value,
+              Type = groupName,
               CaptureIndex = i,
               Index = cap.Index
             };

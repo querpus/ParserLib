@@ -3,11 +3,11 @@ using Parser.Nodes;
 namespace Parser.Tokens;
 
 /// <summary>A collection of tokens, use this to keep token operations consistent.</summary>
-public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<IToken>, IPrintable, IToken
+public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken, IPrintable, IToken
 {
   #region Private Fields
   /// <summary>The internal token list.</summary>
-  private readonly List<IToken> _tokens = [];
+  private readonly List<Nodes.IToken> _tokens = [];
   #endregion
 
   public TokenRef? AssignTo { get; set; }
@@ -15,11 +15,11 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
   /// <summary>Creates the collection from a collection of tokens.</summary>
   /// <param name="tokens">The tokens to add to the list.</param>
   public TokenCollection (IEnumerable<IToken> tokens) : this() => _tokens = tokens.Any() ? [.. tokens] : [];
-  public Spec Spec => _tokens[0].Spec;
+  public Spec Spec => (_tokens[0] as IToken)!.Spec;
   /// <summary>Gets the token at a given index.</summary>
   /// <param name="index">The index to retrieve.</param>
   /// <returns>A token at the specified index.</returns>
-  public IToken this[int index] => _tokens[index];
+  public IToken this[int index] => (IToken) _tokens[index];
   int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
 
   public int Count => _tokens.Count;
@@ -28,13 +28,17 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
 
   public bool HasType => !(Type is null or "-" or EmptyString || Type.Like("None"));
   public IToken? Parent { get; set; }
-  public IList<IToken> Children => _tokens;
+  public IList<Nodes.IToken> Children => _tokens;
   public int Index => _tokens.Count > 0 ? _tokens[0].Index : -1;
   public string ContentNoNewLine => this.ToString(true);
-  string IToken.Content => ToString();
-  string? Nodes.IToken.Value => null;
+  string Nodes.IToken.Content => Children.Select(c => c.Content).TextJoin(Delim);
 
-  string? Nodes.IToken.Name => Type;
+  string Nodes.IToken.Type => Type;
+
+  bool IPrintable.HasHeaderLine => true;
+
+  IList<Nodes.IToken> IMultiToken.Children => Children;
+
   public void Add (IToken item)
   {
     item.ThrowIfNull();
@@ -42,6 +46,7 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
   }
   public void Print (int indent)
   {
+    string sp = new(' ', indent);
     DebugIn(this.TypeName, nameof(Print));
     if (Count == 0)
     {
@@ -54,17 +59,17 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
     else
     {
       LogPart(MsgClass.GreenInfo, $"({Count} Tokens)");
-      foreach (IToken item in _tokens)
+      foreach (var item in _tokens)
       {
         NewLine();
-        LogPart(MsgClass.Forced, new(' ', indent));
+        LogPart(MsgClass.BlueValue, sp);
         item.Print(indent + 2);
       }
     }
     DebugOut();
   }
   public void Clear () => _tokens.Clear();
-  public IEnumerator<IToken> GetEnumerator () => _tokens.GetEnumerator();
+  public IEnumerator<IToken> GetEnumerator () => _tokens.Cast<IToken>().GetEnumerator();
   public void Insert (int index, IToken item)
   {
     item.ThrowIfNull();
@@ -98,7 +103,7 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
     string indent2 = new(' ', indent);
     string ret = $"{(Type.IsEmpty ? "None" : Type)} : {Count} Items";
 
-    foreach (IToken item in _tokens)
+    foreach (var item in _tokens)
     {
       ret += $"\n{indent2}{item}";
     }
@@ -109,6 +114,8 @@ public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken<ITok
   public bool Equals (IToken? other) => other is TokenCollection tc && _tokens.SequenceEqual(tc._tokens);
   public override bool Equals (object? obj) => obj is not null && obj is TokenCollection tc && Equals(tc);
   public override int GetHashCode () => _tokens.GetHashCode();
+  void IMultiToken.Add (Nodes.IToken token) => Children.Add(token);
+
   public static bool operator == (TokenCollection left, TokenCollection right) => left is null ? right is null : left.Equals(right);
   public static bool operator != (TokenCollection left, TokenCollection right) => !(left == right);
   public static bool operator < (TokenCollection left, TokenCollection right) => left is null ? right is not null : left.CompareTo(right) < 0;

@@ -5,6 +5,24 @@ namespace Common.RegExp;
 /// <summary>A static class contianing extension methods for <see cref="Regex"/> related types.</summary>
 public static class RegexExtensions
 {
+  extension(Match match)
+  {
+    /// <summary>Checks if the specified group exists in the match.</summary>
+    /// <param name="group">The name of the group.</param>
+    /// <returns><see langword="true"/> if the group exists; otherwise, <see langword="false"/>.</returns>
+    /// <remarks>This implementation is case-insensitive.</remarks>
+    public bool HasGroup (string group) => match.Groups.Keys.Any(item => item.Like(group));
+    /// <summary>Checks if the specified group exists in the match and returns the number of captures.</summary>
+    /// <param name="group">The name of the group.</param>
+    /// <returns>0 if the group does not exist, otherwise the number of captures in the group, with a minimum value of 1 if the group exists.</returns>
+    /// <remarks>This implementation is case-insensitive.</remarks>
+    public int GroupCaptureCount (string group) => match.HasGroup(group) ? match.Groups[group].Captures.Count : 0;
+    public Dictionary<string, string> ToDictionary () => [..
+      from Group grp in match.Groups
+      select new KeyValuePair<string, string>(grp.Name, grp.Value)
+    ];
+  }
+
   #region MatchCollection Extensions
   /// <summary>Exposes the <see cref="IEnumerator{Match}"/> for <paramref name="mc"/>.</summary>
   /// <param name="mc">The <see cref="MatchCollection"/> to enumerate.</param>
@@ -14,11 +32,6 @@ public static class RegexExtensions
     [.. mc.Select(item => item.ToMatchData())];
   #endregion
   #region Match Extensions
-  public static Dictionary<string, string> ToDictionary (this Match match) =>
-    match is null ? [] :
-    [.. from Group grp in match.Groups
-        where grp.Value.Length > 0
-        select grp.ToKvp()];
   public static Dictionary<string, GroupDataSet> ToGroupDictionary (this Match match) =>
     match is null ? [] :
     [.. from Group grp in match.Groups

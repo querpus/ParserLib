@@ -33,7 +33,7 @@ public sealed class XMLElementNode : Node
 
       if (content_nodes.Any())
       {
-        string content = content_nodes.TextJoin(;
+        string content = content_nodes.TextJoin();
         return content.Length > 0 ? content :  null;
       }
       return null;

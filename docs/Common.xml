@@ -119,6 +119,11 @@
         <member name="P:Common.Debug.StackLoc.Method">
             <summary>The method name.</summary>
         </member>
+        <member name="M:Common.Debug.GetBackColor(Common.MsgClass)">
+            <summary>Gets the </summary>
+            <param name="msg"></param>
+            <returns></returns>
+        </member>
         <member name="M:Common.Debug.DoCatch(System.String)">
             <summary>Purges the stack until the specified key.</summary>
             <param name="key">The key of the position to resume.</param>
@@ -287,8 +292,19 @@
             <param name="bit">The flags to remove.</param>
             <returns>An enum of the given type with the given flags removed.</returns>
         </member>
+        <member name="T:Common.Extensions.IConvertibleExtensions.&lt;G&gt;$0819D340FB927A59502779D7FB3DB4D7.&lt;M&gt;$48E4D3EDCA3E8EB137A734D187572A24">
+            <summary>More IConvertible Extensions</summary>
+            <param name="value">The value to mask.</param>
+        </member>
+        <member name="T:Common.Extensions.IEnumerableExtensions">
+            <summary><see cref="T:System.Collections.IEnumerable"/>, <see cref="T:System.Collections.Generic.IReadOnlyCollection`1"/> and <see cref="T:System.Collections.Generic.IEnumerable`1"/> Extensions</summary>
+        </member>
         <member name="M:Common.Extensions.IEnumerableExtensions.At``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
             <inheritdoc cref="M:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.At(System.Int32)"/>
+        </member>
+        <member name="T:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.&lt;M&gt;$DC4DC80DDDDEF7462B0A0C39742B9657">
+            <summary>Generic IEnumerable Extensions</summary>
+            <typeparam name="TBaseType">The base object type</typeparam>
         </member>
         <member name="T:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.&lt;M&gt;$23639E4D5B9A2C11A922FC7710A99100">
             <summary>Generic IEnumerable Extensions</summary>
@@ -311,6 +327,9 @@
         </member>
         <member name="M:Common.Extensions.IListExtensions.AddRange``1(System.Collections.Generic.IList{``0},System.Collections.Generic.IEnumerable{``0})">
             <inheritdoc cref="M:Common.Extensions.IListExtensions.&lt;G&gt;$4DB8CF06A2C0C864308343016A26ABD8`1.AddRange(System.Collections.Generic.IEnumerable{`0})"/>
+        </member>
+        <member name="M:Common.Extensions.IListExtensions.Peek``1(System.Collections.Generic.IList{``0})">
+            <inheritdoc cref="M:Common.Extensions.IListExtensions.&lt;G&gt;$4DB8CF06A2C0C864308343016A26ABD8`1.Peek"/>
         </member>
         <member name="M:Common.Extensions.IListExtensions.Drop``1(System.Collections.Generic.IList{``0})">
             <inheritdoc cref="M:Common.Extensions.IListExtensions.&lt;G&gt;$4DB8CF06A2C0C864308343016A26ABD8`1.Drop"/>
@@ -336,11 +355,16 @@
             <param name="additions">The items to add to the <see cref="T:System.Collections.Generic.IList`1"/>.</param>
             <exception cref="T:System.ArgumentNullException">The calling list was null.</exception>
         </member>
+        <member name="M:Common.Extensions.IListExtensions.&lt;G&gt;$4DB8CF06A2C0C864308343016A26ABD8`1.Peek">
+            <summary>Performs a peek as if this was a stack.</summary>
+            <returns>The value at the top of the stack. If the list is empty, this returns <see langword="null"/> or <see langword="default"/>.</returns>
+        </member>
         <member name="M:Common.Extensions.IListExtensions.&lt;G&gt;$4DB8CF06A2C0C864308343016A26ABD8`1.Drop">
             <summary>Performs a 'pop' action, but discards the popped item.</summary>
         </member>
         <member name="M:Common.Extensions.IListExtensions.&lt;G&gt;$4DB8CF06A2C0C864308343016A26ABD8`1.Pop">
             <summary>Performs a 'pop' action like a stack would.</summary>
+            <returns>The value that was popped from the stack. If the list is empty, this returns <see langword="null"/> or <see langword="default"/>.</returns>
         </member>
         <member name="T:Common.Extensions.IntExtensions">
             <summary>Integer extensions for bitwise operations.</summary>
@@ -476,6 +500,9 @@
         <member name="M:Common.Extensions.StringExtensions.RemoveNulls(System.String)">
             <inheritdoc cref="M:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.RemoveNulls"/>
         </member>
+        <member name="M:Common.Extensions.StringExtensions.get_IsWhitespace(System.String)">
+            <inheritdoc cref="P:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.IsWhitespace"/>
+        </member>
         <member name="M:Common.Extensions.StringExtensions.get_IsPosInteger(System.String)">
             <inheritdoc cref="P:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.IsPosInteger"/>
         </member>
@@ -487,6 +514,9 @@
         </member>
         <member name="M:Common.Extensions.StringExtensions.Like(System.String,System.String)">
             <inheritdoc cref="M:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.Like(System.String)"/>
+        </member>
+        <member name="M:Common.Extensions.StringExtensions.Like(System.String,System.Collections.Generic.IEnumerable{System.String})">
+            <inheritdoc cref="M:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.Like(System.Collections.Generic.IEnumerable{System.String})"/>
         </member>
         <member name="T:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.&lt;M&gt;$AAB8C6276EA4FEBAEE567A392B2D3B4D">
             <summary>String Extensions</summary>
@@ -500,6 +530,10 @@
         <member name="M:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.RemoveNulls">
             <summary>Removes all null characters from the string.</summary>
             <returns>The input string with all null characters removed.</returns>
+        </member>
+        <member name="P:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.IsWhitespace">
+            <summary>Checks to see if the string contains only whitespace.</summary>
+            <remarks>This is <see langword="true"/> if the string is empty, but <see langword="false"/> if the string is <see langword="null"/>.</remarks>
         </member>
         <member name="T:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.&lt;M&gt;$7DEC1F26B9FD125E814434F43CFB8880">
             <summary>String Extensions</summary>
@@ -529,16 +563,19 @@
             <summary>Shorthand for case insensitive ordinal comparison.</summary>
             <param name="text">This text.</param>
             <param name="other">The other text.</param>
-            <returns><see langword="true"/> if the values match, otherwise <see langword="false"/>.<br/>
-            If either <paramref name="other"/> or <paramref name="text"/> are <see langword="null"/>, this method will return <see langword="false"/>.</returns>
+            <returns><see langword="true"/> if the values match, otherwise <see langword="false"/>.</returns>
+            <remarks>If either <paramref name="other"/> or <paramref name="text"/> are <see langword="null"/>, this method will return <see langword="false"/>.</remarks>
+        </member>
+        <member name="M:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.Like(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>Shorthand for case insensitive ordinal comparison.</summary>
+            <param name="text">This text.</param>
+            <param name="other">The other text.</param>
+            <returns><see langword="true"/> if any of the values match, otherwise <see langword="false"/>.</returns>
+            <remarks>If either <paramref name="other"/> is empty, or <paramref name="text"/> is <see langword="null"/>, this method will return <see langword="false"/>.</remarks>
         </member>
         <member name="T:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.&lt;M&gt;$95F501AA0E8724735C4141225132CAB6">
             <summary>string extensions</summary>
             <param name="text">The <see langword="string"/> to check.</param>
-        </member>
-        <member name="T:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.&lt;M&gt;$AD3B1481E6FD0D68AB4EC792EBD27222">
-            <summary>string extensions</summary>
-            <param name="s">The <see langword="string"/> to check.</param>
         </member>
         <member name="T:Common.Extensions.StringExtensions.&lt;G&gt;$F7FA263FC92DBCBA83A0107FB1627724.&lt;M&gt;$AEFD9F126DE2C6FCD08FD85135E85DEA">
             <summary>string extensions</summary>
@@ -572,11 +609,15 @@
             <summary>Checks if the index is valid.</summary>
         </member>
         <member name="T:Common.IPrintable">
-            <summary>Defines a contract for objects that can output their content in a printable format with a specified indentation
-            level.</summary>
-            <remarks>Implementations should use the provided indentation level to format the output appropriately. This
+            <summary>
+            Defines a contract for objects that can output their content in a printable format with a
+            specified indentation level.
+            </summary>
+            <remarks>
+            Implementations should use the provided indentation level to format the output appropriately. This
             interface is typically used to support custom printing or pretty-printing of objects for debugging or display
-            purposes.</remarks>
+            purposes.
+            </remarks>
         </member>
         <member name="M:Common.IPrintable.SetTabSize(System.Int32)">
             <summary>Sets the default indent size of each level.</summary>
@@ -587,6 +628,12 @@
         </member>
         <member name="P:Common.IPrintable.StartingIndent">
             <summary>The indent at the start.</summary>
+        </member>
+        <member name="P:Common.IPrintable.HasHeaderLine">
+            <summary>
+            Whether or not this object contains a 'header' line, that usually contains
+            the object type or a brief summary before outputtinng object data.
+            </summary>
         </member>
         <member name="M:Common.IPrintable.Print(System.Int32)">
             <summary>Prints this object to the console, preserving hierarchy.</summary>
@@ -675,7 +722,11 @@
         </member>
         <member name="F:Common.MsgClass.BlueInfo">
             <summary>Displays when <see cref="F:Common.LogClass.Debug"/> or <see cref="F:Common.LogClass.Verbose"/> is set at program start.</summary>
-            <remarks>Color is white on black.</remarks>
+            <remarks>Color is dark blue on black.</remarks>
+        </member>
+        <member name="F:Common.MsgClass.BlueValue">
+            <summary>Displays when <see cref="F:Common.LogClass.Debug"/> or <see cref="F:Common.LogClass.Verbose"/> is set at program start.</summary>
+            <remarks>Color is light blue on black.</remarks>
         </member>
         <member name="F:Common.MsgClass.GreenInfo">
             <summary>Displays when <see cref="F:Common.LogClass.Debug"/> or <see cref="F:Common.LogClass.Verbose"/> is set at program start.</summary>
@@ -1069,10 +1120,28 @@
         <member name="T:Common.RegExp.RegexExtensions">
             <summary>A static class contianing extension methods for <see cref="T:System.Text.RegularExpressions.Regex"/> related types.</summary>
         </member>
+        <member name="M:Common.RegExp.RegexExtensions.HasGroup(System.Text.RegularExpressions.Match,System.String)">
+            <inheritdoc cref="M:Common.RegExp.RegexExtensions.&lt;G&gt;$D6B04C75D74BF86D0F6D307C4FF829EA.HasGroup(System.String)"/>
+        </member>
+        <member name="M:Common.RegExp.RegexExtensions.GroupCaptureCount(System.Text.RegularExpressions.Match,System.String)">
+            <inheritdoc cref="M:Common.RegExp.RegexExtensions.&lt;G&gt;$D6B04C75D74BF86D0F6D307C4FF829EA.GroupCaptureCount(System.String)"/>
+        </member>
         <member name="M:Common.RegExp.RegexExtensions.GetEnumerator(System.Text.RegularExpressions.MatchCollection)">
             <summary>Exposes the <see cref="T:System.Collections.Generic.IEnumerator`1"/> for <paramref name="mc"/>.</summary>
             <param name="mc">The <see cref="T:System.Text.RegularExpressions.MatchCollection"/> to enumerate.</param>
             <returns>The <see cref="T:System.Collections.Generic.IEnumerator`1"/>.</returns>
+        </member>
+        <member name="M:Common.RegExp.RegexExtensions.&lt;G&gt;$D6B04C75D74BF86D0F6D307C4FF829EA.HasGroup(System.String)">
+            <summary>Checks if the specified group exists in the match.</summary>
+            <param name="group">The name of the group.</param>
+            <returns><see langword="true"/> if the group exists; otherwise, <see langword="false"/>.</returns>
+            <remarks>This implementation is case-insensitive.</remarks>
+        </member>
+        <member name="M:Common.RegExp.RegexExtensions.&lt;G&gt;$D6B04C75D74BF86D0F6D307C4FF829EA.GroupCaptureCount(System.String)">
+            <summary>Checks if the specified group exists in the match and returns the number of captures.</summary>
+            <param name="group">The name of the group.</param>
+            <returns>0 if the group does not exist, otherwise the number of captures in the group, with a minimum value of 1 if the group exists.</returns>
+            <remarks>This implementation is case-insensitive.</remarks>
         </member>
         <member name="T:Common.RegExp.RegexStaticFunctions">
             <summary>Static functions to shorthand frequent definitions.</summary>
@@ -1247,15 +1316,6 @@
         </member>
         <member name="M:Common.SectionCollection.#ctor(System.String)">
             <summary>Now uses Pos struct for speed.</summary>
-        </member>
-        <member name="P:Common.Tokens.IToken.Value">
-            <summary>The value of this token. This will be <see langword="null"/> if the token is composed of multiple tokens.</summary>
-        </member>
-        <member name="P:Common.Tokens.IToken.Name">
-            <summary>The name or type of this token.</summary>
-        </member>
-        <member name="P:Common.Tokens.IToken.Start">
-            <summary>The index of the first character of this token.</summary>
         </member>
         <member name="T:Common.Types.FileExt">
             <summary>A definition for a file extension.</summary>

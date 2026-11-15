@@ -3,7 +3,6 @@
 
 using System.Xml.Linq;
 
-
 namespace Parser.Nodes;
 
 public interface INodeProcessor
@@ -70,7 +69,6 @@ public class XElementProcessor : INodeProcessor
 public class CaptureTokenProcessor : INodeProcessor
 {
   private readonly IEnumerable<IToken> _tokens;
-
   public CaptureTokenProcessor (IEnumerable<IToken> tokens, NodeRuleSet ruleset)
   {
     _tokens = tokens;
@@ -88,18 +86,19 @@ public class CaptureTokenProcessor : INodeProcessor
     var start_time = DateTime.Now;
     Context = RuleSet.InitialSetup();
     int count = 0;
-    foreach (IToken token in _tokens.Where(t => t.Name is not null).Order())
+    foreach (IToken token in _tokens.Where(t => t.Type is not null).Order())
     {
-      if (!RuleSet.RulesByGroup.TryGetValue(token.Name!, out NodeRule? rule))
+      if (!RuleSet.RulesByGroup.TryGetValue(token.Type, out NodeRule? rule))
       {
-        Log(MsgClass.Warning, $"Token ID ({token.Name}) is not handled.", this);
+        Log(MsgClass.Warning, $"Token ID ({token.Type}) is not handled.", this);
         continue;
       }
-      rule.Execute(Context, token);
+      Context.SetToken(token);
+      rule.Execute(Context);
       count++;
     }
     var end_time = DateTime.Now;
     TimeSpan duration = end_time - start_time;
-    Log(MsgClass.Debug, $"Token Processing Complete: {count} tokens processed in {duration}.", this);
+    Log(MsgClass.Debug, $"Token Processing Complete: {count} tokens processed in {duration.ToString("hh:mm:ss", CIIC)}.", this);
   }
 }

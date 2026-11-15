@@ -42,7 +42,7 @@ public static class Debug
   {
     string format = $"{classname}.{method} : ";
 
-    if (method.StartsWithAny(["[", "("], SCO))
+    if (method.StartsWithAny(SCO, "[", "("))
       format = $"{classname}{method} : ";
 
     DoLog(format, GetBackColor(cls), GetTextColor(cls), true);
@@ -119,6 +119,8 @@ public static class Debug
   /// <param name="part">The text content.</param>
   public static void LogPart (M cls, string part) =>
     DoLog(part, GetBackColor(cls), GetTextColor(cls), true);
+  public static void LogPart (M cls, int part) =>
+    DoLog($"{part}", GetBackColor(cls), GetTextColor(cls), true);
   /// <summary>Writes a newline to the output stream.</summary>
   /// <param name="back">The background color.<br/>Default is black.</param>
   public static void NewLine (ConsoleColor back = C_Black) => DoLog(LFs, back, back, true);
