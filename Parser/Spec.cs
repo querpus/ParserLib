@@ -1,10 +1,85 @@
 #pragma warning disable CA1822 // Mark members as static
 
+using Parser.Inference;
 using Parser.Nodes;
 
-using Parser.Inference;
-
 namespace Parser;
+
+public interface IOperationStrategy
+{
+  int OpIndex { get; }
+  ReadOnlyCollection<IOperation> Operations { get; }
+  Dictionary<string, int> Labels { get; }
+}
+
+public sealed class OperationStrategy : IOperation, IOperationStrategy
+{
+  [UnscopedRef]
+  private ref int _opIndex = ref 0;
+  [NotNull]
+  public XParser? Parser { get; private set; }
+  public OpStatus Status { get; private set; }
+  /// <summary>Loads the operations into a flat pattern.</summary>
+  private void OperationLoad ()
+  {
+    if (Operations.IsEmpty || Operations[^1] is not OperationEnd)
+      Operations.Add(new OperationEnd());
+
+    // Unpack all operations in main list
+    for (int i = 0; i < Operations.Count; i++)
+    {
+      IOperation op = Operations[i];
+      int oldCount = Operations.Count;
+      if (op is IPlaceholderOperation ipo)
+      {
+        int newCount = ipo.Unpack(Operations, i, this);
+        Log(MsgClass.Debug, $"Operation Group Expanded From {oldCount} to {newCount}.", this);
+      }
+    }
+  }
+  public OpStatus DoOperation ([NotNull] XParser parser_ref)
+  {
+    if (SkipOperation)
+      return OpStatus.Skipped;
+
+    if (this is IPlaceholderOperation ipo)
+      ipo.CheckUnpacked();
+
+    Parser = parser_ref;
+
+    if (!NoExecution)
+    {
+      DebugIn(this.TypeName, nameof(Execute));
+      Execute();
+      DebugOut();
+
+      if (Status is OpStatus.AtStart)
+        Log(MsgClass.Warning, $"Status was not defined in operation {this.TypeName}.", this);
+    }
+
+    return Status;
+  }
+
+  public ReadOnlyCollection<IOperation> Operations { get; init; } = [];
+  public bool ContinueOnFail { get; set; }
+  public bool SkipOperation { get; set; }
+
+  public bool NoExecution => false;
+  [UnscopedRef]
+  public int OpIndex => { 
+
+  public Dictionary<string, int> Labels => throw new NotImplementedException();
+
+  public void Execute ()
+  {
+
+  }
+  public void ApplyProperties (bool cont, bool skip)
+  {
+    ContinueOnFail = cont;
+    SkipOperation = skip;
+  }
+}
 
 /// <summary>A class containing the operations, requirements, and instructions for reading a file.</summary>
 /// <remarks>This class is immutable, and should never be altered during operation.</remarks>
@@ -21,11 +96,9 @@ public class Spec : IHasTokenRuleSet, IHasNodeRuleSet
   /// <summary>The default regex options to use.</summary>
   public RegexOptions RxOpt
   {
-    get => field | (SC == SCOIC ? ROIC : RON);
+    get => field |= (SC == SCOIC ? ROIC : RON);
     init;
   }
-  /// <summary>The type of token type to use.</summary>
-  public Type TokenType { get; init; } = typeof(string);
   /// <summary>The default string comparison type to use.</summary>
   /// <remarks>This will automatically set <see cref="RegexOptions.IgnoreCase"/> if this is set to <see cref="StringComparison.OrdinalIgnoreCase"/>.</remarks>
   public StringComparison SC { get; init; } = SCO;
@@ -38,7 +111,8 @@ public class Spec : IHasTokenRuleSet, IHasNodeRuleSet
   /// <summary>Token rules for the tokenize operation.</summary>
   public TokenRuleCollection TokenRules { get; init; } = [];
   /// <summary>Group token rules for the token assembly operation.</summary>
-  public TokenRuleCollection GroupTokenRules { get; init; } = [];
+  public Collection<TokenRule> GroupTokenRules { get; init; } = [];
+  /// <summary>A rule set for a capture tokenizer.</summary>
   public TokenRuleSet? TokenRuleSet { get; init; }
   public NodeRuleSet? NodeRuleSet { get; init; }
 }

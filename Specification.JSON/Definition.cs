@@ -33,7 +33,6 @@ public static class Definition
       new(RT.Recursive, "Array", "x:Ao va:Value x:Ac"),
       new(RT.Recursive, "Object", "x:Bo va:Property x:Bc"),
     ],
-    TokenType = typeof(string),
     TokenCompatLookup = {
       ["Value"] = ["Null", "Bool", "Array", "Undef", "Num", "Str", "Object"],
     },

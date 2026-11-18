@@ -105,7 +105,6 @@ public static class Definition
       IfN(InferenceType.FileContent|InferenceType.Contains, "<STX>")],
     RxOpt = RxOpts,
     IsTextFile = true,
-    TokenType = typeof(string),
     TokenRules = [
       .. TokenRule.MakeSingleCharRules(",;", TokenExact, ["Cm", "Sc"]),
       new(ThrowMatch, "None", $"({Etx}).*?({Stx})"),
