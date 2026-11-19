@@ -14,8 +14,6 @@ global using Parser.Ops.Text;
 
 global using static Common.Names;
 
-global using ITT = Specification.INI.INITokenType;
-
 using System.Reflection;
 using System.Resources;
 

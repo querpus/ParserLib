@@ -22,7 +22,6 @@ public static class Definition
     RxOpt = ROML | ROIPW | ROEC | ROIC,
     IsTextFile = true,
     SC = SCOIC,
-    TokenType = typeof(ITT),
 
     Operations = [
       new TokenizeOperation { InputKey = "text", OutputKey = "tokens", Tokenizer = "xparser" },
@@ -30,15 +29,15 @@ public static class Definition
     ],
 
     TokenRules = [
-      new(TokenComment, ITT.None, ";.*"),
-      new(Competitive, ITT.Value, @"(?<=(?: =))([^\\=\n;]|\\.)*(?=$|;)"),
-      new(Competitive, ITT.Key, @"(?<=^\s*)([^\s\\=\n;]|\\.)*(?=\s*(=))"),
-      new(TokenExact, ITT.Eq, "="),
-      new(TokenExtract, ITT.Section, @"\[(?'keep'.*?)\]")],
+      new(TokenComment, "None", ";.*"),
+      new(Competitive, "Value", @"(?<=(?: =))([^\\=\n;]|\\.)*(?=$|;)"),
+      new(Competitive, "Key", @"(?<=^\s*)([^\s\\=\n;]|\\.)*(?=\s*(=))"),
+      new(TokenExact, "Eq", "="),
+      new(TokenExtract, "Section", @"\[(?'keep'.*?)\]")],
 
     GroupTokenRules = [
-      new(ITT.Property, "n:Key x:Eq v:Value"),
-      new(ITT.SectionWProps, "n:Section pa:Property")],
+      new("Property", "n:Key x:Eq v:Value"),
+      new("SectionWProps", "n:Section pa:Property")],
 
     DefaultRuleSet = IgnoreCase,
     TokenRuleSet = StandardRuleSets.INITokenRuleSet,

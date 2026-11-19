@@ -5,7 +5,7 @@ namespace Parser.Tokens;
 public sealed class TokenAssembler
 {
   private const string Area = nameof(TokenAssembler);
-  private readonly TokenRuleCollection _rules;
+  private readonly Collection<TokenRule> _rules;
 
   // Temp fields
   private TokenCollection? _tokens;

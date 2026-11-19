@@ -96,20 +96,20 @@ public class TokenRule
 
     return [.. tokenRules];
   }
-  public static TokenRule[] MakeWordMatchRules (bool ignore_case, params Collection<object> rules)
+  public static IEnumerable<TokenRule> MakeWordMatchRules (bool ignore_case, params Collection<string> rules)
   {
     Collection<TokenRule> tokenRules = [];
 
     if (rules.IsEmpty || rules is null)
       return [.. tokenRules];
 
-    foreach (object type in rules)
+    foreach (string type in rules)
     {
       TokenRule r = new(RT.TokenMatch | (ignore_case ? RT.IgnoreCase : RT.None), type, @$"\b{type}\b");
       tokenRules.Add(r);
     }
 
-    return [.. tokenRules];
+    return tokenRules;
   }
   #endregion
   public override string ToString () => $"TokenRule ({Type} => {TypeToAssign})";

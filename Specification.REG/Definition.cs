@@ -3,8 +3,6 @@ using Parser.Ops.Text;
 
 using static Parser.DefinitionStaticFunctions;
 
-using RTT = Specification.REG.RegTokenType;
-
 namespace Specification.REG;
 
 public enum RegTokenType
@@ -87,7 +85,7 @@ public static class Definition
       }
       ],
     TokenRules = [
-      new(RT.TokenExact, RTT.Eq, "=")
+      new(RT.TokenExact, "Eq", "=")
     ],
     IsTextFile = true,
     RxOpt = ROIPW | ROEC | ROML,

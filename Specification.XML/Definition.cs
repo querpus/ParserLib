@@ -1,9 +1,8 @@
 #pragma warning disable RE0001 // Invalid regex pattern
 #pragma warning disable CA1720 // Identifier contains type name
 
-using Parser.Nodes;
-
 using Parser;
+using Parser.Nodes;
 using Parser.Ops;
 using Parser.Ops.Text;
 using Parser.Tokens;
@@ -51,7 +50,6 @@ public static class Definition
     RxOpt = ROML | ROEC | ROIPW,
     IsTextFile = true,
     SC = SCO,
-    TokenType = typeof(string),
     TokenRules = [
       new(Competitive, "DString", @"""[^""><]*"""),
       new(Competitive, "SString", "'[^'><]*'"),

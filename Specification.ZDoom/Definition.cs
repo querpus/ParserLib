@@ -38,7 +38,6 @@ public static class Definition
       ["StateCmd"] = ["GotoCmd", "LoopCmd", "BasicCmd"],
       ["StateEntry"] = ["StateCmd", "State", "FrameDef"]
     },
-    TokenType = typeof(string),
     DefaultRuleSet = RT.IgnoreCase,
     TokenRules = [
       s_cLineComment,
@@ -115,7 +114,6 @@ public static class Definition
       ],
     SC = SCOIC,
     IsTextFile = true,
-    TokenType = typeof(string),
     TokenCompatLookup = new Dictionary<string, Collection<string>>()
     {
       ["Keyword"] = ["Vertex", "Thing", "Sector", "LineDef", "SideDef"],
@@ -136,7 +134,6 @@ public static class Definition
       )
     ],
     IsTextFile = true,
-    TokenType = typeof(string),
     SC = SCOIC,
     TokenRules = [
       s_cString,
@@ -169,7 +166,6 @@ public static class Definition
     ],
     RxOpt = ROIC | ROEC | ROML,
     IsTextFile = true,
-    TokenType = typeof(string),
     TokenRules = [
       s_langref,
       s_cString,
@@ -205,7 +201,6 @@ public static class Definition
     RxOpt = ROML | ROIPW | ROIC | ROEC,
     IsTextFile = true,
     SC = SCOIC,
-    TokenType = typeof(string),
     Name = "zdoom.decorate",
     Operations = [
       new TokenizeOperation{ InputKey = "text", OutputKey = "tokens" , Tokenizer = "xparser" },
@@ -270,7 +265,6 @@ public static class Definition
     ],
     IsTextFile = true,
     SC = SCOIC,
-    TokenType = typeof(string),
     DefaultRuleSet = RT.IgnoreCase,
     TokenCompatLookup = {
       ["Value"]     = ["Int", "Char", "String", "Dec", "Expression", "ExprName", "FunctionCall", "ArrayValue", "ExpressionStandalone"],
@@ -407,7 +401,6 @@ public static class Definition
     RxOpt = ROML | ROIC | ROIPW | ROEC,
     SC = SCOIC,
     IsTextFile = true,
-    TokenType = typeof(string),
     GroupTokenRules = [
       //TODO: Start Group Defs
     ],
@@ -437,7 +430,6 @@ public static class Definition
     RxOpt = ROML | ROIC | ROIPW | ROEC,
     SC = SCOIC,
     IsTextFile = true,
-    TokenType = typeof(string),
     GroupTokenRules = [
       //TODO: Start Group Defs
     ],

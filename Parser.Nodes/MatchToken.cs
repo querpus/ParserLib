@@ -9,7 +9,8 @@ public class MatchToken : IToken
   /// <summary>The name or type of this token.</summary>
   public string Type { get; init; } = "None";
   /// <summary>The match index within the <see cref="MatchCollection"/>.</summary>
-  public int MatchIndex { get; init; }
+  public int MatchIndex { get; init; } = -1;
+  /// <summary>The charcter position in the original match.</summary>
   public int Index {get; init;}
   /// <summary>The data from the match groups.</summary>
   public Dictionary<string, OneOrMany<string>> GroupData { get; init; } = [];
@@ -74,10 +75,12 @@ public class MatchToken : IToken
   }
   public static implicit operator MatchToken (Match match)
   {
+    var groups = match.Groups.Cast<Group>();
     MatchToken mtoken = new()
     {
       Content = match.Value,
       Index = match.Index,
+      GroupData = [.. groups.Select<Group, KeyValuePair<string, OneOrMany<string>>>(g => new(g.Name, g.Captures.Count > 1 ? new OneOrMany<string>() { Values = g.Captures.Select(c => c.Value) } : g.Value))]
     };
 
     return mtoken;

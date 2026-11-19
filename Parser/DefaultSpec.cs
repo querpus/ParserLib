@@ -58,7 +58,6 @@ public static class DefaultSpec
     ],
     IsTextFile = true,
     SC = SCOIC,
-    TokenType = typeof(string),
     DefaultRuleSet = RT.IgnoreCase,
     RxOpt = ROEC | ROIC | ROML | ROIPW,
     TokenRules = [

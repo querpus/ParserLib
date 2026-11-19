@@ -3,37 +3,23 @@
 
 namespace Parser.Tokens;
 
-internal enum CTT
-{
-  None = 0,
-  Colon,
-  Po,
-  Pc,
-  Prefix,
-  Content, //c prefix
-  TypeName,//t prefix
-  TokenDef, // Full structure type
-}
-
 internal static class Definition
 {
-  private const RT TExact = RT.TokenExact | RT.IgnoreCase;
-  private const RT TMatch = RT.TokenMatch | RT.IgnoreCase;
-
   public static Spec Dummy = new()
   {
     FileInferences = [],
     Name = "Dummy",
     Operations = [],
-    RxOpt = ROIPW | ROIC | ROML | ROSL | ROEC
+    RxOpt = ROIPW | ROIC | ROML | ROSL | ROEC,
+    DefaultRuleSet = RT.IgnoreCase
   };
 
   public static TokenFactory Factory { get; } = new(Dummy, [
-    new(TExact, CTT.Colon, ":"),
-    new(TExact, CTT.Po, "("),
-    new(TExact, CTT.Pc, ")"),
-    new(TMatch, CTT.Prefix, @"\b[a-y]+(?=\:)"),
-    new(TMatch, CTT.Content, @"(?<=c.*?\:)\w+\b"),
-    new(TMatch, CTT.TypeName, @"(?<=t.*?\:)\w+\b"),
+    new(RT.TokenExact, "Colon", ":"),
+    new(RT.TokenExact, "Po", "("),
+    new(RT.TokenExact, "Pc", ")"),
+    new(RT.TokenMatch, "Prefix", @"\b[a-y]+(?=\:)"),
+    new(RT.TokenMatch, "Content", @"(?<=c.*?\:)\w+\b"),
+    new(RT.TokenMatch, "TypeName", @"(?<=t.*?\:)\w+\b"),
   ]);
 }

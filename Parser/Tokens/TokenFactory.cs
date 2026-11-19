@@ -79,7 +79,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
   private void WarnLog (string msg) => Log(MC.Warning, msg, this);
   #endregion
   #region Private Static Methods
-  private static string GetRuleRegex (TokenRule rule, int? index = null)
+  private static string GetRuleRegex (TokenRule rule, int index)
   {
     string regex = rule?.RuleStringData ?? SE;
 
@@ -90,7 +90,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
 
     string casemod = rule?.Type.HasFlag(RT.IgnoreCase) ?? false ? "(?i)" : "(?-i)";
 
-    return index is not null ? $"{casemod}(?'_R{index}'{regex})" : $"{casemod}{regex}";
+    return $"{casemod}(?'_R{index}'{regex})";
   }
   private static RT GetMaskedType (RT type) => type.RemoveBitLong<RT>(RT.FlagBits);
   private int GetRuleGroupIndex (Match match)
