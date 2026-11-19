@@ -302,6 +302,9 @@
         <member name="M:Common.Extensions.IEnumerableExtensions.At``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
             <inheritdoc cref="M:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.At(System.Int32)"/>
         </member>
+        <member name="M:Common.Extensions.IEnumerableExtensions.Foreach``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0})">
+            <inheritdoc cref="M:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.Foreach(System.Action{`0})"/>
+        </member>
         <member name="T:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.&lt;M&gt;$DC4DC80DDDDEF7462B0A0C39742B9657">
             <summary>Generic IEnumerable Extensions</summary>
             <typeparam name="TBaseType">The base object type</typeparam>
@@ -315,6 +318,10 @@
             <param name="list">The list.</param>
             <param name="index">The index to retrieve.</param>
             <returns>The object at position <paramref name="index"/>.</returns>
+        </member>
+        <member name="M:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.Foreach(System.Action{`0})">
+            <summary>Executes an <see cref="T:System.Action`1"/> <see langword="delegate"/> for every item in the <see cref="T:System.Collections.Generic.IEnumerable`1"/>.</summary>
+            <param name="action"></param>
         </member>
         <member name="T:Common.Extensions.IListExtensions">
             <summary><see cref="T:System.Collections.Generic.IList`1"/> extensions.</summary>
@@ -882,11 +889,9 @@
         </member>
         <member name="T:Common.Pos">
             <summary>A lightweight variant of section that holds a start position and a length for operating on a <see cref="T:System.Span`1"/>, <see cref="T:System.Memory`1"/> or <see langword="string"/>.</summary>
-            <param name="start">The start position.</param>
-            <param name="length">The length.</param>
         </member>
         <member name="M:Common.Pos.#ctor(System.Int32,System.Int32)">
-            <summary>A lightweight variant of section that holds a start position and a length for operating on a <see cref="T:System.Span`1"/>, <see cref="T:System.Memory`1"/> or <see langword="string"/>.</summary>
+            <summary>Standard Constructor</summary>
             <param name="start">The start position.</param>
             <param name="length">The length.</param>
         </member>

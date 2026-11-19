@@ -10,7 +10,7 @@ public abstract class Node : INode
 
   bool IPrintable.HasHeaderLine => true;
 
-  public override string ToString () => $"Node (C:{Children.Count}, P:{Properties.Count}, D:{Data.Count})";
+  public override string ToString () => $"{this.TypeName} (C:{Children.Count}, P:{Properties.Count}, D:{Data.Count})";
   public abstract string Serialize ();
   public bool Equals (INode? other) => ((INode) this).Equals(other);
   protected static void PrintItem (int indent, object item)

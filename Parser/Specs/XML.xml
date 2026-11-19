@@ -31,26 +31,14 @@
       </EntityDef>
     </EntityInfo>-->
     <TokenRules>
-      <Rule>
-        <Data>
-          "[^">&lt;]*"
-        </Data>
-        <Type>Competitive</Type>
-        <TypeToAssign>DString</TypeToAssign>
+      <Rule type="Competitive" assign="DString">
+        <Data> "[^">&lt;]*" </Data>
       </Rule>
-      <Rule>
-        <Type>Competitive</Type>
-        <TypeToAssign>SString</TypeToAssign>
-        <Data>
-          '[^'>&lt;]*'
-        </Data>
+      <Rule type="Competitive" assign="SString">
+        <Data> '[^'>&lt;]*' </Data>
       </Rule>
-      <Rule>
-        <Type>Competitive IgnoredToken</Type>
-        <TypeToAssign>Comment</TypeToAssign>
-        <Data>
-          &lt;!--((?!--).)*-->
-        </Data>
+      <Rule type="Competitive IgnoredToken" assign="Comment">
+        <Data> &lt;!--((?!--).)*--> </Data>
       </Rule>
     </TokenRules>
     <!--<Constructs>
@@ -67,59 +55,37 @@
       <Rule assign="Attribute">
         <Data> n:AttrKey x:Eq v:String </Data>
       </Rule>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>Header</TypeToAssign>
+      <Rule assign="Header">
         <Data> x:Ao x:Qm n:ElementName{xml} pa:Attribute x:Qm x:Ac </Data>
       </Rule>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>DocumentNamespace</TypeToAssign>
+      <Rule assign="DocumentNamespace">
         <Data> t:NamespaceAttr x:Co d:Attribute </Data>
       </Rule>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>DocumentNamespace</TypeToAssign>
+      <Rule assign="DocumentNamespace">
         <Data> t:NamespaceAttr x:Eq v:String </Data>
       </Rule>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>AttributeWithNamespace</TypeToAssign>
+      <Rule assign="AttributeWithNamespace">
         <Data> t:Namespace x:Co n:AttrKey x:Eq v:String </Data>
       </Rule>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>ElementEndWithNamespace</TypeToAssign>
+      <Rule assign="ElementEndWithNamespace">
         <Data> x:Ao x:Sl t:Namespace x:Co n:ElementName x:Ac </Data>
       </Rule>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>ElementEnd</TypeToAssign>
+      <Rule assign="ElementEnd">
         <Data> x:Ao x:Sl n:ElementName x:Ac </Data>
       </Rule>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>ElementSingleWithNamespace</TypeToAssign>
+      <Rule assign="ElementSingleWithNamespace">
         <Data> x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Sl x:Ac </Data>
       </Rule>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>ElementSingle</TypeToAssign>
+      <Rule assign="ElementSingle">
         <Data> x:Ao n:ElementName pa:Attribute x:Sl x:Ac </Data>
       </Rule>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>ElementStartWithNamespace</TypeToAssign>
+      <Rule assign="ElementStartWithNamespace">
         <Data> x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Ac </Data>
       </Rule>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>ElementStart</TypeToAssign>
+      <Rule assign="ElementStart">
         <Data> x:Ao n:ElementName pa:Attribute x:Ac </Data>
       </Rule>
-      <Rule>
-        <Type>Recursive</Type>
-        <TypeToAssign>ElementPair</TypeToAssign>
+      <Rule type="Recursive" assign="ElementPair">
         <Data>d:ElementStart va:ValidContent x:ElementEnd</Data>
       </Rule>
     </GroupTokenRules>

@@ -4,19 +4,24 @@ using Parser.Nodes;
 
 using Parser.Inference;
 
+using System.Xml.Serialization;
+
 namespace Parser;
 
 /// <summary>A class containing the operations, requirements, and instructions for reading a file.</summary>
 /// <remarks>This class is immutable, and should never be altered during operation.</remarks>
+[XmlRoot(elementName: "Spec", IsNullable = false, Namespace = "Parser/Spec")]
 public class Spec : IHasTokenRuleSet, IHasNodeRuleSet
 {
   /// <summary>The name of this Spec.</summary>
+  [XmlElement(DataType = "string", Order = 1)]
   public required string Name { get; init; }
   /// <summary>A <see cref="ReadOnlyCollection{T}"/> of <see cref="IOperation"/> objects that are executed in order to produce the result.</summary>
   public ReadOnlyCollection<IOperation> Operations { get; init; } = [];
   /// <summary>A <see cref="ReadOnlyCollection{T}"/> of <see cref="InferenceNode"/> objects that specify what files use this specification.</summary>
   public ReadOnlyCollection<InferenceNode> FileInferences { get; init; } = [];
   /// <summary>Determines whether to use a byte parser or a text one.</summary>
+  [XmlElement(DataType = "boolean", Order = 2)]
   public bool IsTextFile { get; init; }
   /// <summary>The default regex options to use.</summary>
   public RegexOptions RxOpt
@@ -28,6 +33,7 @@ public class Spec : IHasTokenRuleSet, IHasNodeRuleSet
   public Type TokenType { get; init; } = typeof(string);
   /// <summary>The default string comparison type to use.</summary>
   /// <remarks>This will automatically set <see cref="RegexOptions.IgnoreCase"/> if this is set to <see cref="StringComparison.OrdinalIgnoreCase"/>.</remarks>
+  [XmlElement(DataType = "boolean", ElementName = "CaseInsensitive", Order = 3)]
   public StringComparison SC { get; init; } = SCO;
 
   /// <summary>Define the names of equilivent groups of tokens.</summary>

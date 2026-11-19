@@ -3,12 +3,10 @@
 namespace Common;
 
 /// <summary>A lightweight variant of section that holds a start position and a length for operating on a <see cref="Span{T}"/>, <see cref="Memory{T}"/> or <see langword="string"/>.</summary>
-/// <param name="start">The start position.</param>
-/// <param name="length">The length.</param>
-public readonly struct Pos (int start, int length) : IEquatable<Pos>, IIndexSortable
+public readonly struct Pos : IEquatable<Pos>, IIndexSortable
 {
-  public int Start { get; } = start;
-  public int Length { get; init; } = length;
+  public int Start { get; }
+  public int Length { get; init; }
   public int End
   {
     readonly get => Start + Length - 1;
@@ -22,6 +20,30 @@ public readonly struct Pos (int start, int length) : IEquatable<Pos>, IIndexSort
   public readonly bool IsNull => Start == DNE;
   public static Pos Null { get; } = new(DNE, 0);
   readonly int IIndexSortable.Index => Start;
+
+  /// <summary>Standard Constructor</summary>
+  /// <param name="start">The start position.</param>
+  /// <param name="length">The length.</param>
+  public Pos (int start, int length)
+  {
+    Start = start;
+    Length = length;
+  }
+  public Pos (Match match)
+  {
+    Start = match.Index;
+    Length = match.Length;
+  }
+  public Pos (Group group)
+  {
+    Start = group.Index;
+    Length = group.Length;
+  }
+  public Pos (Capture cap)
+  {
+    Start = cap.Index;
+    Length = cap.Length;
+  }
 
   public readonly Section ToSection (string full_text) => new(Start, Length, full_text);
   public readonly bool IsWithin (int point) => point >= Start && point <= End;

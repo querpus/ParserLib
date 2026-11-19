@@ -5,29 +5,31 @@ namespace Parser.Nodes;
 
 public static partial class StandardRuleSets
 {
-  public static string GenerateRegexForMatchTokenizer ( IEnumerable<(string Name, string Regex)> list)
+  private static string SGrp(string special_group_letters, [SS("regex")] string inner_content, string? token_type = null, int? index = null)
   {
-    Collection<string> result = [];
-    int index = 0;
-
-    // Makes an index group to id the regex string used, and the name group to assign the token type.
-    foreach (var item in list)
+    string result = inner_content;
+    foreach (char c in special_group_letters)
     {
-      result.Add($"(?'_i_{index}' (?'_g_{item.Name}' {item.Regex}))");
-      index++;
-    }
-    return result.TextJoin("|");
-  }
-  public static string GenerateRegexForErrorChecking (IEnumerable<(string ID, string Regex)> list)
-    {
-      string result = SE;
-      int index = 0;
-
-      foreach (var item in list)
+      string group = c switch
       {
-        result += (result.IsNotEmpty ? "|" : "(?'error'") + $"(?'_e_{index}' (?'_g_{item.ID}' {item.Regex}))";
-        index++;
+        'g' /*Token Type*/  => $"_g_{token_type}",
+        'i' /*Regex Index*/ => $"_i_{index}",
+        'e' /*Error Index*/ => $"_e_{index}",
+      };
+      result = RxS.GrpNm(group, result);
+
+      if (c == 'e')
+      {
+        result = RxS.GrpNm("error", result);
       }
-      return result + ")";
     }
+    return result;
+  }
+
+  public static string GenerateRegexForMatchTokenizer (IEnumerable<(string Type, string Regex)> list) => list
+    .Select((tuple, i) => SGrp("gi", tuple.Regex, tuple.Type, i))
+    .Aggregate((s1, s2) => $"{s1}|{s2}");
+  public static string GenerateRegexForErrorChecking (IEnumerable<(string ID, string Regex)> list) => list
+    .Select((tuple, i) => SGrp("eg", tuple.Regex, tuple.ID, i))
+    .Aggregate((s1, s2) => $"{s1}|{s2}");
 }

@@ -12,7 +12,20 @@ public static class NodeRuleHelper
     public object? CreateClass () =>
       Type.GetType(className)?.InvokeMember(SE, BFCI, null, null, null, CIIC);
   }
-
+  extension (IEnumerable<string> targets)
+  {
+    /// <summary>Converts a list of NodeTarget strings into a value.</summary>
+    /// <returns>The <see cref="NT"/> value that the strings represent.</returns>
+    public NT ToNodeTarget ()
+    {
+      NT result = NT.None;
+      foreach (string target in targets)
+      {
+        result |= target.ToNodeTarget();
+      }
+      return result;
+    }
+  }
   extension (string target)
   {
     public NT ToNodeTarget () => target switch
@@ -28,6 +41,9 @@ public static class NodeRuleHelper
       "Properties" => NT.Properties,
       "TokenGroup" => NT.TokenGroup,
       "TokenValue" => NT.TokenValue,
+      "Add" => NT.Add,
+      "Remove" => NT.Remove,
+      "Replace" => NT.Replace,
       _ => NT.None,
     };
   }

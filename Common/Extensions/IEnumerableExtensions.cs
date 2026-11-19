@@ -91,11 +91,21 @@ public static class IEnumerableExtensions
     }
     public int LastIndex => list.Count() - 1;
     public bool IsEmpty => list?.Any() != true;
+    /// <summary>Executes an <see cref="Action{T}"/> <see langword="delegate"/> for every item in the <see cref="IEnumerable{T}"/>.</summary>
+    /// <param name="action"></param>
     public void Foreach (Action<T> action)
     {
       foreach (T? item in list)
       {
         action(item);
+      }
+    }
+    public void Foreach (Action<T, int> action)
+    {
+      int index = 0;
+      foreach (T? item in list)
+      {
+        action(item, index++);
       }
     }
   }

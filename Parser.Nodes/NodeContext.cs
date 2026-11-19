@@ -384,6 +384,8 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
     Token = token;
     Notify("Token");
   }
+  /// <summary>Clears the <see cref="Temp"/> property after the token's instructions finish.</summary>
+  public void ClearTemp () => Temp = null;
 
   #endregion
   /// <summary>Set this to <see langword="true"/> if there must be a single node that everything is within.
@@ -530,9 +532,12 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
   }
   public void WarnIfNotNull (NT target)
   {
-    if (GetTargetNode(target) is not null)
+    foreach (NT ea in target.GetTargets(inclusive_mask: NT.NodeProperties))
     {
-      Log(MsgClass.Warning, $"{target} was not null before assignment.", this);
+      if (GetTargetNode(ea) is not null)
+      {
+        Log(MsgClass.Warning, $"{target} was not null before assignment.", this);
+      }
     }
   }
   public void ClearNode (NT target)
@@ -554,10 +559,16 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       Log(MsgClass.Warning, $"{target} was already null.", this);
       attempt = true;
     }
-
+    if (target.HasFlag(NT.Context))
+    {
+      Log(MsgClass.Warning, "Context cannot be cleared.", this);
+      target = target.RemoveBit<NT>(NT.Context);
+      attempt = true;
+    }
     if (target.HasFlag(NT.Parent))
     {
       Log(MsgClass.Warning, "Cannot clear parent. Use pop.", this);
+      target = target.RemoveBit<NT>(NT.Parent);
       attempt = true;
     }
     if (target.HasFlag(NT.Current))
@@ -587,7 +598,7 @@ public class NodeContext : IPrintable, INotifyPropertyChanged
       Log(MsgClass.GreenInfo, $"Node stored in {target} was cleared.", this);
   }
 
-  protected virtual void DoXMLOperation (string action, string? assignTo, string? valueFrom, string? className)
+  protected virtual void DoXMLCommand (string action, string? assignTo, string? valueFrom, string? className)
   {
     NT target = assignTo?.ToNodeTarget() ?? NT.None;
     NT source = valueFrom?.ToNodeTarget() ?? NT.None;
