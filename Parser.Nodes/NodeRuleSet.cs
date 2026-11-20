@@ -8,7 +8,7 @@ public class NodeRuleSet
   public required Func<NodeContext> InitialSetup { get; init; }
   public ObservableCollection<NodeRule> Rules { get; init; } = [];
 
-  public bool TryGetRule (in IToken token, out NodeRule? rule)
+  public bool TryGetRule ([NotNull] in IToken token, [NotNullWhen(true)] out NodeRule? rule)
   {
     rule = null;
     foreach (var chk in Rules)

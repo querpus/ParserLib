@@ -15,9 +15,9 @@ public sealed class OperationLabel : Operation, IPlaceholderOperation
     }
   }
 
-  public int Unpack ([NotNull] Collection<IOperation> operations, int index, XParser? parser_ref = null)
+  public int Unpack ([NotNull] Collection<IOperation> operations, int index, Dictionary<string, int> label_map)
   {
-    parser_ref?.Labels.Add(Name, index);
+    label_map.Add(Name, index);
     return operations.Count;
   }
 }

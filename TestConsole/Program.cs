@@ -301,6 +301,7 @@ internal static class Program
         Log(MsgClass.Error, "The path at \"" + FinishPath(file) + "\" is not valid.", This);
         data = "";
       }
+      Parser.SetInput(data);
       status = Parser.StepThrough(data);
 
     }

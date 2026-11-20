@@ -28,7 +28,7 @@ public class OperationSwitch : Operation, IPlaceholderOperation
     Status = OpStatus.Pass;
   }
 
-  public int Unpack ([NotNull] Collection<IOperation> operations, int index, XParser? parser_ref = null)
+  public int Unpack ([NotNull] Collection<IOperation> operations, int index, Dictionary<string, int> label_map)
   {
     foreach (SwitchCaseItem @case in Cases)
     {

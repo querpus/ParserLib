@@ -1,22 +1,22 @@
 #pragma warning disable CA1822 // Mark members as static
 
+using System.Xml.Serialization;
+
 using Parser.Inference;
 using Parser.Nodes;
-using System.Xml.Serialization;
 
 namespace Parser;
 
 public interface IOperationStrategy
 {
-  int OpIndex { get; }
-  ReadOnlyCollection<IOperation> Operations { get; }
-  Dictionary<string, int> Labels { get; }
+  IReadOnlyCollection<IOperation> Operations { get; }
+  IReadOnlyDictionary<string, int> Labels { get; }
 }
 
 public sealed class OperationStrategy : IOperation, IOperationStrategy
 {
-  [UnscopedRef]
-  private ref int _opIndex = ref 0;
+  private readonly Collection<IOperation> _operations = [];
+  private readonly Dictionary<string, int> _labels = [];
   [NotNull]
   public XParser? Parser { get; private set; }
   public OpStatus Status { get; private set; }
@@ -24,7 +24,7 @@ public sealed class OperationStrategy : IOperation, IOperationStrategy
   private void OperationLoad ()
   {
     if (Operations.IsEmpty || Operations[^1] is not OperationEnd)
-      Operations.Add(new OperationEnd());
+      _operations.Add(new OperationEnd());
 
     // Unpack all operations in main list
     for (int i = 0; i < Operations.Count; i++)
@@ -33,7 +33,7 @@ public sealed class OperationStrategy : IOperation, IOperationStrategy
       int oldCount = Operations.Count;
       if (op is IPlaceholderOperation ipo)
       {
-        int newCount = ipo.Unpack(Operations, i, this);
+        int newCount = ipo.Unpack(_operations, i, this);
         Log(MsgClass.Debug, $"Operation Group Expanded From {oldCount} to {newCount}.", this);
       }
     }
@@ -43,17 +43,14 @@ public sealed class OperationStrategy : IOperation, IOperationStrategy
     if (SkipOperation)
       return OpStatus.Skipped;
 
-    if (this is IPlaceholderOperation ipo)
-      ipo.CheckUnpacked();
-
     Parser = parser_ref;
 
-    if (!NoExecution)
-    {
-      DebugIn(this.TypeName, nameof(Execute));
-      Execute();
-      DebugOut();
+    OperationLoad();
 
+    int index = 0;
+
+    for (; index < Operations.Count && index >= 0; index++)
+    {
       if (Status is OpStatus.AtStart)
         Log(MsgClass.Warning, $"Status was not defined in operation {this.TypeName}.", this);
     }
@@ -61,20 +58,14 @@ public sealed class OperationStrategy : IOperation, IOperationStrategy
     return Status;
   }
 
-  public ReadOnlyCollection<IOperation> Operations { get; init; } = [];
+  public IReadOnlyCollection<IOperation> Operations => _operations;
   public bool ContinueOnFail { get; set; }
   public bool SkipOperation { get; set; }
 
-  public bool NoExecution => false;
-  [UnscopedRef]
-  public int OpIndex => { 
+  bool IOperation.NoExecution => false;
 
-  public Dictionary<string, int> Labels => throw new NotImplementedException();
+  public IReadOnlyDictionary<string, int> Labels => _labels;
 
-  public void Execute ()
-  {
-
-  }
   public void ApplyProperties (bool cont, bool skip)
   {
     ContinueOnFail = cont;
