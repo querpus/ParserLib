@@ -6,18 +6,19 @@ namespace Parser;
 public sealed class XParser
 {
   [AllowNull]
-  internal static Library Library;
+  private static Library Library;
   private const string Area = nameof(XParser);
   private bool ActiveFailure => LastStatus.IsFail && !CurrentOp.ContinueOnFail;
+  private readonly Stack<ParentStrategy> _parentStacks = [];
   #region Public Properties
   /// <summary>The current operation index.</summary>
   public int OpIndex { get; private set; }
   /// <summary>The next operation index.</summary>
   public int NextOpIndex { get; private set; }
   /// <summary>The current operation.</summary>
-  public IOperation CurrentOp => _operationStrategyStack.Peek()[OpIndex];
+  public IOperation CurrentOp => ParsedOperations[OpIndex];
   /// <summary>The next operation.</summary>
-  public IOperation NextOp => (NextOpIndex == -1 || NextOpIndex >= OpCount) ? new OperationEnd() : Operations[NextOpIndex];
+  public IOperation NextOp => (NextOpIndex == -1 || NextOpIndex >= OpCount) ? new OperationEnd() : ParsedOperations[NextOpIndex];
   /// <summary>The status of the last operation performed.</summary>
   public OpStatus LastStatus { get; private set; } = AtStart;
   /// <summary>Gets the file data as a list of bytes.</summary>
@@ -26,35 +27,80 @@ public sealed class XParser
     Data.CanLoad<string>("initial") ? Library["textbylines"] :
     Data.CanLoad<Memory<byte>>("initial") ? Library["binary"] :
     Library["unknown"];
+  public Collection<IOperation> ParsedOperations { get; private set; } = [];
   public Spec? Spec { get; private set; }
-  public OperationStrategy Strategy => _operationStrategyStack.Peek();
-  private readonly Stack<int> _operationIndexStack = [];
-  private readonly Stack<OperationStrategy> _operationStrategyStack = [];
-  public void PushStrategy (OperationStrategy strategy)
+  public OperationStrategy CurrentStrategy { get; private set; } = [];
+  public bool HasParent => _parentStacks.IsNotEmpty;
+  public OpStatus EnterStrategy (OperationStrategy strategy)
   {
-    _operationIndexStack.Push(OpIndex);
-    _operationStrategyStack.Push(strategy);
+    var parent = new ParentStrategy()
+    {
+      Index = OpIndex,
+      Strategy = CurrentStrategy,
+      ParsedOperations = new(ParsedOperations),
+      Labels = new(Labels),
+    };
+    OpIndex = 0;
+    CurrentStrategy = strategy;
+    Labels = [];
+    ParsedOperations = OperationLoad(strategy);
+    _parentStacks.Push(parent);
+
+    LastStatus = ParseLoop();
+
+    if (LastStatus.IsPass || LastStatus.IsEnd)
+    {
+      var prev_state = _parentStacks.Pop();
+
+      OpIndex = prev_state.Index;
+      CurrentStrategy = prev_state.Strategy;
+      Labels = [.. prev_state.Labels];
+      ParsedOperations = [.. prev_state.ParsedOperations];
+
+      return Pass;
+    }
+    else
+    {
+      Log(MsgClass.Error, "EnterStrategy resulted in a fail.", this);
+      return LastStatus;
+    }
   }
-  private void FinishStrategy ()
+  /// <summary>Loads the operations into a flat pattern.</summary>
+  private Collection<IOperation> OperationLoad (OperationStrategy strategy)
   {
-    _ = _operationIndexStack.Pop();
-    _ = _operationStrategyStack.Pop();
+    Collection<IOperation> result = [.. strategy.Operations];
+
+    if (result.IsEmpty || result[^1] is not OperationEnd)
+    {
+      result.Add(new OperationEnd());
+    }
+    else // Unpack all operations in main list
+    {
+      for (int i = 0; i < result.Count; i++)
+      {
+        IOperation op = result[i];
+        int oldCount = result.Count;
+        if (op is IPlaceholderOperation ipo)
+        {
+          int newCount = ipo.Unpack(result, i, this);
+          if (newCount != oldCount)
+            Log(MsgClass.Debug, $"Operation Group Expanded From {oldCount} to {newCount}.", this);
+        }
+      }
+    }
+    return result;
   }
-  [NotNull] public OperationStrategy Operations => _operationStrategyStack.Peek();
-  public Dictionary<string, int> Labels { get; } = [];
+  public Dictionary<string, int> Labels { get; private set; } = [];
   /// <summary>The dictionary storing all of the data from the parsed file.</summary>
   [NotNull] public DataStore? Data { get; private set; }
   /// <summary>Gets the result of a successful parse operation set.</summary>
   /// <remarks>This property returns <see langword="null"/> if the operation sequence has failed, or has not ran.</remarks>
   public object? Result => Data.CanLoad("result") ? Data["result"] : null;
   /// <summary>The number of operations in the currently loaded specification, after parsing the operation sequence.</summary>
-  public int OpCount => Operations.Count;
+  public int OpCount => ParsedOperations.Count;
   #endregion
   #region Constructor
-  public XParser ()
-  {
-
-  }
+  public XParser () { }
   public XParser (Spec spec) => InitializeParser(spec);
   public XParser (string file)
   {
@@ -64,26 +110,6 @@ public sealed class XParser
   }
   #endregion
   #region Private Methods
-  /// <summary>Loads the operations into a flat pattern.</summary>
-  private void OperationLoad ()
-  {
-    Spec.ThrowIfNull();
-    Operations.AddRange(Spec.Operations);
-    if (Operations.IsEmpty || Operations[^1] is not OperationEnd)
-      Operations.Add(new OperationEnd());
-
-    // Unpack all operations in main list
-    for (int i = 0; i < Operations.Count; i++)
-    {
-      IOperation op = Operations[i];
-      int oldCount = Operations.Count;
-      if (op is IPlaceholderOperation ipo)
-      {
-        int newCount = ipo.Unpack(Operations, i, Labels);
-        Log(MsgClass.Debug, $"Operation Group Expanded From {oldCount} to {newCount}.", this);
-      }
-    }
-  }
   private void InitializeData<T> (T data)
   {
     Spec.ThrowIfNull();
@@ -96,10 +122,10 @@ public sealed class XParser
         _ => throw new InvalidDataException("Data must by a byte array or a string.")
       };
     }
-    OperationLoad();
     data.ThrowIfNull();
     Data.Initialize(data);
   }
+  private void InitializeLibrary (Library lib) => Library = lib;
   /// <summary>Sets up the Specification and DataStore for the parser.</summary>
   /// <param name="spec">The specification to use.</param>
   [MemberNotNull(nameof(Data), nameof(Spec))]
@@ -107,6 +133,7 @@ public sealed class XParser
   {
     Data = new() { Parser = this };
     Spec = spec;
+    ParsedOperations = OperationLoad(spec.Operations);
     NextOpIndex = 0;
   }
   private void AdvanceOperation ()
@@ -149,7 +176,7 @@ public sealed class XParser
 
     Log(MsgClass.BlueInfo, $"Performing Operation {CurrentOp.TypeName}.", this);
 
-    void setExceptionData (OpStatus status, OperationException toLog)
+    void setExceptionData (OpStatus status, Exception toLog)
     {
       DoCatch("PerformOperation");
       LastStatus = status;
@@ -163,6 +190,7 @@ public sealed class XParser
     catch (OperationNoSuchVarException onsv) { setExceptionData(FailNoSuchVarName, onsv); }
     catch (UnknownOperationException uoe) { setExceptionData(FailNoSpec, uoe); }
     catch (OperationException o) { setExceptionData(Fail, o); }
+    catch (Exception e) { setExceptionData(Error, e); }
     Log(MsgClass.Debug, $"Operation resulted in {LastStatus}.", this);
 
     if (LastStatus is EndCommand || ActiveFailure)
@@ -192,25 +220,27 @@ public sealed class XParser
   {
     InitializeParser(spec);
 
-    if (Spec is null)
-    {
-      throw Err.ThrowNoSpec("No Specification defined.");
-    }
     Data["file_path"] = path;
     if (Spec.IsTextFile)
     {
       string text = File.ReadAllText(path);
-      return ParseData(spec, text);
+      InitializeData(text);
+      return ParseLoop();
     }
     else
     {
       Memory<byte> contents = File.ReadAllBytes(path);
-      return ParseData(spec, contents);
+      InitializeData(contents);
+      return ParseLoop();
     }
   }
   /// <summary>Sets the next operation to be the one at <paramref name="index"/>.</summary>
   /// <param name="index">The index of the next operation to execute.</param>
   public void SetNextOperationIndex (int index) => NextOpIndex = index;
+  /// <summary>Assigns the input to the parser.</summary>
+  /// <typeparam name="TData">The type of input. Can be a <see langword="string"/> or a <see langword="byte"/> array.</typeparam>
+  /// <param name="input">The input to assign.</param>
+  /// <remarks>A byte array could be a <see cref="Memory{T}"/> object, a <see cref="Span{T}"/>, a <see cref="List{T}"/>, or a simple <see cref="IEnumerable{T}"/></remarks>
   public void SetInput<TData> (TData input) => InitializeData(input);
   /// <summary>Incrementally steps through all the operations, requesting user confirmation to continue.</summary>
   /// <returns>The <see cref="OpStatus"/> codes representing the result of each operation.</returns>
@@ -224,7 +254,7 @@ public sealed class XParser
       yield return PerformOperation();
   }
 
-  internal void QueryOperation ()
+  public void QueryOperation ()
   {
     string userInput;
 

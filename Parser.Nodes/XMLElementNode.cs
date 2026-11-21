@@ -6,6 +6,7 @@ public sealed class XMLElementNode : Node
 {
   private static string SerializeAttribute (KeyValuePair<string, INode> kvp) => $"{kvp.Key}={kvp.Value.Serialize()}";
   private string SerializeAttributes () => Properties.Select(SerializeAttribute).TextJoin(" ");
+
   public override string Serialize ()
   {
     string? name = Data.TryGetValue("Name", out object? value) && value is string n ? n : null;
@@ -24,7 +25,11 @@ public sealed class XMLElementNode : Node
   }
   public bool HasElements => Children.Any(c => c is XMLElementNode);
   /// <summary>Gets the element name and namespace.</summary>
-  public string? Name => Data.TryGetValue("Name", out object? value) && value is string name ? name : null;
+  public string? Name
+  {
+    get => Data.TryGetValue("Name", out object? value) && value is string name ? name : null;
+    set => Data["Name"] = value ?? SE;
+  }
   public string? Content
   {
     get

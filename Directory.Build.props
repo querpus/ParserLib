@@ -1,7 +1,10 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
+  
   <PropertyGroup>
+    <AnalysisLevel>preview-all</AnalysisLevel>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <Authors>John Taylor</Authors>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     <DefaultLanguage>en-US</DefaultLanguage>
     <DocumentationFile>$(SolutionDir)docs\$(MSBuildProjectName).xml</DocumentationFile>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
@@ -23,4 +26,10 @@
     <Title>$(MSBuildProjectName)</Title>
     <WarningLevel>9999</WarningLevel>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Roslynator.Analyzers" Version="5.0.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="Roslynator.CodeFixes" Version="5.0.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+  </ItemGroup>
+  
 </Project>

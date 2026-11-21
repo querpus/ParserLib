@@ -1,10 +1,9 @@
 //#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
 
 using System.Collections.Frozen;
 
 using Common.RegExp;
-
-using SysRegex = System.Text.RegularExpressions.Regex;
 
 namespace Common.Extensions;
 
@@ -19,8 +18,8 @@ public static class StringExtensions
     /// <param name="other">The text to compare to.</param>
     /// <returns><see langword="true"/> if the values match, otherwise <see langword="false"/></returns>
     public bool Is (string? other) => (text.IsEmpty && other.IsEmpty) || (text?.Equals(other, SCO) ?? false);
-    public bool IsAny (IEnumerable<string> other) => (text.IsEmpty && other.IsEmpty) || text.Any(Equals, other);
-    public string Remove (string regex, RegexOptions options = RegexOptions.None) => text is null ? SE : SysRegex.Replace(text, regex, SE, options);
+    public bool IsAny (IEnumerable<string> other) => (text.IsEmpty && other.IsEmpty) || text.Any(Is, other);
+    public string Remove (string regex, RegexOptions options = RegexOptions.None) => text is null ? SE : Regex.Replace(text, regex, SE, options);
     public string Remove (int changed_pos, int changed_length) => text is null ? SE : text.Replace(changed_pos, changed_length);
     public string RemoveChars (string chars) => new(text?.Where(item => !chars.Contains(item, SCO)).ToArray());
     public string RemoveAllButChars (string chars) => new(text?.Where(item => chars.Contains(item, SCO)).ToArray());
@@ -28,7 +27,7 @@ public static class StringExtensions
     {
       string result = text ?? string.Empty;
 
-      while (SysRegex.IsMatch(result, regex))
+      while (Regex.IsMatch(result, regex))
         result = result.Remove(regex, options);
 
       return result;
@@ -68,6 +67,7 @@ public static class StringExtensions
     }
     public string Replace (ReplaceNode node, RegexOptions options = ROIPW) => node?.ReplaceRegex(text ?? SE, options) ?? SE;
   }
+  private static readonly FrozenSet<ReplaceNode> JSONReplaces = [("\r\n", @"\n"), ("\r", @"\n"), ("\n", @"\n"), (@"\", "\\"), ("\"", "\\\"")];
   private static readonly FrozenSet<ReplaceNode> XMLReplaces = [("&", "&amp;"), ("\"", "&quot;"), ("'", "&apos;"), ("<", "&lt;"), (">", "&gt;")];
   extension(string s)
   {
@@ -102,7 +102,7 @@ public static class StringExtensions
 
       return index;
     }
-    public int IndexOfAny (IEnumerable<string> checkFor, int startAt, StringComparison sc, out int found_len)
+    public int FirstIndexOfAny (IEnumerable<string> checkFor, int startAt, StringComparison sc, out int found_len)
     {
       found_len = DNE;
 
@@ -154,7 +154,7 @@ public static class StringExtensions
       int pos = DNE;
       do
       {
-        pos = s.IndexOfAny(checkForAny, pos == DNE ? 0 : pos, sc, out int found_len);
+        pos = s.FirstIndexOfAny(checkForAny, pos == DNE ? 0 : pos, sc, out int found_len);
         if (pos != DNE)
         {
           count++;
@@ -168,7 +168,7 @@ public static class StringExtensions
     public bool? ToBool () => bool.TryParse(s, out bool value) ? value : null;
     public bool ValidateWithRegex ([SS("regex")] string validation_expression, RegexOptions options = RegexOptions.None)
     {
-      MatchCollection matches = SysRegex.Matches(s, validation_expression, options);
+      MatchCollection matches = Regex.Matches(s, validation_expression, options);
       return matches.Count == 1 && matches[0].Length == s?.Length;
     }
     public DateTime? ToDateTime () => DateTime.TryParse(s, out DateTime value) ? value : null;
@@ -199,6 +199,7 @@ public static class StringExtensions
       return s;
     }
     public string XMLSafe => XMLReplaces.ReplaceByNodes(s, SCO);
+    public string JSONEscaped => JSONReplaces.ReplaceByNodes(s, SCO);
     public string ReplaceIfContainsGroup (Match match, string group, string replaceWith) =>
       match?.Groups.ContainsKey(group) == true ? s.Replace(match, replaceWith) : s;
     public string ReplaceAllIfContainsGroup (MatchCollection matches, string group, string replaceWith)
@@ -218,6 +219,9 @@ public static class StringExtensions
       list.Any(s2 => s.StartsWith(s2, sc));
     public bool EndsWithAny (StringComparison sc = SCO, params IEnumerable<string> list) =>
       list.Any(s2 => s.EndsWith(s2, sc));
+    public bool ContainsAny (StringComparison sc = SCO, params IEnumerable<string> list) =>
+      list.Any(s2 => s.Contains(s2, sc));
+    public bool ContainsNewLine () => s?.ContainsAny(SCO, Chars.NewLines) == true;
   }
   /// <summary>String Extensions</summary>
   /// <param name="text">The string to check.</param>
@@ -243,7 +247,7 @@ public static class StringExtensions
 
       return new(array);
     }
-
+    public string this[Range pos] => text[pos.Start..pos.End];
     public string PreReplace (int changed_pos) => text[..(changed_pos - 1)];
     public string PostReplace (int changed_pos, int replace_length) => text[(changed_pos + replace_length)..];
     public string RecursiveReplace (string lf, string rw, StringComparison options = SCO)
@@ -286,7 +290,7 @@ public static class StringExtensions
   }
   /// <summary>string extensions</summary>
   /// <param name="text">The <see langword="string"/> to check.</param>
-  extension([NotNullWhen(true)] string? text)
+  extension([NotNullWhen(true), MaybeNullWhen(false)] string? text)
   {
     /// <summary>Checks if a <see langword="string"/> is not <see langword="null"/> or empty.</summary>
     /// <returns><see langword="false"/> if the <see langword="string"/> is empty or <see langword="null"/>, <see langword="true"/> otherwise.</returns>
@@ -305,13 +309,6 @@ public static class StringExtensions
     /// <remarks>If either <paramref name="other"/> is empty, or <paramref name="text"/> is <see langword="null"/>, this method will return <see langword="false"/>.</remarks>
     public bool Like (params IEnumerable<string> other) => !text.IsEmpty && (text?.Any(Like, other) ?? false);
     public bool Any (Func<string, string?, bool> func, params IEnumerable<string>? other) => other?.Any(item => func(item, text)) ?? false;
-  }
-  /// <summary>string extensions</summary>
-  /// <param name="text">The <see langword="string"/> to check.</param>
-  extension([NotNullWhen(true)] string text)
-  {
-    public bool ContainsAny (IEnumerable<string> other, StringComparison sc = SCO) => other.Any(x => text.Contains(x, sc));
-    public bool ContainsNewLine () => text?.ContainsAny(Chars.NewLines, SCO) == true;
   }
   /// <summary>string extensions</summary>
   /// <param name="lines">The <see langword="string"/>[] to check.</param>
@@ -334,12 +331,13 @@ public static class StringExtensions
       if (text.IsEmpty)
         throw new ANEx(nameof(text));
     }
+    public string this[Pos pos] => text is not null && text.Length > pos.End && pos.Start >= 0 ? text[pos.Start..(pos.End + 1)] : text = SE;
   }
 
   extension(string data)
   {
     public T ToEnum<T> () where T : struct => Enum.Parse<T>(data);
-    public int ToInt<T> (Type type) => (int) Enum.Parse(type, data);
+    public int ToInt (Type type) => (int) Enum.Parse(type, data);
   }
 
   extension([SS("regex")] string rx)
@@ -347,7 +345,7 @@ public static class StringExtensions
     public bool TryMatchAt (RegexOptions options, int index, string input, [NotNullWhen(true)] out MatchDataSet? match)
     {
       match = null;
-      Match attempt = SysRegex.Match(input, rx, options);
+      Match attempt = Regex.Match(input, rx, options);
 
       if (attempt.Success && attempt.Index == index)
       {

@@ -3,6 +3,7 @@ using System.Linq;
 
 using Parser.Exceptions;
 using Parser.Nodes;
+using Parser.Ops;
 
 using IBasicToken = Parser.Nodes.IToken;
 using ResWAD = Specification.WAD.Properties.Resources;
@@ -13,33 +14,6 @@ using SpecXML = Specification.XML.Definition;
 using SpecZDoom = Specification.ZDoom.Definition;
 
 namespace TestConsole;
-
-public class TokenSnapshot
-{
-  public int CurrentTokenIndex;
-  public int TokenCount;
-  public string? CurrentValue;
-  public string? CurrentType;
-  public string? LastTokenValue;
-  public string? LastTokenType;
-  public int NodeCount;
-}
-
-public class TokenProcessRunner
-{
-  public string? Input { get; private set; }
-  public int StepIndex { get; private set; }
-  public TokenSnapshot? Snapshot { get; private set; }
-  public void Init (string input)
-  {
-    Input = input;
-    StepIndex = 0;
-  }
-  public void Step ()
-  {
-
-  }
-}
 
 internal static class Program
 {
@@ -62,7 +36,10 @@ internal static class Program
   #region Basic Methods
   internal static void PressEnterToContinue ()
   {
-    Log(MsgClass.Prompt, "Press enter to continue.", This);
+    LogPart(MsgClass.BlueValue, "[");
+    LogPart(MsgClass.Prompt, "Press enter to continue.");
+    LogPart(MsgClass.BlueValue, "]");
+    NewLine();
     _ = GetInput();
   }
   [MemberNotNull(nameof(UserInput))]
@@ -117,11 +94,16 @@ internal static class Program
     string file_xml_errors = File.ReadAllText(FinishPath(Paths.xml_errors));
     string file_ipl_label = File.ReadAllText(FinishPath(Paths.ipl_label));
 
-    static void generic_test<TTokenizer> (string file, NodeRuleSet node_rules, TokenRuleSet token_rules) where TTokenizer : ITokenizer<IBasicToken>, new()
+    static void generic_spec<TTokenizer> (string file, Spec rule_spec) where TTokenizer : ITokenizer<IBasicToken>, new()
     {
-      TTokenizer cTokenizer = new() { Rules = token_rules };
+      if (rule_spec.NodeRuleSet is null || rule_spec.TokenRuleSet is null)
+      {
+        Log(MsgClass.Error, "Invalid Spec - Cannot use for capture parser", This);
+        return;
+      }
+      TTokenizer cTokenizer = new() { Rules = rule_spec.TokenRuleSet };
       IEnumerable<IBasicToken> cTokens = cTokenizer.Tokenize(file);
-      CaptureTokenProcessor cProcessor = new(cTokens, node_rules);
+      CaptureTokenProcessor cProcessor = new(cTokens, rule_spec.NodeRuleSet);
       cProcessor.Process();
       cProcessor.Context?.Print(0);
       PressEnterToContinue();
@@ -138,30 +120,30 @@ internal static class Program
         switch (GetInput())
         {
           case "CAPTURE":
-            generic_test<CaptureTokenizer>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-
-            generic_test<CaptureTokenizer>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            generic_test<CaptureTokenizer>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            break;
+            generic_spec<CaptureTokenizer>(file_xsd_specification, SpecXML.Spec);
+            generic_spec<CaptureTokenizer>(file_xml_operation, SpecXML.Spec);
+            generic_spec<CaptureTokenizer>(file_xml_errors, SpecXML.Spec);
+            goto Prompt;
           case "GROUP":
-            generic_test<GroupTokenizer>(file_xsd_specification, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            generic_test<GroupTokenizer>(file_xml_operation, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            generic_test<GroupTokenizer>(file_xml_errors, StandardRuleSets.XMLRuleSet, StandardRuleSets.XMLTokenRuleSet);
-            break;
+            generic_spec<GroupTokenizer>(file_xsd_specification, SpecXML.Spec);
+            generic_spec<GroupTokenizer>(file_xml_operation, SpecXML.Spec);
+            generic_spec<GroupTokenizer>(file_xml_errors, SpecXML.Spec);
+            goto Prompt;
           case "XPARSER":
-            InitialTest("xml", Paths.xml_operation);
+            InitialTest("xml", file_xml_operation, use_file_as_text_input: true);
             InitialTest(SpecXML.Spec, Paths.xml_errors);
             InitialTest(SpecXML.Spec, ResZDoom.xml_acs);
-            PressEnterToContinue();
-            break;
+            goto Prompt;
           case "MATCH":
             MatchTokenizer mTokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
             Collection<MatchToken> mTokens = mTokenizer.Tokenize(file_xsd_specification);
             mTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
-            PressEnterToContinue();
-            break;
+            goto Prompt;
           default:
             Log(MsgClass.Error, "Invalid choice.", This);
+            goto Prompt;
+          Prompt:
+            PressEnterToContinue();
             break;
         }
         break;
@@ -170,7 +152,7 @@ internal static class Program
         switch (GetInput())
         {
           case "CAPTURE":
-            generic_test<CaptureTokenizer>(file_json_launch, StandardRuleSets.JSONRuleSet, StandardRuleSets.JSONTokenRuleSet);
+            generic_spec<CaptureTokenizer>(file_json_launch, SpecJSON.Spec);
             break;
           case "XPARSER":
             InitialTest(SpecJSON.Spec, Paths.json_error);
@@ -216,7 +198,7 @@ internal static class Program
         switch (GetInput())
         {
           case "CAPTURE":
-            generic_test<CaptureTokenizer>(file_ipl_label, StandardRuleSets.IPLRuleSet, StandardRuleSets.IPLTokenRuleSet);
+            generic_spec<CaptureTokenizer>(file_ipl_label, SpecIPL.Spec);
             break;
           case "XPARSER":
             InitialTest(SpecIPL.Spec, Paths.ipl_simple);
@@ -281,41 +263,62 @@ internal static class Program
     }
     DebugOut();
   }
-  internal static void InitialTest (Spec spec, string file)
+  internal static void StepAndOutput<T> (T data)
+  {
+    Parser.SetInput(data);
+    int i = 0;
+    foreach (var os in Parser.StepThrough())
+    {
+      Log(MsgClass.Warning, "The operation " + Parser.ParsedOperations[i++] + "resulted in " + os, This);
+      Parser.QueryOperation();
+    }
+  }
+  internal static void InitialTest (Spec spec, string file, bool use_file_as_text_input = false)
   {
     DebugIn("Program", "InitialTest");
     ClearLog();
-    Log(MsgClass.Warning, $"Starting test of '{Path.GetFileName(file)}' with '{spec.Name}'.", This);
+    if (use_file_as_text_input)
+      Log(MsgClass.Warning, $"Starting test, using text data with '{spec.Name}'.", This);
+    else
+      Log(MsgClass.Warning, $"Starting test of '{Path.GetFileName(file)}' with '{spec.Name}'.", This);
     Parser = new(spec);
     OpStatus status = OpStatus.AtStart;
 
-    if (spec.IsTextFile)
+    if (spec.IsTextFile && !use_file_as_text_input)
     {
-      string data;
       try
       {
-        data = File.ReadAllText(FinishPath(file));
+        string data = File.ReadAllText(FinishPath(file));
+        StepAndOutput(data);
       }
       catch (FileNotFoundException)
       {
         Log(MsgClass.Error, "The path at \"" + FinishPath(file) + "\" is not valid.", This);
-        data = "";
       }
-      Parser.SetInput(data);
-      status = Parser.StepThrough(data);
-
     }
-    else
+    else if (!use_file_as_text_input)
     {
+      byte[] data;
       try
       {
-        byte[] data = File.ReadAllBytes(FinishPath(file));
-        status = Parser.StepThrough(data);
+        data = File.ReadAllBytes(FinishPath(file));
       }
       catch (FileNotFoundException)
       {
         Log(MsgClass.Error, $"File {file} not found.", This);
+        data = [];
       }
+
+      StepAndOutput(data);
+    }
+    else if (spec.IsTextFile && use_file_as_text_input)
+    {
+      StepAndOutput(file);
+    }
+    else
+    {
+      Log(MsgClass.Error, "Error: The spec provided is not a text file, but text input was provided.", This);
+      return;
     }
     Log(MsgClass.Warning, $"Operations have concluded with status {status}.", This);
     DebugOut();
@@ -328,13 +331,13 @@ internal static class Program
     {
       string content = File.ReadAllText(path);
       Parser = new(spec);
-      Status = Parser.StepThrough(content);
+      StepAndOutput(content);
     }
     else
     {
       Memory<byte> bytes = File.ReadAllBytes(path);
       Parser = new(spec);
-      Status = Parser.StepThrough(bytes);
+      StepAndOutput(bytes);
     }
 
     Log(MsgClass.BlueInfo, $"The {spec.Name} test resulted in {Status}.", This);

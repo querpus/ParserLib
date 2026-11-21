@@ -3,9 +3,7 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xmlns:xml="http://www.w3.org/XML/1998/namespace"
             xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
-  <Spec>
-    <Name>pak</Name>
-    <TextFile>false</TextFile>
+  <Spec name="pak" type="bytes">
     <Instructions>
       <Label name="Start"/>
       <MakeCursor cursor_var="current_pos" content_var="bytes" position="0"/>
@@ -28,10 +26,6 @@
       </ForCount>
       <Terminate success="true"/>
     </Instructions>
-    <!--<EntityInfo>
-      <EntityDef>
-      </EntityDef>
-    </EntityInfo>-->
     <FileInferences initial="and">
       <Extension>pak</Extension>
       <Header>PACK</Header>

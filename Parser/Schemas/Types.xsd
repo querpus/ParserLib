@@ -17,6 +17,29 @@
       <xs:minLength value="1"/>
     </xs:restriction>
   </xs:simpleType>
+  <xs:simpleType name="SpecInputType">
+    <xs:annotation>
+      <xs:documentation>
+        Defines the different allowed input formats for a Spec.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="NonEmptyTokenType">
+      <xs:enumeration value="text">
+        <xs:annotation>
+          <xs:documentation>
+            Loads the input as text.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="bytes">
+        <xs:annotation>
+          <xs:documentation>
+            Loads the input as a byte array. (Internally a Memory&lt;byte&gt;
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
   <xs:simpleType name="InitializeType">
     <xs:annotation>
       <xs:documentation>
@@ -664,6 +687,9 @@ True by default.
     <xs:sequence>
       <xs:element name="Rule" type="TokenRuleDef" maxOccurs="unbounded" minOccurs="0"/>
     </xs:sequence>
+    <xs:attribute name="RegexDotMatchesNewline" type="xs:boolean" use="optional"/>
+    <xs:attribute name="RegexMultiLine" type="xs:boolean" use="optional"/>
+    <xs:attribute name="RegexRightToLeft" type="xs:boolean" use="optional"/>
   </xs:complexType>
   <xs:complexType name="GroupRuleList">
     <xs:sequence>
