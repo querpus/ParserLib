@@ -77,6 +77,9 @@
         <member name="P:Parser.Nodes.MatchToken.MatchIndex">
             <summary>The match index within the <see cref="T:System.Text.RegularExpressions.MatchCollection"/>.</summary>
         </member>
+        <member name="P:Parser.Nodes.MatchToken.Index">
+            <summary>The charcter position in the original match.</summary>
+        </member>
         <member name="P:Parser.Nodes.MatchToken.GroupData">
             <summary>The data from the match groups.</summary>
         </member>
@@ -90,6 +93,9 @@
         <member name="M:Parser.Nodes.NodeContext.SetToken(Parser.Nodes.IToken)">
             <summary>Sets the current token. Should only be called from the node processor.</summary>
             <param name="token">The current token.</param>
+        </member>
+        <member name="M:Parser.Nodes.NodeContext.ClearTemp">
+            <summary>Clears the <see cref="P:Parser.Nodes.NodeContext.Temp"/> property after the token's instructions finish.</summary>
         </member>
         <member name="P:Parser.Nodes.NodeContext.SingleRoot">
             <summary>Set this to <see langword="true"/> if there must be a single node that everything is within.
@@ -148,10 +154,11 @@
             <summary>The default action if none is defined.</summary>
             <param name="context">The processing context.</param>
         </member>
-        <member name="M:Parser.Nodes.NodeRule.Discard(System.String,System.String)">
+        <member name="M:Parser.Nodes.NodeRule.Discard(System.String,System.String,System.Boolean)">
             <summary>Creates a node rule that discards the token's contents.</summary>
             <param name="groupName">The token type to look for.</param>
             <param name="exact_text">The exact text to look for.</param>
+            <param name="ignore_case">If set to <see langword="true"/>, then <paramref name="exact_text"/> is a case-insensitive check.</param>
             <returns>The created node rule.</returns>
         </member>
         <member name="M:Parser.Nodes.NodeRule.SyntaxError(System.String,System.Boolean,System.String)">

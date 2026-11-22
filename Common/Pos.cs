@@ -7,6 +7,7 @@ public readonly struct Pos : IEquatable<Pos>, IIndexSortable
 {
   public int Start { get; }
   public int Length { get; init; }
+  /// <summary>The inclusive end of this range.</summary>
   public int End
   {
     readonly get => Start + Length - 1;
@@ -18,6 +19,7 @@ public readonly struct Pos : IEquatable<Pos>, IIndexSortable
     }
   }
   public readonly bool IsNull => Start == DNE;
+  public static explicit operator Range (Pos pos) => new(pos.Start, pos.End + 1);
   public static Pos Null { get; } = new(DNE, 0);
   readonly int IIndexSortable.Index => Start;
 

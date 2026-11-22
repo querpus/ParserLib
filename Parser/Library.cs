@@ -6,7 +6,6 @@ namespace Parser;
 
 public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IReadOnlyCollection<Spec>
 {
-  private const string Area = "Library";
   private readonly Dictionary<string, Spec> _specs = [];
   /// <summary>The singleton instance of this object.</summary>
   private Dictionary<string, ReadOnlyCollection<InferenceNode>> SpecInferences =>

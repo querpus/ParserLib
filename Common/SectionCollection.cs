@@ -1,7 +1,5 @@
 //#pragma warning disable CA1710 // Identifiers should have correct suffix
 
-using Common.Extensions;
-
 namespace Common;
 
 /// <summary>Now uses Pos struct for speed.</summary>
@@ -15,7 +13,7 @@ public sealed class SectionCollection (string full_text) : ICollection<Pos>
   bool ICollection<Pos>.IsReadOnly => false;
 
   public Pos this[int index] => _sections[index].ToSection(FullText ?? SE);
-  public string GetText (Pos index) => $"{FullText[index]}";
+  public string GetText (Pos index) => $"{FullText[(Range) index]}";
   private void Compress ()
   {
     _sections.Sort();

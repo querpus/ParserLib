@@ -1,7 +1,6 @@
 //#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 using Common.RegExp;
-using Common.Extensions;
 
 namespace Common.RegExp;
 

@@ -5,6 +5,7 @@ using Parser.Exceptions;
 using Parser.Nodes;
 
 using IBasicToken = Parser.Nodes.IToken;
+using ResIPL = Specification.IPL.Properties.Resources;
 using ResWAD = Specification.WAD.Properties.Resources;
 using ResZDoom = Specification.ZDoom.Properties.Resources;
 using SpecIPL = Specification.IPL.Definition;
@@ -91,7 +92,9 @@ internal static class Program
     string file_xml_operation = File.ReadAllText(FinishPath(Paths.xml_operation));
     string file_json_launch = File.ReadAllText(FinishPath(Paths.json_launch));
     string file_xml_errors = File.ReadAllText(FinishPath(Paths.xml_errors));
-    string file_ipl_label = File.ReadAllText(FinishPath(Paths.ipl_label));
+    string file_ipl_label = File.ReadAllText(FinishPath(ResIPL.ipl_label));
+    // TODO: Fix the ini in the wrong module.
+    string file_ini_vncdefault = File.ReadAllText(FinishPath(ResIPL.ini_vncdefault));
 
     static void generic_spec<TTokenizer> (string file, Spec rule_spec) where TTokenizer : ITokenizer<IBasicToken>, new()
     {
@@ -129,8 +132,8 @@ internal static class Program
             generic_spec<GroupTokenizer>(file_xml_errors, SpecXML.Spec);
             goto Prompt;
           case "XPARSER":
-            InitialTest("xml", file_xml_operation, use_file_as_text_input: true);
-            InitialTest(SpecXML.Spec, Paths.xml_errors);
+            InitialTest(LibRef["xml"], file_xml_operation, use_file_as_text_input: true);
+            InitialTest(SpecXML.Spec, file_xml_errors, use_file_as_text_input: true);
             InitialTest(SpecXML.Spec, ResZDoom.xml_acs);
             goto Prompt;
           case "MATCH":
@@ -154,7 +157,7 @@ internal static class Program
             generic_spec<CaptureTokenizer>(file_json_launch, SpecJSON.Spec);
             break;
           case "XPARSER":
-            InitialTest(SpecJSON.Spec, Paths.json_error);
+            InitialTest(LibRef["json"], Paths.json_error);
             InitialTest(SpecJSON.Spec, Paths.json_launch);
             break;
           default:
@@ -187,7 +190,7 @@ internal static class Program
         InitialTest(SpecZDoom.UDMF, ResZDoom.udmf_map00);
         break;
       case "INI":
-        InitialTest("ini", Paths.ini_vncdefault);
+        InitialTest(LibRef["ini"], file_ini_vncdefault, use_file_as_text_input: true);
         break;
       case "ZS" or "ZSCRIPT":
         InitialTest(SpecZDoom.ZScript, ResZDoom.zs_demon);
@@ -200,8 +203,8 @@ internal static class Program
             generic_spec<CaptureTokenizer>(file_ipl_label, SpecIPL.Spec);
             break;
           case "XPARSER":
-            InitialTest(SpecIPL.Spec, Specification.INI.ipl_simple);
-            InitialTest(SpecIPL.Spec, Paths.ipl_label);
+            InitialTest(SpecIPL.Spec, ResIPL.ipl_simple);
+            InitialTest(SpecIPL.Spec, ResIPL.ipl_label);
             break;
           default:
             Log(MsgClass.Error, "Invalid choice.", This);

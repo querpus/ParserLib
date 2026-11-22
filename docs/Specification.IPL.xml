@@ -377,5 +377,30 @@
               resource lookups using this strongly typed resource class.
             </summary>
         </member>
+        <member name="P:Specification.IPL.Properties.Resources.ini_vncdefault">
+            <summary>
+              Looks up a localized string similar to ParserLib\Specification.INI\Samples\default.ini.
+            </summary>
+        </member>
+        <member name="P:Specification.IPL.Properties.Resources.ipl_batch6456">
+            <summary>
+              Looks up a localized string similar to ParserLib\Specification.IPL\Samples\6456 batch.txt.
+            </summary>
+        </member>
+        <member name="P:Specification.IPL.Properties.Resources.ipl_batch6458">
+            <summary>
+              Looks up a localized string similar to ParserLib\Specification.IPL\Samples\6458 batch.txt.
+            </summary>
+        </member>
+        <member name="P:Specification.IPL.Properties.Resources.ipl_label">
+            <summary>
+              Looks up a localized string similar to ParserLib\Specification.IPL\Samples\label.ipl.
+            </summary>
+        </member>
+        <member name="P:Specification.IPL.Properties.Resources.ipl_simple">
+            <summary>
+              Looks up a localized string similar to ParserLib\Specification.IPL\Samples\simple.txt.
+            </summary>
+        </member>
     </members>
 </doc>
