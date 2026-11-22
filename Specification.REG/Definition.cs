@@ -59,7 +59,7 @@ public static class Definition
   {
     Name = "reg",
     FileInferences = [IfN(ExtIs, "reg")],
-    Operations = [
+    Strategy = [
       new ReplaceOperation()
       {
         Nodes = [

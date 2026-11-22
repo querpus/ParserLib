@@ -5,7 +5,8 @@
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:xml="http://www.w3.org/XML/1998/namespace"
            xmlns="Parser/Spec"
-           xml:lang="en-us">
+           xml:lang="en-us"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <!-- Simple Types TODO: Finish Documentation -->
   <xs:simpleType name="NonEmptyTokenType">
     <xs:annotation>
@@ -320,7 +321,7 @@
       </xs:choice>
     </xs:sequence>
   </xs:complexType>-->
-  <xs:complexType name="StructureContentType">
+  <!--<xs:complexType name="StructureContentType">
     <xs:attribute name="class" type="NonEmptyTokenType" use="required"/>
   </xs:complexType>
   <xs:complexType name="StructurePropertyType">
@@ -351,7 +352,7 @@
         <xs:element name="Content" type="StructureContentType"/>
       </xs:choice>
     </xs:sequence>
-  </xs:complexType>
+  </xs:complexType>-->
   <xs:complexType name="FileInferencesType">
     <xs:sequence>
       <xs:choice maxOccurs="unbounded">
@@ -752,11 +753,11 @@ True by default.
     <xs:attributeGroup ref="ComplexTokenAttrGroup"/>
   </xs:complexType>-->
   <!-- Attribute Groups TODO: Finish Documentation -->
-  <xs:attributeGroup name="ComplexTokenAttrGroup">
+  <!--<xs:attributeGroup name="ComplexTokenAttrGroup">
     <xs:attribute name="tokentype" type="xs:token"/>
     <xs:attribute name="class" type="xs:token"/>
     <xs:attribute name="class_type_params" type="xs:normalizedString"/>
-  </xs:attributeGroup>
+  </xs:attributeGroup>-->
   <xs:attributeGroup name="DataReadLengthAttrGroup">
     <xs:attribute name="length" type="DataReadLength">
       <xs:annotation>

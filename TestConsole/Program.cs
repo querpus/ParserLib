@@ -3,7 +3,6 @@ using System.Linq;
 
 using Parser.Exceptions;
 using Parser.Nodes;
-using Parser.Ops;
 
 using IBasicToken = Parser.Nodes.IToken;
 using ResWAD = Specification.WAD.Properties.Resources;
@@ -201,7 +200,7 @@ internal static class Program
             generic_spec<CaptureTokenizer>(file_ipl_label, SpecIPL.Spec);
             break;
           case "XPARSER":
-            InitialTest(SpecIPL.Spec, Paths.ipl_simple);
+            InitialTest(SpecIPL.Spec, Specification.INI.ipl_simple);
             InitialTest(SpecIPL.Spec, Paths.ipl_label);
             break;
           default:

@@ -15,7 +15,7 @@ public class Spec : IHasTokenRuleSet, IHasNodeRuleSet, ISerializable
   /// <summary>The name of this Spec.</summary>
   [XmlElement(DataType = "string", Order = 1)]
   public required string Name { get; init; }
-  /// <summary>A <see cref="ReadOnlyCollection{T}"/> of <see cref="IOperation"/> objects that are executed in order to produce the result.</summary>
+  /// <summary>An <see cref="OperationStrategy"/> of <see cref="IOperation"/> objects that are executed in order to produce the result.</summary>
   public OperationStrategy Operations { get; init; } = [];
   /// <summary>A <see cref="ReadOnlyCollection{T}"/> of <see cref="InferenceNode"/> objects that specify what files use this specification.</summary>
   public ReadOnlyCollection<InferenceNode> FileInferences { get; init; } = [];

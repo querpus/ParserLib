@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Definition xmlns="Parser/Spec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
-  <Spec>
-    <Name>wad</Name>
-    <TextFile>false</TextFile>
+  <Spec type="bytes" name="wad">
     <Instructions>
       <Label name="Start"/>
       <MakeCursor cursor_var="current_pos" content_var="bytes" position="0"/>
@@ -33,9 +31,7 @@
     </FileInferences>
   </Spec>
   
-  <Spec>
-    <Name>wad2</Name>
-    <TextFile>false</TextFile>
+  <Spec name="wad2" type="bytes">
     <Instructions>
       <Label name="Start"/>
       <MakeCursor cursor_var="current_pos" content_var="bytes" position="0"/>

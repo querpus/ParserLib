@@ -2,11 +2,15 @@
 
 namespace Parser;
 
+/// <summary>An enhanced <see cref="IList{T}"/> that contains <see cref="IOperation"/> objects.</summary>
 public sealed class OperationStrategy : IOperation, IList<IOperation>
 {
+  /// <summary>Gets the collection of operations.</summary>
   public Collection<IOperation> Operations { get; init; } = [];
+  /// <summary>A reference to the parser.</summary>
   [NotNull]
   public XParser? Parser { get; private set; }
+  /// <summary>The status that this operation will return when DoOperation completes.</summary>
   public OpStatus Status { get; private set; }
   public OpStatus DoOperation ([NotNull] XParser parser_ref)
   {
@@ -19,23 +23,23 @@ public sealed class OperationStrategy : IOperation, IList<IOperation>
 
     return Status;
   }
+
+  #region IOperation Interface Implementation
   public bool ContinueOnFail { get; set; }
   public bool SkipOperation { get; set; }
 
   bool IOperation.NoExecution => false;
-
-  public int Count => Operations.Count;
-
-  bool ICollection<IOperation>.IsReadOnly => false;
-
-  IOperation IList<IOperation>.this[int index] { get => Operations[index]; set => Operations[index] = value; }
 
   public void ApplyProperties (bool cont, bool skip)
   {
     ContinueOnFail = cont;
     SkipOperation = skip;
   }
-
+  #endregion
+  #region IList<IOperation> Interface Implementation
+  public int Count => Operations.Count;
+  bool ICollection<IOperation>.IsReadOnly => false;
+  IOperation IList<IOperation>.this[int index] { get => Operations[index]; set => Operations[index] = value; }
   int IList<IOperation>.IndexOf (IOperation item) => Operations.IndexOf(item);
   void IList<IOperation>.Insert (int index, IOperation item) => Operations.Insert(index, item);
   void IList<IOperation>.RemoveAt (int index) => Operations.RemoveAt(index);
@@ -46,4 +50,5 @@ public sealed class OperationStrategy : IOperation, IList<IOperation>
   bool ICollection<IOperation>.Remove (IOperation item) => Operations.Remove(item);
   IEnumerator<IOperation> IEnumerable<IOperation>.GetEnumerator () => Operations.GetEnumerator();
   IEnumerator IEnumerable.GetEnumerator () => Operations.GetEnumerator();
+  #endregion
 }
