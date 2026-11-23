@@ -14,32 +14,6 @@ using SpecZDoom = Specification.ZDoom.Definition;
 
 namespace TestConsole;
 
-public class TokenSnapshot
-{
-  public int CurrentTokenIndex;
-  public int TokenCount;
-  public string? CurrentValue;
-  public string? CurrentType;
-  public string? LastTokenValue;
-  public string? LastTokenType;
-  public int NodeCount;
-}
-
-public class TokenProcessRunner
-{
-  public string? Input { get; private set; }
-  public int StepIndex { get; private set; }
-  public TokenSnapshot? Snapshot { get; private set; }
-  public void Init (string input)
-  {
-    Input = input;
-    StepIndex = 0;
-  }
-  public void Step ()
-  {
-
-  }
-}
 
 internal static class Program
 {

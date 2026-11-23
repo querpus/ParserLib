@@ -14,8 +14,6 @@ public interface IOperationStrategy
 
 public sealed class OperationStrategy : IOperation, IOperationStrategy
 {
-  [UnscopedRef]
-  private ref int _opIndex = ref 0;
   [NotNull]
   public XParser? Parser { get; private set; }
   public OpStatus Status { get; private set; }
@@ -65,7 +63,6 @@ public sealed class OperationStrategy : IOperation, IOperationStrategy
   public bool SkipOperation { get; set; }
 
   public bool NoExecution => false;
-  [UnscopedRef]
   public int OpIndex => { 
 
   public Dictionary<string, int> Labels => throw new NotImplementedException();
