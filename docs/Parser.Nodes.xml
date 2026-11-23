@@ -35,6 +35,12 @@
             <summary>Adds a child to the children list.</summary>
             <param name="child">The child to add.</param>
         </member>
+        <member name="P:Parser.Nodes.INodeProcessor.Context">
+            <summary></summary>
+        </member>
+        <member name="M:Parser.Nodes.INodeProcessor.Process">
+            <summary>Processes and creates the <see cref="P:Parser.Nodes.INodeProcessor.Context"/>.</summary>
+        </member>
         <member name="P:Parser.Nodes.IPLCommandNode.CommandLetter">
             <summary>Gets the content of this node.</summary>
         </member>
@@ -156,6 +162,13 @@
             <returns>The created node rule.</returns>
             <exception cref="T:Common.ValidationException">The node rule was matched and <paramref name="throw_error"/> was <see langword="true"/>.</exception>
         </member>
+        <member name="M:Parser.Nodes.NodeRuleHelper.ToNodeTarget(System.Collections.Generic.IEnumerable{System.String})">
+            <inheritdoc cref="M:Parser.Nodes.NodeRuleHelper.&lt;G&gt;$847E497AF7B3C92F46645CBF28E0BD00.ToNodeTarget"/>
+        </member>
+        <member name="M:Parser.Nodes.NodeRuleHelper.&lt;G&gt;$847E497AF7B3C92F46645CBF28E0BD00.ToNodeTarget">
+            <summary>Converts a list of NodeTarget strings into a value.</summary>
+            <returns>The <see cref="T:Parser.Nodes.NodeTarget"/> value that the strings represent.</returns>
+        </member>
         <member name="M:Parser.Nodes.NodeTargetExtensions.get_RootOrParent">
             <inheritdoc cref="P:Parser.Nodes.NodeTargetExtensions.&lt;G&gt;$5518E6172550A9A60944A8FDF8CF06CF.RootOrParent"/>
         </member>
@@ -237,11 +250,17 @@
             <b>TKey</b> will always be a <see langword="string"/>, <b>TValue</b> will always be a type of <see cref="T:Parser.Nodes.INode"/>
             </remarks>
         </member>
-        <member name="P:Parser.Nodes.INodeProcessor.Context">
-            <summary></summary>
+        <member name="F:Parser.Nodes.NodeTarget.Add">
+            <summary>A modifier that indicates how to assign data to a list.</summary>
+            <summary>Adds the data to the end of the list.</summary>
         </member>
-        <member name="M:Parser.Nodes.INodeProcessor.Process">
-            <summary>Processes and creates the <see cref="P:Parser.Nodes.INodeProcessor.Context"/>.</summary>
+        <member name="F:Parser.Nodes.NodeTarget.Replace">
+            <summary>A modifier that indicates how to assign data to a list.</summary>
+            <summary>Replaces the data in the list with the provided data.</summary>
+        </member>
+        <member name="F:Parser.Nodes.NodeTarget.Remove">
+            <summary>A modifier that indicates how to assign data to a list.</summary>
+            <summary>Removes the referenced data from the list.</summary>
         </member>
         <member name="P:Parser.Nodes.XMLCommentNode.Content">
             <summary>Gets the content of this node.</summary>

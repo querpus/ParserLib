@@ -38,6 +38,7 @@ public static class NodeTargetExtensions
     public static NT Fields => TokenGroup | TokenValue | Context;
     /// <summary>The modifiers to select what to look at when pulling data.</summary>
     public static NT Mods => Data | Children | Properties;
+    public static NT ListMods => Add | Remove | Replace;
   }
 }
 
@@ -87,5 +88,13 @@ public enum NodeTarget
   /// <b>TKey</b> will always be a <see langword="string"/>, <b>TValue</b> will always be a type of <see cref="INode"/>
   /// </remarks>
   Properties = 1 << 10,
+  /// <summary>A modifier that indicates how to assign data to a list.</summary>
+  /// <summary>Adds the data to the end of the list.</summary>
   Add = 1 << 11,
+  /// <summary>A modifier that indicates how to assign data to a list.</summary>
+  /// <summary>Replaces the data in the list with the provided data.</summary>
+  Replace = 1 << 12,
+  /// <summary>A modifier that indicates how to assign data to a list.</summary>
+  /// <summary>Removes the referenced data from the list.</summary>
+  Remove = 1 << 13,
 }

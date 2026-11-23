@@ -22,7 +22,7 @@
       <ReadData output_var="numlumps" type="int" cursor_var="current_pos"/>
       <ReadData output_var="diroffset" type="int" cursor_var="current_pos"/>
       <SetCursorPos cursor_var="current_pos" position_var="diroffset"/>
-      <Initialize initial_var="directory" type="Collection" value_type="DirectoryEntry"/>
+      <Initialize initial_var="directory" type="Collection" value_type="PositionalDataBlock"/>
       <ForCount length_var="numlumps" cursor_var="index">
         <ReadData output_var="lump_pos" type="int" cursor_var="current_pos"/>
         <ReadData output_var="lump_size" type="int" cursor_var="current_pos"/>

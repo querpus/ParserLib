@@ -17,14 +17,26 @@ public static class Err
   /// <exception cref="OperationBadInputTypeException"/>
   [DoesNotReturn]
   public static dynamic ThrowBadInput (string expected, string got) => throw new OperationBadInputTypeException(expected, got);
+  /// <summary>Throws a no such var exception.</summary>
+  /// <param name="key">The data key that did not exist.</param>
+  /// <returns>Does not return.</returns>
+  /// <exception cref="OperationNoSuchVarException"/>
   [DoesNotReturn]
   public static dynamic ThrowNoVar (string key) => throw new OperationNoSuchVarException(key);
+  /// <summary>Throws a bad definition exception.</summary>
+  /// <param name="msg">THe message to display.</param>
+  /// <returns>Does not return.</returns>
+  /// <exception cref="OperationBadDefinitionException"/>
   [DoesNotReturn]
   public static dynamic ThrowBadDef (string msg) => throw new OperationBadDefinitionException(msg);
   [DoesNotReturn]
   public static dynamic ThrowBadResult (string msg) => throw new OperationBadResultException(msg);
   [DoesNotReturn]
   public static dynamic ThrowNoSpec (string msg) => throw new SpecNotDefinedException(msg);
+  /// <summary>Throws an operation unpacking exception.</summary>
+  /// <param name="msg">The message to display.</param>
+  /// <returns>Does not return.</returns>
+  /// <exception cref="OperationUnpackingException"/>
   [DoesNotReturn]
   public static dynamic ThrowUnpacked (string msg) => throw new OperationUnpackingException(msg);
 }

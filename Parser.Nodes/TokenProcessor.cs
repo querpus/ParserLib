@@ -1,70 +1,7 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 #pragma warning disable format // Formatting
 
-using System.Xml.Linq;
-
 namespace Parser.Nodes;
-
-public interface INodeProcessor
-{
-  dynamic? Input { get; init; }
-  /// <summary></summary>
-  NodeContext? Context { get; }
-  /// <summary>Processes and creates the <see cref="Context"/>.</summary>
-  [MemberNotNull(nameof(Context))]
-  void Process ();
-  static NodeContext Process<TProcessor> (dynamic input) where TProcessor : INodeProcessor, new()
-  {
-    TProcessor engine = new() { Input = input };
-    engine.Process();
-    return engine.Context;
-  }
-}
-
-public class XElementProcessor : INodeProcessor
-{
-  public NodeContext? Context { get; private set; }
-  public dynamic? Input { get; init; }
-
-  public XElementProcessor () { }
-  public XElementProcessor (XElement root) => Input = root;
-
-  public void Process ()
-  {
-    var start_time = DateTime.Now;
-    Context = new() { SingleRoot = true, Root = GetNodes(Input) };
-    var end_time = DateTime.Now;
-    TimeSpan duration = end_time - start_time;
-    Log(MsgClass.Debug, $"XElement Processing Complete: processed in {duration}.", this);
-  }
-
-  private static XMLElementNode GetNodes (XElement element)
-  {
-    XMLElementNode result = new();
-
-    result.Data["Name"] = element.Name.LocalName;
-
-    if (element.HasElements)
-    {
-      element.Elements().Foreach(c => result.Children.Add(GetNodes(c)));
-    }
-    if (element.HasAttributes)
-    {
-      foreach (var attr in element.Attributes())
-      {
-        string attr_name = attr.Name.LocalName;
-        string attr_value = attr.Value;
-        result.Attributes.Add(attr_name, new XMLContentNode() { Content = attr_value });
-      }
-    }
-    if (!element.Value.IsWhitespace && !element.Value.IsEmpty)
-    {
-      string value = element.Value;
-      result.Children.Add(new XMLContentNode { Content = value });
-    }
-    return result;
-  }
-}
 
 public class CaptureTokenProcessor : INodeProcessor
 {
@@ -86,19 +23,20 @@ public class CaptureTokenProcessor : INodeProcessor
     var start_time = DateTime.Now;
     Context = RuleSet.InitialSetup();
     int count = 0;
-    foreach (IToken token in _tokens.Where(t => t.Type is not null).Order())
+    foreach (IToken token in _tokens.Order())
     {
-      if (!RuleSet.RulesByGroup.TryGetValue(token.Type, out NodeRule? rule))
+      if (!RuleSet.TryGetRule(token, out NodeRule? rule))
       {
-        Log(MsgClass.Warning, $"Token ID ({token.Type}) is not handled.", this);
+        Log(MsgClass.Warning, $"Token [{token.Type}] '{token.Content}' was not handled.", this);
         continue;
       }
       Context.SetToken(token);
       rule.Execute(Context);
+      Context.ClearTemp();
       count++;
     }
     var end_time = DateTime.Now;
     TimeSpan duration = end_time - start_time;
-    Log(MsgClass.Debug, $"Token Processing Complete: {count} tokens processed in {duration.ToString("hh:mm:ss", CIIC)}.", this);
+    Log(MsgClass.Debug, $"Token Processing Complete: {count} tokens processed in {duration.TotalSeconds}s.", this);
   }
 }

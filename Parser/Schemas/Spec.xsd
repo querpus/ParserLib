@@ -19,7 +19,13 @@
         <xs:element name="Spec" minOccurs="1" maxOccurs="unbounded">
           <xs:complexType>
             <xs:all maxOccurs="1" minOccurs="1">
-              <xs:element name="Name" type="NonEmptyTokenType" minOccurs="1" maxOccurs="1"/>
+              <xs:element name="Name" type="NonEmptyTokenType" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                  <xs:documentation>
+                    The unique name of this spec. This string is what you use to reference it in the Library object.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
               <xs:element name="TextFile" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
               <xs:element name="CaseInsensitive" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
               <xs:element name="RegexDotMatchesNewline" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
@@ -41,7 +47,13 @@
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>-->
-              <xs:element name="Instructions" minOccurs="1" type="InnerInstructionSet" maxOccurs="1"/>
+              <xs:element name="Instructions" minOccurs="1" type="InnerInstructionSet" maxOccurs="1">
+                <xs:annotation>
+                  <xs:documentation>
+                    Specifies the instructions to perform on this file type.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
               <xs:element name="FileInferences" minOccurs="0" type="FileInferencesType" maxOccurs="1">
                 <xs:annotation>
                   <xs:documentation>

@@ -1,5 +1,7 @@
 //#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
+using System.Collections.Frozen;
+
 using Common.RegExp;
 
 using SysRegex = System.Text.RegularExpressions.Regex;
@@ -66,7 +68,7 @@ public static class StringExtensions
     }
     public string Replace (ReplaceNode node, RegexOptions options = ROIPW) => node?.ReplaceRegex(text ?? SE, options) ?? SE;
   }
-
+  private static readonly FrozenSet<ReplaceNode> XMLReplaces = [("&", "&amp;"), ("\"", "&quot;"), ("'", "&apos;"), ("<", "&lt;"), (">", "&gt;")];
   extension(string s)
   {
     public bool IsAlphanumeric => s.All(item => item.IsAlphanumeric());
@@ -75,7 +77,32 @@ public static class StringExtensions
     /// <remarks>This is <see langword="true"/> if the string is empty, but <see langword="false"/> if the string is <see langword="null"/>.</remarks>
     public bool IsWhitespace => s?.All(item => item.IsWhitespace()) ?? false;
     public bool IsNumber => decimal.TryParse(s, out decimal _);
-    public int FirstIndexOfAny (IEnumerable<string> checkFor, int startAt, StringComparison sc, out int found_len)
+    public int LastIndexOfAny (IEnumerable<string> checkFor, int startAt, StringComparison sc, out int found_len)
+    {
+      found_len = DNE;
+
+      if (s.IsEmpty || checkFor?.IsEmpty != false)
+        return DNE;
+
+      int index = DNE;
+
+      foreach (string item in checkFor)
+      {
+        if (item.IsEmpty)
+          continue;
+
+        int cur = s.LastIndexOf(item, startAt, sc);
+
+        if (index == DNE || (cur > index && cur != DNE))
+        {
+          index = cur;
+          found_len = item.Length;
+        }
+      }
+
+      return index;
+    }
+    public int IndexOfAny (IEnumerable<string> checkFor, int startAt, StringComparison sc, out int found_len)
     {
       found_len = DNE;
 
@@ -127,7 +154,7 @@ public static class StringExtensions
       int pos = DNE;
       do
       {
-        pos = s.FirstIndexOfAny(checkForAny, pos == DNE ? 0 : pos, sc, out int found_len);
+        pos = s.IndexOfAny(checkForAny, pos == DNE ? 0 : pos, sc, out int found_len);
         if (pos != DNE)
         {
           count++;
@@ -148,7 +175,7 @@ public static class StringExtensions
     public TimeSpan? ToTimeSpan () => TimeSpan.TryParse(s, out TimeSpan value) ? value : null;
     public Collection<string> Expand () => [.. s.Select(item => item.ToString())];
     public string Remove (Match match) => s is null ? SE : match is null ? s : s.Remove(match.Index, match.Length);
-
+    public string Remove (Pos pos) => s is null ? SE : pos.IsNull ? s : s.Remove(pos.Start, pos.Length);
     public string Replace (Match match, string replaceWith)
     {
       if (s is null)
@@ -171,19 +198,7 @@ public static class StringExtensions
         s = s.Replace(lf, replaceWith, SCO);
       return s;
     }
-    public string XMLSafe
-    {
-      get
-      {
-        s ??= SE;
-        s = s.Replace("&", "&amp;", SCO);
-        s = s.Replace("'", "&apos;", SCO);
-        s = s.Replace("\"", "&quot;", SCO);
-        s = s.Replace("<", "&lt;", SCO);
-        s = s.Replace(">", "&gt;", SCO);
-        return s;
-      }
-    }
+    public string XMLSafe => XMLReplaces.ReplaceByNodes(s, SCO);
     public string ReplaceIfContainsGroup (Match match, string group, string replaceWith) =>
       match?.Groups.ContainsKey(group) == true ? s.Replace(match, replaceWith) : s;
     public string ReplaceAllIfContainsGroup (MatchCollection matches, string group, string replaceWith)
@@ -195,9 +210,9 @@ public static class StringExtensions
       return s;
     }
     public bool Equals (char c) => s?.Length == 1 && c == s[0];
-    public bool EqualsAny (StringComparison sc = SCO, params Collection<string> list) =>
+    public bool EqualsAny (StringComparison sc = SCO, params IEnumerable<string> list) =>
       list.Any(s2 => s.Equals(s2, sc));
-    public bool EqualsAll (StringComparison sc = SCO, params Collection<string> list) =>
+    public bool EqualsAll (StringComparison sc = SCO, params IEnumerable<string> list) =>
       list.All(s2 => s.Equals(s2, sc));
     public bool StartsWithAny (StringComparison sc = SCO, params IEnumerable<string> list) =>
       list.Any(s2 => s.StartsWith(s2, sc));
@@ -233,7 +248,7 @@ public static class StringExtensions
     public string PostReplace (int changed_pos, int replace_length) => text[(changed_pos + replace_length)..];
     public string RecursiveReplace (string lf, string rw, StringComparison options = SCO)
     {
-      string temp = text ?? "";
+      string temp = text;
 
       while (temp.Contains(lf, options))
         temp = temp.Replace(lf, rw, options);
@@ -246,7 +261,7 @@ public static class StringExtensions
         return (DNE, DNE);
       string before = text[..position];
 
-      int lnst = before.LastIndexOfAny(['\n', '\r', '\v']);
+      int lnst = before.LastIndexOfAny(Chars.NewLines, 0, SCO, out _);
       int lines = before.ContainsCount(Chars.NewLines, SCO);
       int col = before.Length - lnst;
       return (lines, col);

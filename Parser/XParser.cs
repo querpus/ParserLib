@@ -15,7 +15,7 @@ public sealed class XParser
   /// <summary>The next operation index.</summary>
   public int NextOpIndex { get; private set; }
   /// <summary>The current operation.</summary>
-  public IOperation CurrentOp => Operations[OpIndex];
+  public IOperation CurrentOp => _operationStrategyStack.Peek()[OpIndex];
   /// <summary>The next operation.</summary>
   public IOperation NextOp => (NextOpIndex == -1 || NextOpIndex >= OpCount) ? new OperationEnd() : Operations[NextOpIndex];
   /// <summary>The status of the last operation performed.</summary>
@@ -27,7 +27,20 @@ public sealed class XParser
     Data.CanLoad<Memory<byte>>("initial") ? Library["binary"] :
     Library["unknown"];
   public Spec? Spec { get; private set; }
-  [NotNull] public Collection<IOperation>? Operations { get; } = [];
+  public OperationStrategy Strategy => _operationStrategyStack.Peek();
+  private readonly Stack<int> _operationIndexStack = [];
+  private readonly Stack<OperationStrategy> _operationStrategyStack = [];
+  public void PushStrategy (OperationStrategy strategy)
+  {
+    _operationIndexStack.Push(OpIndex);
+    _operationStrategyStack.Push(strategy);
+  }
+  private void FinishStrategy ()
+  {
+    _ = _operationIndexStack.Pop();
+    _ = _operationStrategyStack.Pop();
+  }
+  [NotNull] public OperationStrategy Operations => _operationStrategyStack.Peek();
   public Dictionary<string, int> Labels { get; } = [];
   /// <summary>The dictionary storing all of the data from the parsed file.</summary>
   [NotNull] public DataStore? Data { get; private set; }
@@ -66,7 +79,7 @@ public sealed class XParser
       int oldCount = Operations.Count;
       if (op is IPlaceholderOperation ipo)
       {
-        int newCount = ipo.Unpack(Operations, i, this);
+        int newCount = ipo.Unpack(Operations, i, Labels);
         Log(MsgClass.Debug, $"Operation Group Expanded From {oldCount} to {newCount}.", this);
       }
     }
@@ -183,7 +196,7 @@ public sealed class XParser
     {
       throw Err.ThrowNoSpec("No Specification defined.");
     }
-    SetFilePath(path);
+    Data["file_path"] = path;
     if (Spec.IsTextFile)
     {
       string text = File.ReadAllText(path);
@@ -198,67 +211,66 @@ public sealed class XParser
   /// <summary>Sets the next operation to be the one at <paramref name="index"/>.</summary>
   /// <param name="index">The index of the next operation to execute.</param>
   public void SetNextOperationIndex (int index) => NextOpIndex = index;
-  public void SetFilePath (string path) => Data["file_path"] = path;
+  public void SetInput<TData> (TData input) => InitializeData(input);
   /// <summary>Incrementally steps through all the operations, requesting user confirmation to continue.</summary>
-  /// <param name="input">The file data as a <see langword="string"/>.</param>
-  /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
-  /// <exception cref="QuitException">Quits the program.</exception>
-  public OpStatus StepThrough<TData> (TData input)
+  /// <returns>The <see cref="OpStatus"/> codes representing the result of each operation.</returns>
+  /// <exception cref="OperationBadDefinitionException">Called StepThrough without assigning or initializing input data.</exception>
+  public IEnumerable<OpStatus> StepThrough ()
   {
-    DebugIn(Area, "StepThrough");
-    InitializeData(input);
+    if (Data?.HasData != true)
+      Err.ThrowBadDef("No input data to step through.");
 
-    while (NextOpIndex >= 0)
+    while (NextOpIndex != -1)
+      yield return PerformOperation();
+  }
+
+  internal void QueryOperation ()
+  {
+    string userInput;
+
+    void promptUser () => userInput = Console.ReadLine() ?? SE;
+    void checkAction (string input, dynamic data, Action<dynamic> actionOnData)
     {
-      OpStatus status = PerformOperation();
-      string userInput;
-
-      void promptUser () => userInput = Console.ReadLine() ?? SE;
-      void checkAction (string input, dynamic data, Action<dynamic> actionOnData)
+      if (userInput.Like(input))
       {
-        if (userInput.Like(input))
-        {
-          actionOnData(data);
-        }
+        actionOnData(data);
       }
-      void checkPrompt (string input, string askmsg, Action<string> actionOnInput)
-      {
-        if (userInput.Like(input))
-        {
-          Log(MsgClass.Prompt, askmsg, this);
-          promptUser();
-          actionOnInput(userInput);
-        }
-      }
-
-      string[] allow_continue = [SE, "next", "quit", "exit", "skip"];
-
-      do
-      {
-        Log(MsgClass.Prompt, "Enter a command to analyze parser state.", this);
-        promptUser();
-
-        checkPrompt("quit", "are you sure? (y/n)", user => _ = user.Like("y") ? throw new QuitException() : "no quit");
-        checkAction("data", Data.ToString(), data => Log(MsgClass.Debug, data, this));
-        checkPrompt("print", "Enter the key to display.", obj =>
-        {
-          if (Data.TryLoad(obj, out object? data) && data is IPrintable ip) ip.Print();
-        });
-        checkAction("print all", Data, data =>
-        {
-          foreach (object? item in data)
-          {
-            if (item is IPrintable pr)
-              pr.Print();
-            else
-              Log(MsgClass.GreenInfo, item.ToString2(), this);
-          }
-        });
-        checkAction("show next", $"Next Operation: {NextOpIndex} : {NextOp}", data => Log(MsgClass.Debug, data, this));
-        checkPrompt("data in", "Enter the key to display.", _ => Log(MsgClass.Debug, $"[{userInput}] = {(Data.TryLoad(userInput, out object? data) ? data : "<Load Failure>")}", this));
-      } while (!userInput.EqualsAny(SCOIC, [.. allow_continue]) || userInput.IsNotEmpty);
     }
-    DebugOut();
-    return LastStatus;
+    void checkPrompt (string input, string askmsg, Action<string> actionOnInput)
+    {
+      if (userInput.Like(input))
+      {
+        Log(MsgClass.Prompt, askmsg, this);
+        promptUser();
+        actionOnInput(userInput);
+      }
+    }
+
+    string[] allow_continue = [SE, "next", "quit", "exit", "skip"];
+
+    do
+    {
+      Log(MsgClass.Prompt, "Enter a command to analyze parser state.", this);
+      promptUser();
+
+      checkPrompt("quit", "are you sure? (y/n)", user => _ = user.Like("y") ? throw new QuitException() : "no quit");
+      checkAction("data", Data.ToString(), data => Log(MsgClass.Debug, data, this));
+      checkPrompt("print", "Enter the key to display.", obj =>
+      {
+        if (Data.TryLoad(obj, out object? data) && data is IPrintable ip) ip.Print();
+      });
+      checkAction("print all", Data, data =>
+      {
+        foreach (object? item in data)
+        {
+          if (item is IPrintable pr)
+            pr.Print();
+          else
+            Log(MsgClass.GreenInfo, item.ToString2(), this);
+        }
+      });
+      checkAction("show next", $"Next Operation: {NextOpIndex} : {NextOp}", data => Log(MsgClass.Debug, data, this));
+      checkPrompt("data in", "Enter the key to display.", _ => Log(MsgClass.Debug, $"[{userInput}] = {(Data.TryLoad(userInput, out object? data) ? data : "<Load Failure>")}", this));
+    } while (!userInput.EqualsAny(SCOIC, [.. allow_continue]) || userInput.IsNotEmpty);
   }
 }
