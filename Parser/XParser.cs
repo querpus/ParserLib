@@ -1,3 +1,9 @@
+using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using System.Xml.Linq;
+
+using Microsoft.Extensions.Options;
+
 using static Parser.OpStatus;
 
 namespace Parser;
@@ -5,11 +11,54 @@ namespace Parser;
 /// <summary>A parser the takes a file's content and turns it into tokens or objects.</summary>
 public sealed class XParser
 {
-  [AllowNull]
-  private static Library Library;
-  private const string Area = nameof(XParser);
+  private record struct State (int Index, int NextIndex, OperationStrategy Strategy, ReadOnlyCollection<IOperation> ParsedOperations, Collection<Action<XParser>> Actions, ReadOnlyDictionary<string, int> Labels)
+  {
+    public static State Snapshot (XParser parser) => new()
+    {
+      Index = parser.OpIndex,
+      NextIndex = parser.NextOpIndex,
+      Strategy = parser.CurrentStrategy,
+      ParsedOperations = new(parser.ParsedOperations),
+      Actions = [],
+      Labels = new(parser.Labels)
+    };
+    public static readonly State Empty = new()
+    {
+      Index = 0,
+      NextIndex = 0,
+      Strategy = [],
+      ParsedOperations = [],
+      Actions = [],
+      Labels = ReadOnlyDictionary<string, int>.Empty
+    };
+    public static State Initialize (OperationStrategy strategy)
+    {
+      (var parsedOperations, var actions) = OperationLoad(strategy);
+      return new()
+      {
+        Index = 0,
+        NextIndex = 0,
+        Strategy = strategy,
+        ParsedOperations = [.. parsedOperations],
+        Actions = actions,
+        Labels = ReadOnlyDictionary<string, int>.Empty
+      };
+    }
+  }
+
+  private void ApplyState (State state)
+  {
+    OpIndex = state.Index;
+    NextOpIndex = state.NextIndex;
+    CurrentStrategy = state.Strategy;
+    ParsedOperations = [.. (state.ParsedOperations)];
+    Labels = [.. state.Labels];
+
+    state.Actions.Foreach(a => a(this));
+  }
+  private static Library LibRef => Library.Instance;
   private bool ActiveFailure => LastStatus.IsFail && !CurrentOp.ContinueOnFail;
-  private readonly Stack<ParentStrategy> _parentStacks = [];
+  private readonly Stack<State> _parentStacks = [];
   #region Public Properties
   /// <summary>The current operation index.</summary>
   public int OpIndex { get; private set; }
@@ -23,52 +72,53 @@ public sealed class XParser
   public OpStatus LastStatus { get; private set; } = AtStart;
   /// <summary>Gets the file data as a list of bytes.</summary>
   public Spec LocalDefaultSpec =>
-    Data?.HasData != true ? Library["unknown"] :
-    Data.CanLoad<string>("initial") ? Library["textbylines"] :
-    Data.CanLoad<Memory<byte>>("initial") ? Library["binary"] :
-    Library["unknown"];
+    Data?.HasData != true ? LibRef["unknown"] :
+    Data.CanLoad<string>("initial") ? LibRef["textbylines"] :
+    Data.CanLoad<Memory<byte>>("initial") ? LibRef["binary"] :
+    Data.CanLoad<XElement>("initial") ? LibRef["xelement"] :
+    LibRef["unknown"];
   public Collection<IOperation> ParsedOperations { get; private set; } = [];
   public Spec? Spec { get; private set; }
   public OperationStrategy CurrentStrategy { get; private set; } = [];
   public bool HasParent => _parentStacks.IsNotEmpty;
   public OpStatus EnterStrategy (OperationStrategy strategy)
   {
-    var parent = new ParentStrategy()
+    var parent = State.Snapshot(this);
+    OpStatus status = AtStart;
+    var this_op = CurrentOp;
+    try
     {
-      Index = OpIndex,
-      Strategy = CurrentStrategy,
-      ParsedOperations = new(ParsedOperations),
-      Labels = new(Labels),
-    };
-    OpIndex = 0;
-    CurrentStrategy = strategy;
-    Labels = [];
-    ParsedOperations = OperationLoad(strategy);
-    _parentStacks.Push(parent);
+      var enter_state = State.Initialize(strategy);
+      ApplyState(enter_state);
 
-    LastStatus = ParseLoop();
+      status = ParseLoop();
 
-    if (LastStatus.IsPass || LastStatus.IsEnd)
-    {
-      var prev_state = _parentStacks.Pop();
-
-      OpIndex = prev_state.Index;
-      CurrentStrategy = prev_state.Strategy;
-      Labels = [.. prev_state.Labels];
-      ParsedOperations = [.. prev_state.ParsedOperations];
-
-      return Pass;
+      if (status.IsFail)
+      {
+        Log(MsgClass.Error, "EnterStrategy resulted in a fail.", this);
+        throw new OperationException("EnterStrategy resulted in a fail.");
+      }
     }
-    else
+    catch (OperationException e) when (status.IsFail)
     {
-      Log(MsgClass.Error, "EnterStrategy resulted in a fail.", this);
-      return LastStatus;
+      Log(MsgClass.Error, e.Message, this);
     }
+    catch (OperationException e)
+    {
+      Log(MsgClass.Error, e.Message, this);
+      throw new OperationException("An exception occured without a failure code.", e);
+    }
+    finally
+    {
+      ApplyState(parent);
+    }
+    return this_op.ContinueOnFail ? FailOverride : status;
   }
   /// <summary>Loads the operations into a flat pattern.</summary>
-  private Collection<IOperation> OperationLoad (OperationStrategy strategy)
+  private static (Collection<IOperation>, Collection<Action<XParser>>) OperationLoad (OperationStrategy strategy)
   {
     Collection<IOperation> result = [.. strategy.Operations];
+    Collection<Action<XParser>> actions = [];
 
     if (result.IsEmpty || result[^1] is not OperationEnd)
     {
@@ -82,13 +132,17 @@ public sealed class XParser
         int oldCount = result.Count;
         if (op is IPlaceholderOperation ipo)
         {
-          int newCount = ipo.Unpack(result, i, this);
+          int newCount = ipo.Unpack(result, i, out Action<XParser>? action);
+          if (action is not null)
+          {
+            actions.Add(action);
+          }
           if (newCount != oldCount)
-            Log(MsgClass.Debug, $"Operation Group Expanded From {oldCount} to {newCount}.", this);
+            Log(MsgClass.Debug, $"Operation Group Expanded From {oldCount} to {newCount}.", nameof(XParser));
         }
       }
     }
-    return result;
+    return (result, actions);
   }
   public Dictionary<string, int> Labels { get; private set; } = [];
   /// <summary>The dictionary storing all of the data from the parsed file.</summary>
@@ -104,8 +158,8 @@ public sealed class XParser
   public XParser (Spec spec) => InitializeParser(spec);
   public XParser (string file)
   {
-    string? name = Library.CheckFile(file);
-    Spec spec = Library.LookupOrDefault(name);
+    string? name = LibRef.CheckFile(file);
+    Spec spec = LibRef.LookupOrDefault(name);
     InitializeParser(spec);
   }
   #endregion
@@ -117,15 +171,15 @@ public sealed class XParser
     {
       Spec = data switch
       {
-        string => Library["textbylines"],
-        IEnumerable<byte> => Library["binary"],
+        string => LibRef["textbylines"],
+        IEnumerable<byte> => LibRef["binary"],
+        XElement => LibRef["xelement"],
         _ => throw new InvalidDataException("Data must by a byte array or a string.")
       };
     }
     data.ThrowIfNull();
     Data.Initialize(data);
   }
-  private void InitializeLibrary (Library lib) => Library = lib;
   /// <summary>Sets up the Specification and DataStore for the parser.</summary>
   /// <param name="spec">The specification to use.</param>
   [MemberNotNull(nameof(Data), nameof(Spec))]
@@ -133,8 +187,8 @@ public sealed class XParser
   {
     Data = new() { Parser = this };
     Spec = spec;
-    ParsedOperations = OperationLoad(spec.Operations);
-    NextOpIndex = 0;
+
+    ApplyState(State.Initialize(spec.Operations));
   }
   private void AdvanceOperation ()
   {
@@ -150,40 +204,33 @@ public sealed class XParser
   /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
   private OpStatus ParseLoop ()
   {
-    DebugIn(Area, "ParseLoop");
-
     while (NextOpIndex >= 0 && !ActiveFailure)
     {
-      _ = PerformOperation();
+      LastStatus = PerformOperation();
     }
-    DebugOut();
     return LastStatus;
   }
   /// <summary>Performs the operation indicated by <see cref="OpIndex"/> and advances to the next operation.</summary>
   /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
   private OpStatus PerformOperation ()
   {
-    DebugIn(Area, "PerformOperation");
-    AddCatch("PerformOperation");
-
     if (CurrentOp.SkipOperation)
     {
-      Log(MsgClass.Debug, "Skip Operation Encountered", this);
+      Log(MsgClass.Warning, "Skip Operation Encountered", this);
       AdvanceOperation();
-      DebugOut();
-      return LastStatus = Skipped;
+      return Skipped;
     }
 
-    Log(MsgClass.BlueInfo, $"Performing Operation {CurrentOp.TypeName}.", this);
+    Log(MsgClass.Debug, $"Performing Operation {CurrentOp.TypeName}.", this);
 
+    OpStatus result = AtStart;
     void setExceptionData (OpStatus status, Exception toLog)
     {
-      DoCatch("PerformOperation");
-      LastStatus = status;
+      result = status;
       Log(MsgClass.Error, toLog.Message, this);
     }
 
-    try { LastStatus = CurrentOp.DoOperation(this); }
+    try { result = CurrentOp.DoOperation(this); }
     catch (OperationBadInputTypeException obit) { setExceptionData(FailBadInputType, obit); }
     catch (OperationBadDefinitionException obd) { setExceptionData(FailBadOpDefinition, obd); }
     catch (OperationBadResultException obr) { setExceptionData(FailBadOpResult, obr); }
@@ -191,14 +238,13 @@ public sealed class XParser
     catch (UnknownOperationException uoe) { setExceptionData(FailNoSpec, uoe); }
     catch (OperationException o) { setExceptionData(Fail, o); }
     catch (Exception e) { setExceptionData(Error, e); }
-    Log(MsgClass.Debug, $"Operation resulted in {LastStatus}.", this);
+    Log(MsgClass.Debug, $"Operation resulted in {result}.", this);
 
-    if (LastStatus is EndCommand || ActiveFailure)
+    if (result is EndCommand || (result.IsFail && !CurrentOp.ContinueOnFail))
       NextOpIndex = -1;
 
     AdvanceOperation();
-    DebugOut();
-    return LastStatus;
+    return result;
   }
   #endregion
   /// <summary>Initializes the data and begins parsing.</summary>

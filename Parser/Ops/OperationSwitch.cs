@@ -28,8 +28,10 @@ public class OperationSwitch : Operation, IPlaceholderOperation
     Status = OpStatus.Pass;
   }
 
-  public int Unpack ([NotNull] Collection<IOperation> operations, int index, XParser parser_ref)
+  public int Unpack ([NotNull] Collection<IOperation> operations, int index, out Action<XParser>? action)
   {
+    action = null;
+
     foreach (SwitchCaseItem @case in Cases)
     {
       @case.CasePosition = operations.Count;
