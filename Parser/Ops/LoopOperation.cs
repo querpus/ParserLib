@@ -1,120 +1,48 @@
 namespace Parser.Ops;
 
-/// <summary>The type of loop that this loop operation is doing.</summary>
-public enum LoopType
+public abstract class LoopOperation : Operation, IPlaceholderOperation
 {
-  None = 0,
-  While = 1,
-  ForEach = 2,
-  Until = 3,
-  ForCount = 4
-}
 
-/// <summary>Creates an iterative loop within the parser. This can iterate through data, or a binary file.</summary>
-/// <remarks><see cref="OpIndex"/> must be set in the operation loader in the parser. This is the loop's position the operation list.</remarks>
-[Obsolete("Use the new loop objects ForCountOperation, and WhileOperation")]
-public sealed class LoopOperation : Operation, IPlaceholderOperation
-{
-  /// <summary>The type of loop to perform.</summary>
-  public LoopType Type { get; init; }
+  /// <summary>The key name to store this loop operation's <see cref="CursorData"/>.</summary>
+  public required string CursorKey { get; init; }
+  /// <summary>Operations to perform.</summary>
+  public IEnumerable<IOperation> Operations { get; init; } = [];
+
   /// <summary>Start of loop section.</summary>
-  public int OpIndex { get; set; }
-  public string? CursorKey { get; set; }
-  public int? Count { get; init; }
-  public ICondition? Condition { get; set; }
-  public required Collection<IOperation> Operations { get; init; }
-
-  private string GetLoopName ()
+  /// <remarks>This will be the postion of the actual loop body in the operation list.</remarks>
+  protected int LoopIndex { get; set; }
+  /// <summary>The current index of the unpacker.</summary>
+  /// <remarks>This will be the position of the <see cref="LoopOperation"/> object in the operation list.</remarks>
+  protected int CurrentIndex { get; set; }
+  protected abstract IOperation ContinueOp { get; }
+  protected abstract IOperation StartLoop { get; }
+  /// <summary>The inner operations with the breaks and continues configured.</summary>
+  protected IEnumerable<IOperation> InnerOperations => Operations.Select(item => item switch
   {
-    string name = "loop_counter";
-    int num = 0;
-    string result () => $"{name}{((num > 0) ? num : "")}";
-    while (Data.CanLoad(result()))
-      num++;
-    return result();
-  }
+    OperationBreak ob => new OperationBreak(CurrentIndex + 1, CursorKey),
+    OperationContinue oc => ContinueOp,
+    _ => item
+  });
 
-  private int UnpackInc ([NotNull] Collection<IOperation> operations, int index, int inc)
+  public int Unpack ([NotNull] Collection<IOperation> operations, int index, out Action<XParser>? action)
   {
-    CursorKey.ThrowIfNull();
-    Collection<IOperation> additions = [];
-    OpIndex = operations.Count;
-    additions.AddRange(Operations);
-    additions.Add(new OperationContinue());
-    foreach (IOperation op in additions)
-    {
-      if (op is OperationBreak ob)
-        ob.SetupBreakTarget(index, CursorKey);
+    action = null;
 
-      if (op is OperationContinue oc)
-        oc.SetupContinue(OpIndex, inc, CursorKey);
-    }
-    operations.AddRange(additions);
+    CurrentIndex = index;
+    LoopIndex = operations.Count;
+
+    operations.Add(StartLoop);
+    operations.AddRange(InnerOperations);
+    operations.Add(ContinueOp);
+
     return operations.Count;
   }
-  public int Unpack ([NotNull] Collection<IOperation> operations, int index, XParser? parser_ref) =>
-    Type is LoopType.While or LoopType.Until or LoopType.None
-      ? UnpackInc(operations, index, 0)
-      : Type is LoopType.ForCount or LoopType.ForEach ? UnpackInc(operations, index, 1) : operations.Count;
 
-  public bool Continue () => Type switch
+  public void CheckUnpacked ()
   {
-    LoopType.While when Condition is not null => Condition.Evaluate(Parser),
-    LoopType.None => true,
-    LoopType.ForEach or LoopType.ForCount when CursorKey is not null => Data.GetCountOfKey(CursorKey) > Parser.GetCursorByKey(CursorKey).Index,
-    _ => true,
-  };
-  protected override void Execute ()
-  {
-    DebugIn("LoopOperation", "Execute");
-
-    if (OpIndex == 0)
+    if (LoopIndex == 0 || CursorKey.IsEmpty)
     {
-      Status = Op.ThrowBadDef("Loop Pre-processing not complete.");
-    }
-
-    void initializeCursor ()
-    {
-      Parser.AddCursor(CursorKey);
-      Parser.SetNextOperationIndex(OpIndex);
-    }
-
-    switch (Type)
-    {
-      case LoopType.ForEach when CursorKey is not null:
-        initializeCursor();
-        goto Pass;
-      case LoopType.Until when Condition is not null:
-        if (!Condition.Evaluate(Parser))
-        {
-          Parser.SetNextOperationIndex(OpIndex);
-        }
-        goto Pass;
-      case LoopType.ForCount when Count is not null:
-        CursorKey ??= GetLoopName();
-        Data[CursorKey] = new object[Count.Value];
-        initializeCursor();
-        goto Pass;
-      case LoopType.ForCount when Count is null && CursorKey is not null:
-
-        if (!Data.TryLoad(CursorKey, out int count))
-        {
-          Status = OpStatus.FailBadInputType;
-          return;
-        }
-        string loop_name = GetLoopName();
-        Data[loop_name] = new object[count];
-        initializeCursor();
-        goto Pass;
-      Pass:
-        Status = OpStatus.Pass;
-        DebugOut();
-        return;
-      case LoopType.ForEach:
-      case LoopType.Until:
-      default:
-        Status = Op.ThrowBadDef("Loop was not setup correctly.");
-        throw null;
+      Err.ThrowUnpacked("Loop Pre-processing not complete.");
     }
   }
 }

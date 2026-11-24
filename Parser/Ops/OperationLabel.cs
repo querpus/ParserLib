@@ -1,22 +1,23 @@
 namespace Parser.Ops;
 
-public sealed class OperationLabel (string name) : Operation, IPlaceholderOperation
+/// <summary>A label that can be referenced from a jump statement.</summary>
+public sealed class OperationLabel : Operation, IPlaceholderOperation
 {
   /// <summary>The name of this label.</summary>
-  public string Name { get; } = name;
-  public override bool NoInput => true;
+  public required string Name { get; init; }
   public override bool NoExecution => true;
-  public override bool NoOutput => true;
 
-  public int Unpack ([NotNull] Collection<IOperation> operations, int index, XParser? parser_ref = null)
+  public void CheckUnpacked ()
   {
-    parser_ref?.Labels.Add(Name, index);
-    operations.ThrowIfNull();
-    return operations.Count;
+    if (string.IsNullOrEmpty(Name.Trim()))
+    {
+      Err.ThrowUnpacked("Name is null or empty.");
+    }
   }
 
-  protected override void Execute ()
+  public int Unpack ([NotNull] Collection<IOperation> operations, int index, out Action<XParser>? action)
   {
-
+    action = (parser_ref) => parser_ref.Labels.Add(Name, index);
+    return operations.Count;
   }
 }

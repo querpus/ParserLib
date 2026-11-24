@@ -1,3 +1,0 @@
-<!--For more information on using transformations see the web.config examples at http://go.microsoft.com/fwlink/?LinkId=214134. -->
-<hostitem:hostItem hostitem:baseType="Microsoft.Office.Tools.Excel.WorksheetBase" hostitem:namespace="ExcelSequenceHelper" hostitem:className="KeySheet" hostitem:identifier="KeySheet" hostitem:primaryCookie="KeySheet" hostitem:factoryType="Microsoft.Office.Tools.Excel.Factory" hostitem:startupIndex="1" xmlns:hostitem="http://schemas.microsoft.com/2004/VisualStudio/Tools/Applications/HostItem.xsd" xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-</hostitem:hostItem>

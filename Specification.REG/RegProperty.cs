@@ -3,7 +3,7 @@ using Common.Extensions;
 namespace Specification.REG;
 
 /// <summary>A registry key, type, and value, with an option to delete the entry.</summary>
-public sealed class RegProperty : IProperty<string>, IGeneratable
+public sealed class RegProperty : IProperty<string>
 {
   /// <summary>A blank property.</summary>
   public static RegProperty Blank { get; } = new() { };
@@ -34,13 +34,13 @@ public sealed class RegProperty : IProperty<string>, IGeneratable
   }
 
   // Readable Properties
-  /// <summary><see langword="true"/> if this key is null or default initial value;</summary>
+  /// <summary><see langword="true"/> if this key is <see langword="null"/> or an empty <see langword="string"/>, <see langword="false"/> otherwise.</summary>
   public bool IsDefault => Key == SE;
 
   private RegProperty () { }
 
-  /// <inheritdoc/>
-  /// <exception cref="InvalidOperationException"/>
+  /// <summary>Generates a <see cref="RegProperty"/> from a <see cref="MatchDataSet"/>.</summary>
+  /// <exception cref="InvalidOperationException">The <see cref="MatchDataSet"/> was missing a required group.</exception>
   public static RegProperty Generate (MatchDataSet input)
   {
     input.ThrowIfNull();
@@ -51,27 +51,24 @@ public sealed class RegProperty : IProperty<string>, IGeneratable
     bool isRem = input.HasGroup("remval");
     bool isDef = input.HasGroup("default");
 
-    RegProperty result = new()
+    return new()
     {
       Key = isDef ?
         input["default"].Content :
         hasKey ?
           input["key"].Content :
-          throw new InvalidOperationException("The input MatchDataStore did not contain a 'key' group or a 'default' group."),
+          throw new InvalidOperationException("The input MatchDataSet did not contain a 'key' group or a 'default' group."),
       IsDeleteEntry = isRem,
       Value = isRem ?
         input["remval"].Content :
         hasValue ?
           input["value"].Content :
-          throw new InvalidOperationException("The input MatchDataStore did not contain a 'value' group or a 'remval' group."),
+          throw new InvalidOperationException("The input MatchDataSet did not contain a 'value' group or a 'remval' group."),
       Type = hasType ? input["type"].Content : SE,
       Size = hasSize ? input["hsize"].Content : SE,
     };
-    return result;
   }
-  /// <inheritdoc/>
-  public bool Equals (IProperty<string>? other) => Value is not null && Value.Equals(other?.Value, SCO) && Key.Equals(other.Key, SCO);
-  /// <inheritdoc/>
+  public bool Equals (IProperty<string>? other) => other is not null && Value?.Equals(other.Value, SCO) == true && Key.Equals(other.Key, SCO);
   public int CompareTo (IProperty<string>? other) => Key.CompareTo(other?.Key, SCOIC);
   /// <summary>Assigns the specified value to the <see cref="Value"/> property.</summary>
   /// <param name="value">The value to assign. Cannot be null or empty.</param>
@@ -79,23 +76,17 @@ public sealed class RegProperty : IProperty<string>, IGeneratable
   /// <summary>Assigns a value to the <see cref="Value"/> property, converting it to a string.</summary>
   /// <param name="value">The object to assign. If <paramref name="value"/> is <see langword="null"/>, a default value is assigned instead.</param>
   public void AssignValue (object value) => Value = value?.ToString() ?? SE;
-  /// <inheritdoc/>
   public override bool Equals (object? obj) =>
     obj is IProperty<string> iprop &&
     Key.Equals(iprop.Key, SCOIC) &&
     (Value?.Equals(iprop.Value, SCO) ?? false);
-  /// <inheritdoc/>
   public override int GetHashCode () => HashCode.Combine(Key.ToUpperInvariant(), Value?.ToUpperInvariant());
 
+  public static implicit operator KeyValuePair<string, string?> (RegProperty input) => input is null ? new(SE, SE) : new(input.Key, input.Value);
   public static bool operator == (RegProperty left, RegProperty right) => left is null ? right is null : left.Equals(right);
-
   public static bool operator != (RegProperty left, RegProperty right) => !(left == right);
-
   public static bool operator < (RegProperty left, RegProperty right) => left is null ? right is not null : left.CompareTo(right) < 0;
-
   public static bool operator <= (RegProperty left, RegProperty right) => left is null || left.CompareTo(right) <= 0;
-
-  public static bool operator > (RegProperty left, RegProperty right) => left is not null && left.CompareTo(right) > 0;
-
+  public static bool operator > (RegProperty left, RegProperty right) => left?.CompareTo(right) > 0;
   public static bool operator >= (RegProperty left, RegProperty right) => left is null ? right is null : left.CompareTo(right) >= 0;
 }

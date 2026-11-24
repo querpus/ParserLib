@@ -33,6 +33,10 @@ public static class Names
   public const StringComparison SCO = StringComparison.Ordinal;
   /// <summary>Ordinal (Case-Insensitive).</summary>
   public const StringComparison SCOIC = StringComparison.OrdinalIgnoreCase;
+  /// <summary>Invariant (Case-Sensitive).</summary>
+  public const StringComparison SCI = StringComparison.InvariantCulture;
+  /// <summary>Invariant (Case-Insensitive).</summary>
+  public const StringComparison SCIIC = StringComparison.InvariantCultureIgnoreCase;
 
   /// <summary>Number styles.</summary>
   public const NumberStyles
@@ -61,6 +65,8 @@ public static class Names
   public const RegexOptions ROR2L = RegexOptions.RightToLeft;
   /// <summary>Explicit capture, only stores named groups.</summary>
   public const RegexOptions ROEC = RegexOptions.ExplicitCapture;
+  /// <summary>Culture Invariant, does not care about cultural differences in language.</summary>
+  public const RegexOptions ROCI = RegexOptions.CultureInvariant;
 
   /// <summary>The current thread's default culture.</summary>
   public static CultureInfo CICC => CultureInfo.CurrentCulture;
@@ -72,14 +78,14 @@ public static class Names
   public static CultureInfo CIIUC => CultureInfo.InstalledUICulture;
 
   /// <summary>Name for the not found indicator.</summary>
-  /// <value>Equal to -1.</value>
+  /// <remarks>Equal to -1.</remarks>
   public const int
     ErrVal = -1,
     NotFound = -1,
     DNE = -1;
 
   /// <summary>Reference to an empty <see langword="string"/>.</summary>
-  /// <value>Equal to <see cref="string.Empty"/>.</value>
+  /// <remarks>Equal to <see cref="string.Empty"/>.</remarks>
   public static string SE => string.Empty;
 
   /// <summary>Reference to an empty <see langword="string"/>.</summary>

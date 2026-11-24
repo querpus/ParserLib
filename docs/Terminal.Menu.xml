@@ -13,6 +13,16 @@
         <member name="P:Terminal.Menu.MenuAction.NextMenuName">
             <summary>The name of the next menu.</summary>
         </member>
+        <member name="F:Terminal.Menu.MenuAreaType.None">
+            <summary>No special handling</summary>
+        </member>
+        <member name="M:Terminal.Menu.Controller.Clear(System.Int32)">
+            <summary>Clears the specified line from the console.</summary>
+            <param name="line">The line to clear.</param>
+        </member>
+        <member name="M:Terminal.Menu.Controller.Clear">
+            <summary>Clears all the content from the console.</summary>
+        </member>
         <member name="T:Terminal.Menu.MenuController">
             <summary>The menu controller. Can be static since there is only one console.</summary>
         </member>

@@ -1,4 +1,4 @@
-using static Common.Regex.RegexStaticFunctions;
+using static Common.RegExp.RegexStaticFunctions;
 
 namespace Parser;
 
@@ -47,8 +47,8 @@ public static partial class RX
   public static RxS Boolean => field = Rx(@"(?n:\b(false|true)\b)");
 
   // Modifiers
-  public static RxS CaseInsensitive { get; } = Rx(@"(?i)");
-  public static RxS CaseSensitive { get; } = Rx(@"(?-i)");
-  public static RxS Extended { get; } = Rx(@"(?x)");
-  public static RxS NotExtended { get; } = Rx(@"(?-x)");
+  public static RxS CaseInsensitive { get; } = Rx("(?i)");
+  public static RxS CaseSensitive { get; } = Rx("(?-i)");
+  public static RxS Extended { get; } = Rx("(?x)");
+  public static RxS NotExtended { get; } = Rx("(?-x)");
 }

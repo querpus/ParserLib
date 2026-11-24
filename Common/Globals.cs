@@ -3,6 +3,7 @@ global using System.Collections;
 global using System.Collections.Generic;
 global using System.Collections.Immutable;
 global using System.Collections.ObjectModel;
+global using System.Diagnostics.CodeAnalysis;
 global using System.Globalization;
 global using System.IO;
 global using System.Linq;
@@ -15,12 +16,15 @@ global using Common.Extensions;
 global using static Common.Names;
 
 global using ANEx = System.ArgumentNullException;
-global using RegexObj = System.Text.RegularExpressions.Regex;
 global using SS = System.Diagnostics.CodeAnalysis.StringSyntaxAttribute;
-global using StringTuple = (string Key, string Value);
+
+#if DEBUG
+[assembly: AssemblyConfiguration("Debug")]
+#else
+[assembly: AssemblyConfiguration("Release")]
+#endif
 
 [assembly: AssemblyCompany("Magna AIM Systems")]
-[assembly: AssemblyConfiguration("Debug")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: AssemblyInformationalVersion("1.0.0")]
 [assembly: AssemblyProduct("CommonLibrary")]

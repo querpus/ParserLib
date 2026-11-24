@@ -1,5 +1,8 @@
 /* Visual Studio Settings File */
 {
   "copilot.general.editor.enhanceNonChat": false,
-  "copilot.general.editor.enableFixWithCopilot": false
+  "languages.csharp.general.wordWrap": false,
+  "languages.csharp.tabs.tabSize": 2,
+  "languages.csharp.tabs.indentSize": 2,
+  "debugging.hotReload.applyOnFileSave": true
 }

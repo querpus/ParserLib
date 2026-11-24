@@ -3,6 +3,5 @@
 // Project-level suppressions either have no target or are given
 // a specific target and scoped to a namespace, type, member, etc.
 
-using System.Diagnostics.CodeAnalysis;
-
-[assembly: SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "<Pending>", Scope = "type", Target = "~T:Specification.ZDoom.ZScript.ZScriptTokenType")]
+[assembly: SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "<Pending>", Scope = "type", Target = "~T:Specification.ZDoom.Lang.ZScript.ZScriptTokenType")]
+[assembly: SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "<Pending>", Scope = "member", Target = "~P:Specification.ZDoom.Definition.Decorate")]

@@ -8,6 +8,6 @@ public class JSONStringValue (string value) : IJSONNode
 {
   public string Value { get; set; } = value;
   public JsonValueKind Type => JsonValueKind.String;
-  public override string ToString () => $"""{Value}""";
+  public override string ToString () => $"\"{Value}\"";
   object? IJSONNode.Value => Value;
 }

@@ -1,120 +1,118 @@
 //#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace Common.Extensions;
 
+/// <summary><see cref="IList{T}"/> extensions.</summary>
 public static class IListExtensions
 {
-  //IList<T>
-  /// <summary>Checks if an <see cref="IList{T}"/> is <see langword="null"/> or empty.</summary>
-  /// <typeparam name="T"></typeparam>
-  /// <param name="list"></param>
-  /// <returns></returns>
-  public static bool IsEmpty<T> (this IList<T>? list) => list is null || list.Count == 0;
-  public static void AddRange<T> ([NotNull] this IList<T> list, IEnumerable<T> additions)
+  /// <summary>List extensions with <typeparamref name="T"/> as the item type.</summary>
+  /// <typeparam name="T">The type of items in the <see cref="IList{T}"/>.</typeparam>
+  /// <param name="list">The list that the methods are executing from.</param>
+  extension<T> ([NotNullWhen(true)] ICollection<T>? list)
   {
-    list ??= [];
-    if (additions is null)
-      return;
-    foreach (T item in additions)
+    /// <summary>Checks if an <see cref="IList{T}"/> is <see langword="null"/> or empty.</summary>
+    /// <returns><see langword="true"/> if the list is empty or null, <see langword="false"/> otherwise.</returns>
+    public bool IsEmpty => list is null || list.Count == 0;
+  }
+  extension<T> (IList<T> list)
+  {
+    #region Queue Functions for IList<T>
+    /// <summary>Adds an item to the queue.</summary>
+    /// <param name="item">The item to add.</param>
+    public void Enqueue (T item)
+    {
+      if (item is null)
+        return;
+
       list.Add(item);
-  }
-  public static void RemoveCount<T> (this IList<T> list, int count, int startat = 0)
-  {
-    if (list is null)
-      return;
+    }
+    public T Dequeue ()
+    {
+      if (list.IsEmpty)
+        throw new ArgumentOutOfRangeException(nameof(list), "Cannot Dequeue, list is empty.");
 
-    for (int i = 0; i <= count; i++)
-      list.RemoveAt(startat);
-  }
-  public static void InsertMany<T> ([NotNull] this IList<T> list, int index, IEnumerable<T> additions)
-  {
-    list ??= [];
+      T item = list[0];
+      list.RemoveAt(0);
+      return item;
+    }
+    #endregion Queue Functions for IList<T>
+    /// <summary>Adds a range of items to an <see cref="IList{T}"/>.</summary>
+    /// <param name="additions">The items to add to the <see cref="IList{T}"/>.</param>
+    /// <exception cref="ANEx">The calling list was null.</exception>
+    public void AddRange (IEnumerable<T> additions)
+    {
+      ANEx.ThrowIfNull(list);
 
-    if (additions is null)
-      return;
+      if (additions is null)
+        return;
 
-    Action<T> doThing = list.Count <= index ? list.Add : i => list.Insert(index, i);
+      foreach (T item in additions)
+        list.Add(item);
+    }
+    public void InsertMany (int index, IEnumerable<T> additions)
+    {
+      list ??= [];
 
-    foreach (T item in additions)
-      doThing.Invoke(item);
-  }
-  public static void Replace<T> (this IList<T> list, int atIndex, IEnumerable<T> replaceWith)
-  {
-    if (list is null)
-      return;
+      if (additions is null)
+        return;
 
-    list.RemoveAt(atIndex);
-    list.InsertMany(atIndex, replaceWith);
-  }
-  public static void RemoveLast<T> ([NotNull] this IList<T> list)
-  {
-    list ??= [];
-    list.RemoveAt(list.Count - 1);
-  }
+      Action<T> doThing = list.Count <= index ? list.Add : i => list.Insert(index, i);
 
-  public static void TrimEmpty ([NotNull] this IList<string> list)
-  {
-    list ??= [];
-    while (list.Remove(SE)) { }
-  }
+      foreach (T item in additions)
+        doThing.Invoke(item);
+    }
+    public void RemoveLast ()
+    {
+      if (list.IsEmpty)
+        return;
 
-  // Stack Functions for IList<T>
+      list.RemoveAt(list.Count - 1);
+    }
 
-  /// <summary>Performs a 'pop' action, but discards the popped item.</summary>
-  /// <typeparam name="T">The type of item.</typeparam>
-  /// <param name="list">The list to perform the action on.</param>
-  public static void Drop<T> (this IList<T>? list)
-  {
-    list?.RemoveAt(list.Count - 1);
-  }
-  public static T Pop<T> ([NotNull] this IList<T> list)
-  {
-    list.ThrowIfNull();
+    /// <summary>Performs a peek as if this was a stack.</summary>
+    /// <returns>The value at the top of the stack. If the list is empty, this returns <see langword="null"/> or <see langword="default"/>.</returns>
+    public T? Peek () => list.IsEmpty ? default : list[^1];
+    /// <summary>Performs a 'pop' action, but discards the popped item.</summary>
+    public void Drop () => list?.RemoveLast();
+    /// <summary>Performs a 'pop' action like a stack would.</summary>
+    /// <returns>The value that was popped from the stack. If the list is empty, this returns <see langword="null"/> or <see langword="default"/>.</returns>
+    public T? Pop ()
+    {
+      if (list.IsEmpty)
+        return default;
 
-    T item = list.Last();
-    list.RemoveAt(list.Count - 1);
-    return item;
-  }
-  public static T Peek<T> ([NotNull] this IList<T> list) where T : class
-  {
-    // Return an empty string if it is peeking at an empty string collection.
-    if (typeof(T).Name.Is("String") && list.IsEmpty())
-      return (SE as T)!;
-
-    list.ThrowIfNull();
-    return list.Last();
+      T item = list[^1];
+      list.RemoveLast();
+      return item;
+    }
   }
 
-  // Queue Functions for IList<T>
-
-  public static void Enqueue<T> ([NotNull] this IList<T> list, T item)
+  extension<T> (IList<T> list)
   {
-    list.ThrowIfNull();
-    list.Add(item);
-  }
-  public static T Dequeue<T> ([NotNull] this IList<T> list)
-  {
-    list.ThrowIfNull();
+    public void RemoveCount (int count, int startat = 0)
+    {
+      if (list is null)
+        return;
 
-    if (list.IsEmpty())
-      throw new ArgumentOutOfRangeException(nameof(list), "Cannot Dequeue, list is empty.");
+      for (int i = 0; i <= count; i++)
+        list.RemoveAt(startat);
+    }
+    public void Replace (int atIndex, IEnumerable<T> replaceWith)
+    {
+      if (list is null)
+        return;
 
-    T item = list[0];
-    list.RemoveAt(0);
-    return item;
-  }
-
-  public static IList<T?> Nullify<T> ([NotNull] this IList<T> list) where T : struct
-  {
-    list.ThrowIfNull();
-    return list.IsEmpty() ? [] : [.. from item in list let item2 = (T?) item select item2];
+      list.RemoveAt(atIndex);
+      list.InsertMany(atIndex, replaceWith);
+    }
   }
 
-  public static IList<T> DeNullify<T> ([NotNull] this IList<T?> list) where T : struct
+  extension([NotNull] IList<string> list)
   {
-    list.ThrowIfNull();
-    return list.IsEmpty() ? [] : [.. from item in list let item2 = item is null ? default : item.Value select item2];
+    public void TrimEmpty ()
+    {
+      list ??= [];
+      while (list.Remove(SE)) { }
+    }
   }
 }

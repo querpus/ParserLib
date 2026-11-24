@@ -21,37 +21,61 @@ public sealed class DataStore
   /// <summary>Gets the number of elements contained in the collection.</summary>
   public int Count => _dict.Count;
   public ReadOnlyCollection<string> Keys => [.. _dict.Keys];
-  public ReadOnlyCollection<object> Values => [.. _dict.Values];
   /// <summary>Gets or sets data to a given key.</summary>
   /// <param name="key">The key to assign to or look up.
   /// Prefixing this string with a "+" when assigning will cause it to make a list instead of overrwriting.</param>
-  /// <returns>The data assigned to the given key, or <see langword="null"/> if the key is not present.</returns>
+  /// <param name="throw_on_fail">Specifies whether to throw an exception on a missing key, or to return <see langword="null"/>.</param>
+  /// <returns>The data assigned to the given key, or throws an exception if it is not found.</returns>
   /// <exception cref="ArgumentException"/>
-  [NotNull]
-  [MaybeNull]
-  public object this[string key]
+  [DisallowNull]
+  public object? this[string? key, bool throw_on_fail]
   {
-    get => TryLoad(key, out object? value) ? value : null;
+    get => key is null ? null : throw_on_fail ? LoadOrFail(key) : LoadIfAble(key);
     set
     {
-      DebugIn("DataStore", $"[{key}]");
-      key.ThrowIfNull();
-      bool hasKey = _dict.ContainsKey(key);
-      if (key.StartsWith('+', SCO) && hasKey)
-      {
-        key = key[1..];
-        bool success = DoSave<object>(key, value, DM.Overwrite | DM.AddToCollection | DM.MakeCollection | DM.MergeCollection);
-        if (!success)
-        {
-          Log(MsgClass.Error, $"Accessor tried to make list, but failed. Value:{value} & Key:{key} & Current: {_dict[key]}.");
-        }
-      }
-      else
-      {
-        _ = DoSave<object>(key, value, DM.Overwrite);
-      }
+      if (throw_on_fail && key is null)
+        key.ThrowIfNull();
+      else if (key is null)
+        return;
+
+      _ = DoSave<object>(key, value, DM.Overwrite);
     }
   }
+
+  [DisallowNull]
+  [NotNull]
+  public object this[string? key]
+  {
+    get => key is null ? null! : LoadOrFail(key);
+    set
+    {
+      key.ThrowIfNull();
+      _ = DoSave<object>(key, value, DM.Overwrite);
+    }
+  }
+
+  [DisallowNull]
+  [NotNull]
+  public object this[string? key, dynamic value_if_not_found]
+  {
+    get => key is null ? value_if_not_found : LoadIfAble(key) ?? value_if_not_found;
+    set
+    {
+      if (key is null)
+        return;
+
+      _ = DoSave<object>(key, value, DM.Overwrite);
+    }
+  }
+
+  /// <summary>Loads the key, or throws an exception.</summary>
+  /// <param name="key">The key to load.</param>
+  /// <returns>The value of the key.</returns>
+  /// <exception cref="OperationNoSuchVarException">The key is not present in the <see cref="DataStore"/>.</exception>
+  internal object LoadOrFail (string key) => TryLoad(key, out object? value) ? value : Err.ThrowNoVar(key);
+  internal T LoadOrFail<T> (string key) => TryLoad(key, out T? value) ? value : Err.ThrowNoVar(key);
+  internal object? LoadIfAble (string key) => TryLoad(key, out object? value) ? value : null;
+  internal T? LoadIfAble<T> (string key) => TryLoad(key, out T? value) ? value : default;
 
   public override string ToString ()
   {
@@ -67,25 +91,29 @@ public sealed class DataStore
 
   /// <summary>The internal saving logic.</summary>
   /// <typeparam name="T">The data type to save.</typeparam>
-  /// <param name="key"></param>
-  /// <param name="data"></param>
-  /// <param name="mode"></param>
-  /// <returns></returns>
+  /// <param name="key">The key to save to.</param>
+  /// <param name="data">The data to save.</param>
+  /// <param name="mode">The <see cref="DM"/> to utilize.</param>
+  /// <returns><see langword="true"/> if the save was successful, <see langword="false"/> otherwise.</returns>
   private bool DoSave<T> (string key, object data, DM mode)
   {
     if (data is null)
       return false;
 
+    if (key.StartsWith('+', SCO))
+    {
+      key = key[1..];
+      mode |= DM.MergeCollection | DM.AddToCollection | DM.MakeCollection;
+    }
+
     if (mode.HasFlag(DM.MergeCollection) && TryLoadArray(key, out IEnumerable<T>? existing_to_merge) && data is IEnumerable<T> new_list)
     {
-      Collection<T> big_list = [.. existing_to_merge, .. new_list];
-      _dict[key] = big_list;
+      _dict[key] = (Collection<T>) [.. existing_to_merge, .. new_list];
       return true;
     }
     else if (mode.HasFlag(DM.AddToCollection) && TryLoadArray(key, out IEnumerable<T>? existing_to_add) && data is T new_item)
     {
-      Collection<T> big_list = [.. existing_to_add, new_item];
-      _dict[key] = big_list;
+      _dict[key] = (Collection<T>) [.. existing_to_add, new_item];
       return true;
     }
     else if (mode.HasFlag(DM.MakeCollection) && TryLoad(key, out T? lonely_item) && data is T friend_item)
@@ -108,7 +136,7 @@ public sealed class DataStore
       return false;
     }
   }
-  public void Initialize<T> ([NotNull] T initial)
+  internal void Initialize<T> (T initial)
   {
     DebugIn("DataStore", "Initialize");
     initial.ThrowIfNull();
@@ -117,30 +145,27 @@ public sealed class DataStore
     if (initial is string s)
     {
       Save("text", s);
-      Save<int>("file_size", s.Length);
+      Save("file_size", s.Length);
     }
     else if (initial is IEnumerable<byte> bytes)
     {
       Memory<byte> list = bytes.ToArray().AsMemory();
       Save("bytes", list);
-      Save<int>("file_size", list.Length);
+      Save("file_size", list.Length);
     }
     else if (initial is IEnumerable list)
     {
-      Log(MsgClass.Warning, "Initialization of an unknown list.");
+      Log(MsgClass.Warning, "Initialization of an unknown list.", this);
       Collection<object> coll = [.. list.OfType<object>()];
       Save("list", coll);
-      Save<int>("list_size", coll.Count);
+      Save("list_size", coll.Count);
     }
     DebugOut();
   }
-  public bool CanLoad ([NotNullWhen(true)] string key) =>
-    _dict.ContainsKey(key) && _dict[key] != null;
-  public bool TryLoad ([NotNullWhen(true)] string key, [NotNullWhen(true)][MaybeNullWhen(false)] out object data)
-  {
-    data = CanLoad(key) ? _dict[key] : null;
-    return data is not null;
-  }
+  public bool CanLoad ([NotNullWhen(true)] string? key) =>
+    key is not null && _dict.ContainsKey(key) && _dict[key] != null;
+  public bool TryLoad ([NotNullWhen(true)] string key, [NotNullWhen(true)][MaybeNullWhen(false)] out object data) =>
+    (CanLoad(key) ? data = _dict[key] : data = null) is not null;
   public bool TryLoadArray ([NotNullWhen(true)] string key, [NotNullWhen(true)][MaybeNullWhen(false)] out IEnumerable data)
   {
     data = CanLoad<IEnumerable>(key) ? this[key] as IEnumerable : null;
@@ -161,15 +186,31 @@ public sealed class DataStore
   }
   public void Save<T> ([NotNull] string key, object data, DM mode = DM.Overwrite)
   {
-    bool saved = DoSave<T>(key, data, mode);
-
-    if (!saved)
+    if (!DoSave<T>(key, data, mode))
       throw new OperationException("DATA NOT SAVED");
   }
   public int GetCountOfKey (string key) =>
     !CanLoad(key) ? 0 :
     _dict[key] is IEnumerable<object> list ? list.Count() :
     1;
+  public bool TryGetCursorByKey (string key, out CursorData? cd) =>
+    !CanLoad(key) ? throw Err.ThrowNoVar(key) :
+    !TryLoad<CursorData>(key, out cd) ? throw Err.ThrowBadInput("", $"{_dict[key].GetType()}") : true;
+  /// <summary>Gets the cursor that was created on the given key.</summary>
+  /// <param name="key">The key of the cursor to retrieve.</param>
+  /// <exception cref="OperationNoSuchVarException"/>
+  /// <exception cref="OperationBadInputTypeException"/>
+  public CursorData GetCursorByKey (string key) =>
+    !CanLoad(key) ? throw Err.ThrowNoVar(key) :
+    _dict[key] is CursorData cursor ? cursor :
+    throw Err.ThrowBadInput(nameof(CursorData), $"{_dict[key].GetType()}");
+
+  public void SetCursorIndex (string key, int index) => GetCursorByKey(key).Index = index;
+  public void IncCursorIndex (string key, int inc) => GetCursorByKey(key).Index += inc;
+  /// <summary>Checks if a cursor exists on a given key.</summary>
+  /// <param name="key">The key to check.</param>
+  /// <returns><see langword="true"/> if the cursor exists on <paramref name="key"/>, <see langword="false"/> otherwise.</returns>
+  public bool HasCursorByKey (string key) => CanLoad<CursorData>(key);
   /// <summary>Removes the indicated key from storage.</summary>
   /// <param name="key">The key to clear.</param>
   /// <returns><see langword="true"/> if the key existed to be cleared, <see langword="false"/> otherwise.</returns>

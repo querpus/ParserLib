@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Definition xmlns="Parser/Spec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
+  <Spec>
+    <Name>sample</Name>
+    <TextFile>false</TextFile>
+    <Instructions>
+      <Label name="Start"/>
+      <GotoLabel name="Start"/>
+      <Terminate success="true"/>
+    </Instructions>
+  </Spec>
+  <Spec>
+    <Name>wad_test</Name>
+    <TextFile>false</TextFile>
+    <Instructions>
+      <Tokenize input_var="text" output_var="tokens"/>
+      <Label name="Start"/>
+      <MakeCursor cursor_var="current_pos" position="0"/>
+      <GotoOpIndex target="2"/>
+      <GotoLabel name="Start"/>
+      <ReadData output_var="file_id" encoding="ASCII" endian="Little" type="text" length="4" cursor_var="current_pos"/>
+      <ReadData output_var="numlumps" type="int" cursor_var="current_pos"/>
+      <ReadData output_var="diroffset" type="int" cursor_var="current_pos"/>
+      <SetCursorPos cursor_var="current_pos" position_var="diroffset"/>
+      <Initialize initial_var="directory" type="Collection" value_type="DirectoryEntry"/>
+      <ForCount length_var="numlumps" cursor_var="index">
+        <ReadData output_var="lump_pos" type="int" cursor_var="current_pos"/>
+        <ReadData output_var="lump_size" type="int" cursor_var="current_pos"/>
+        <ReadData output_var="lump_name" type="text" length="8" cursor_var="current_pos"/>
+        <ReadData output_var="lump_data" content_var="bytes" type="binary" length_var="lump_size" position_var="lump_pos"/>
+        <AddItem list_var="directory" type="PositionalDataBlock">
+          <Property name="Index" content_var="lump_pos"/>
+          <Property name="Name" content_var="lump_name"/>
+          <Property name="Data" content_var="lump_data"/>
+        </AddItem>
+      </ForCount>
+      <ForEach list_var="bytes" cursor_var="cursor">
+        <ReadData output_var="lump_pos" type="text" cursor_var="current_pos" length_var="current_item"/>
+      </ForEach>
+      <!--<Switch condition="[file_id]">
+        <Case value="WAD2">
+          <Label name="wad2"/>
+        </Case>
+        <Default>
+          <Label name="wad"/>
+        </Default>
+      </Switch>-->
+      <Terminate success="true"/>
+    </Instructions>
+    <FileInferences initial="and">
+      <Extension>wad</Extension>
+      <Or>
+        <Header>IWAD</Header>
+        <Header>PWAD</Header>
+      </Or>
+    </FileInferences>
+  </Spec>
+</Definition>

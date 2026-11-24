@@ -1,38 +1,40 @@
+using Parser.Nodes;
+
 namespace Parser.Ops.Text;
 
 /// <summary>Tokenizes a string or list of strings.</summary>
 public class TokenizeOperation : Operation
 {
   protected TokenRuleCollection Rules { get; }
-
-  public TokenizeOperation (IEnumerable<TokenRule> rules, string input_key = "text", string output_key = "tokens") : base(input_key, output_key)
-  {
-    Rules = [.. rules];
-  }
-  public TokenizeOperation (string input_key = "text", string output_key = "tokens") : base(input_key, output_key)
-  {
-    Rules = [];
-  }
+  public required string InputKey { get; init; }
+  public required string OutputKey { get; init; }
+  public string? Tokenizer { get; init; }
+  public TokenizeOperation (IEnumerable<TokenRule> rules) => Rules = [.. rules];
+  public TokenizeOperation () => Rules = [];
 
   protected override void Execute ()
   {
-    DebugIn ("TokenizeOperation", "Execute");
-    // Load Tokens if loading from Spec
-    if (!Rules.Any())
+    if (Data[InputKey] is string input)
     {
-      Rules.AddRange(Spec.TokenRules);
-    }
-
-    if (WorkData is string input)
-    {
-      TokenFactory factory = new(Rules, Spec);
-      TokenCollection return_tokens = [.. factory.Produce(input)];
-      WorkData = return_tokens;
+      if (Tokenizer.Like(["xparser", "tokenfactory"]) || Tokenizer is null)
+      {
+        TokenFactory factory = new() { Spec = Spec };
+        Data[OutputKey] = factory.Tokenize(input);
+      }
+      else if (Tokenizer.Like(["capture", "cap"]))
+      {
+        CaptureTokenizer ctokenizer = new() { Rules = Spec };
+        Data[OutputKey] = ctokenizer.Tokenize(input);
+      }
+      else
+      {
+        throw Err.ThrowBadDef("Invalid value for tokenizer type.");
+      }
       Status = OpStatus.Pass;
     }
     else
     {
-      Status = Op.ThrowBadInput("string", $"{WorkData?.GetType()}");
+      throw Err.ThrowBadInput("string", Data[InputKey].TypeName);
     }
   }
 }

@@ -2,7 +2,7 @@ using System.Linq;
 
 namespace Specification.XML;
 
-public class XMLString () : ITextSerializer
+public class XMLString ()
 {
   private Collection<IXMLObject> Elements { get; } = [];
   private Collection<IXMLObject> Closing { get; } = [];
@@ -38,7 +38,12 @@ public class XMLString () : ITextSerializer
     Elements.Add(open);
     Closing.Add(open.ClosingElement);
   }
-  public void CloseLastElement () => Elements.Add(Closing.Pop());
+  public void CloseLastElement ()
+  {
+    if (!Closing.IsEmpty)
+      Elements.Add(Closing.Pop()!);
+  }
+
   public void AddContent (string content) => Elements.Add(new XMLContent() { Content = content });
   public void AddLineFeed ()
   {

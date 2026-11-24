@@ -7,12 +7,25 @@ global using System.Linq;
 
 global using Common;
 global using Common.Extensions;
-global using Common.Regex;
+global using Common.RegExp;
 
 global using Parser;
-global using Parser.Ops;
 global using Parser.Ops.Text;
 
 global using static Common.Names;
 
-global using ITT = Specification.INI.INITokenType;
+using System.Reflection;
+using System.Resources;
+
+[assembly: AssemblyCompany("Specification.INI")]
+#if DEBUG
+[assembly: AssemblyConfiguration("Debug")]
+#elif RELEASE
+[assembly: AssemblyConfiguration("Release")]
+#endif
+[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyInformationalVersion("1.0.0.0-Prerelease")]
+[assembly: AssemblyProduct("Specification.INI")]
+[assembly: AssemblyTitle("Specification.INI")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: NeutralResourcesLanguage("en-US")]

@@ -2,31 +2,26 @@
 
 namespace Parser.Ops.Text;
 
-public class BetweenRegexOperation ([SS("Regex")] string prefix, [SS("Regex")] string suffix, string input_key, string output_key) : Operation(input_key, output_key)
+public class BetweenRegexOperation : Operation
 {
-  protected RxS Assembled => new(@$"(?:{prefix})(?<keep>[\s\S]*?)(?:{suffix})");
-  protected Regex OpRegex => new(Assembled);
-
+  protected RxS Assembled => new(@$"({Prefix})(?<keep>[\s\S]*?)({Suffix})");
+  protected Regex OpRegex => new(Assembled, ROEC | Spec.RxOpt);
+  [SS("Regex")]
+  public required string Prefix { get; init; }
+  [SS("Regex")]
+  public required string Suffix { get; init; }
+  public required string InputKey { get; init; }
+  public required string OutputKey { get; init; }
+  private Collection<string> DoTask (string input) =>
+    [.. from item in OpRegex.Matches(input) select item.Groups["keep"].Value];
   protected override void Execute ()
   {
-    if (WorkData is null)
-    {
-      Status = OpStatus.FailBadInputNull;
-      return;
-    }
-
-    if (WorkData is string s)
-      WorkData = (from item in OpRegex.Matches(s) select item.Groups["keep"].Value).ToCollection();
-    else if (WorkData is IEnumerable<string> list)
-    {
-      /* TODO: Finish BetweenRegexOperation.DoOperation when data is IEnumerable<string> */
-      // data = list.Select(x => x.Trim()).ToCollection();
-    }
-    else
-    {
-      Status = OpStatus.FailBadInputType;
-      return;
-    }
+    Data[OutputKey] =
+      Data[InputKey] is string s ?
+        DoTask(s) :
+      Data[InputKey] is IEnumerable<string> list ?
+        list.Select(DoTask) :
+      throw Err.ThrowBadInput("string or IEnumerable<string>", Data[InputKey].TypeName);
 
     Status = OpStatus.Pass;
   }

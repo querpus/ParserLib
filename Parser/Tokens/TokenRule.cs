@@ -8,6 +8,14 @@ public class TokenRule
   public string TypeToAssign { get; set; }
   public ChkSequence GroupSequence { get; } = [];
 
+  #region Constructors
+  [SetsRequiredMembers]
+  public TokenRule (RT type, [SS("regex")] string ruleStringData)
+  {
+    TypeToAssign = "None";
+    RuleStringData = ruleStringData;
+    Type = type;
+  }
   [SetsRequiredMembers]
   public TokenRule (RT type, string typeToAssign, [SS("regex")] string ruleStringData)
   {
@@ -23,7 +31,7 @@ public class TokenRule
     TypeToAssign = typeToAssign?.ToString() ?? SE;
   }
   public TokenRule () => TypeToAssign = SE;
-  /// <summary>Use this constructor to make a basic non-recurrsive group rule.</summary>
+  /// <summary>Use this constructor to make a basic non-recursive group rule.</summary>
   /// <param name="typeToAssign">The type to assign to the assembled token.</param>
   /// <param name="ruleStringData">The assembly definition.</param>
   [SetsRequiredMembers]
@@ -33,7 +41,7 @@ public class TokenRule
     RuleStringData = ruleStringData;
     TypeToAssign = typeToAssign;
   }
-  /// <summary>Use this constructor to make a basic non-recurrsive group rule.</summary>
+  /// <summary>Use this constructor to make a basic non-recursive group rule.</summary>
   /// <param name="typeToAssign">The type to assign to the assembled token.</param>
   /// <param name="ruleStringData">The assembly definition.</param>
   [SetsRequiredMembers]
@@ -43,6 +51,8 @@ public class TokenRule
     RuleStringData = ruleStringData;
     TypeToAssign = typeToAssign?.ToString() ?? SE;
   }
+  #endregion
+  #region Static Generation
   public static TokenRule[] CopyOfRuleSet (TokenRuleCollection rules)
   {
     Collection<TokenRule> new_rules = [];
@@ -59,58 +69,48 @@ public class TokenRule
   /// <param name="type">The rule type. Should be TokenExact or SplitExact, plus any necessary modifiers.</param>
   /// <param name="typeToAssign">The type to assign. May be a single object applied to all, or a list of objects the same length as <paramref name="chars"/>.</param>
   /// <returns>An array of TokenRules.</returns>
-  public static TokenRule[] MakeSingleCharRules (string chars, RT type, object typeToAssign)
-  {
-    Collection<TokenRule> tokenRules = [];
-
-    if (string.IsNullOrEmpty(chars))
-      return [.. tokenRules];
-
-    tokenRules = typeToAssign.IsCollection()
-      ? [..
-        typeToAssign.
-        AsCollection().
-        Zip(chars).
-        Select(i => new TokenRule(type, i.First, i.Second.ToString()))]
-      : [..
-        chars.
-        ToArray().
-        AsCollection().
-        Select(i => new TokenRule(type, typeToAssign, i.ToString() ?? SE))];
-
-    return [.. tokenRules];
-  }
+  public static TokenRule[] MakeSingleCharRules (string chars, RT type, params Collection<string> typeToAssign) =>
+    string.IsNullOrEmpty(chars)
+      ? []
+      : typeToAssign.Count switch
+      {
+        1 => [.. chars.Select(single_char => new TokenRule(type, typeToAssign[0], $"{single_char}"))],
+        > 1 => [.. typeToAssign.Select((assign, index) => new TokenRule(type, assign, $"{chars[index]}"))]
+      };
   /// <summary>Creates an array of token rules representing keywords.</summary>
   /// <returns>A list of TokenMatch rules that properly exempt ranges.</returns>
-  public static TokenRule[] MakeWordMatchRules (bool ignore_case, params Collection<(string, dynamic)> rules)
+  public static TokenRule[] MakeWordMatchRules (bool ignore_case, params Collection<(string, string)> rules)
   {
     Collection<TokenRule> tokenRules = [];
 
-    if (rules.IsEmpty() || rules is null)
+    if (rules.IsEmpty || rules is null)
       return [.. tokenRules];
 
-    foreach ((string word, dynamic type) in rules)
+    string rx_ic = ignore_case ? "(?i)" : SE;
+
+    foreach ((string word, string type) in rules)
     {
-      TokenRule r = new(RT.TokenMatch | (ignore_case ? RT.IgnoreCase : RT.None), type, @$"\b{word}\b");
+      TokenRule r = new(RT.TokenMatch, type, @$"{rx_ic}\b{word}\b");
       tokenRules.Add(r);
     }
 
     return [.. tokenRules];
   }
-  public static TokenRule[] MakeWordMatchRules (bool ignore_case, params Collection<object> rules)
+  public static IEnumerable<TokenRule> MakeWordMatchRules (bool ignore_case, params Collection<string> rules)
   {
     Collection<TokenRule> tokenRules = [];
 
-    if (rules.IsEmpty() || rules is null)
+    if (rules.IsEmpty || rules is null)
       return [.. tokenRules];
 
-    foreach (object type in rules)
+    foreach (string type in rules)
     {
       TokenRule r = new(RT.TokenMatch | (ignore_case ? RT.IgnoreCase : RT.None), type, @$"\b{type}\b");
       tokenRules.Add(r);
     }
 
-    return [.. tokenRules];
+    return tokenRules;
   }
+  #endregion
   public override string ToString () => $"TokenRule ({Type} => {TypeToAssign})";
 }

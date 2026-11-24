@@ -2,18 +2,11 @@
 
 namespace Parser.Tokens;
 
-public interface IToken : IIndexSortable, IComparable<IToken>, IEquatable<IToken>
+public interface IToken : IEquatable<IToken>, Nodes.IToken
 {
+  Spec Spec { get; }
   /// <summary>Assigned at match, cleared if match fails, kept if passes.</summary>
   TokenRef? AssignTo { get; set; }
-  string Type { get; set; }
-  bool HasType { get; }
-  bool Exempt { get; set; }
-  IList<IToken> Children { get; set; }
-  string Content => Children.Select(static t => t.Content).TextJoin(" ");
-  string ContentNoNewLine => Content.
-    Replace("\n", "<LF>", SCO).
-    Replace("\r", "<CR>", SCO);
+  string ContentNoNewLine => Content.Replace(["\n", "\r"], ["<LF>", "<CR>"]).ToString(true);
   string ToString (int indent);
-  void Print (int indent);
 }

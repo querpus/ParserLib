@@ -6,7 +6,7 @@ namespace Common.Extensions;
 
 public static class TupleExtensions
 {
-  public static KeyValuePair<string, string> ToKVP (this StringTuple t) => new(t.Key, t.Value);
+  public static KeyValuePair<string, string> ToKVP (this (string Key, string Value) t) => new(t.Key, t.Value);
   public static KeyValuePair<TKey, TValue> ToKVP<TKey, TValue> (this (TKey Key, TValue Value) t) => new(t.Key, t.Value);
 }
 

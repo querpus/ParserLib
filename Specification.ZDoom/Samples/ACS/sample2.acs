@@ -1,0 +1,38 @@
+// This is a comment
+/* This too */
+int AvailableToAllScripts = 101;
+int ICanMakeArrays[3] = {3,6,9};
+
+Script 1 OPEN
+{
+    int ScriptVariable = 0;
+    while(AvailableToAllScripts == 101)
+    {
+        ScriptVariable++;
+        Delay(1);
+    }
+}
+
+script 2 ENTER
+{
+    int vang, angle;
+    while(TRUE)
+    {    
+        vang = VectorAngle (GetActorX (1) - GetActorX (0), GetActorY (1) - GetActorY (0));
+        angle = (vang - GetActorAngle (0) + 1.0) % 1.0;
+
+        if (angle < 0.2 || angle > 0.8)
+        {
+            int sx = 320 - (320 * Sin (angle) / Cos (angle));
+
+            SetHudSize (640, 480, 0);
+            HudMessage (s:"^"; HUDMSG_PLAIN, 1, CR_RED, sx * 1.0, 480.2, 0);
+        }
+        else
+        {
+            HudMessage (s:""; HUDMSG_PLAIN, 1, 0, 0, 0, 0);
+        }
+
+        Delay (1);
+    }
+}

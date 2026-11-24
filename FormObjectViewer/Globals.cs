@@ -9,11 +9,16 @@ global using Parser;
 
 global using DSV = System.ComponentModel.DesignerSerializationVisibility;
 global using DSVA = System.ComponentModel.DesignerSerializationVisibilityAttribute;
+
 using System.Reflection;
 using System.Resources;
 
 [assembly: AssemblyCompany("Parser Form Viewer")]
+#if DEBUG
 [assembly: AssemblyConfiguration("Debug")]
+#elif RELEASE
+[assembly: AssemblyConfiguration("Release")]
+#endif
 [assembly: AssemblyFlags(AssemblyNameFlags.None)]
 [assembly: AssemblyProduct("Parser Form Viewer")]
 [assembly: AssemblyTitle("Parser Form Viewer")]

@@ -22,12 +22,18 @@ public enum MsgClass
   /// <remarks>Color is black on red.</remarks>
   Critical,
   /// <summary>Displays when <see cref="LogClass.Debug"/> or <see cref="LogClass.Verbose"/> is set at program start.</summary>
-  /// <remarks>Color is white on black.</remarks>
+  /// <remarks>Color is dark blue on black.</remarks>
   BlueInfo,
+  /// <summary>Displays when <see cref="LogClass.Debug"/> or <see cref="LogClass.Verbose"/> is set at program start.</summary>
+  /// <remarks>Color is light blue on black.</remarks>
+  BlueValue,
   /// <summary>Displays when <see cref="LogClass.Debug"/> or <see cref="LogClass.Verbose"/> is set at program start.</summary>
   /// <remarks>Color is green on black.</remarks>
   GreenInfo,
   /// <summary>Not visible.</summary>
   /// <remarks>Color is black on black.</remarks>
-  Hidden
+  Hidden,
+  /// <summary>Always displays, for user input requests.</summary>
+  /// <remarks>Color is purple on black.</remarks>
+  Prompt
 }

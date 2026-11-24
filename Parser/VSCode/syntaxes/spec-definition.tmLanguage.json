@@ -1,0 +1,85 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Spec Definition",
+  "scopeName": "source.spec-definition",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#string" },
+    { "include": "#number" },
+    { "include": "#keyword" },
+    { "include": "#identifier" }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.spec-definition",
+          "match": "//.*?$"
+        },
+        {
+          "name": "comment.block.spec-definition",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.spec-definition",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.spec-definition",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.spec-definition",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.spec-definition",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "number": {
+      "patterns": [
+        {
+          "name": "constant.numeric.float.spec-definition",
+          "match": "\\b([0-9]+\\.[0-9]*|\\.[0-9]+)([eE][+-]?[0-9]+)?\\b"
+        },
+        {
+          "name": "constant.numeric.integer.spec-definition",
+          "match": "\\b([0-9]+)\\b"
+        }
+      ]
+    },
+    "keyword": {
+      "patterns": [
+        {
+          "name": "keyword.control.spec-definition",
+          "match": "\\b(Spec|Inferences|for|while|return|function|class|const|let|var)\\b"
+        },
+        {
+          "name": "keyword.type.spec-definition",
+          "match": "\\b(int|string|bool|float|void)\\b"
+        }
+      ]
+    },
+    "identifier": {
+      "patterns": [
+        {
+          "name": "variable.spec-definition",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  }
+}

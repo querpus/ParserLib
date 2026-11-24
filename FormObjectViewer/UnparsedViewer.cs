@@ -22,15 +22,10 @@ internal sealed partial class UnparsedViewer : Form
       VisualRichBox.Text = "No sections to preview.";
       return;
     }
-    SectionCollection inverse = Inverse;
 
-    int count = Sections.Count;
-    int inverse_count = inverse.Count;
-    int inverse_chars = inverse.Select<Pos, int>(p => p.Length).Sum();
-
-    SectionCountTextBox.Text = $"{count}";
-    InverseCountTextBox.Text = $"{inverse_count}";
-    InverseCharsTextBox.Text = $"{inverse_chars}";
+    SectionCountTextBox.Text = $"{Sections.Count}";
+    InverseCountTextBox.Text = $"{Inverse.Count}";
+    InverseCharsTextBox.Text = $"{Inverse.Sum(p => p.Length)}";
 
     VisualRichBox.Text = Sections.FullText;
 

@@ -1,0 +1,56 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\querpus.ipl]
+@="Intermec Printing Language"
+"DefaultIcon"=hex(2):25,00,69,00,63,00,6f,00,6e,00,73,00,25,00,5c,00,54,00,65,\
+  00,78,00,74,00,46,00,69,00,6c,00,65,00,2e,00,69,00,63,00,6f,00,00,00
+"FriendlyTypeName"="Intermec Printing Language"
+
+[HKEY_CLASSES_ROOT\querpus.acs]
+@="Doom ACS Script"
+"DefaultIcon"=hex(2):25,00,69,00,63,00,6f,00,6e,00,73,00,25,00,5c,00,54,00,65,\
+  00,78,00,74,00,46,00,69,00,6c,00,65,00,2e,00,69,00,63,00,6f,00,00,00
+"FriendlyTypeName"="Doom ACS Script"
+
+[HKEY_CLASSES_ROOT\querpus.acs.o]
+@="Compilied Doom ACS Script"
+"DefaultIcon"=hex(2):25,00,69,00,63,00,6f,00,6e,00,73,00,25,00,5c,00,54,00,65,\
+  00,78,00,74,00,46,00,69,00,6c,00,65,00,2e,00,69,00,63,00,6f,00,00,00
+"FriendlyTypeName"="Compilied Doom ACS Script"
+
+[HKEY_CLASSES_ROOT\querpus.bas]
+@="VBA Source File"
+"DefaultIcon"=hex(2):25,00,69,00,63,00,6f,00,6e,00,73,00,25,00,5c,00,54,00,65,\
+  00,78,00,74,00,46,00,69,00,6c,00,65,00,2e,00,69,00,63,00,6f,00,00,00
+"FriendlyTypeName"="VBA Source File"
+
+[HKEY_CLASSES_ROOT\querpus.txt]
+@="Text File"
+"DefaultIcon"=hex(2):25,00,69,00,63,00,6f,00,6e,00,73,00,25,00,5c,00,54,00,65,\
+  00,78,00,74,00,46,00,69,00,6c,00,65,00,2e,00,69,00,63,00,6f,00,00,00
+"FriendlyTypeName"="Text File"
+
+[HKEY_CLASSES_ROOT\.txt]
+@="querpus.txt"
+"PerceivedType"="text"
+"Content Type"="text/plain"
+
+[HKEY_CLASSES_ROOT\.ipl]
+@="querpus.ipl"
+"PerceivedType"="text"
+"Content Type"="text/plain"
+
+[HKEY_CLASSES_ROOT\.bas]
+@="querpus.bas"
+"PerceivedType"="text"
+"Content Type"="text/plain"
+
+
+[HKEY_CLASSES_ROOT\.acs]
+@="querpus.acs"
+"PerceivedType"="text"
+"Content Type"="text/plain"
+
+[HKEY_CLASSES_ROOT\.o]
+@="querpus.acs.o"
+

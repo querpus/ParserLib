@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Definition xmlns="Parser/Spec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
+  <Spec name="ini" type="text" ignore_case="true">
+    <TokenRules RegexDotMatchesNewline="false">
+      <Rule type="TokenComment">
+        <Data> ;.* </Data>
+      </Rule>
+      <Rule assign="Value" type="Competitive">
+        <Data> (?&lt;=(=))([^\\=\n;]|\\.)*(?=$|;) </Data>
+      </Rule>
+      <Rule assign="Key" type="Competitive">
+        <Data> (?&lt;=^\s*)([^\s\\=\n;]|\\.)*(?=\s*(=)) </Data>
+      </Rule>
+      <Rule assign="Eq" type="TokenExact">
+        <Data> = </Data>
+      </Rule>
+      <Rule assign="Section" type="TokenExtract">
+        <Data> \[(?&apos;keep&apos;.*?)\] </Data>
+      </Rule>
+    </TokenRules>
+    <GroupTokenRules>
+      <Rule assign="Property">
+        <Data> n:Key x:Eq v:value </Data>
+      </Rule>
+    </GroupTokenRules>
+    <Instructions>
+      <Label name="Start"/>
+      <Tokenize input_var="text" output_var="tokens" tokenizer="xparser"/>
+      <Print check_var="tokens"/>
+      <TokenAssemble input_var="tokens" output_var="token_groups"/>
+      <Print check_var="tokengroups"/>
+      <Terminate success="true"/>
+    </Instructions>
+    <FileInferences initial="or">
+      <Extension>ini</Extension>
+      <Extension>vnc</Extension>
+      <Extension>url</Extension>
+      <Extension>inf</Extension>
+    </FileInferences>
+  </Spec>
+</Definition>

@@ -1,6 +1,7 @@
 #pragma warning disable CA1416 // Validate platform compatibility
 #pragma warning disable CA1812 // Remove unused classes
 
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -18,22 +19,8 @@ namespace FormObjectViewer;
 
 internal sealed partial class ParserForm : Form
 {
+  private Library Lib { get; }
   private bool ItemsChanged { get; set; }
-  private List<Spec> SpecList { get; } = [
-      Specification.ZDoom.Definition.ACS,
-      Specification.ZDoom.Definition.ModelDef,
-      Specification.ZDoom.Definition.ACS,
-      Specification.INI.Definition.Spec,
-      Specification.IPL.Definition.Spec,
-      Specification.JSON.Definition.Spec,
-      Specification.REG.Definition.Spec,
-      Specification.XML.Definition.Spec,
-      Specification.ZDoom.Definition.MapInfo,
-      Specification.ZDoom.Definition.SndInfo,
-      Specification.ZDoom.Definition.UDMF,
-      Specification.ZDoom.Definition.ZScript,
-
-    ];
   public BindingList<string> TokenRules { get; } = [
       "TokenMatch",
       "TokenExact",
@@ -44,16 +31,20 @@ internal sealed partial class ParserForm : Form
       "StoreExtra",
       "StoreOther",
     ];
-  private Spec LoadedSpec => SpecComboBox.SelectedIndex >= 0 ? SpecList[SpecComboBox.SelectedIndex] : DefaultSpec.Unknown;
+  private Spec LoadedSpec => SpecComboBox.SelectedIndex >= 0 ? Lib.Values.At(SpecComboBox.SelectedIndex) : Lib["unknown"];
   private readonly BindingList<TokenRule> _workingRules = [];
   private readonly BindingList<TokenRule> _workingGroupRules = [];
   private readonly BindingList<IToken> _currentTokens = [];
   [AllowNull]
   private SectionCollection _sections;
   private string _parseFile = "";
-  private TokenFactory? _factory = new();
+  private TokenFactory? _factory;
 
-  public ParserForm () => InitializeComponent();
+  public ParserForm ()
+  {
+    InitializeComponent();
+    Lib = Library.InitializeLibrary(AppDomain.CurrentDomain);
+  }
 
   private void UpdateCounts ()
   {
@@ -79,8 +70,7 @@ internal sealed partial class ParserForm : Form
 
   private void LoadSpecList (object sender, EventArgs e)
   {
-    List<string> specNames = [.. SpecList.Select(i => i.Name)];
-    SpecComboBox.DataSource = specNames;
+    SpecComboBox.DataSource = (Collection<string>) [.. Lib.Values.Select(spec => spec.Name)];
     LoadParseFileButton.Enabled = true;
     LoadRulesButton.Enabled = true;
     LoadRulesFileButton.Enabled = true;
@@ -167,7 +157,7 @@ internal sealed partial class ParserForm : Form
       return;
     }
 
-    _factory = new(_workingRules, LoadedSpec);
+    _factory = new(LoadedSpec, _workingRules);
 
     foreach (IToken token in _factory.Produce(contents))
     {
@@ -220,7 +210,6 @@ internal sealed partial class ParserForm : Form
     maker.AddLineFeed();
     foreach (TokenRule rule in _workingRules)
     {
-
       maker.AddElementOpen("Rule", [("index", $"{counter++}")]);
       maker.AddLineFeed();
       maker.AddElementOpen("Type");
@@ -296,9 +285,6 @@ internal sealed partial class ParserForm : Form
       _workingRules[e.RowIndex].Type = editForm.Original.Type;
       _workingRules[e.RowIndex].TypeToAssign = editForm.Original.TypeToAssign;
     }
-    else
-      this.DoNothing();
-
     editForm.Dispose();
     TokenRuleDataGrid.Refresh();
     UpdateCounts();

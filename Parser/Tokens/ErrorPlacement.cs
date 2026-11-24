@@ -63,14 +63,14 @@ public class ErrorPlacement
   public void WritePrevLine ()
   {
     LogHead(_mcHead);
-    LogPart(_mcPrev, $"  ");
+    LogPart(_mcPrev, "  ");
     LogPart(_mcPrev, _prevLine);
     NewLine();
   }
   public void WriteErrorLine ()
   {
     LogHead(_mcHead);
-    LogPart(_mcPrev, $"> ");
+    LogPart(_mcPrev, "> ");
     if (_startOuter == 0)
     {
       LogPart(_mcOuter, _errorLine[0.._startInner]);
@@ -95,7 +95,7 @@ public class ErrorPlacement
   public void WritePointLine ()
   {
     LogHead(_mcHead);
-    LogPart(_mcPrev, $"  ");
+    LogPart(_mcPrev, "  ");
     LogPart(_mcPrev, new string(' ', _pointCol - 1));
     LogPart(_mcPrev, "^");
     NewLine();

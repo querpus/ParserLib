@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Definition xmlns="Parser/Spec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
+  <Spec>
+    <Name>ini</Name>
+    <TextFile>true</TextFile>
+    <CaseInsensitive>true</CaseInsensitive>
+    <TokenRules>
+      <Rule>
+        <TypeToAssign>None</TypeToAssign>
+        <Type>TokenComment</Type>
+        <Data> ;.* </Data>
+      </Rule>
+      <Rule>
+        <TypeToAssign>Value</TypeToAssign>
+        <Type>Competitive</Type>
+        <Data>
+          (?&lt;=(=))([^\\=\n;]|\\.)*(?=$|;)
+        </Data>
+      </Rule>
+      <Rule>
+        <TypeToAssign>Key</TypeToAssign>
+        <Type>Competitive</Type>
+        <Data>
+          (?&lt;=^\s*)([^\s\\=\n;]|\\.)*(?=\s*(=))
+        </Data>
+      </Rule>
+      <Rule>
+        <TypeToAssign>Eq</TypeToAssign>
+        <Type>TokenExact</Type>
+        <Data> = </Data>
+      </Rule>
+      <Rule>
+        <TypeToAssign>Section</TypeToAssign>
+        <Type>TokenExtract</Type>
+        <Data> \[(?&apos;keep&apos;.*?)\] </Data>
+      </Rule>
+    </TokenRules>
+    <GroupTokenRules>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>Property</TypeToAssign>
+        <Data>
+          n:Key x:Eq v:value
+        </Data>
+      </Rule>
+    </GroupTokenRules>
+    <Instructions>
+      <Label name="Start"/>
+      <Tokenize input_var="text" output_var="tokens"/>
+      <Print check_var="tokens"/>
+      <TokenAssemble input_var="tokens" output_var="token_groups"/>
+      <Print check_var="tokengroups"/>
+      <Terminate success="true"/>
+    </Instructions>
+    <TokenConstructs allow_unlisted="false">
+      <Construct tokentype="Section" class="INISection">
+        <PropertyList tokentype="Property" class="PropertyObj">
+          <Name tokentype="Key" class="string"/>
+          <Value tokentype="Value" class="string"/>
+        </PropertyList>
+      </Construct>
+    </TokenConstructs>
+    <FileInferences initial="or">
+      <Extension>ini</Extension>
+      <Extension>vnc</Extension>
+      <Extension>url</Extension>
+      <Extension>inf</Extension>
+    </FileInferences>
+  </Spec>
+</Definition>

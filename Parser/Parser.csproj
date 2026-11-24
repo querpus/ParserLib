@@ -1,36 +1,44 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Project Sdk="Microsoft.NET.Sdk" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
   <PropertyGroup>
     <AnalysisLevel>preview-all</AnalysisLevel>
-    <DefaultLanguage>en-US</DefaultLanguage>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NuGetAuditLevel>low</NuGetAuditLevel>
-    <NuGetAuditMode>all</NuGetAuditMode>
-    <Platforms>AnyCPU;x86;x64</Platforms>
+    <NoWarn>AD0001</NoWarn>
     <TargetFramework>net11.0</TargetFramework>
-    <UserSecretsId>37d036cf-7713-4a90-a266-751a9fd18f93</UserSecretsId>
-    <Version>1.0.0</Version>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="V2\" />
-    <EmbeddedResource Remove="V2\" />
-    <None Remove="V2\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Samples\demon.zs" />
-    <Content Include="Samples\label.ipl" />
-    <Content Include="Samples\sample.cfg" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="11.0.0-preview.2.26159.112" />
-    <PackageReference Include="System.Drawing.Common" Version="11.0.0-preview.2.26159.112" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Parser.Nodes\Parser.Nodes.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content CopyToOutputDirectory="Always" Include="Specs\*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Schemas\ETokenizer.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
 
 </Project>

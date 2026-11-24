@@ -1,17 +1,78 @@
-using Parser.Exceptions;
+using System.Xml.Linq;
+
+using Parser.Nodes;
 
 namespace Parser.Inference;
 
-public class InferenceNode (IT type, string content) : IInferenceNode
+public static class InferenceNodeFactory
 {
-  /// <inheritdoc/>
-  public string Content { get; } = content;
+  private static InferenceNodeGroup GetGroup (IT type, XMLElementNode root)
+  {
+    IEnumerable<XMLElementNode> children = root.Children.OfType<XMLElementNode>();
 
-  public IT Type { get; } = type;
+    return new InferenceNodeGroup(children.Select(Produce), type);
+  }
+  public static InferenceNode Produce (XElement? element)
+  {
+    if (element is null)
+      return new InferenceNodeGroup(IT.Or);
+    var tokens = new CaptureTokenizer() { Rules = StandardRuleSets.XMLTokenRuleSet }.Tokenize(element.ToString());
+    var tp = new CaptureTokenProcessor(tokens, StandardRuleSets.XMLRuleSet);
+    tp.Process();
+    return Produce(tp.Context?.Root as XMLElementNode);
+  }
+  public static InferenceNode Produce (XMLElementNode? root)
+  {
+    if (root is null)
+      return new InferenceNodeGroup(IT.Or);
 
-  /// <inheritdoc/>
-  /// <exception cref="InvalidFileInferenceException"/>
-  public bool CheckFile (string filepath)
+    InferenceNode result;
+    if (root.LocalName == "FileInferences")
+    {
+      ISerializable? initial = root.Attributes.TryGetValue("initial", out INode? value) ? value : null;
+      bool isAnd = false;
+      if (initial is not null)
+      {
+        isAnd = new QString(initial.Serialize()).Value.Like("And");
+      }
+      else
+      {
+        Log(MsgClass.Warning, "InferenceNode Initial attribute undfined.", "InferenceNodeFactory");
+      }
+
+      IT groupType = isAnd ? IT.And : IT.Or;
+
+      result = GetGroup(groupType, root);
+    }
+    else if (root.LocalName == "Or")
+    {
+      result = GetGroup(IT.Or, root);
+    }
+    else if (root.LocalName == "And")
+    {
+      result = GetGroup(IT.And, root);
+    }
+    else
+    {
+      IT type = root.Name switch
+      {
+        "Extension" => IT.Ext,
+        "Header" => IT.FileHeader,
+        _ => IT.None
+      };
+      result = new(type, root.Children.Serialize());
+    }
+    return result;
+  }
+}
+
+public record InferenceNode (IT Type, string Content)
+{
+  /// <summary>Checks a file and determines if it satisfies the inference node.</summary>
+  /// <param name="filepath">Path to the file.</param>
+  /// <returns><see langword="true"/> if the node is satisfied, <see langword="false"/> otherwise.</returns>
+  /// <exception cref="InvalidFileInferenceException"></exception>
+  public virtual bool CheckFile (string filepath)
   {
     string getHeader ()
     {
@@ -35,16 +96,19 @@ public class InferenceNode (IT type, string content) : IInferenceNode
     bool
       useSize = false;
 
-    StringComparison
-      caseCheck = SCOIC;
+    StringComparison caseCheck = SCOIC;
 
     long
       size = new FileInfo(filepath).Length;
 
     if (type(IT.Ext))
+    {
       value = ext;
+    }
     else if (type(IT.FName))
+    {
       value = name;
+    }
     else if (Type.HasFlag(IT.FileContent))
     {
       caseCheck = SCO;
@@ -56,7 +120,9 @@ public class InferenceNode (IT type, string content) : IInferenceNode
       value = getHeader();
     }
     else
-      useSize = Type.HasFlag(IT.FileSize) ? true : throw new InvalidFileInferenceException();
+    {
+      useSize = type(IT.FileSize) ? true : throw new InvalidFileInferenceException();
+    }
 
     bool result = false;
 
@@ -81,6 +147,6 @@ public class InferenceNode (IT type, string content) : IInferenceNode
         result = size < long.Parse(Content, CIIC);
     }
 
-    return not ? !result : result;
+    return result ^ not;
   }
 }

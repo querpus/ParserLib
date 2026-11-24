@@ -1,0 +1,60 @@
+{
+  "name": "JSON",
+  "description": "Basic JSON highlighting",
+  "sampleText": "{\n  \"JSONDocument\": [ false, 34, 0x7fff, 3.3, null, 'single' ]\n}",
+  "author": "Querpus",
+  "scopeName": "text.json",
+  "rangeExtensionType": {
+    "default": "lookAround1000"
+  },
+  "listCompletionDefinitions": [
+    {
+      "comment": "",
+      "enabled": true,
+      "match": "(^[  |\\t]+)()(.*)",
+      "sequencePadding": "0",
+      "captures": {
+        "indent": "1",
+        "prefix": "2",
+        "line": "3",
+        "sequence": ""
+      },
+      "replacements": {
+      }
+    }
+  ],
+  "fileExtensions": [
+    "json"
+  ],
+  "patterns": [
+    {
+      "match": "(\"(?:\\\\.|[^\\\"])*\")\\s*(:)\\s*",
+      "exclusive": true,
+      "comment": "Key",
+      "captures": {
+        "1": { "scope": "code.literal" },
+        "2": { "scope": "code.punctuation" } }
+    },{
+      "match": "([\"'])((?>\\.|[^\\\"])*)\\1",
+      "exclusive": true,
+      "comment": "String value",
+      "captures": { "0": { "scope": "code.literal" } }
+    },{
+      "match": "-?\\d*\\.\\d+|-?\\d+\\.?\\d*|-?0[xX][a-fA-F0-9]{1,16}",
+      "exclusive": true,
+      "comment": "Number literal",
+      "captures": { "0": { "scope": "code.literal" } }
+    },{
+      "match": "\\b(true|false|null|undefined)\\b",
+      "exclusive": true,
+      "comment": "JSON Keyword",
+      "captures": { "0": { "scope": "code.keyword" } }
+    },{
+      "match": "[{}\\[\\];(),:]",
+      "exclusive": true,
+      "comment": "Punctuation",
+      "captures": { "0": { "scope": "code.punctuation" } }
+    }
+  ],
+  "navigationPatterns": []
+}

@@ -2,47 +2,42 @@
 
 namespace Parser.Tokens;
 
-public class Token : IToken, IPrintable
+public sealed class Token : IToken
 {
+  public string Delim { get; init; } = " ";
   public TokenRef? AssignTo { get; set; }
+  public required Spec Spec { get; init; }
   public string Content { get; set; } = SE;
   // Calculated Properties
   public int LastPosition => Index + Length - 1;
   public int Length => Content.Length;
-  public bool Exempt { get; set; }
   public int Index { get; init; }
-  public string Type { get; set; } = SE;
-  public IList<IToken> Children { get; set; } = [];
-  public virtual int Count => Children.Count;
+  public string Type { get => field.IsEmpty ? field = "None" : field; set; }
+  public IToken? Parent { get; set; }
   public bool HasType => Type is not null;
+
+  string Nodes.IToken.Type => Type;
+
+  bool IPrintable.HasHeaderLine => false;
+
+  int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
   public override string ToString () => $"{Type} : {Content}";
   public string ToString (int indent) => $"{Type} : {Content}";
   public void Print (int indent)
   {
-    LogPart(MsgClass.Forced, $"{Type}");
-    LogPart(MsgClass.BlueInfo, $" : ");
-    if (Count is 0 or 1)
-    {
-      LogPart(MsgClass.GreenInfo, Content);
-    }
-    else
-    {
-      foreach (IToken t in Children)
-      {
-        NewLine();
-        LogPart(MsgClass.Forced, new(' ', indent));
-        t.Print(indent + IPrintable.TabSize);
-      }
-    }
+    LogPart(MsgClass.BlueValue, $"{Type}");
+    LogPart(MsgClass.Warning, " : ");
+    LogPart(MsgClass.GreenInfo, ((IToken) this).ContentNoNewLine.ToString(true));
   }
   public override bool Equals (object? obj) => obj is IToken rt && Equals(rt);
   public override int GetHashCode () => HashCode.Combine(Content, Index, Type);
-  public int CompareTo (IToken? other) => Index.CompareTo(other?.Index);
-  public virtual bool Equals (IToken? other) => GetHashCode() == other?.GetHashCode();
+  public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
+  public bool Equals (IToken? other) => GetHashCode() == other?.GetHashCode();
+  public string Serialize () => Content;
   public static bool operator == (Token left, IToken right) => left is null ? right is null : left.Equals(right);
   public static bool operator != (Token left, IToken right) => !(left == right);
   public static bool operator < (Token left, IToken right) => left is null ? right is not null : left.CompareTo(right) < 0;
   public static bool operator <= (Token left, IToken right) => left is null || left.CompareTo(right) <= 0;
-  public static bool operator > (Token left, IToken right) => left is not null && left.CompareTo(right) > 0;
+  public static bool operator > (Token left, IToken right) => left?.CompareTo(right) > 0;
   public static bool operator >= (Token left, IToken right) => left is null ? right is null : left.CompareTo(right) >= 0;
 }

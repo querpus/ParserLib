@@ -3,30 +3,39 @@ using Parser.Ops.Text;
 
 using static Parser.DefinitionStaticFunctions;
 
-using RTT = Specification.REG.RegTokenType;
-
 namespace Specification.REG;
 
-[Flags]
 public enum RegTokenType
 {
   None,
 
   Head,
   KeyPart,
-  AddVal, SubVal,
-  AddDefVal, SubDefVal,
-  DWordHex, QWordHex,
-  HexPair, HexOne,
+  AddVal,
+  SubVal,
+  AddDefVal,
+  SubDefVal,
+  DWordHex,
+  QWordHex,
+  HexPair,
+  HexOne,
   AInt,
-  Co, Eq,
-  Sl, Cm,
-  Bo, Bc,
-  Po, Pc,
-  At, Mn,
-  TypeName, Key,
-  AddKey, RemKey,
-  AddProp, RemProp,
+  Co,
+  Eq,
+  Sl,
+  Cm,
+  Bo,
+  Bc,
+  Po,
+  Pc,
+  At,
+  Mn,
+  TypeName,
+  Key,
+  AddKey,
+  RemKey,
+  AddProp,
+  RemProp,
 };
 
 /// <summary>Defines the registry spec.</summary>
@@ -51,26 +60,35 @@ public static class Definition
     Name = "reg",
     FileInferences = [IfN(ExtIs, "reg")],
     Operations = [
-      new ReplaceOperation([
-        (@"\;.*$", ""), //Remove line comments
-        (@"^\s+", ""), //Remove beginning ws
-        (@"\s+$", ""), //Remove ending ws
-        (@"\s*\=\s*", "="), //Remove ws around eq sign
-        (@"\\" + RX.LnEnd, "") //Remove escaped newlines
-      ], "text", "text"){
+      new ReplaceOperation()
+      {
+        Nodes = [
+          (@"\;.*$", ""), //Remove line comments
+          (@"^\s+", ""), //Remove beginning ws
+          (@"\s+$", ""), //Remove ending ws
+          (@"\s*\=\s*", "="), //Remove ws around eq sign
+          (@"\\" + RX.LnEnd, "]") //Remove escaped newlines
+        ],
+        InputKey = "text",
+        OutputKey = "text"
       },
-      new TokenizeOperation("text", "tokens"),
-      new TokenAssembleOperation("tokens", "tokens_assembled")
+      new TokenizeOperation
+      {
+        InputKey = "text",
+        OutputKey = "tokens",
+        Tokenizer = "xparser"
+      },
+      new TokenAssembleOperation
+      {
+        InputKey = "tokens",
+        OutputKey = "tokens_assembled"
+      }
       ],
     TokenRules = [
-      new(RT.TokenExact, RTT.Eq, "=")
+      new(RT.TokenExact, "Eq", "=")
     ],
     IsTextFile = true,
     RxOpt = ROIPW | ROEC | ROML,
     SC = SCOIC,
   };
-  private static object Generate<TOut> () where TOut : class, new()
-  {
-    return new();
-  }
 }

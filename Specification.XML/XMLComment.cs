@@ -6,6 +6,6 @@ public sealed class XMLComment () : IXMLObject
   public string Content { get; set; } = SE;
   string IXMLObject.Tag => Content;
 
-  public string Serialize () => $"<!--{Content}-->";
+  public string Serialize () => $"<!-- {Content} -->";
   public override string ToString () => Serialize();
 }

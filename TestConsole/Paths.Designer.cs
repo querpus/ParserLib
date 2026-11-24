@@ -61,60 +61,6 @@ namespace TestConsole {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.WAD\WAD.txt.
-        /// </summary>
-        public static string binparse_wad {
-            get {
-                return ResourceManager.GetString("binparse_wad", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.INI\Samples\default.ini.
-        /// </summary>
-        public static string ini_vncdefault {
-            get {
-                return ResourceManager.GetString("ini_vncdefault", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.IPL\Samples\6456 batch.txt.
-        /// </summary>
-        public static string ipl_batch6456 {
-            get {
-                return ResourceManager.GetString("ipl_batch6456", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.IPL\Samples\6458 batch.txt.
-        /// </summary>
-        public static string ipl_batch6458 {
-            get {
-                return ResourceManager.GetString("ipl_batch6458", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Parser\Samples\label.ipl.
-        /// </summary>
-        public static string ipl_label {
-            get {
-                return ResourceManager.GetString("ipl_label", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.IPL\Samples\simple.txt.
-        /// </summary>
-        public static string ipl_simple {
-            get {
-                return ResourceManager.GetString("ipl_simple", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to ParserLib\Specification.JSON\Samples\errors.json.
         /// </summary>
         public static string json_error {
@@ -133,29 +79,11 @@ namespace TestConsole {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.REG\Resources\Types\dllfile.reg.
+        ///   Looks up a localized string similar to ParserLib\Specification.JSON\Samples\stations.json.
         /// </summary>
-        public static string reg_dllfile {
+        public static string json_stations {
             get {
-                return ResourceManager.GetString("reg_dllfile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.REG\Resources\Types\ipl.reg.
-        /// </summary>
-        public static string reg_iplfile {
-            get {
-                return ResourceManager.GetString("reg_iplfile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.WAD\Samples\PL2.WAD.
-        /// </summary>
-        public static string wad_pl2 {
-            get {
-                return ResourceManager.GetString("wad_pl2", resourceCulture);
+                return ResourceManager.GetString("json_stations", resourceCulture);
             }
         }
         
@@ -178,7 +106,7 @@ namespace TestConsole {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.XML\Schemas\specification.xsd.
+        ///   Looks up a localized string similar to ParserLib\Parser\Schemas\Spec.xsd.
         /// </summary>
         public static string xsd_specification {
             get {

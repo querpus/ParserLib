@@ -4,55 +4,71 @@ namespace Common.Extensions;
 
 public static class IDictionaryExtensions
 {
-  public static bool ContainsKey (this IDictionary<string, object> dic, IEnumerable<string> list) =>
-    dic is not null && list is not null && list.Any(dic.ContainsKey);
-  public static bool ContainsKey (this IDictionary<string, string> dic, IEnumerable<string> list) =>
-    dic is not null && list is not null && list.Any(dic.ContainsKey);
-  public static bool ContainsKey<TKey, TValue> (this IDictionary<TKey, TValue> dic, IEnumerable<TKey> list) =>
-    dic is not null && list is not null && list.Any(dic.ContainsKey);
-  public static IDictionary<TKey, TValue> Concat<TKey, TValue> (this IDictionary<TKey, TValue> current, IDictionary<TKey, TValue> addition, bool overwrite = true) where TKey : notnull
+  extension(IDictionary<string, string> dic)
   {
-    Dictionary<TKey, TValue> result = [];
+    public bool ContainsKey (IEnumerable<string> list) =>
+      dic is not null && list?.Any(dic.ContainsKey) == true;
+    public void Print (int indent)
+    {
+      var str_indent = new string(' ', indent);
+      var child_indent = new string(' ', indent + 2);
+      Debug.Log(MsgClass.GreenInfo, str_indent + "Dictionary", dic);
+      foreach (var item in dic)
+      {
+        Debug.Log(MsgClass.GreenInfo, child_indent + item.Key + " : " + item.Value, dic);
+      }
+    }
+  }
+  extension(IDictionary<string, object> dic)
+  {
+    public bool ContainsKey (IEnumerable<string> list) =>
+      dic is not null && list?.Any(dic.ContainsKey) == true;
+    public void Print (int indent)
+    {
+      var str_indent = new string(' ', indent);
+      var child_indent = new string(' ', indent + 2);
+      Debug.Log(MsgClass.GreenInfo, str_indent + "Dictionary", dic);
+      foreach (var item in dic)
+      {
+        Debug.Log(MsgClass.GreenInfo, child_indent + item.Key + " : " + item.Value, dic);
+      }
+    }
+  }
+  extension<TKey> (IDictionary<TKey, object> dic) where TKey : notnull
+  {
+    public bool TryGetValueAs<TValue> (TKey key, [MaybeNullWhen(false)][NotNullWhen(true)] out TValue? value)
+    {
+      bool result = dic.TryGetValue(key, out object? temp);
 
-    if (current is not null)
-      foreach (KeyValuePair<TKey, TValue> kvp in current)
-        result[kvp.Key] = kvp.Value;
-    if (addition is not null)
-      foreach (KeyValuePair<TKey, TValue> kvp in addition)
-        if (overwrite || !result.ContainsKey(kvp.Key))
+      value = (TValue?) temp;
+
+      return value is not null && result;
+    }
+  }
+  extension<TKey, TValue> (IDictionary<TKey, TValue> dic) where TKey : notnull
+  {
+    public bool ContainsKey (IEnumerable<TKey> list) =>
+      dic is not null && list?.Any(dic.ContainsKey) == true;
+    public IDictionary<TKey, TValue> Concat (IDictionary<TKey, TValue> addition, bool overwrite = true)
+    {
+      Dictionary<TKey, TValue> result = [];
+
+      if (dic is not null)
+      {
+        foreach (KeyValuePair<TKey, TValue> kvp in dic)
           result[kvp.Key] = kvp.Value;
+      }
 
-    return result;
-  }
-  public static IDictionary<TKey, object> Concat<TKey> (this IDictionary<TKey, object> current, IDictionary<TKey, object> addition, bool overwrite = true) where TKey : notnull
-  {
-    Dictionary<TKey, object> result = [];
+      if (addition is not null)
+      {
+        foreach (KeyValuePair<TKey, TValue> kvp in addition)
+        {
+          if (overwrite || !result.ContainsKey(kvp.Key))
+            result[kvp.Key] = kvp.Value;
+        }
+      }
 
-    if (current is not null)
-      foreach (KeyValuePair<TKey, object> kvp in current)
-        result[kvp.Key] = kvp.Value;
-    if (addition is not null)
-      foreach (KeyValuePair<TKey, object> kvp in addition)
-        if (overwrite || !result.ContainsKey(kvp.Key))
-          result[kvp.Key] = kvp.Value;
-
-    return result;
-  }
-  public static IDictionary<TKey, object?> Nullify<TKey> (this IDictionary<TKey, object> current) where TKey : notnull
-  {
-    Dictionary<TKey, object?> result = [];
-    current.ThrowIfNull();
-    foreach (KeyValuePair<TKey, object> kvp in current)
-      result.Add(kvp.Key, kvp.Value);
-    return result;
-  }
-  public static IDictionary<TKey, object> Denullify<TKey> (this IDictionary<TKey, object?> current) where TKey : notnull
-  {
-    Dictionary<TKey, object> result = [];
-    current.ThrowIfNull();
-    foreach (KeyValuePair<TKey, object?> kvp in current)
-      if (kvp.Value is not null)
-        result.Add(kvp.Key, kvp.Value);
-    return result;
+      return result;
+    }
   }
 }

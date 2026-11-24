@@ -1,71 +1,81 @@
+using Parser.Nodes;
+
 namespace Parser.Tokens;
 
 /// <summary>A collection of tokens, use this to keep token operations consistent.</summary>
-public sealed class TokenCollection () : IList<IToken>, IToken
+public sealed class TokenCollection () : IReadOnlyList<IToken>, IMultiToken, IPrintable, IToken
 {
+  #region Private Fields
   /// <summary>The internal token list.</summary>
-  private List<IToken> _tokens = [];
-  private readonly Type _restrictedTo = typeof(IToken);
+  private readonly List<Nodes.IToken> _tokens = [];
+  #endregion
+
   public TokenRef? AssignTo { get; set; }
+
   /// <summary>Creates the collection from a collection of tokens.</summary>
   /// <param name="tokens">The tokens to add to the list.</param>
   public TokenCollection (IEnumerable<IToken> tokens) : this() => _tokens = tokens.Any() ? [.. tokens] : [];
-
-  /// <summary>Gets or sets the token at a given index.</summary>
-  /// <param name="index">The index to modify or retrieve.</param>
+  public Spec Spec => (_tokens[0] as IToken)!.Spec;
+  /// <summary>Gets the token at a given index.</summary>
+  /// <param name="index">The index to retrieve.</param>
   /// <returns>A token at the specified index.</returns>
-  public IToken this[int index]
-  {
-    get => _tokens[index];
-    set => _tokens[index] = value;
-  }
+  public IToken this[int index] => (IToken) _tokens[index];
+  int IComparable.CompareTo (object? other) => CompareTo(other is IIndexSortable isort ? isort : null);
 
   public int Count => _tokens.Count;
-  bool ICollection<IToken>.IsReadOnly => false;
-
   public string Type { get; set; } = SE;
-  public bool HasType => Type.IsNotEmpty() && !Type.Like("None");
-  bool IToken.Exempt { get; set; }
-  public IList<IToken> Children
-  {
-    get => _tokens;
-    set => _tokens = [.. value];
-  }
+  public string Delim { get; init; } = " ";
+
+  public bool HasType => !(Type is null or "-" or EmptyString || Type.Like("None"));
+  public IToken? Parent { get; set; }
+  public IList<Nodes.IToken> Children => _tokens;
   public int Index => _tokens.Count > 0 ? _tokens[0].Index : -1;
+  public string ContentNoNewLine => this.ToString(true);
+  string Nodes.IToken.Content => Children.Select(c => c.Content).TextJoin(Delim);
+
+  string Nodes.IToken.Type => Type;
+
+  bool IPrintable.HasHeaderLine => true;
+
+  IList<Nodes.IToken> IMultiToken.Children => Children;
 
   public void Add (IToken item)
   {
     item.ThrowIfNull();
-    if (item.GetType().IsAssignableTo(_restrictedTo))
-      _tokens.Add(item);
-    else
-      throw new InvalidOperationException("Cannot add token to list.");
+    _tokens.Add(item);
   }
   public void Print (int indent)
   {
-    LogPart(MsgClass.BlueInfo, $"({Count} Tokens)");
-    foreach (IToken item in _tokens)
+    string sp = new(' ', indent);
+    DebugIn(this.TypeName, nameof(Print));
+    if (Count == 0)
     {
-      NewLine();
-      LogPart(MsgClass.Forced, new(' ', indent));
-      item.Print(indent + 2);
+      LogPart(MsgClass.Error, "Empty Token List Printed. Check Why.");
     }
+    if (Count == 1)
+    {
+      _tokens[0].Print(indent);
+    }
+    else
+    {
+      LogPart(MsgClass.GreenInfo, $"({Count} Tokens)");
+      foreach (var item in _tokens)
+      {
+        NewLine();
+        LogPart(MsgClass.BlueValue, sp);
+        item.Print(indent + 2);
+      }
+    }
+    DebugOut();
   }
   public void Clear () => _tokens.Clear();
-  bool ICollection<IToken>.Contains (IToken item) => _tokens.Contains(item);
-  void ICollection<IToken>.CopyTo (IToken[] array, int arrayIndex) => _tokens.CopyTo(array, arrayIndex);
-  public IEnumerator<IToken> GetEnumerator () => _tokens.GetEnumerator();
-  public int IndexOf (IToken item) => _tokens.IndexOf(item);
+  public IEnumerator<IToken> GetEnumerator () => _tokens.Cast<IToken>().GetEnumerator();
   public void Insert (int index, IToken item)
   {
     item.ThrowIfNull();
-    if (item.GetType().IsAssignableTo(_restrictedTo))
-      _tokens.Insert(index, item);
-    else
-      throw new InvalidOperationException("Cannot add token to list.");
+    _tokens.Insert(index, item);
   }
-  public bool Remove (IToken item) => _tokens.Remove(item);
-  public void RemoveAt (int index) => _tokens.RemoveAt(index);
+
   IEnumerator IEnumerable.GetEnumerator () => GetEnumerator();
 
   /// <summary>Removes <paramref name="count"/> from the collection starting at <paramref name="first"/>.</summary>
@@ -81,29 +91,35 @@ public sealed class TokenCollection () : IList<IToken>, IToken
   }
 
   public void SortByIndex () => _tokens.Sort((item, item2) => item.CompareTo(item2));
+
   internal string GetContent () => Count == 0 ? SE : _tokens.Select(s => s.Content).Aggregate((first, second) => $"{first} {second}");
+
   public override string ToString () => $"TokenCollection Type {ListString(2)}";
+
   public string ToString (int indent) => ListString(indent);
+
   public string ListString (int indent)
   {
     string indent2 = new(' ', indent);
-    string ret = $"{(Type.IsEmpty() ? "None" : Type)} : {Count} Items";
+    string ret = $"{(Type.IsEmpty ? "None" : Type)} : {Count} Items";
 
-    foreach (IToken item in _tokens)
+    foreach (var item in _tokens)
     {
       ret += $"\n{indent2}{item}";
     }
     return ret;
   }
-
-  public int CompareTo (IToken? other) => Index.CompareTo(other?.Index);
+  public string Serialize () => _tokens.TextJoin(Delim);
+  public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
   public bool Equals (IToken? other) => other is TokenCollection tc && _tokens.SequenceEqual(tc._tokens);
-  public override bool Equals (object? obj) => ReferenceEquals(this, obj) || obj is not null && obj is TokenCollection tc && Equals(tc);
+  public override bool Equals (object? obj) => obj is not null && obj is TokenCollection tc && Equals(tc);
   public override int GetHashCode () => _tokens.GetHashCode();
+  void IMultiToken.Add (Nodes.IToken token) => Children.Add(token);
+
   public static bool operator == (TokenCollection left, TokenCollection right) => left is null ? right is null : left.Equals(right);
   public static bool operator != (TokenCollection left, TokenCollection right) => !(left == right);
   public static bool operator < (TokenCollection left, TokenCollection right) => left is null ? right is not null : left.CompareTo(right) < 0;
   public static bool operator <= (TokenCollection left, TokenCollection right) => left is null || left.CompareTo(right) <= 0;
-  public static bool operator > (TokenCollection left, TokenCollection right) => left is not null && left.CompareTo(right) > 0;
+  public static bool operator > (TokenCollection left, TokenCollection right) => left?.CompareTo(right) > 0;
   public static bool operator >= (TokenCollection left, TokenCollection right) => left is null ? right is null : left.CompareTo(right) >= 0;
 }

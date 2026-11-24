@@ -1,7 +1,6 @@
-using Parser.Tokens;
+using Parser.Nodes;
 
 using static Parser.DefinitionStaticFunctions;
-using static Parser.Tokens.TokenRule;
 using static Parser.Tokens.TokenRuleType;
 
 namespace Specification.INI;
@@ -18,28 +17,29 @@ public static class Definition
     FileInferences = [
       IfN(ExtIs, "ini"),
       IfN(ExtIs, "vnc"),
+      IfN(ExtIs, "url"),
       IfN(ExtIs, "inf")],
     RxOpt = ROML | ROIPW | ROEC | ROIC,
     IsTextFile = true,
     SC = SCOIC,
-    TokenType = typeof(ITT),
 
     Operations = [
-      new TokenizeOperation(),
-      new TokenAssembleOperation(),
-      Op.End],
+      new TokenizeOperation { InputKey = "text", OutputKey = "tokens", Tokenizer = "xparser" },
+      new TokenAssembleOperation { InputKey = "tokens", OutputKey = "tokens_assembled" },
+    ],
 
     TokenRules = [
-      new(TokenComment, ITT.None, @";.*?$"),
-      new(Competitive, ITT.Value, @"(?<=(=))([^\\=\n;]|\\.)*(?=$|;)"),
-      new(Competitive, ITT.Key, @"(?<=^\s*)([^\s\\=\n;]|\\.)*(?=\s*(=))"),
-      .. MakeSingleCharRules("=", TokenExact, new ITT[] { ITT.Eq } ),
-      new(TokenExtract, ITT.Section, @"\[(?'keep'.*?)\]")],
+      new(TokenComment, "None", ";.*"),
+      new(Competitive, "Value", @"(?<=(?: =))([^\\=\n;]|\\.)*(?=$|;)"),
+      new(Competitive, "Key", @"(?<=^\s*)([^\s\\=\n;]|\\.)*(?=\s*(=))"),
+      new(TokenExact, "Eq", "="),
+      new(TokenExtract, "Section", @"\[(?'keep'.*?)\]")],
 
     GroupTokenRules = [
-      new(ITT.Property, "n:Key x:Eq v:Value"),
-      new(ITT.SectionWProps, "n:Section pa:Property")],
+      new("Property", "n:Key x:Eq v:Value"),
+      new("SectionWProps", "n:Section pa:Property")],
 
     DefaultRuleSet = IgnoreCase,
+    TokenRuleSet = StandardRuleSets.INITokenRuleSet,
   };
 }

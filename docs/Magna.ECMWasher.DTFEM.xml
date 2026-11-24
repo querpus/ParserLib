@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Magna.ECMWasher.DTFEM</name>
+    </assembly>
+    <members>
+        <member name="T:SerialSenderApp.App">
+            <summary>
+            Interaction logic for App.xaml
+            </summary>
+            <summary>
+            App
+            </summary>
+        </member>
+        <member name="M:SerialSenderApp.App.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="M:SerialSenderApp.App.Main">
+            <summary>
+            Application Entry Point.
+            </summary>
+        </member>
+        <member name="T:SerialSenderApp.MainWindow">
+            <summary>
+            MainWindow
+            </summary>
+        </member>
+        <member name="M:SerialSenderApp.MainWindow.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+    </members>
+</doc>

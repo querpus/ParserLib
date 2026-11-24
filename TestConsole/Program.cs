@@ -1,16 +1,15 @@
-using System.Collections.Generic;
-using System.IO;
+using System.Collections.ObjectModel;
+using System.Linq;
 
-using Parser.Condition;
+using Parser.Exceptions;
+using Parser.Nodes;
 
-using static Common.Debug;
-
-using ResWAD = Specification.WAD.Resources;
+using IBasicToken = Parser.Nodes.IToken;
+using ResIPL = Specification.IPL.Properties.Resources;
+using ResWAD = Specification.WAD.Properties.Resources;
 using ResZDoom = Specification.ZDoom.Properties.Resources;
-using SpecINI = Specification.INI.Definition;
 using SpecIPL = Specification.IPL.Definition;
 using SpecJSON = Specification.JSON.Definition;
-using SpecWAD = Specification.WAD.Definition;
 using SpecXML = Specification.XML.Definition;
 using SpecZDoom = Specification.ZDoom.Definition;
 
@@ -20,56 +19,32 @@ internal static class Program
 {
   #region Constants
   internal const string LaptopPath = @"C:\Users\johntay4\source\repos\Git";
-  internal const string CheckPath = @"C:\Users\johntayl.adm";
+  internal const string CheckPath = @"C:\Users\johntay4\Work";
   internal const string DesktopPath = @"D:\Git";
   internal const int LogLine = 10;
+  internal const string This = nameof(Program);
   #endregion
   #region Fields
   internal static string? UserInput;
-  internal static XParser Parser = new();
-  internal static OpStatus Status = OpStatus.AtStart;
+  #endregion
+  #region Properties
+  internal static XParser Parser { get; set; } = new();
+  [AllowNull]
+  internal static Library LibRef { get; set; }
   #endregion
   #region Basic Methods
-  [MemberNotNull(nameof(UserInput))]
-  internal static void UserLine () => UserInput = Console.ReadLine()?.ToUpperInvariant() ?? SE;
-  internal static string UserLineReturn () => Console.ReadLine() ?? SE;
-  internal static void LogError (string message) => Log(MsgClass.Error, message);
-  internal static void LogDebug (string message) => Log(MsgClass.Debug, message);
-  internal static void LogInfo (string message) => Log(MsgClass.BlueInfo, message);
-  internal static void LogWarn (string message) => Log(MsgClass.Warning, message);
-  internal static string FinishPath (string path)
+  internal static void PressEnterToContinue ()
   {
-    return Directory.Exists(CheckPath) ? $@"{LaptopPath}\{path}" : $@"{DesktopPath}\{path}";
+    LogPart(MsgClass.BlueValue, "[");
+    LogPart(MsgClass.Prompt, "Press enter to continue.");
+    LogPart(MsgClass.BlueValue, "]");
+    NewLine();
+    _ = GetInput();
   }
+  [MemberNotNull(nameof(UserInput))]
+  internal static string GetInput () => UserInput = Console.ReadLine()?.ToUpperInvariant() ?? SE;
+  internal static string FinishPath (string path) => Directory.Exists(CheckPath) ? $@"{LaptopPath}\{path}" : $@"{DesktopPath}\{path}";
   #endregion
-
-  internal static readonly Spec TestSpec = new()
-  {
-    Name = "testSpec",
-    Operations = [
-      Op.StoreKey("test_key", "string_value"),
-      Op.While("while_loop", CompareCondition.AsString("test_key", "string_value", true),
-      [
-        Op.CopyKey("test_key", "copied_key"),
-        Op.StoreKey("test_key", "different_value"),
-      ]),
-      Op.DebugKey("copied_key"),
-      Op.DebugKey("test_key"),
-    ],
-  };
-  internal static readonly Spec TestSpec2 = new()
-  {
-    Name = "testSpec",
-    Operations = [
-      Op.StoreKey("test_key", "string_value"),
-      Op.ForCount( "for_count_loop", 3, [
-        Op.CopyKey("test_key", "copied_key"),
-        Op.StoreKey("test_key", "different_value")
-      ]),
-      Op.DebugKey("copied_key"),
-      Op.DebugKey("test_key"),
-    ],
-  };
   #region Menu Definition
   internal static Action<IList<object>> DoTest => item => _ = item[0] is string s && item[1] is Spec sp ? TestTextParser(s, sp) : throw new InvalidOperationException("Invalid data passed to TestTextParser");
   // MenuItem 2 "Quit"
@@ -88,118 +63,199 @@ internal static class Program
   internal static int Main (string[] args)
   {
     DebugIn("Program", "Main");
-    Console.Clear();
 #if DEBUG
     Verbosity = LogClass.Debug;
 #else
-    Verbosity = LogClass.Standard;
+    Verbosity = LogClass.Verbose;
 #endif
-    //MenuController.StartMenu(InitialMenu);
-    Library.InitializeLibrary(AppDomain.CurrentDomain);
-    LogInfo("Program Start");
-  Start:
-    LogInfo("");
-    string? choice = Console.ReadLine();
-    switch (choice?.ToLowerInvariant())
-    {
-      case "wad":
-        InitialTest(SpecWAD.WAD, ResWAD.wad_rpg03);
-        InitialTest(SpecWAD.WAD, ResWAD.wad_pl2);
-        InitialTest(SpecWAD.WAD, ResWAD.wad_tnt);
-        break;
-      case "mapinfo":
-        InitialTest(SpecZDoom.MapInfo, ResZDoom.mapinfo_common);
-        break;
-      case "acs":
-        InitialTest(SpecZDoom.ACS, ResZDoom.acs_rpglevel);
-        InitialTest(SpecZDoom.ACS, ResZDoom.acs_rpgmfunc);
-        InitialTest(SpecZDoom.ACS, ResZDoom.acs_foolib);
-        InitialTest(SpecZDoom.ACS, ResZDoom.acs_sample);
-        break;
-      case "xml":
-        InitialTest(SpecXML.Spec, Paths.xsd_specification);
-        InitialTest(SpecXML.Spec, Paths.xml_operation);
-        InitialTest(SpecXML.Spec, Paths.xml_errors);
-        InitialTest(SpecZDoom.UDMF, ResZDoom.xml_acs);
-        break;
-      case "sndinfo":
-        InitialTest(SpecZDoom.SndInfo, ResZDoom.sndinfo_test);
-        break;
-      case "udmf":
-        InitialTest(SpecZDoom.UDMF, ResZDoom.udmf_sample);
-        break;
-      case "ini":
-        InitialTest(SpecINI.Spec, Paths.ini_vncdefault);
-        break;
-      case "zs" or "zscript":
-        InitialTest(SpecZDoom.ZScript, ResZDoom.zs_demon);
-        break;
-      case "ipl":
-        InitialTest(SpecIPL.Spec, Paths.ipl_simple);
-        InitialTest(SpecIPL.Spec, Paths.ipl_label);
-        break;
-      case null:
-      case "exit" or "quit":
-        goto Exit;
-      case "ops":
-        InitialTest(TestSpec, Paths.ini_vncdefault);
-        break;
-      case "json":
-        InitialTest(SpecJSON.Spec, Paths.json_error);
-        break;
-      default:
-        Log(MsgClass.Warning, "Unknown test.");
-        break;
-    }
-    goto Start;
+    LibRef = Library.InitializeLibrary(AppDomain.CurrentDomain);
 
-  Exit:
     if (args.Length == 0)
     {
-      LogWarn("No files specified.");
+      Log(MsgClass.Warning, "No files specified.", nameof(Program));
     }
     else
     {
       ProcessArgs(args);
     }
 
-    LogWarn("Press enter to exit.");
+    TestSelectionLoop();
+
+    Log(MsgClass.Prompt, "Press enter to exit.", nameof(Program));
     _ = Console.ReadLine();
     return 0;
   }
+  internal static void TestSelectionLoop ()
+  {
+    string file_xsd_specification = File.ReadAllText(FinishPath(Paths.xsd_specification));
+    string file_xml_operation = File.ReadAllText(FinishPath(Paths.xml_operation));
+    string file_json_launch = File.ReadAllText(FinishPath(Paths.json_launch));
+    string file_xml_errors = File.ReadAllText(FinishPath(Paths.xml_errors));
+    string file_ipl_label = File.ReadAllText(FinishPath(ResIPL.ipl_label));
+    // TODO: Fix the ini in the wrong module.
+    string file_ini_vncdefault = File.ReadAllText(FinishPath(ResIPL.ini_vncdefault));
 
+    static void generic_spec<TTokenizer> (string file, Spec rule_spec) where TTokenizer : ITokenizer<IBasicToken>, new()
+    {
+      if (rule_spec.NodeRuleSet is null || rule_spec.TokenRuleSet is null)
+      {
+        Log(MsgClass.Error, "Invalid Spec - Cannot use for capture parser", This);
+        return;
+      }
+      TTokenizer cTokenizer = new() { Rules = rule_spec.TokenRuleSet };
+      IEnumerable<IBasicToken> cTokens = cTokenizer.Tokenize(file);
+      CaptureTokenProcessor cProcessor = new(cTokens, rule_spec.NodeRuleSet);
+      cProcessor.Process();
+      cProcessor.Context?.Print(0);
+      PressEnterToContinue();
+    }
+
+  Start:
+    Console.Clear();
+    Log(MsgClass.GreenInfo, $"Library contains: {LibRef.Values.Select(s => s.Name).TextJoin(", ")}", This);
+    Log(MsgClass.Prompt, "Select a test. (wad/xml/mapinfo/acs/ini/json/ipl)", This);
+    switch (GetInput())
+    {
+      case "XML":
+        Log(MsgClass.Prompt, "Select a version. (capture/group/match/xparser)", This);
+        switch (GetInput())
+        {
+          case "CAPTURE":
+            generic_spec<CaptureTokenizer>(file_xsd_specification, SpecXML.Spec);
+            generic_spec<CaptureTokenizer>(file_xml_operation, SpecXML.Spec);
+            generic_spec<CaptureTokenizer>(file_xml_errors, SpecXML.Spec);
+            goto Prompt;
+          case "GROUP":
+            generic_spec<GroupTokenizer>(file_xsd_specification, SpecXML.Spec);
+            generic_spec<GroupTokenizer>(file_xml_operation, SpecXML.Spec);
+            generic_spec<GroupTokenizer>(file_xml_errors, SpecXML.Spec);
+            goto Prompt;
+          case "XPARSER":
+            InitialTest(LibRef["xml"], file_xml_operation, use_file_as_text_input: true);
+            InitialTest(SpecXML.Spec, file_xml_errors, use_file_as_text_input: true);
+            InitialTest(SpecXML.Spec, ResZDoom.xml_acs);
+            goto Prompt;
+          case "MATCH":
+            MatchTokenizer mTokenizer = new() { Rules = StandardRuleSets.XMLTokenRuleSet };
+            Collection<MatchToken> mTokens = mTokenizer.Tokenize(file_xsd_specification);
+            mTokens.Foreach(t => Log(MsgClass.GreenInfo, t.ToString(true), This));
+            goto Prompt;
+          default:
+            Log(MsgClass.Error, "Invalid choice.", This);
+            goto Prompt;
+          Prompt:
+            PressEnterToContinue();
+            break;
+        }
+        break;
+      case "JSON":
+        Log(MsgClass.Prompt, "Select a version. (capture/xparser)", This);
+        switch (GetInput())
+        {
+          case "CAPTURE":
+            generic_spec<CaptureTokenizer>(file_json_launch, SpecJSON.Spec);
+            break;
+          case "XPARSER":
+            InitialTest(LibRef["json"], Paths.json_error);
+            InitialTest(SpecJSON.Spec, Paths.json_launch);
+            break;
+          default:
+            Log(MsgClass.Error, "Invalid choice.", This);
+            break;
+        }
+        break;
+      case "WAD":
+        InitialTest("wad", ResWAD.wad_rpg03);
+        InitialTest("wad", ResWAD.wad_pl2);
+        InitialTest("wad", ResWAD.wad_tnt);
+        break;
+      case "MAPINFO":
+        InitialTest(SpecZDoom.MapInfo, ResZDoom.mapinfo_common);
+        break;
+      case "DECORATE":
+        InitialTest(SpecZDoom.Decorate, ResZDoom.dec_mkii);
+        break;
+      case "ACS":
+        InitialTest(SpecZDoom.ACS, ResZDoom.acs_rpglevel);
+        InitialTest(SpecZDoom.ACS, ResZDoom.acs_rpgmfunc);
+        InitialTest(SpecZDoom.ACS, ResZDoom.acs_foolib);
+        InitialTest(SpecZDoom.ACS, ResZDoom.acs_sample);
+        break;
+      case "SNDINFO":
+        InitialTest(SpecZDoom.SndInfo, ResZDoom.sndinfo_test);
+        break;
+      case "UDMF":
+        InitialTest(SpecZDoom.UDMF, ResZDoom.udmf_sample);
+        InitialTest(SpecZDoom.UDMF, ResZDoom.udmf_map00);
+        break;
+      case "INI":
+        InitialTest(LibRef["ini"], file_ini_vncdefault, use_file_as_text_input: true);
+        break;
+      case "ZS" or "ZSCRIPT":
+        InitialTest(SpecZDoom.ZScript, ResZDoom.zs_demon);
+        break;
+      case "IPL":
+        Log(MsgClass.Prompt, "Select a version. (capture/xparser)", This);
+        switch (GetInput())
+        {
+          case "CAPTURE":
+            generic_spec<CaptureTokenizer>(file_ipl_label, SpecIPL.Spec);
+            break;
+          case "XPARSER":
+            InitialTest(SpecIPL.Spec, ResIPL.ipl_simple);
+            InitialTest(SpecIPL.Spec, ResIPL.ipl_label);
+            break;
+          default:
+            Log(MsgClass.Error, "Invalid choice.", This);
+            break;
+        }
+        break;
+      case "EXIT" or "QUIT":
+        Environment.Exit(0);
+        throw new QuitException();
+      case "":
+        Log(MsgClass.Warning, "Nothing selected, enter a test, or type exit or quit to exit the program.", This);
+        break;
+      default:
+        Log(MsgClass.Warning, "Unknown test.", This);
+        break;
+    }
+    Log(MsgClass.Prompt, "Press enter to return to the test selection.", This);
+    _ = GetInput();
+    goto Start;
+  }
   internal static void ProcessArgs (string[] args)
   {
-    DebugIn("ProcessArgs");
+    OpStatus status;
     foreach (string path in args)
     {
-      string content;
-      try { content = File.ReadAllText(path); }
-      catch (DirectoryNotFoundException) { content = "<STX><ESC>P<ESC>C<ETX>"; }
+      string? specName = LibRef.CheckFile(path);
+      Spec? spec = LibRef.Lookup(specName);
 
-      LogInfo("Loading File : " + path);
-
-      Parser = new XParser(SpecIPL.Spec);
-      Status = Parser.Parse(content);
-
-      LogDebug("OpStatus is " + Status);
-
-      LogDebug("Result is " + Parser.Result);
-      Collection<Specification.IPL.CommandDataSet> objects = Parser.Result as Collection<Specification.IPL.CommandDataSet> ?? [];
-      LogDebug("Result count = " + objects.Count);
-      foreach (object item in objects)
+      while (spec is null)
       {
-        LogDebug($">{item}");
+        Log(MsgClass.Warning, $"Spec {specName} not found. Enter a valid Spec name", This);
+        specName = GetInput();
+        spec = LibRef.Lookup(specName);
       }
+
+      status = Parser.ParseFile(spec, path);
+
+      Log(MsgClass.Debug, "OpStatus is " + status, This);
+
+      Log(MsgClass.Debug, "Result is " + Parser.Result, This);
+      Log(MsgClass.Debug, "Result count = " + Parser.Result.AsCollection().Count, This);
+      if (Parser.Result is IPrintable ip)
+        ip.Print();
     }
-    DebugOut();
   }
+
   internal static void InitialTest (string spec, string file)
   {
-    DebugIn("InitialTest");
-    if (!Library.TryLookup(spec, out Spec? lookup_spec))
+    DebugIn("Program", "InitialTest");
+    if (!LibRef.TryLookup(spec, out Spec? lookup_spec))
     {
-      LogError($"Cannot start test of '{Path.GetFileName(file)}' with '{spec}', the spec was not found.");
+      Log(MsgClass.Error, $"Cannot start test of '{Path.GetFileName(file)}' with '{spec}', the spec was not found.", This);
     }
     else
     {
@@ -207,167 +263,87 @@ internal static class Program
     }
     DebugOut();
   }
-  internal static void InitialTest (Spec spec, string file)
+  internal static OpStatus StepAndOutput<T> (T data)
   {
-    DebugIn("InitialTest");
-    ClearLog();
-    LogWarn($"Starting test of '{Path.GetFileName(file)}' with '{spec.Name}'.");
-    Parser = new(spec);
-    OpStatus status;
-
-    if (spec.IsTextFile)
+    Parser.SetInput(data);
+    int i = 0;
+    OpStatus result = OpStatus.AtStart;
+    foreach (var os in Parser.StepThrough())
     {
-      string data;
+      result = os;
+      Log(MsgClass.Warning, "The operation " + Parser.ParsedOperations[i++] + "resulted in " + os, This);
+      Parser.QueryOperation();
+    }
+    return result;
+  }
+  internal static void InitialTest (Spec spec, string file, bool use_file_as_text_input = false)
+  {
+    ClearLog();
+    if (use_file_as_text_input)
+      Log(MsgClass.Warning, $"Starting test, using text data with '{spec.Name}'.", This);
+    else
+      Log(MsgClass.Warning, $"Starting test of '{Path.GetFileName(file)}' with '{spec.Name}'.", This);
+    Parser = new(spec);
+    OpStatus status = OpStatus.AtStart;
+
+    if (spec.IsTextFile && !use_file_as_text_input)
+    {
       try
       {
-        data = File.ReadAllText(FinishPath(file));
+        string data = File.ReadAllText(FinishPath(file));
+        status = StepAndOutput(data);
       }
-      catch (IOException)
+      catch (FileNotFoundException)
       {
-        data = "";
+        Log(MsgClass.Error, "The path at \"" + FinishPath(file) + "\" is not valid.", This);
       }
-      status = Parser.StepThrough(data);
+    }
+    else if (!use_file_as_text_input)
+    {
+      byte[] data;
+      try
+      {
+        data = File.ReadAllBytes(FinishPath(file));
+      }
+      catch (FileNotFoundException)
+      {
+        Log(MsgClass.Error, $"File {file} not found.", This);
+        data = [];
+      }
+
+      status = StepAndOutput(data);
+    }
+    else if (spec.IsTextFile && use_file_as_text_input)
+    {
+      status = StepAndOutput(file);
     }
     else
     {
-      byte[] data = File.ReadAllBytes(FinishPath(file));
-      status = Parser.StepThrough(data);
+      Log(MsgClass.Error, "Error: The spec provided is not a text file, but text input was provided.", This);
+      return;
     }
-    LogWarn($"Operations have concluded with status {status}.");
-    DebugOut();
-    //if (spec.IsTextFile)
-    //{
-    //  //Load Data
-    //  string input = File.ReadAllText(file.UserDirFix());
-    //  TokenFactory factory = new(spec);
-    //  TokenCollection result = [.. factory.Produce(input)];
-    //  LogWarn($"Tokens Created : {result.Count}");
-    //  TokenAssembler assembler = new(spec);
-    //  TokenCollection tokens = [.. result];
-    //  TokenCollection tokens_assembled = assembler.Execute(tokens);
-    //  LogWarn($"Tokens After Assembly : {tokens_assembled.Count}");
-    //  Console.WriteLine("\n\n");
-    //  foreach (IToken token in tokens_assembled)
-    //  {
-    //    Console.WriteLine($"{token}");
-    //  }
-    //  LogInfo($"Token Log Complete");
-    //}
-    //else
-    //{
-    //  byte[] bytes;
-    //  try
-    //  {
-    //    bytes = File.ReadAllBytes(file.UserDirFix());
-    //  }
-    //  catch (DirectoryNotFoundException de)
-    //  {
-    //    LogError($"{de.Message}");
-    //    bytes = [];
-    //  }
-    //}
+    Log(MsgClass.Warning, $"Operations have concluded with status {status}.", This);
   }
 
   internal static XParser TestTextParser (string path, Spec spec)
   {
-    DebugIn("TestTextParser");
+    OpStatus status;
+    DebugIn("Program", "TestTextParser");
     if (spec.IsTextFile)
     {
       string content = File.ReadAllText(path);
       Parser = new(spec);
-      Status = Parser.StepThrough(content);
+      status = StepAndOutput(content);
     }
     else
     {
-      byte[] bytes = File.ReadAllBytes(path);
+      Memory<byte> bytes = File.ReadAllBytes(path);
       Parser = new(spec);
-      Status = Parser.StepThrough(bytes);
+      status = StepAndOutput(bytes);
     }
 
-    LogInfo($"The {spec.Name} test resulted in {Status}.");
+    Log(MsgClass.BlueInfo, $"The {spec.Name} test resulted in {status}.", This);
     DebugOut();
     return Parser;
-  }
-  internal static void DisplayOpOrder ()
-  {
-    DebugIn("DisplayOpOrder");
-    LogDebug("Parser Operation Order:");
-    foreach (IOperation op in Parser?.Operations ?? [])
-    {
-      if (op.ToString() is not null)
-        LogDebug(">" + op.ToString());
-      else
-        LogError("Error: Bad Op");
-    }
-    DebugOut();
-  }
-  internal static void Load ()
-  {
-    DebugIn("Load");
-    Spec userSpec;
-    string userPath;
-    string? specName;
-    string fileContent;
-    byte[] byteContent;
-
-  GetFile:
-
-    LogDebug("Path to file:");
-    userPath = UserLineReturn();
-
-    if (userPath.IsAny(["back", "quit", "exit"]))
-    {
-      DebugOut();
-      return;
-    }
-    if (!File.Exists(userPath))
-      goto GetFile;
-
-    fileContent = File.ReadAllText(userPath);
-    byteContent = File.ReadAllBytes(userPath);
-    specName = Library.CheckFile(userPath);
-    userSpec = Library.LookupOrDefault(specName);
-    LogInfo($"Spec Chosen is {userSpec.Name}");
-
-  GetSpec:
-    LogInfo($"Input a new spec or press enter to use chosen ({userSpec.Name})");
-    UserInput = UserLineReturn();
-
-    if (UserInput.IsEmpty())
-      goto ParseFile;
-
-    Spec? chosenSpec = Library.Lookup(UserInput);
-
-    if (chosenSpec is null)
-    {
-      LogError($"Invalid Spec {UserInput}");
-      goto GetSpec;
-    }
-    else
-    {
-      userSpec = chosenSpec;
-    }
-  ParseFile:
-    if (userSpec.IsTextFile)
-    {
-      XParser parser = new(userSpec);
-      OpStatus status = parser.Parse(fileContent);
-
-      if (status.IsFail())
-        LogError($"Failed, status is {status}");
-      else
-        LogInfo($"Good, status is {status}");
-    }
-    else
-    {
-      XParser parser = new(userSpec);
-      OpStatus status = parser.Parse(byteContent);
-
-      if (status.IsFail())
-        Log(MsgClass.Error, $"Failed, status is {status}");
-      else
-        Log(MsgClass.BlueInfo, $"Good, status is {status}");
-    }
-    DebugOut();
   }
 }

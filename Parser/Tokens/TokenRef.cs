@@ -26,9 +26,14 @@ public enum TokenRef
   AddFlagList,
   SubFlagList,
 
-  Custom,
+  Custom = 128,
   /// <summary>This token sequence entry will supply any fields not already filled by other definitions from its own respective values.</summary>
-  /// <remarks>If a <see cref="ComplexToken"/> was passed to any field of a <see cref="ComplexToken"/> with this flag assigned, all of its parts would populate the one being created..
-  /// These properties would be overwritten by any defined token sequence entries.</remarks>
-  Inherit,
+  /// <remarks>
+  /// If a <see cref="ComplexToken"/> was passed to any field of a <see cref="ComplexToken"/> with this type assigned, all of its parts would populate the one being created.
+  /// These properties would be overwritten by any defined token sequence entries.<br/>
+  /// If a <see cref="Token"/> was passed to any field of a <see cref="ComplexToken"/> with this
+  /// type assigned, only the Token Type would copy, and the value would be assigned
+  /// to the <see cref="Value"/> entry.<br/>
+  /// </remarks>
+  Inherit = 256,
 }

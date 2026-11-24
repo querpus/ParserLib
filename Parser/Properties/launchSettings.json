@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "TestConsole": {
+      "commandName": "Executable",
+      "executablePath": "D:\\Git\\ParserLib\\TestConsole\\bin\\Debug\\net11.0\\TestConsole.exe",
+      "workingDirectory": "D:\\Git\\ParserLib"
+    }
+  }
+}

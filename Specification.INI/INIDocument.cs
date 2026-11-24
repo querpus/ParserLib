@@ -1,7 +1,9 @@
+using Parser.Tokens;
+
 namespace Specification.INI;
 
 /// <summary>A document, which is a collection of INISections.</summary>
-public sealed class INIDocument : ICanAddChildren<INISection>, ITextSerializer, ICloneable, IEnumerable<INISection>, ICanAccessChildren<string, INISection>, ICanAccessChildren<int, INISection>
+public sealed class INIDocument : ISerializable, ICloneable, IEnumerable<INISection>
 {
   #region Static Constructors
   /// <summary>Creates an <c>INIDocument</c> from another <c>INIDocument</c>.</summary>
@@ -29,6 +31,19 @@ public sealed class INIDocument : ICanAddChildren<INISection>, ITextSerializer, 
       {
         ns.Add(new(p));
       }
+    }
+  }
+  public INIDocument (IEnumerable<IToken> tokens)
+  {
+    foreach (IToken t in tokens)
+    {
+      if (t.Type.Like("Section"))
+      {
+        Sections.Add(new INISection(t));
+        continue;
+      }
+
+      Debug.Log(MsgClass.Error, $"Incorrect Token Type {t.Type} must be Section.", this);
     }
   }
 

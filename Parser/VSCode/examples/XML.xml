@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Definition xmlns="Parser/Spec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
+  <Spec>
+    <Name>xml</Name>
+    <TextFile>true</TextFile>
+    <CaseInsensitive>false</CaseInsensitive>
+    <TokenRules>
+    </TokenRules>
+    <GroupTokenRules>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>Attribute</TypeToAssign>
+        <Data>
+          n:AttrKey x:Eq v:String
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>Header</TypeToAssign>
+        <Data>
+          x:Ao x:Qm n:ElementName{xml} pa:Attribute x:Qm x:Ac
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>DocumentNamespace</TypeToAssign>
+        <Data>
+          t:NamespaceAttr x:Co d:Attribute
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>DocumentNamespace</TypeToAssign>
+        <Data>
+          t:NamespaceAttr x:Eq v:String
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>AttributeWithNamespace</TypeToAssign>
+        <Data>
+          t:Namespace x:Co n:AttrKey x:Eq v:String
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>ElementEndWithNamespace</TypeToAssign>
+        <Data>
+          x:Ao x:Sl t:Namespace x:Co n:ElementName x:Ac
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>ElementEnd</TypeToAssign>
+        <Data>
+          x:Ao x:Sl n:ElementName x:Ac
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>ElementSingleWithNamespace</TypeToAssign>
+        <Data>
+          x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Sl x:Ac
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>ElementSingle</TypeToAssign>
+        <Data>
+          x:Ao n:ElementName pa:Attribute x:Sl x:Ac
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>ElementStartWithNamespace</TypeToAssign>
+        <Data>
+          x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Ac
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>None</Type>
+        <TypeToAssign>ElementStart</TypeToAssign>
+        <Data>
+          x:Ao n:ElementName pa:Attribute x:Ac
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>Recursive</Type>
+        <TypeToAssign>ElementPair</TypeToAssign>
+        <Data>
+          d:ElementStart va:ValidContent x:ElementEnd
+        </Data>
+      </Rule>
+      <Rule>
+        <Type>Recursive</Type>
+        <TypeToAssign>ElementPair</TypeToAssign>
+        <Data>
+          d:ElementStartWithNamespace va:ValidContent x:ElementEndWithNamespace
+        </Data>
+      </Rule>
+    </GroupTokenRules>
+    <Instructions>
+      <Label name="Start"/>
+      <Tokenize input_var="text" output_var="tokens"/>
+      <Print check_var="tokens"/>
+      <TokenAssemble input_var="tokens" output_var="token_groups"/>
+      <Print check_var="token_groups"/>
+      <Terminate success="true"/>
+    </Instructions>
+    <TokenConstructs allow_unlisted="false">
+      <Construct tokentype="ElementPair" class="XElement">
+        <PropertyList tokentype="Property" class="PropertyObj">
+          <Name tokentype="Key" class="string"/>
+          <Value tokentype="Value" class="string"/>
+        </PropertyList>
+      </Construct>
+    </TokenConstructs>
+    <FileInferences initial="or">
+      <Extension>ini</Extension>
+      <Extension>vnc</Extension>
+      <Extension>url</Extension>
+      <Extension>inf</Extension>
+    </FileInferences>
+  </Spec>
+</Definition>

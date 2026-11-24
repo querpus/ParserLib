@@ -1,67 +1,184 @@
 //#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-using System.Diagnostics.CodeAnalysis;
-
-using Common.Regex;
+using Common.RegExp;
 
 namespace Common.Extensions;
 
+/// <summary><see cref="IEnumerable"/>, <see cref="IReadOnlyCollection{T}"/> and <see cref="IEnumerable{T}"/> Extensions</summary>
 public static class IEnumerableExtensions
 {
-  // IEnumerable<T>
-  public static T At<T> (this IEnumerable<T> list, int index) => list.ToArray()[index];
-  public static Collection<T> ToCollection<T> (this IEnumerable<T> list) => [.. list];
-  public static string TextJoin<T> (this IEnumerable<T> list, string separator = EmptyString)
+  /// <summary>Generic IEnumerable Extensions</summary>
+  /// <typeparam name="TBaseType">The base object type</typeparam>
+  extension<TBaseType> (IEnumerable<TBaseType> list) where TBaseType : class
   {
-    string result = string.Empty;
+    public IEnumerable<TBaseType> OfTypes<TAllowedType1, TAllowedType2> ()
+      where TAllowedType1 : TBaseType
+      where TAllowedType2 : TBaseType =>
+      Explicit(list, [typeof(TAllowedType1), typeof(TAllowedType2)]);
+    public IEnumerable<TBaseType> NotOfType<TDisallowedType> ()
+      where TDisallowedType : TBaseType =>
+      Restrict(list, [typeof(TDisallowedType)]);
+    public IEnumerable<TBaseType> NotOfTypes<TDisallowedType1, TDisallowedType2> ()
+      where TDisallowedType1 : TBaseType
+      where TDisallowedType2 : TBaseType =>
+      Restrict(list, [typeof(TDisallowedType1), typeof(TDisallowedType2)]);
+    private IEnumerable<TBaseType> Restrict ([NotNull] IEnumerable<Type> types)
+    {
+      if (types.IsEmpty)
+        return list;
+      foreach (TBaseType item in list)
+      {
+        Type item_type = item.GetType();
+        foreach (Type cannot_be in types)
+        {
+          if (item_type.IsAssignableTo(cannot_be))
+          {
+            list = list.
+          }
+        }
+      }
+    }
+  }
+  /// <summary>Generic IEnumerable Extensions</summary>
+  /// <typeparam name="T">The object type</typeparam>
+  extension<T> (IEnumerable<T> list)
+  {
+    /// <summary>Allows indexing for ienumerable types.</summary>
+    /// <param name="list">The list.</param>
+    /// <param name="index">The index to retrieve.</param>
+    /// <returns>The object at position <paramref name="index"/>.</returns>
+    public T At (int index) => list.ToArray()[index];
+    public T At (Index index) => list.ToArray()[index];
+    public T this[Index i] => list.At(i);
+    public T this[int i] => list.At(i);
+    public string TextJoin (string separator = EmptyString)
+    {
+      if (list is null)
+        return SE;
 
-    if (list is null)
+      string result = SE;
+
+      foreach (T? item in list)
+      {
+        string itemString = item?.ToString()!;
+        if (itemString.IsEmpty)
+          continue;
+
+        if (result.IsNotEmpty)
+          result += separator;
+        result += itemString;
+      }
       return result;
-
-    foreach (T? item in list)
-    {
-      string? itemString = item?.ToString();
-      if (string.IsNullOrEmpty(itemString))
-        continue;
-
-      if (result.IsNotEmpty())
-        result += separator;
-      result += itemString;
     }
-    return result;
-  }
-  public static int LastIndex<T> (this IEnumerable<T> list) => list is null ? -1 : list.Count() - 1;
-  public static int LastIndex<T> (this IReadOnlyCollection<T> list) => list is null ? -1 : list.Count - 1;
-  public static Collection<T> Condense<T> (this IEnumerable<IEnumerable<T>> listlist) =>
-  [.. listlist.Aggregate((list1, list2) => list1.Concat(list2))];
-  // IEnumerable
-  public static int Count (this IEnumerable list)
-  {
-    IEnumerator? iter = list?.GetEnumerator();
-    int i = 0;
-    while (iter != null && iter.MoveNext()) { i++; }
-    return i;
-  }
-  public static string TextJoin (this IEnumerable list, string separator = EmptyString)
-  {
-    if (list is null)
-      return SE;
-
-    string result = SE;
-    foreach (object item in list)
+    public string TextJoin (Func<T, string> selector, string separator = EmptyString)
     {
-      string? itemString = item?.ToString();
-      if (string.IsNullOrEmpty(itemString))
-        continue;
-      if (result.IsNotEmpty())
-        result += separator;
-      result += itemString;
-    }
-    return result;
-  }
-  public static Collection<string> ToStringCollection (this IEnumerable list) => list.AsCollection<string>();
-  public static bool IsEmpty ([NotNullWhen(true)] this IEnumerable? list) => list is null || list.Count() == 0;
+      if (list is null)
+        return SE;
 
-  // IEnumerable<string>
-  public static RxS AggregateRegex (this IEnumerable<string> list) => list.TextJoin("|");
+      string result = SE;
+
+      foreach (T item in list)
+      {
+        string itemString = selector(item);
+        if (itemString.IsEmpty)
+          continue;
+
+        if (result.IsNotEmpty)
+          result += separator;
+        result += itemString;
+      }
+      return result;
+    }
+    /// <summary>The position of the last item.</summary>
+    /// <remarks>If the list is empty, this returns -1.</remarks>
+    public int LastIndex => list.Count() - 1;
+    public bool IsEmpty => list?.Any() != true;
+    /// <summary>Executes an <see cref="Action{T}"/> <see langword="delegate"/> for every item in the <see cref="IEnumerable{T}"/>.</summary>
+    /// <param name="action"></param>
+    public void Foreach (Action<T> action)
+    {
+      foreach (T? item in list)
+      {
+        action(item);
+      }
+    }
+    public void Foreach (Action<T, int> action)
+    {
+      int index = 0;
+      foreach (T? item in list)
+      {
+        action(item, index++);
+      }
+    }
+  }
+  extension<T> (IReadOnlyCollection<T>? list)
+  {
+    /// <summary>The position of the last item.</summary>
+    /// <remarks>If the list is empty, this returns -1.</remarks>
+    public int LastIndex => (list?.Count ?? 0) - 1;
+  }
+  extension<T> (IEnumerable<IEnumerable<T>> listlist)
+  {
+    public Collection<T> Flatten () =>
+      [.. listlist.Aggregate((list1, list2) => list1.Concat(list2))];
+  }
+  extension(IEnumerable list)
+  {
+    /// <summary>Iterates the IEnumerable, and counts the items.</summary>
+    public int ICount
+    {
+      get
+      {
+        int i = 0;
+        foreach (var _ in list)
+        {
+          i++;
+        }
+        return i;
+      }
+    }
+
+    public string TextJoin (string separator = EmptyString)
+    {
+      if (list.IsEmpty)
+        return SE;
+
+      string result = SE;
+      foreach (object item in list)
+      {
+        string itemString = item?.ToString()!;
+        if (itemString.IsEmpty)
+          continue;
+        if (result.IsNotEmpty)
+          result += separator;
+        result += itemString;
+      }
+      return result;
+    }
+    public Collection<string> ToStringCollection () => [.. list.Cast<string>()];
+  }
+  extension([NotNullWhen(false)] IEnumerable? list)
+  {
+    public bool IsEmpty => list is null || list.AsCollection<object>().Count == 0;
+  }
+  extension([NotNullWhen(true)] IEnumerable? list)
+  {
+    public bool IsNotEmpty => list?.AsCollection<object>().Count > 0;
+  }
+  extension(IEnumerable<string> list)
+  {
+    public RxS AggregateRegex () => list.TextJoin("|");
+  }
+  extension(IEnumerable<ReplaceNode> nodes)
+  {
+    public string ReplaceByNodes (string input, StringComparison sc) => nodes.Aggregate(input, (text, node) => text = node.ReplaceText(text, sc));
+  }
+  extension(IEnumerable<IPrintable> items)
+  {
+    public void Print (int indent) => items.Foreach(i => i.Print(indent));
+  }
+  extension(IEnumerable<ISerializable> items)
+  {
+    public string Serialize (string delimiter = "") => items.TextJoin(delimiter);
+  }
 }

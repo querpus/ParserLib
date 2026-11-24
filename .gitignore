@@ -10,16 +10,20 @@
 *.userosscache
 *.sln.docstates
 
+# Windows BS
+thumbs.db
+desktop.ini
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
 # Mono auto generated files
 mono_crash.*
 
-# Build results
+# Build results+
 [Dd]ebug/
 [Dd]ebugPublic/
-[Rr]elease/
+[Rr]elease+/
 [Rr]eleases/
 x64/
 x86/
@@ -389,6 +393,8 @@ FodyWeavers.xsd
 
 # Local History for Visual Studio Code
 .history/
+.git/
+.github/
 
 # Windows Installer files from build outputs
 *.cab
@@ -397,6 +403,9 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-# JetBrains Rider
 *.sln.iml
-ParserTestsProject.zip
+*.zip
+
+*.csproj.lscache
+~%*.xlsm
+/Parser.Nodes/NodeContext.Old.cs

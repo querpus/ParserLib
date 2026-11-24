@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Definition xmlns="Parser/Spec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
+  <Spec name="ipl" type="text">
+    <TokenRules default="">
+      <Rule type="TokenComment">
+        <Data> ;.* </Data>
+      </Rule>
+      <Rule type="TokenMatch" assign="Value">
+        <Data> (?&lt;= ( , | a-zA-Z | \s) ) \d+ </Data>
+      </Rule>
+      <Rule type="Competitive" assign="Key">
+        <Data>
+          (?&lt;=^\s*)([^\s\\=\n;]|\\.)*(?=\s*=)
+        </Data>
+      </Rule>
+      <Rule type="TokenExact" assign="Sc">
+        <Data> ; </Data>
+      </Rule>
+      <Rule type="TokenExtract" assign="Section">
+        <Data> \[(?'keep'.*?)\] </Data>
+      </Rule>
+    </TokenRules>
+    <GroupTokenRules>
+      <Rule assign="OriginProp">
+        <Data> n:Letter{o} q:Value x:Cm q:Value xo:Sc </Data>
+      </Rule>
+    </GroupTokenRules>
+    <Instructions>
+      <Label name="Start"/>
+      <Tokenize input_var="text" output_var="tokens" tokenizer="capture"/>
+      <Print check_var="tokens"/>
+      <TokenAssemble input_var="tokens" output_var="token_groups"/>
+      <Print check_var="tokengroups"/>
+      <Terminate success="true"/>
+    </Instructions>
+    <FileInferences initial="or">
+      <Extension>ini</Extension>
+      <Extension>vnc</Extension>
+      <Extension>url</Extension>
+      <Extension>inf</Extension>
+    </FileInferences>
+  </Spec>
+</Definition>

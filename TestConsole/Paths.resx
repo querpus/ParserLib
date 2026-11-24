@@ -117,23 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ini_vncdefault" xml:space="preserve">
-    <value>ParserLib\Specification.INI\Samples\default.ini</value>
-  </data>
-  <data name="ipl_batch6456" xml:space="preserve">
-    <value>ParserLib\Specification.IPL\Samples\6456 batch.txt</value>
-  </data>
-  <data name="ipl_batch6458" xml:space="preserve">
-    <value>ParserLib\Specification.IPL\Samples\6458 batch.txt</value>
-  </data>
-  <data name="reg_iplfile" xml:space="preserve">
-    <value>ParserLib\Specification.REG\Resources\Types\ipl.reg</value>
-  </data>
   <data name="xsd_specification" xml:space="preserve">
-    <value>ParserLib\Specification.XML\Schemas\specification.xsd</value>
-  </data>
-  <data name="ipl_label" xml:space="preserve">
-    <value>ParserLib\Parser\Samples\label.ipl</value>
+    <value>ParserLib\Parser\Schemas\Spec.xsd</value>
   </data>
   <data name="json_error" xml:space="preserve">
     <value>ParserLib\Specification.JSON\Samples\errors.json</value>
@@ -141,22 +126,13 @@
   <data name="json_launch" xml:space="preserve">
     <value>ParserLib\Specification.JSON\Samples\launchSettings.json</value>
   </data>
-  <data name="wad_pl2" xml:space="preserve">
-    <value>ParserLib\Specification.WAD\Samples\PL2.WAD</value>
-  </data>
-  <data name="binparse_wad" xml:space="preserve">
-    <value>ParserLib\Specification.WAD\WAD.txt</value>
-  </data>
-  <data name="ipl_simple" xml:space="preserve">
-    <value>ParserLib\Specification.IPL\Samples\simple.txt</value>
-  </data>
   <data name="xml_operation" xml:space="preserve">
     <value>ParserLib\Specification.XML\Samples\operation.xml</value>
   </data>
   <data name="xml_errors" xml:space="preserve">
     <value>ParserLib\Specification.XML\Samples\errors.xml</value>
   </data>
-  <data name="reg_dllfile" xml:space="preserve">
-    <value>ParserLib\Specification.REG\Resources\Types\dllfile.reg</value>
+  <data name="json_stations" xml:space="preserve">
+    <value>ParserLib\Specification.JSON\Samples\stations.json</value>
   </data>
 </root>

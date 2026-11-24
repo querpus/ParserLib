@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns="Parser/Spec">
+  <xs:include schemaLocation="Types.xsd"/>
+  <xs:element name="Definition">
+    <xs:annotation>
+      <xs:documentation>
+        The root node. Should contain the optional Prefabs element first, then Spec elements following it. There must be at least 1 spec in the file.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Prefabs" minOccurs="0" maxOccurs="1" type="PrefabSection"/>
+        <xs:element name="Spec" minOccurs="1" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:all maxOccurs="1" minOccurs="1">
+              <xs:element name="TokenRules" type="TokenRuleList" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="GroupTokenRules" type="GroupRuleList" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="TokenLookups" type="TokenLookupsType" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="DefaultRuleSet" type="TokenRuleTypeList" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                  <xs:documentation>
+                    This specifies the default rule options applied to every token rule. This does not affect group rules.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="Instructions" minOccurs="1" type="InnerInstructionSet" maxOccurs="1">
+                <xs:annotation>
+                  <xs:documentation>
+                    Specifies the instructions to perform on this file type.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="FileInferences" minOccurs="0" type="FileInferencesType" maxOccurs="1">
+                <xs:annotation>
+                  <xs:documentation>
+                    Specifies the rules to auto-detect this file type.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
+            </xs:all>
+            <xs:attribute name="name" type="NonEmptyTokenType" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The unique name of this spec. This string is what you use to reference it in the Library object.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="type" type="SpecInputType" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The type of data this is interpretted as. This can be 'text' or 'bytes'.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="ignore_case" type="xs:boolean" use="optional">
+              <xs:annotation>
+                <xs:documentation>
+                  This specifies whether of not we ever have to validate the case of letters.
+                  Setting this to true overrides all case sensitivity.
+                  Setting this to false can be overridden by any other level.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+          </xs:complexType>
+          <xs:key name="OpLabelKey">
+            <xs:selector xpath=".//Label"/>
+            <xs:field xpath="@name"/>
+          </xs:key>
+          <xs:key name="TokenCompatKey">
+            <xs:selector xpath=".//TokenLookups/TokenLookup"/>
+            <xs:field xpath="@alias"/>
+          </xs:key>
+          <xs:key name="SpecKey">
+            <xs:selector xpath=".//Spec"/>
+            <xs:field xpath="Name"/>
+          </xs:key>
+          <xs:keyref refer="OpLabelKey" name="GotoLabelConstraint">
+            <xs:selector xpath=".//GotoLabel"/>
+            <xs:field xpath="@name"/>
+          </xs:keyref>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

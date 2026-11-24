@@ -4,78 +4,84 @@
         <name>Parser</name>
     </assembly>
     <members>
-        <member name="M:Parser.Condition.AndCondition.Evaluate">
-            <inheritdoc/>
+        <member name="T:Parser.Condition.IExpression">
+            <summary>Represents a condition or a check, and its result.</summary>
         </member>
-        <member name="T:Parser.Condition.ICondition">
+        <member name="M:Parser.Condition.IExpression.Evaluate(Parser.DataStore)">
+            <summary>Evaluates the value and returns it.</summary>
+            <returns>The calculated value or result of the expression. This method returns <see langword="null"/> if the evaluation fails.</returns>
+        </member>
+        <member name="M:Parser.Condition.IExpression.LogicalEvaluate(Parser.DataStore)">
+            <summary>Evalutates the condition.</summary>
+            <param name="data">The <see cref="T:Parser.DataStore"/> reference</param>
+            <returns><see langword="true"/> if the condition is true, or a value that is not 0, -1, null, an empty collection, or an empty string. Returns <see langword="false"/> otherwise.</returns>
+            <remarks>If the evaluation fails, it returns <see langword="false"/>.</remarks>
+            <example>
+            An empty <see cref="T:System.Collections.Generic.IEnumerable`1"/> returns <see langword="false"/><br/>
+            The number <c>4</c> returns <see langword="true"/><br/>
+            The number <c>-1</c> returns <see langword="false"/><br/>
+            The value <see langword="null"/> returns <see langword="false"/><br/>
+            Any unlisted object returns <see langword="true"/>
+            </example>
+        </member>
+        <member name="P:Parser.Condition.IfBlockConditional.Condition">
+            <summary>The if condition string. This is <see langword="null"/> for the <see langword="else"/> block.</summary>
+        </member>
+        <member name="M:Parser.Condition.KOExtension.get_IsOperator(Parser.Condition.KeyOption)">
+            <inheritdoc cref="P:Parser.Condition.KOExtension.&lt;G&gt;$D307DF55685F88C11946897FBB54FCD2.IsOperator"/>
+        </member>
+        <member name="M:Parser.Condition.KOExtension.get_UsesObjectInput(Parser.Condition.KeyOption)">
+            <inheritdoc cref="P:Parser.Condition.KOExtension.&lt;G&gt;$D307DF55685F88C11946897FBB54FCD2.UsesObjectInput"/>
+        </member>
+        <member name="P:Parser.Condition.KOExtension.&lt;G&gt;$D307DF55685F88C11946897FBB54FCD2.IsOperator">
+            <summary>This item is an operator.</summary>
+        </member>
+        <member name="P:Parser.Condition.KOExtension.&lt;G&gt;$D307DF55685F88C11946897FBB54FCD2.UsesObjectInput">
+            <summary>This item takes an object as input.</summary>
+        </member>
+        <member name="F:Parser.Condition.KeyOption.Undefined">
+            <summary>Undefined. This is the initial value.</summary>
+        </member>
+        <member name="F:Parser.Condition.KeyOption.Null">
+            <summary>The value 'null'.</summary>
+        </member>
+        <member name="F:Parser.Condition.KeyOption.True">
+            <summary>The boolean value 'true'.</summary>
+        </member>
+        <member name="F:Parser.Condition.KeyOption.OpStart">
+            <summary>Represents the start operation.</summary>
+        </member>
+        <member name="M:Parser.Condition.ParsedExpression.Evaluate(Parser.DataStore)">
             <summary>
-            Represents a condition or a check, and its result.
+            Evaluate the expression.
             </summary>
-        </member>
-        <member name="P:Parser.Condition.ICondition.Type">
-            <summary>
-            The type of condition.
-            </summary>
-        </member>
-        <member name="P:Parser.Condition.ICondition.ConditionResult">
-            <summary>
-            The result of the condition evaluation.
-            </summary>
-        </member>
-        <member name="M:Parser.Condition.ICondition.Evaluate">
-            <summary>
-            Evalutates the condition and stores the result.
-            </summary>
-        </member>
-        <member name="M:Parser.Condition.IfCondition.Evaluate">
-            <inheritdoc/>
-        </member>
-        <member name="F:Parser.Condition.OperationConditionType.Error">
-            <summary>Bad condition type.</summary>
-        </member>
-        <member name="F:Parser.Condition.OperationConditionType.None">
-            <summary>No condition is always a pass.</summary>
-        </member>
-        <member name="F:Parser.Condition.OperationConditionType.Fail">
-            <summary>Condition of 1 is always a fail.</summary>
-        </member>
-        <member name="F:Parser.Condition.OperationConditionType.And">
-            <summary>The condition is a logical AND of other conditions.</summary>
-        </member>
-        <member name="F:Parser.Condition.OperationConditionType.Or">
-            <summary>The condition is a logical OR of other conditions.</summary>
-        </member>
-        <member name="F:Parser.Condition.OperationConditionType.Not">
-            <summary>The condition is a logical NOT of itself.</summary>
-        </member>
-        <member name="M:Parser.Condition.OrCondition.Evaluate">
-            <inheritdoc/>
+            <param name="data">The <see cref="T:Parser.DataStore"/> reference.</param>
+            <remarks>If the evaluation fails, it always returns <see langword="false"/>.</remarks>
         </member>
         <member name="T:Parser.CursorData">
-            <summary>
-            The data for a loop or cursor object.
-            </summary>
-        </member>
-        <member name="M:Parser.CursorData.#ctor(System.Int32,System.String,Parser.DataStore)">
-            <summary>Creates a new cursor and sets itself as the last accessed.</summary>
-            <param name="index">The index of the cursor.</param>
-            <param name="key">The key to iterate through.</param>
-            <param name="data">The reference to the <see cref="T:Parser.DataStore"/> where the keyed data is stored.</param>
+            <summary>The data for a loop or cursor object.</summary>
         </member>
         <member name="P:Parser.CursorData.Index">
             <summary>The index of the cursor.</summary>
         </member>
-        <member name="P:Parser.CursorData.Key">
+        <member name="P:Parser.CursorData.ListKey">
             <summary>The key the cursor is operating on.</summary>
         </member>
-        <member name="P:Parser.CursorData.Data">
-            <summary>A reference to the data dictionary the parser is using.</summary>
+        <member name="M:Parser.CursorData.#ctor(Parser.XParser,System.Int32,System.String)">
+            <summary>Creates a new cursor.</summary>
+            <param name="parser">The parser reference.</param>
+            <param name="index">The index of the cursor.</param>
+            <param name="list_key">The key to iterate through.</param>
         </member>
-        <member name="P:Parser.CursorData.Cursor">
-            <summary>The object referenced.</summary>
+        <member name="M:Parser.CursorData.#ctor(Parser.XParser,System.Int32,System.Int32)">
+            <summary>Creates a new cursor.</summary>
+            <param name="parser">The parser reference.</param>
+            <param name="index">The index of the cursor.</param>
+            <param name="length">The maximum iterations.</param>
         </member>
-        <member name="P:Parser.CursorData.Last">
-            <summary>The last accessed cursor.</summary>
+        <member name="M:Parser.CursorData.#ctor(Parser.XParser)">
+            <summary>Creates a new cursor without a constraint.</summary>
+            <param name="parser">The parser reference.</param>
         </member>
         <member name="T:Parser.DataStore">
             <summary>
@@ -90,140 +96,163 @@
             </summary>
             <remarks>Any string may be used as a key.</remarks>
         </member>
-        <member name="P:Parser.DataStore.DataOrder">
-            <summary>
-            The order that keys have been saved to. You can get the last key in this collection to get the last stored key.
-            </summary>
+        <member name="P:Parser.DataStore.Parser">
+            <summary>A reference to the parser containting this data.</summary>
         </member>
-        <member name="P:Parser.DataStore.Item(System.String)">
-            <summary>
-            Gets or sets data to a given key.
-            </summary>
+        <member name="P:Parser.DataStore.HasData">
+            <summary>Gets a value indicating whether the collection contains any elements.</summary>
+        </member>
+        <member name="P:Parser.DataStore.Count">
+            <summary>Gets the number of elements contained in the collection.</summary>
+        </member>
+        <member name="P:Parser.DataStore.Item(System.String,System.Boolean)">
+            <summary>Gets or sets data to a given key.</summary>
             <param name="key">The key to assign to or look up.
             Prefixing this string with a "+" when assigning will cause it to make a list instead of overrwriting.</param>
-            <returns>The data assigned to the given key, or <see langword="null"/> if the key is not present.</returns>
+            <param name="throw_on_fail">Specifies whether to throw an exception on a missing key, or to return <see langword="null"/>.</param>
+            <returns>The data assigned to the given key, or throws an exception if it is not found.</returns>
             <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="T:Parser.DebugMsg">
-            <summary>A predefined debug message.</summary>
+        <member name="M:Parser.DataStore.LoadOrFail(System.String)">
+            <summary>Loads the key, or throws an exception.</summary>
+            <param name="key">The key to load.</param>
+            <returns>The value of the key.</returns>
+            <exception cref="T:Parser.Exceptions.OperationNoSuchVarException">The key is not present in the <see cref="T:Parser.DataStore"/>.</exception>
         </member>
-        <member name="T:Parser.ExceptionMsg">
-            <summary>A predefined exception message.</summary>
+        <member name="M:Parser.DataStore.DoSave``1(System.String,System.Object,Common.DictionaryMode)">
+            <summary>The internal saving logic.</summary>
+            <typeparam name="T">The data type to save.</typeparam>
+            <param name="key">The key to save to.</param>
+            <param name="data">The data to save.</param>
+            <param name="mode">The <see cref="T:Common.DictionaryMode"/> to utilize.</param>
+            <returns><see langword="true"/> if the save was successful, <see langword="false"/> otherwise.</returns>
         </member>
-        <member name="T:Parser.Debug">
-            <summary>Static class containing debugging logs.</summary>
+        <member name="M:Parser.DataStore.GetCursorByKey(System.String)">
+            <summary>Gets the cursor that was created on the given key.</summary>
+            <param name="key">The key of the cursor to retrieve.</param>
+            <exception cref="T:Parser.Exceptions.OperationNoSuchVarException"/>
+            <exception cref="T:Parser.Exceptions.OperationBadInputTypeException"/>
         </member>
-        <member name="P:Parser.Debug.Verbose">
-            <summary>Set to <see langword="true"/> to output debugging information to the output stream.</summary>
+        <member name="M:Parser.DataStore.HasCursorByKey(System.String)">
+            <summary>Checks if a cursor exists on a given key.</summary>
+            <param name="key">The key to check.</param>
+            <returns><see langword="true"/> if the cursor exists on <paramref name="key"/>, <see langword="false"/> otherwise.</returns>
         </member>
-        <member name="P:Parser.Debug.LineStart">
-            <summary>Set to the line you must go to when making logs.</summary>
-        </member>
-        <member name="P:Parser.Debug.LineCount">
-            <summary>This increments when a log is written. Set to 0 to reset to top.</summary>
-        </member>
-        <member name="M:Parser.Debug.SetStream(System.IO.TextWriter)">
-            <summary>Sets the output stream.</summary>
-            <param name="stream">The stream to output to.</param>
-        </member>
-        <member name="M:Parser.Debug.Log(System.String)">
-            <summary>Logs a message to the output stream.</summary>
-            <param name="msg">The message to log.</param>
-        </member>
-        <member name="M:Parser.Debug.Log(System.String,System.String,System.ConsoleColor,System.ConsoleColor)">
-            <summary>Logs a message to the output stream.</summary>
-            <param name="src">The orignating class.</param>
-            <param name="msg">The message to log.</param>
-            <param name="back">The background color.</param>
-            <param name="text">The foreground color.</param>
-        </member>
-        <member name="M:Parser.Debug.Log(System.String,System.String,System.String,System.ConsoleColor,System.ConsoleColor)">
-            <summary>Logs a message to the output stream.</summary>
-            <param name="src">The orignating class.</param>
-            <param name="target">The originating method.</param>
-            <param name="msg">The message to log.</param>
-            <param name="back">The background color.</param>
-            <param name="text">The foreground color.</param>
-        </member>
-        <member name="P:Parser.DefaultSpec.Unknown">
-            <summary>The default spec.</summary>
-        </member>
-        <member name="P:Parser.DefaultSpec.Binary">
-            <summary>The spec assigned if the parser gets a binary file.</summary>
+        <member name="M:Parser.DataStore.Remove(System.String)">
+            <summary>Removes the indicated key from storage.</summary>
+            <param name="key">The key to clear.</param>
+            <returns><see langword="true"/> if the key existed to be cleared, <see langword="false"/> otherwise.</returns>
         </member>
         <member name="P:Parser.DefaultSpec.TextByLines">
-            <summary>Splits a string on newlines into a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see langword="string"/> objects.</summary>
+            <summary>Splits a <see langword="string"/> on newlines into a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see langword="string"/> objects.</summary>
+        </member>
+        <member name="P:Parser.DefaultSpec.Unknown">
+            <summary>Splits a <see langword="string"/> on newlines into a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see langword="string"/> objects.</summary>
         </member>
         <member name="T:Parser.DefinitionStaticFunctions">
-            <summary>
-            This is a static class for <see cref="T:Parser.Spec"/> definitions.
-            </summary>
+            <summary>This is a static class for <see cref="T:Parser.Spec"/> definitions.</summary>
         </member>
-        <member name="T:Parser.DepthMarker">
-            <summary>Represents a marker used to denote the start and end of a depth or region, along with associated marker type and
-            inclusion options.</summary>
-            <remarks>A DepthMarker defines a pair of string markers and related options that can be used to annotate or
-            delimit regions, such as in parsing, formatting, or code generation scenarios. The struct is immutable and supports
-            value equality.</remarks>
+        <member name="T:Parser.Err">
+            <summary>A static class to assist with creating operation sequences in <see cref="T:Parser.Spec"/> objects.</summary>
         </member>
-        <member name="T:Parser.Inference.IInferenceNode">
-            <summary>
-            A node specifiing a property of the files that use the parent format.
-            </summary>
+        <member name="M:Parser.Err.ThrowBufferOver(System.Int32,System.Int32)">
+            <summary>Throws a buffer overflow exception.</summary>
+            <param name="position">The desired position.</param>
+            <param name="end_of_file">The largest possible position.</param>
+            <returns>Does not return.</returns>
+            <exception cref="T:Parser.Exceptions.OperationBufferOverflowException"/>
         </member>
-        <member name="P:Parser.Inference.IInferenceNode.Type">
-            <summary>
-            The type of node.
-            </summary>
+        <member name="M:Parser.Err.ThrowBadInput(System.String,System.String)">
+            <summary>Throws a bad input exception.</summary>
+            <param name="expected">The expected input.</param>
+            <param name="got">The input recieved.</param>
+            <returns>Does not return.</returns>
+            <exception cref="T:Parser.Exceptions.OperationBadInputTypeException"/>
         </member>
-        <member name="M:Parser.Inference.IInferenceNode.CheckFile(System.String)">
-            <summary>
-            Check if the file at the specified location matches this node.
-            </summary>
-            <param name="filepath">The path to the file to check.</param>
-            <returns><see langword="true"/> if the file matches the node, <see langword="false"/> otherwise.</returns>
+        <member name="M:Parser.Err.ThrowNoVar(System.String)">
+            <summary>Throws a no such var exception.</summary>
+            <param name="key">The data key that did not exist.</param>
+            <returns>Does not return.</returns>
+            <exception cref="T:Parser.Exceptions.OperationNoSuchVarException"/>
         </member>
-        <member name="P:Parser.Inference.InferenceNode.Content">
-            <inheritdoc/>
+        <member name="M:Parser.Err.ThrowBadDef(System.String)">
+            <summary>Throws a bad definition exception.</summary>
+            <param name="msg">THe message to display.</param>
+            <returns>Does not return.</returns>
+            <exception cref="T:Parser.Exceptions.OperationBadDefinitionException"/>
+        </member>
+        <member name="M:Parser.Err.ThrowUnpacked(System.String)">
+            <summary>Throws an operation unpacking exception.</summary>
+            <param name="msg">The message to display.</param>
+            <returns>Does not return.</returns>
+            <exception cref="T:Parser.Exceptions.OperationUnpackingException"/>
+        </member>
+        <member name="T:Parser.Exceptions.InvalidFileInferenceException">
+            <summary>Thrown when there is a problem parsing the file inferences.</summary>
+        </member>
+        <member name="T:Parser.Exceptions.InvalidDefinitionException">
+            <summary>Represents an exception that is thrown when an invalid parse type is passed to a generate operation.</summary>
+        </member>
+        <member name="T:Parser.Exceptions.OperationBadInputTypeException">
+            <summary>Thrown when the operation expects a different type of input than what it was given.</summary>
+        </member>
+        <member name="T:Parser.Exceptions.OperationBadResultException">
+            <summary>A catch-all exception that simply means the operation's result was not what it should be.</summary>
+        </member>
+        <member name="T:Parser.Exceptions.OperationBufferOverflowException">
+            <summary>Thrown when a cursor overruns its maximum size, or an attempt to access a non-existant array item occurs.</summary>
+        </member>
+        <member name="T:Parser.Exceptions.OperationConditionStringException">
+            <summary>Thrown when a formatting or structural issue with parsing an expression string occurs.</summary>
+        </member>
+        <member name="T:Parser.Exceptions.OperationException">
+            <summary>An exception thrown by an operation. Should be caught and converted to an <see cref="T:Parser.OpStatus"/>.</summary>
+        </member>
+        <member name="T:Parser.Exceptions.OperationNoSuchVarException">
+            <summary>An exception thrown by an operation when the key does nt exist in the <see cref="T:Parser.DataStore"/>.</summary>
+        </member>
+        <member name="T:Parser.Exceptions.OperationUnpackingException">
+            <summary>Represents an exception that is thrown when an a packed operation is executed. Operations that must unpack must do so prior to execution.</summary>
+        </member>
+        <member name="T:Parser.Exceptions.QuitException">
+            <summary>This is for quickly jumping back to the parser to quit the parse cycle.</summary>
+        </member>
+        <member name="T:Parser.Exceptions.SpecNotDefinedException">
+            <summary>Thrown when the requested <see cref="T:Parser.Spec"/> does not exist in the <see cref="T:Parser.Library"/>.</summary>
         </member>
         <member name="M:Parser.Inference.InferenceNode.CheckFile(System.String)">
-            <inheritdoc/>
-            <exception cref="T:Parser.InvalidFileInferenceException"/>
+            <summary>Checks a file and determines if it satisfies the inference node.</summary>
+            <param name="filepath">Path to the file.</param>
+            <returns><see langword="true"/> if the node is satisfied, <see langword="false"/> otherwise.</returns>
+            <exception cref="T:Parser.Exceptions.InvalidFileInferenceException"></exception>
         </member>
-        <member name="T:Parser.Inference.InferenceNodeOr">
-            <summary>
-            Logically ORs the nodes this node contains.
-            </summary>
-            <param name="nodes">The nodes this node contains.</param>
-        </member>
-        <member name="M:Parser.Inference.InferenceNodeOr.#ctor(System.Collections.Generic.IEnumerable{Parser.Inference.IInferenceNode})">
-            <summary>
-            Logically ORs the nodes this node contains.
-            </summary>
-            <param name="nodes">The nodes this node contains.</param>
-        </member>
-        <member name="M:Parser.Inference.InferenceNodeOr.CheckFile(System.String)">
-            <summary>
-            Check if the file at the specified location matches this node.
-            </summary>
-            <param name="filepath">The path to the file to check.</param>
-            <returns><see langword="true"/> if the file matches the node, <see langword="false"/> otherwise.</returns>
-        </member>
-        <member name="T:Parser.InvalidParseTypeException">
-            <summary>
-            Represents an exception that is thrown when an invalid parse type is passed to a generate operation.
-            </summary>
-        </member>
-        <member name="T:Parser.Language.TokenNodePiece">
-            <summary>
-            Defines a chunk of a language token.
-            </summary>
-        </member>
-        <member name="P:Parser.Library.Instance">
+        <member name="P:Parser.Library.SpecInferences">
             <summary>The singleton instance of this object.</summary>
+        </member>
+        <member name="M:Parser.Library.InitializeLibrary(System.AppDomain)">
+            <summary>Initializes the library.</summary>
+            <remarks>This must be called before the library is used.</remarks>
+            <param name="domain">The domain that we are loading the <see cref="T:Parser.Spec"/> objects from.</param>
         </member>
         <member name="M:Parser.Library.CheckFile(System.String)">
             <summary>Provides the <see cref="T:Parser.Spec"/> for the provided file path.</summary>
+        </member>
+        <member name="T:Parser.OperationStrategy">
+            <summary>An enhanced <see cref="T:System.Collections.Generic.IList`1"/> that contains <see cref="T:Parser.Ops.IOperation"/> objects.</summary>
+        </member>
+        <member name="P:Parser.OperationStrategy.Operations">
+            <summary>Gets the collection of operations.</summary>
+        </member>
+        <member name="P:Parser.OperationStrategy.Parser">
+            <summary>A reference to the parser.</summary>
+        </member>
+        <member name="P:Parser.OperationStrategy.Status">
+            <summary>The status that this operation will return when DoOperation completes.</summary>
+        </member>
+        <member name="M:Parser.OperationStrategy.DoOperation(Parser.XParser)">
+            <summary>Calls upon the <see cref="T:Parser.XParser"/> to save the current strategy state and enter a new strategy (This one).</summary>
+            <param name="parser_ref">The currently running <see cref="T:Parser.XParser"/>.</param>
+            <inheritdoc/>
         </member>
         <member name="T:Parser.OpStatus">
             <summary>
@@ -232,193 +261,186 @@
             </summary>
         </member>
         <member name="F:Parser.OpStatus.Any">
-            <summary>
-            Not returned by any operation, but used to indicate that any operation code is accepted when checking status.
-            </summary>
+            <summary>Not returned by any operation, but used to indicate that any operation code is accepted when checking status.</summary>
         </member>
         <member name="F:Parser.OpStatus.Error">
-            <summary>
-            Should never be returned by any operation, but is used to indicate that an error has occurred.
-            </summary>
+            <summary>Should never be returned by any operation, but is used to indicate that an error has occurred.</summary>
         </member>
         <member name="F:Parser.OpStatus.AtStart">
-            <summary>
-            The initial status of an operation, used to indicate that the operation has not yet started.
-            </summary>
+            <summary>The initial status of an operation, used to indicate that the operation has not yet started.</summary>
         </member>
         <member name="F:Parser.OpStatus.Pass">
-            <summary>
-            Indicates that the operation has completed successfully.
-            </summary>
+            <summary>Indicates that the operation has completed successfully.</summary>
         </member>
         <member name="F:Parser.OpStatus.Skipped">
-            <summary>
-            Represents a state where an operation or process was skipped.
-            </summary>
+            <summary>Represents a state where an operation or process was skipped.</summary>
         </member>
         <member name="F:Parser.OpStatus.FailOverride">
-            <summary>
-            Represents a state where an operation failed, but the parser should continue processing other operations.
-            </summary>
-        </member>
-        <member name="F:Parser.OpStatus.StartInnerLoop">
-            <summary>
-            Represents the state of starting an inner loop in the process.
-            </summary>
-            <remarks>This value is typically used to indicate that the process has entered the inner loop
-            phase.</remarks>
+            <summary>Represents a state where an operation failed, but the parser should continue processing other operations.</summary>
         </member>
         <member name="F:Parser.OpStatus.ConditionPass">
-            <summary>
-            The if condition passed.
-            </summary>
+            <summary>The if condition passed.</summary>
         </member>
         <member name="F:Parser.OpStatus.ConditionFail">
-            <summary>
-            The if condition failed.
-            </summary>
+            <summary>The if condition failed.</summary>
+        </member>
+        <member name="F:Parser.OpStatus.LoopBreak">
+            <summary>The loop was exited.</summary>
+        </member>
+        <member name="F:Parser.OpStatus.LoopContinue">
+            <summary>The loop advanced to the next iteration.</summary>
+            <remarks>This is set by <see cref="T:Parser.Ops.ForCountOperation"/>, <see cref="T:Parser.Ops.ForEachOperation"/>, and <see cref="T:Parser.Ops.WhileOperation"/> loops.</remarks>
         </member>
         <member name="F:Parser.OpStatus.Fail">
-            <summary>
-            A generic failure status that indicates an operation has failed.
-            </summary>
+            <summary>A generic failure status that indicates an operation has failed.</summary>
+            <remarks>Caused by a generic <see cref="T:Parser.Exceptions.OperationException"/>.</remarks>
         </member>
         <member name="F:Parser.OpStatus.FailBadInputNull">
-            <summary>
-            Represents a failure condition where the input is null.
-            </summary>
+            <summary>Represents a failure condition where the input is null.</summary>
         </member>
         <member name="F:Parser.OpStatus.FailBadOpDefinition">
-            <summary>
-            Represents a failure condition where the operation definition is invalid or malformed.
-            </summary>
+            <summary>Represents a failure condition where the operation definition is invalid or malformed.</summary>
         </member>
         <member name="F:Parser.OpStatus.FailBadOpResult">
-            <summary>
-            Represents a failure condition where the operation result is not valid or does not meet the expected criteria.
-            </summary>
+            <summary>Represents a failure condition where the operation result is not valid or does not meet the expected criteria.</summary>
         </member>
         <member name="F:Parser.OpStatus.FailBadOpImpossible">
-            <summary>
-            Represents a failure condition where the operation is impossible to perform due to the current state or context.
-            </summary>
+            <summary>Represents a failure condition where the operation is impossible to perform due to the current state or context.</summary>
         </member>
         <member name="F:Parser.OpStatus.FailInference">
-            <summary>
-            Represents a failure condition where the inference process has failed, such as when the parser cannot determine what type of specification to use.
-            </summary>
+            <summary>Represents a failure condition where the inference process has failed, such as when the parser cannot determine what type of specification to use.</summary>
         </member>
         <member name="F:Parser.OpStatus.FailBufferOverflow">
-            <summary>
-            Represents a failure condition where the operation has exceeded the buffer size or capacity, leading to an overflow error.
-            </summary>
+            <summary>Represents a failure condition where the operation has exceeded the buffer size or capacity, leading to an overflow error.</summary>
             <remarks>This is specific to parsers that handle data in buffers, such as byte parsers.</remarks>
         </member>
         <member name="F:Parser.OpStatus.FailNoSpec">
-            <summary>
-            Represents a failure condition where the operation cannot proceed because no specification was provided or found.
-            </summary>
+            <summary>Represents a failure condition where the operation cannot proceed because no specification was provided or found.</summary>
         </member>
         <member name="F:Parser.OpStatus.FailNoSuchVarName">
-            <summary>
-            Represents a failure condition where the operation cannot proceed because a required variable name was not found or is missing.
-            </summary>
+            <summary>Represents a failure condition where the operation cannot proceed because a required variable name was not found or is missing.</summary>
         </member>
         <member name="F:Parser.OpStatus.FailBadInputType">
-            <summary>
-            Represents a failure condition where the input data type is not compatible with the expected type for the operation.
-            </summary>
+            <summary>Represents a failure condition where the input data type is not compatible with the expected type for the operation.</summary>
         </member>
         <member name="F:Parser.OpStatus.FailNullOpResult">
-            <summary>
-            Represents a failure condition where the operation result is null, which is not acceptable for the operation's requirements.
-            </summary>
+            <summary>Represents a failure condition where the operation result is null, which is not acceptable for the operation's requirements.</summary>
         </member>
         <member name="F:Parser.OpStatus.PastFail">
-            <summary>
-            Represents a failure condition where the operation has failed due to a past failure that was not handled or resolved.
-            </summary>
+            <summary>Represents a failure condition where the operation has failed due to a past failure that was not handled or resolved.</summary>
         </member>
         <member name="F:Parser.OpStatus.DefinedFail">
-            <summary>
-            Indicates that the operation sequence has been failed via an action in defined in the specification.
-            </summary>
+            <summary>Indicates that the operation sequence has been failed via an action in defined in the specification.</summary>
         </member>
         <member name="F:Parser.OpStatus.FailNoInput">
-            <summary>
-            Indicates that the parser was not passed any initial input.
-            </summary>
+            <summary>Indicates that the parser was not passed any initial input.</summary>
         </member>
         <member name="F:Parser.OpStatus.EndCommand">
-            <summary>
-            Indicates that the operation sequence has been completed successfully, and no further operations are needed.
-            </summary>
+            <summary>Indicates that the operation sequence has been completed successfully, and no further operations are needed.</summary>
         </member>
-        <member name="M:Parser.OpStatusExtensions.IsFail(Parser.OpStatus,System.Boolean)">
-            <summary>
-            Checks a status for failure.
-            </summary>
-            <param name="status">The status to check.</param>
-            <param name="continueOnFail">The continue on fail value.</param>
-            <returns></returns>
+        <member name="M:Parser.OpStatusExtensions.get_IsFail(Parser.OpStatus)">
+            <inheritdoc cref="P:Parser.OpStatusExtensions.&lt;G&gt;$F6DF33A3E7BC049BA485872BF96B2A4E.IsFail"/>
+        </member>
+        <member name="M:Parser.OpStatusExtensions.get_IsPass(Parser.OpStatus)">
+            <inheritdoc cref="P:Parser.OpStatusExtensions.&lt;G&gt;$F6DF33A3E7BC049BA485872BF96B2A4E.IsPass"/>
+        </member>
+        <member name="P:Parser.OpStatusExtensions.&lt;G&gt;$F6DF33A3E7BC049BA485872BF96B2A4E.IsFail">
+            <summary>Checks a status for failure.</summary>
+            <returns><see langword="true"/> if the status was a failure code, <see langword="false"/> otherwise.</returns>
+        </member>
+        <member name="P:Parser.OpStatusExtensions.&lt;G&gt;$F6DF33A3E7BC049BA485872BF96B2A4E.IsPass">
+            <summary>Checks a status for success.</summary>
+        </member>
+        <member name="P:Parser.Ops.AddItemOperation.ParameterKeys">
+            <summary>A dictionary of property names and data keys to pull their value from.</summary>
+        </member>
+        <member name="T:Parser.Ops.DebugPrintKeyOperation">
+            <summary>Prints a key that implements <see cref="T:Common.IPrintable"/>.</summary>
+            <remarks>If the key does not implement <see cref="T:Common.IPrintable"/>, nothing happens, and the operation returns <see cref="F:Parser.OpStatus.Skipped"/>.</remarks>
+        </member>
+        <member name="P:Parser.Ops.DebugPrintKeyOperation.InputKey">
+            <summary>The key to print.</summary>
+        </member>
+        <member name="M:Parser.Ops.DebugPrintKeyOperation.Execute">
+            <inheritdoc/>
+            <remarks>This is a debugging operation and does not store data.</remarks>
+        </member>
+        <member name="T:Parser.Ops.DebugToStringOperation">
+            <summary>An operation that logs the contents of the provided key.</summary>
+        </member>
+        <member name="M:Parser.Ops.DebugToStringOperation.Execute">
+            <inheritdoc/>
+            <remarks>This is a debugging operation and does not store data.</remarks>
+        </member>
+        <member name="T:Parser.Ops.DebugWaitForInputOperation">
+            <!-- No matching elements were found for the following include tag --><include file="operation.xml" path="/doc/members/member[@name=&quot;T:Parser.Ops.Operation&quot;]" />
+            <summary>Constructs an operation that waits for a specific key press or the enter key.</summary>
+            <param name="key">The key to wait for.</param>
+        </member>
+        <member name="M:Parser.Ops.DebugWaitForInputOperation.#ctor(System.ConsoleKey)">
+            <!-- No matching elements were found for the following include tag --><include file="operation.xml" path="/doc/members/member[@name=&quot;T:Parser.Ops.Operation&quot;]" />
+            <summary>Constructs an operation that waits for a specific key press or the enter key.</summary>
+            <param name="key">The key to wait for.</param>
+        </member>
+        <member name="T:Parser.Ops.DivideOperation">
+            <summary>Divides 2 integers to find the quotient.</summary>
+        </member>
+        <member name="T:Parser.Ops.ForEachOperation">
+            <summary>Iterates over the specified key, storing the current item in another key to be accessed.</summary>
         </member>
         <member name="T:Parser.Ops.IOperation">
-            <summary>
-            The interface for all operations in the parser.
-            </summary>
+            <summary>The interface for all operations in the parser.</summary>
         </member>
         <member name="P:Parser.Ops.IOperation.ContinueOnFail">
-            <summary>
-            Specifies that the operation should not stop the parser upon failure.
-            </summary>
+            <summary>Specifies that the operation should not stop the parser upon failure.</summary>
         </member>
         <member name="P:Parser.Ops.IOperation.SkipOperation">
-            <summary>
-            Specifies that the operation should be skipped.
-            </summary>
+            <summary>Specifies that the operation should be skipped.</summary>
         </member>
-        <member name="P:Parser.Ops.IOperation.IgnoreAllLoads">
-            <summary>
-            Whether or not this operation loads any data.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.IOperation.NeverExecutes">
-            <summary>
-            Set this in a child operation if the <see cref="M:Parser.Ops.IOperation.DoOperation(Parser.XParser)"/> method should never execute.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.IOperation.LoopBreak">
-            <summary>
-            Specifies the break target. This is the position that the loop will go to after it concludes.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.IOperation.LoopStart">
-            <summary>
-            Specifies the beginning of the loop. This is the position it will start the next iteration at.
-            </summary>
+        <member name="P:Parser.Ops.IOperation.NoExecution">
+            <summary>Specifies that the operation performs no action, and simply advances to the next operation.</summary>
         </member>
         <member name="M:Parser.Ops.IOperation.DoOperation(Parser.XParser)">
-            <summary>
-            Calls the operation with the parser provided.
-            </summary>
+            <summary>Calls the operation with the parser provided.</summary>
             <param name="parser_ref">The parser to pull data from and to store data in.</param>
             <returns>An <see cref="T:Parser.OpStatus"/> that represents the result status.</returns>
         </member>
-        <member name="T:Parser.Ops.LoopType">
-            <summary>The type of loop that this loop operation is doing.</summary>
+        <member name="M:Parser.Ops.IOperation.ApplyProperties(System.Boolean,System.Boolean)">
+            <summary>Applies these attributes to the operation.</summary>
+            <param name="cont">Specifies that the operation should not stop the parser upon failure.</param>
+            <param name="skip">Specifies that the operation should be skipped.</param>
         </member>
-        <member name="T:Parser.Ops.LoopOperation">
-            <summary>
-            Creates an iterative loop within the parser. This can iterate through data, or a binary file.
-            </summary>
-            <remarks>
-            <see cref="P:Parser.Ops.LoopOperation.OpIndex"/> must be set in the operation loader in the parser. This is the loop's position the operation list.
-            </remarks>
+        <member name="T:Parser.Ops.IPlaceholderOperation">
+            <summary>For operations that require some work by the parser before they can be iterated through.</summary>
         </member>
-        <member name="P:Parser.Ops.LoopOperation.OpIndex">
-            <summary>
-            Start of loop section.
-            </summary>
+        <member name="M:Parser.Ops.IPlaceholderOperation.Unpack(System.Collections.ObjectModel.Collection{Parser.Ops.IOperation},System.Int32,Parser.XParser)">
+            <summary>Unpacks the operation into a flat structure.</summary>
+            <param name="operations">The operation list reference.</param>
+            <param name="index">The index of this operation in the sequence.</param>
+            <param name="parser_ref">The parser or strategy reference.</param>
+            <returns>The operation count after unpacking.</returns>
+        </member>
+        <member name="M:Parser.Ops.IPlaceholderOperation.CheckUnpacked">
+            <summary>Checks if the operation properly unpacked.</summary>
+            <returns>Returns if the operation unpacked correctly, otherwise it will throw a <see  cref="T:Parser.Exceptions.OperationUnpackingException"/>.</returns>
+            <exception cref="T:Parser.Exceptions.OperationUnpackingException">The operation did not unpack correctly.</exception>
+        </member>
+        <member name="P:Parser.Ops.LoopOperation.CursorKey">
+            <summary>The key name to store this loop operation's <see cref="T:Parser.CursorData"/>.</summary>
+        </member>
+        <member name="P:Parser.Ops.LoopOperation.Operations">
+            <summary>Operations to perform.</summary>
+        </member>
+        <member name="P:Parser.Ops.LoopOperation.LoopIndex">
+            <summary>Start of loop section.</summary>
+            <remarks>This will be the postion of the actual loop body in the operation list.</remarks>
+        </member>
+        <member name="P:Parser.Ops.LoopOperation.CurrentIndex">
+            <summary>The current index of the unpacker.</summary>
+            <remarks>This will be the position of the <see cref="T:Parser.Ops.LoopOperation"/> object in the operation list.</remarks>
+        </member>
+        <member name="P:Parser.Ops.LoopOperation.InnerOperations">
+            <summary>The inner operations with the breaks and continues configured.</summary>
         </member>
         <member name="T:Parser.Ops.Operation">
             <summary>
@@ -427,187 +449,88 @@
             </summary>
         </member>
         <member name="M:Parser.Ops.Operation.ThrowIf(System.Boolean,System.String)">
-            <summary>
-            Throws an <see cref="T:System.InvalidOperationException"/> if condition is <see langword="true"/>.
-            </summary>
+            <summary>Throws an <see cref="T:Parser.Exceptions.OperationException"/> if condition is <see langword="true"/>.</summary>
             <param name="condition">The condition to check.</param>
             <param name="msg">The exception message.</param>
-            <exception cref="T:System.InvalidOperationException"></exception>
-        </member>
-        <member name="M:Parser.Ops.Operation.ThrowNoOverrideError">
-            <summary>
-            Throws an <see cref="T:System.NotImplementedException"/>. Use if you require an override in a class, and cannot make it abstract.
-            </summary>
-            <exception cref="T:System.NotImplementedException"/>
-        </member>
-        <member name="M:Parser.Ops.Operation.ThrowNoOverrideError``1">
-            <summary>
-            Throws an <see cref="T:System.NotImplementedException"/>. Use if you require an override in a class, and cannot make it abstract.
-            </summary>
-            <exception cref="T:System.NotImplementedException"/>
-        </member>
-        <member name="M:Parser.Ops.Operation.ThrowUnusableOverrideError">
-            <summary>
-            Throws an <see cref="T:System.NotSupportedException"/>. Use if you must prevent a valid overload from a base class from being used.
-            </summary>
-            <exception cref="T:System.NotSupportedException"/>
-        </member>
-        <member name="M:Parser.Ops.Operation.ThrowBadParserError(System.Object,System.Type)">
-            <summary>
-            Throws an <see cref="T:System.ArgumentException"/>. Use if the parser type was not correct and you cannot recover.
-            </summary>
-            <param name="parser">The parser object.</param>
-            <param name="desired_parser">The type of parser you need.</param>
-            <exception cref="T:System.ArgumentException"/>
-        </member>
-        <member name="P:Parser.Ops.Operation.End">
-            <summary>
-            A built in operation that ends the operation sequence.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.Operation.MultipleInputValues">
-            <summary>
-            The loaded data from the input keys if there are multiple keys provided.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.Operation.InputKeys">
-            <summary>
-            A collection of all of the input keys. This will only contain one key if only one key is provided.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.Operation.InputKey">
-            <summary>
-            The input key provided, or the first input key if multiple are provided.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.Operation.OutputKey">
-            <summary>
-            The output key provided.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.Operation.WorkToReturn">
-            <summary>
-            The object to be assigned to the output key at after the <c><see cref="M:Parser.Ops.Operation.Execute"/></c> step completes successfully.
-            </summary>
+            <exception cref="T:Parser.Exceptions.OperationException"></exception>
         </member>
         <member name="P:Parser.Ops.Operation.Status">
-            <summary>
-            The status of the operation.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.Operation.AdjustedStatus">
-            <summary>
-            The adjusted status taking into account operation flags.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.Operation.ContinueOnFail">
-            <inheritdoc/>
-        </member>
-        <member name="P:Parser.Ops.Operation.SkipOperation">
-            <inheritdoc/>
-        </member>
-        <member name="P:Parser.Ops.Operation.IgnoreAllLoads">
-            <summary>
-            Whether or not this operation loads any data.
-            </summary>
-        </member>
-        <member name="M:Parser.Ops.Operation.CheckInputNull">
-            <summary>
-            Checks the parsers current working data, and sets the Status to <see cref="F:Parser.OpStatus.FailNoSuchVarName"/> if it is missing.
-            This method is for when one input is provided.
-            </summary>
-        </member>
-        <member name="M:Parser.Ops.Operation.CheckInputsNull">
-            <summary>
-            Checks the parsers current working data, and sets the Status to <see cref="F:Parser.OpStatus.FailNoSuchVarName"/> if it is missing.
-            This method is for when more than one input is provided.
-            </summary>
-        </member>
-        <member name="M:Parser.Ops.Operation.CheckOperationFlags">
-            <summary>
-            Sets the status to EndCommand or Skipped if the operation is flagged to be those.
-            </summary>
-        </member>
-        <member name="M:Parser.Ops.Operation.CheckInput``1(``0@)">
-            <summary>
-            Checks if the data stored in <see cref="P:Parser.Ops.Operation.InputKey"/> is of type <typeparamref name="T"/>.
-            </summary>
-            <typeparam name="T">The type or interface to check against.</typeparam>
-            <param name="casted">The data casted to the type specified.</param>
-            <returns>Returns <see langword="true"/> if the data is of the correct type, <see langword="false"/> otherwise.</returns>
-        </member>
-        <member name="M:Parser.Ops.Operation.CheckInputs``1(System.Collections.ObjectModel.Collection{``0}@)">
-            <summary>
-            Checks all the inputs provided and validates them to a common class or interface.
-            </summary>
-            <typeparam name="T">The common class or interface.</typeparam>
-            <param name="casted">The collection of inputs.</param>
-            <returns>Returns <see langword="true"/> if the check passed, <see langword="false"/> otherwise.</returns>
+            <summary>The status of the operation.</summary>
         </member>
         <member name="P:Parser.Ops.Operation.Parser">
-            <summary>
-            The reference to the parser.
-            </summary>
+            <summary>The reference to the parser.</summary>
         </member>
         <member name="P:Parser.Ops.Operation.Data">
-            <summary>
-            The reference to the <see cref="T:Parser.DataStore"/>.
-            </summary>
+            <summary>The reference to the <see cref="T:Parser.DataStore"/>.</summary>
         </member>
         <member name="P:Parser.Ops.Operation.Spec">
-            <summary>
-            The reference to the specification.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.Operation.LoopBreak">
-            <summary>
-            The jump target of any <see cref="F:Parser.OperationActionType.BreakLoop"/> action that is called.
-            </summary>
-        </member>
-        <member name="P:Parser.Ops.Operation.LoopStart">
-            <summary>
-            The jump target of any <see cref="F:Parser.OperationActionType.ContinueLoop"/> and the beginning of the loop section.
-            </summary>
-        </member>
-        <member name="M:Parser.Ops.Operation.#ctor(System.Collections.Generic.IEnumerable{System.String},System.String)">
-            <summary>
-            Multiple input keys.
-            </summary>
+            <summary>The reference to the specification.</summary>
         </member>
         <member name="M:Parser.Ops.Operation.#ctor">
-            <summary>
-            Constructor for the static <see cref="P:Parser.Ops.Operation.End"/> object, and for operations that do not touch data.
-            </summary>
+            <summary>Constructor for an operation object.</summary>
         </member>
-        <member name="M:Parser.Ops.Operation.#ctor(System.String,System.String)">
-            <summary>
-            Single input key.
-            </summary>
+        <member name="M:Parser.Ops.Operation.DoOperation(Parser.XParser)">
+            <summary>This method is the entry point for all operations.</summary>
+            <param name="parser_ref">The reference to the parser executing this operation.</param>
+            <returns>An <see cref="T:Parser.OpStatus"/> reflecting the result of the operation. Failures will be thrown,
+            and then caught by the <see cref="T:Parser.XParser"/>.</returns>
         </member>
         <member name="M:Parser.Ops.Operation.Execute">
             <summary>
-            Performs the operation and stores the value in <c><see cref="P:Parser.Ops.Operation.WorkToReturn"/></c>,
-            and the <see cref="T:Parser.OpStatus"/> in <c><see cref="P:Parser.Ops.Operation.Status"/></c><br/>
-            Use <c><see cref="M:Parser.Ops.Operation.CheckInput``1(``0@)"/></c> or <see cref="M:Parser.Ops.Operation.CheckArray``1(System.Collections.Generic.IEnumerable{``0}@)"/> to validate single variables.
-            Use <see cref="M:Parser.Ops.Operation.CheckInputs``1(System.Collections.ObjectModel.Collection{``0}@)"/> to validate mulitple.
+            Performs the operation, storing and loading data from <see cref="P:Parser.Ops.Operation.Data"/>.<br/>
+            The <see cref="P:Parser.Ops.Operation.Status"/> property should be assigned a value,
+            if the value is <see cref="F:Parser.OpStatus.AtStart"/> upon completion, a warning will display.
             </summary>
+            <exception cref="T:Parser.Exceptions.OperationException"></exception>
+            <exception cref="T:Parser.Exceptions.OperationBadDefinitionException">Method was not overridden, or NoExecute was not set.</exception>
         </member>
-        <member name="M:Parser.Ops.Operation.Initialize(Parser.XParser)">
-            <summary>
-            Assigns the <c><see cref="T:Parser.XParser"/></c> to this operation and loads the data for the operation to work on.
-            </summary>
-            <param name="parser">The parser reference to pass to the operation.</param>
+        <member name="P:Parser.Ops.OperationBreak.Null">
+            <summary>Created during parsing as a placeholder until unpacking.</summary>
         </member>
-        <member name="T:Parser.Ops.OperationCollection">
-            <summary>
-            A collection of operations that are executed in the given order.
-            </summary>
+        <member name="P:Parser.Ops.OperationBreak.BreakTarget">
+            <summary>The position to break to.</summary>
+            <remarks>This will usually be the position after the original loop statement.</remarks>
+        </member>
+        <member name="P:Parser.Ops.OperationBreak.BreakCursor">
+            <summary>The key storing the cursor for the current loop.</summary>
+        </member>
+        <member name="T:Parser.Ops.OperationCheckLoopCondition">
+            <summary>This is placed at the start of a while loop.</summary>
+            <param name="condition">The condition to check.</param>
+            <param name="cursor_key">The key for the cursor.</param>
+            <param name="break_target">The target index to break to.</param>
+        </member>
+        <member name="M:Parser.Ops.OperationCheckLoopCondition.#ctor(System.String,System.String,System.Int32)">
+            <summary>This is placed at the start of a while loop.</summary>
+            <param name="condition">The condition to check.</param>
+            <param name="cursor_key">The key for the cursor.</param>
+            <param name="break_target">The target index to break to.</param>
+        </member>
+        <member name="T:Parser.Ops.OperationEnd">
+            <summary>This operation ends the operation sequence with a success.</summary>
+        </member>
+        <member name="M:Parser.Ops.OperationEnd.#ctor(System.Boolean)">
+            <summary>This operation ends the operation sequence with a success.</summary>
+        </member>
+        <member name="T:Parser.Ops.OperationLabel">
+            <summary>A label that can be referenced from a jump statement.</summary>
+        </member>
+        <member name="P:Parser.Ops.OperationLabel.Name">
+            <summary>The name of this label.</summary>
+        </member>
+        <member name="T:Parser.Ops.PromptOperation">
+            <summary>Prompts for input, and stores the input.
+            Optionally validates the input as well.</summary>
+        </member>
+        <member name="M:Parser.Ops.PromptOperation.Execute">
+            <summary>Executes the prompt operation, consisting of displaying the prompt message and reading user input.
+            This can also optionally validate this input. If no validator is provided, the input will be accepted as valid.</summary>
+            <exception cref="T:Parser.Exceptions.OperationBadResultException">Thrown when the validation fails.</exception>
         </member>
         <member name="T:Parser.Ops.Text.CombineOperation">
-            <summary>
-            <summary>
+            <summary><summary>
         Performs an operation that uses and may alter or reassign the data.<br />
-      </summary><returns>
+      </summary><remarks>
         <see cref="F:Parser.OpStatus.Error" /> : The operation encountered a fatal error.<br />
         <see cref="F:Parser.OpStatus.Pass" /> : The operation completed.<br />
         <see cref="F:Parser.OpStatus.Skipped" /> : The operation was skipped or not executed. <br />
@@ -620,91 +543,16 @@
         <see cref="F:Parser.OpStatus.FailNoSuchVarName" /> : The operation was supplied an invalid key.<br />
         <see cref="F:Parser.OpStatus.FailNoSpec" /> : The operation does not have a valid <see cref="T:Parser.Spec" />.<br />
         <see cref="F:Parser.OpStatus.EndCommand" /> : The operation completed and was the final operation. <br />
-      </returns><exception cref="T:Parser.UnknownOperationException" />
-            </summary>
-            <param name="delimiter">What to space the text parts with.</param>
-            <param name="input_key">The input key.</param>
-            <param name="output_key">The output key.</param>
+      </remarks><exception cref="T:Parser.UnknownOperationException" /></summary>
         </member>
-        <member name="M:Parser.Ops.Text.CombineOperation.#ctor(System.String,System.String,System.Object)">
-            <summary>
-            <summary>
-        Performs an operation that uses and may alter or reassign the data.<br />
-      </summary><returns>
-        <see cref="F:Parser.OpStatus.Error" /> : The operation encountered a fatal error.<br />
-        <see cref="F:Parser.OpStatus.Pass" /> : The operation completed.<br />
-        <see cref="F:Parser.OpStatus.Skipped" /> : The operation was skipped or not executed. <br />
-        <see cref="F:Parser.OpStatus.FailBadInputNull" /> : The operation was given a null value. <br />
-        <see cref="F:Parser.OpStatus.FailBadInputType" /> : The operation was given an incompatible object as input. <br />
-        <see cref="F:Parser.OpStatus.FailBadOpDefinition" /> : The operation or specification definition has an error or is not valid. <br />
-        <see cref="F:Parser.OpStatus.FailBadOpImpossible" /> : The operation reached an impossible statement. <br />
-        <see cref="F:Parser.OpStatus.FailNullOpResult" /> : The operation resulted in a null value. <br />
-        <see cref="F:Parser.OpStatus.FailBufferOverflow" /> : The operation advanced beyond the EOL of the input. <br />
-        <see cref="F:Parser.OpStatus.FailNoSuchVarName" /> : The operation was supplied an invalid key.<br />
-        <see cref="F:Parser.OpStatus.FailNoSpec" /> : The operation does not have a valid <see cref="T:Parser.Spec" />.<br />
-        <see cref="F:Parser.OpStatus.EndCommand" /> : The operation completed and was the final operation. <br />
-      </returns><exception cref="T:Parser.UnknownOperationException" />
-            </summary>
-            <param name="delimiter">What to space the text parts with.</param>
-            <param name="input_key">The input key.</param>
-            <param name="output_key">The output key.</param>
+        <member name="P:Parser.Ops.Text.CombineOperation.Delimeter">
+            <summary>The <see langword="char"/> or <see langword="string"/> to bridge the combined values of the data at <see cref="P:Parser.Ops.Text.CombineOperation.InputKey"/>.</summary>
         </member>
-        <member name="T:Parser.Ops.Text.ConsolidateOperation`1">
-            <summary>
-            Combines multiple keys into one key. Keys must have a common type or interface.
-            </summary>
-            <typeparam name="TCommon">The common type or interface.</typeparam>
-            <param name="input_keys">The keys to combine.</param>
-            <param name="output_key">The combined keys.</param>
+        <member name="P:Parser.Ops.Text.CombineOperation.InputKey">
+            <summary>The input key.</summary>
         </member>
-        <member name="M:Parser.Ops.Text.ConsolidateOperation`1.#ctor(System.Collections.Generic.IEnumerable{System.String},System.String)">
-            <summary>
-            Combines multiple keys into one key. Keys must have a common type or interface.
-            </summary>
-            <typeparam name="TCommon">The common type or interface.</typeparam>
-            <param name="input_keys">The keys to combine.</param>
-            <param name="output_key">The combined keys.</param>
-        </member>
-        <member name="M:Parser.Ops.Text.ConsolidateOperation`1.Execute">
-            <inheritdoc/>
-        </member>
-        <member name="T:Parser.Ops.Text.DebugToStringOperation">
-            <summary>
-            An operation that logs the contents of the provided key.
-            </summary>
-        </member>
-        <member name="M:Parser.Ops.Text.DebugToStringOperation.#ctor(System.String)">
-            <summary>
-            Constructs an operation that logs the contents of the provided key.
-            </summary>
-            <param name="input_key">The key to output the contents of.</param>
-        </member>
-        <member name="M:Parser.Ops.Text.DebugToStringOperation.Execute">
-            <inheritdoc/>
-            <remarks>This is a debugging operation and does not store data.</remarks>
-        </member>
-        <member name="M:Parser.Ops.Text.DebugWaitForInputOperation.#ctor(System.Nullable{System.ConsoleKey})">
-            <summary>
-            Constructs an operation that waits for a specific key press or the enter key.
-            </summary>
-            <param name="key">The key to wait for.</param>
-        </member>
-        <member name="T:Parser.Ops.Text.DepthOperation">
-            <summary>
-            Takes an input as a collection of tokens,
-            and assigns a depth value to them. 
-            </summary>
-            <remarks><code>
-            Inputs: <see langword="string"/>, <see cref="T:System.Collections.Generic.IEnumerable`1"/>(<see langword="string"/>)<br/>
-            Output: <c>Same as input</c>
-            </code><br/>
-            Statuses:
-            <code>
-            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.
-            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.
-            <see cref="F:Parser.OpStatus.FailBadInputNull"/>: The data at the key was <see langword="null"/> or missing.
-            </code>
-            </remarks>
+        <member name="P:Parser.Ops.Text.CombineOperation.OutputKey">
+            <summary>The output key.</summary>
         </member>
         <member name="T:Parser.Ops.Text.ExternalOperation`2">
             <summary>
@@ -714,26 +562,18 @@
             </summary>
             <typeparam name="TIn">The type of object to supply as input.</typeparam>
             <typeparam name="TOut">The type of object written to the output key.</typeparam>
-            <param name="input_key">The key to get the input from.</param>
-            <param name="output_key">The key to write the output to.</param>
             <param name="operation">The function to perform to change from a <typeparamref name="TIn"/> to a <typeparamref name="TOut"/>.</param>
             <param name="validation">The function that determines whether or not the conversion was a success.</param>
             <remarks><code>
             Inputs: <typeparamref name="TIn"/><br/>
             Output: <typeparamref name="TOut"/>
-            </code><br/>
-            Statuses:
-            <code>
-            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.
-            <see cref="F:Parser.OpStatus.Skipped"/>: Operation completed successfully, but no work was done.
-            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.
-            <see cref="F:Parser.OpStatus.FailBadInputNull"/>: The data at the key was <see langword="null"/>.
-            <see cref="F:Parser.OpStatus.FailNoSuchVarName"/>: There was no data at the input key.
-            <see cref="F:Parser.OpStatus.FailBadOpResult"/>: The validation function failed.
             </code>
             </remarks>
+            <exception cref="T:Parser.Exceptions.OperationBadResultException"/>
+            <exception cref="T:Parser.Exceptions.OperationNoSuchVarException"/>
+            <exception cref="T:Parser.Exceptions.OperationBadInputTypeException"/>
         </member>
-        <member name="M:Parser.Ops.Text.ExternalOperation`2.#ctor(System.Func{`0,`1},System.Func{`1,System.Boolean},System.String,System.String)">
+        <member name="M:Parser.Ops.Text.ExternalOperation`2.#ctor(System.Func{`0,`1},System.Func{`1,System.Boolean})">
             <summary>
             Takes an input as a <typeparamref name="TIn"/> object,
             and generates a <typeparamref name="TOut"/> from it,
@@ -741,81 +581,23 @@
             </summary>
             <typeparam name="TIn">The type of object to supply as input.</typeparam>
             <typeparam name="TOut">The type of object written to the output key.</typeparam>
-            <param name="input_key">The key to get the input from.</param>
-            <param name="output_key">The key to write the output to.</param>
             <param name="operation">The function to perform to change from a <typeparamref name="TIn"/> to a <typeparamref name="TOut"/>.</param>
             <param name="validation">The function that determines whether or not the conversion was a success.</param>
             <remarks><code>
             Inputs: <typeparamref name="TIn"/><br/>
             Output: <typeparamref name="TOut"/>
-            </code><br/>
-            Statuses:
-            <code>
-            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.
-            <see cref="F:Parser.OpStatus.Skipped"/>: Operation completed successfully, but no work was done.
-            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.
-            <see cref="F:Parser.OpStatus.FailBadInputNull"/>: The data at the key was <see langword="null"/>.
-            <see cref="F:Parser.OpStatus.FailNoSuchVarName"/>: There was no data at the input key.
-            <see cref="F:Parser.OpStatus.FailBadOpResult"/>: The validation function failed.
             </code>
             </remarks>
+            <exception cref="T:Parser.Exceptions.OperationBadResultException"/>
+            <exception cref="T:Parser.Exceptions.OperationNoSuchVarException"/>
+            <exception cref="T:Parser.Exceptions.OperationBadInputTypeException"/>
         </member>
-        <member name="T:Parser.Ops.Text.GenerateFromObjectOperation`1">
-            <summary>
-            Takes an input as a collection of <see cref="T:Common.Regex.MatchDataSet"/> objects,
-            and generates a <see cref="T:System.Collections.Generic.Dictionary`2"/> of items from it,
-            provided that the specified group (or groups) are present.
-            </summary>
-            <typeparam name="TOutput">The type of object to create.</typeparam>
-            <param name="input_key">The key to get the input from.</param>
-            <param name="output_key">The key to write the output to.</param>
-            <param name="group_name">The group name to check for.</param>
-            <remarks><code>
-            Inputs: IDictionary&lt;int, MatchData>, IEnumerable&lt;MatchData>
-            Output: <see cref="T:System.Collections.Generic.Dictionary`2">Dictionary&lt;int, TOutput></see></code>
-            <br/>
-            Statuses:
-            <code>
-            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.
-            <see cref="F:Parser.OpStatus.Skipped"/>: Operation completed successfully, but no work was done.
-            <see cref="F:Parser.OpStatus.FailOverride"/>: Operation failed, but is allowed to continue.
-            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.
-            <see cref="F:Parser.OpStatus.FailBadInputNull"/>: The data at the key was <see langword="null"/> or missing.
-            <see cref="F:Parser.OpStatus.FailNoSuchVarName"/>: The key was not found in the <see cref="T:Parser.DataStore"/>.
-            </code>
-            </remarks>
-        </member>
-        <member name="M:Parser.Ops.Text.GenerateFromObjectOperation`1.#ctor(System.String,System.String,System.String)">
-            <summary>
-            Takes an input as a collection of <see cref="T:Common.Regex.MatchDataSet"/> objects,
-            and generates a <see cref="T:System.Collections.Generic.Dictionary`2"/> of items from it,
-            provided that the specified group (or groups) are present.
-            </summary>
-            <typeparam name="TOutput">The type of object to create.</typeparam>
-            <param name="input_key">The key to get the input from.</param>
-            <param name="output_key">The key to write the output to.</param>
-            <param name="group_name">The group name to check for.</param>
-            <remarks><code>
-            Inputs: IDictionary&lt;int, MatchData>, IEnumerable&lt;MatchData>
-            Output: <see cref="T:System.Collections.Generic.Dictionary`2">Dictionary&lt;int, TOutput></see></code>
-            <br/>
-            Statuses:
-            <code>
-            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.
-            <see cref="F:Parser.OpStatus.Skipped"/>: Operation completed successfully, but no work was done.
-            <see cref="F:Parser.OpStatus.FailOverride"/>: Operation failed, but is allowed to continue.
-            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.
-            <see cref="F:Parser.OpStatus.FailBadInputNull"/>: The data at the key was <see langword="null"/> or missing.
-            <see cref="F:Parser.OpStatus.FailNoSuchVarName"/>: The key was not found in the <see cref="T:Parser.DataStore"/>.
-            </code>
-            </remarks>
-        </member>
-        <member name="M:Parser.Ops.Text.GenerateFromObjectOperation`1.Execute">
-            <inheritdoc/>
+        <member name="T:Parser.Ops.Text.FilterTokenOperation">
+            <summary>Represents an operation to filter tokens based on specified criteria.</summary>
         </member>
         <member name="T:Parser.Ops.Text.GenerateOperation`2">
             <summary>
-            Takes an input as a collection of <see cref="T:Common.Regex.MatchDataSet"/> objects,
+            Takes an input as a collection of <see cref="T:Common.RegExp.MatchDataSet"/> objects,
             and generates a <see cref="T:System.Collections.Generic.Dictionary`2"/> of items from it,
             provided that the specified group (or groups) are present.
             </summary>
@@ -827,42 +609,28 @@
             <br/>
             Statuses:
             <code>
-            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.
-            <see cref="F:Parser.OpStatus.Skipped"/>: Operation completed successfully, but no work was done.
-            <see cref="F:Parser.OpStatus.FailOverride"/>: Operation failed, but is allowed to continue.
-            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.
-            <see cref="F:Parser.OpStatus.FailBadInputNull"/>: The data at the key was <see langword="null"/> or missing.
+            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.<br/>
+            <see cref="F:Parser.OpStatus.Skipped"/>: Operation completed successfully, but no work was done.<br/>
+            <see cref="F:Parser.OpStatus.FailOverride"/>: Operation failed, but is allowed to continue.<br/>
+            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.<br/>
+            <see cref="F:Parser.OpStatus.FailBadInputNull"/>: The data at the key was <see langword="null"/> or missing.<br/>
             <see cref="F:Parser.OpStatus.FailNoSuchVarName"/>: The key was not found in the <see cref="T:Parser.DataStore"/>.
             </code>
             </remarks>
         </member>
-        <member name="M:Parser.Ops.Text.GenerateOperation`2.#ctor(System.Func{`0,`1},System.Func{`0,System.Boolean},System.String,System.String)">
+        <member name="M:Parser.Ops.Text.GenerateOperation`2.#ctor(System.Func{`0,`1},System.Predicate{`0})">
             <summary>
-            TODO: Document this operation.
+            Generates a <typeparamref name="TOut"/> from a <typeparamref name="TIn"/>.
+            Validates the <typeparamref name="TOut"/> against the <paramref name="predicate"/> and stores the result.
             </summary>
-            <param name="output_key">The key to store the output objects in.</param>
             <param name="func">The generation function.</param>
             <param name="predicate">The condition that the generation function requires.</param>
-            <param name="input_key">The key to pull data from.</param>
         </member>
-        <member name="M:Parser.Ops.Text.GenerateOperation`2.Execute">
-            <inheritdoc/>
+        <member name="T:Parser.Ops.Text.ConstructOperation">
+            <summary>Assembles an array of strings into objects.</summary>
         </member>
         <member name="T:Parser.Ops.Text.LoadOperation">
-            <summary>
-            Loads a path as text.
-            </summary>
-            <param name="input_key">The path to the file(s).</param>
-            <param name="output_key">The key to store the text in.</param>
-            <param name="ignoreMissing">Whether or not to </param>
-        </member>
-        <member name="M:Parser.Ops.Text.LoadOperation.#ctor(System.String,System.String,System.Boolean)">
-            <summary>
-            Loads a path as text.
-            </summary>
-            <param name="input_key">The path to the file(s).</param>
-            <param name="output_key">The key to store the text in.</param>
-            <param name="ignoreMissing">Whether or not to </param>
+            <summary>Loads a path as text.</summary>
         </member>
         <member name="T:Parser.Ops.Text.ReplaceOperation">
             <summary>
@@ -874,91 +642,48 @@
             Inputs: <see langword="string"/>, <see cref="T:System.Collections.Generic.IEnumerable`1"/>(<see langword="string"/>)<br/>
             Output: <c>Same as input</c>
             </code><br/>
-            Statuses:
-            <code>
-            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.
-            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.
-            <see cref="F:Parser.OpStatus.FailBadInputNull"/>: The data at the key was <see langword="null"/> or missing.
-            </code>
+            Statuses:<br/>
+            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.<br/>
+            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.<br/>
+            <see cref="F:Parser.OpStatus.FailNoSuchVarName"/>: The data at the key was missing.<br/>
             </remarks>
-        </member>
-        <member name="M:Parser.Ops.Text.ReplaceOperation.#ctor(Common.ReplaceNodes,System.String,System.String)">
-            <summary>
-            Creates a new <see cref="T:Parser.Ops.Text.ReplaceOperation"/> with nodes.
-            </summary>
-            <param name="nodes">The replacement and look for pairs.</param>
-            <param name="input_key">The key to get the input from.</param>
-            <param name="output_key">The key to write the output to.</param>
         </member>
         <member name="T:Parser.Ops.Text.SplitOperation">
             <summary>
             Takes an input as a <see langword="string"/> or a collection of strings,
             and splits the contents into a single <see cref="T:System.Collections.ObjectModel.Collection`1"/> of strings.
-            This will correctly handle a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of strings.
+            This will correctly handle a <see cref="T:System.Collections.ObjectModel.Collection`1"/> of strings, further spliting them
+            and flattening the resulting list to a standard <see cref="T:System.Collections.ObjectModel.Collection`1"/>.
+            </summary>
+            <remarks><br/>
+            <h4>Allowed Input Types</h4>
+            <see langword="string"/>, <see cref="T:System.Collections.Generic.IEnumerable`1"/>(<see langword="string"/>)<br/>
+            <h4>Produced Output Types</h4>
+            <see cref="T:System.Collections.ObjectModel.Collection`1"/>(<see langword="string"/>)<br/>
+            </remarks>
+        </member>
+        <member name="T:Parser.Ops.Text.TokenAssembleOperation">
+            <summary>
+            Takes an input as a <see cref="T:Parser.Tokens.TokenCollection"/>,
+            and assembles the tokens into structures defined by rules.<br/>
+            Internally uses a <see cref="T:Parser.Tokens.TokenAssembler"/> to do the work.
             </summary>
             <remarks><code>
-            Inputs: <see langword="string"/>, <see cref="T:System.Collections.Generic.IEnumerable`1"/>(<see langword="string"/>)<br/>
-            Output: <see cref="T:System.Collections.ObjectModel.Collection`1"/>(<see langword="string"/>)
-            </code><br/>
-            Statuses:
-            <code>
-            <see cref="F:Parser.OpStatus.Pass"/>: Operation completed successfully.
-            <see cref="F:Parser.OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.
-            <see cref="F:Parser.OpStatus.FailBadInputNull"/>: The data at the key was <see langword="null"/>.
-            <see cref="F:Parser.OpStatus.FailNoSuchVarName"/>: The key was missing.
-            </code>
+            InputKey: <see cref="T:Parser.Tokens.TokenCollection"/>, <see cref="T:System.Collections.Generic.IEnumerable`1">IEnumerable</see>&lt;<see cref="T:Parser.Tokens.IToken"/>&gt;<br/>
+            OutputKey: <see cref="T:Parser.Tokens.TokenCollection"/></code>
+            <br/>
             </remarks>
         </member>
-        <member name="M:Parser.Ops.Text.SplitOperation.Execute">
-            <inheritdoc/>>
+        <member name="T:Parser.Ops.Text.TokenizeOperation">
+            <summary>Tokenizes a string or list of strings.</summary>
         </member>
-        <member name="T:Parser.Ops.Text.TokenizeOperation`1">
-            <summary>
-            Tokenizes a string or list of strings.
-            <typeparamref name="T">The token type identifier. Enums and strings are supported.</typeparamref>
-            </summary>
-        </member>
-        <member name="T:Parser.Ops.Text.TokenTemplateOperation">
-            <summary>
-            TODO: This operation is buggy and not yet functional.
-            </summary>
-        </member>
-        <member name="F:Parser.Ops.Text.TokenTemplateOperation.ParentNode">
-            <inheritdoc/>
-            <remarks>
-            This operation checks for token groups and builds them.
-            </remarks>
-        </member>
-        <member name="M:Parser.Ops.Text.TokenTemplateOperation.CheckPosition">
-            <summary>
-            Checks the current position for a match.
-            </summary>
-        </member>
-        <member name="T:Parser.Output.OutputValueContent">
-            <summary>
-            Stores an output value for generating objects.
-            This one stores the content in a group and stores it in a field.
-            </summary>
-            <param name="varName">The field name.</param>
-            <param name="groupName">The group name in the <see cref="T:Common.Regex.MatchDataSet"/>.</param>
-        </member>
-        <member name="M:Parser.Output.OutputValueContent.#ctor(System.String,System.String)">
-            <summary>
-            Stores an output value for generating objects.
-            This one stores the content in a group and stores it in a field.
-            </summary>
-            <param name="varName">The field name.</param>
-            <param name="groupName">The group name in the <see cref="T:Common.Regex.MatchDataSet"/>.</param>
-        </member>
-        <member name="T:Parser.Output.OutputValueStaticFunctions">
-            <summary>
-            Static functions useful when defining output values in a specification.
-            </summary>
+        <member name="P:Parser.Ops.WhileOperation.Condition">
+            <summary>While Condition</summary>
         </member>
         <member name="P:Parser.RX.LineEnd">
             <remarks>
             Pattern:<br/>
-            <code>(?:\\r\\n?|\\n)</code><br/>
+            <code>(?:\r\n?|\n)</code><br/>
             Explanation:<br/>
             <code>
             ○ Match with 2 alternative expressions, atomically.<br/>
@@ -972,7 +697,7 @@
         <member name="P:Parser.RX.GroupName">
             <remarks>
             Pattern:<br/>
-            <code>(?:(?&lt;=\\(\\?\\&lt;)(?&lt;groupname&gt;\\w+?)(?=\\&gt;\\)))</code><br/>
+            <code>(?:(?&lt;=\(\?\&lt;)(?&lt;groupname&gt;\w+?)(?=\&gt;\)))</code><br/>
             Explanation:<br/>
             <code>
             ○ Zero-width positive lookbehind.<br/>
@@ -987,7 +712,7 @@
         <member name="P:Parser.RX.XlRangeSplitter">
             <remarks>
             Pattern:<br/>
-            <code>\\s*,(?![^{}]*\\})\\s*</code><br/>
+            <code>\s*,(?![^{}]*\})\s*</code><br/>
             Explanation:<br/>
             <code>
             ○ Match a whitespace character atomically any number of times.<br/>
@@ -1002,7 +727,7 @@
         <member name="P:Parser.RX.TokenTemplateDefinition">
             <remarks>
             Pattern:<br/>
-            <code>^(?'ref_name'\\w+)\\s*\\-\\s*(?'line''(?'literal'.+?)'|(?'ws_req'\\ )|(?'opt_ws_or_comment'\\-)|\\#(?'ref'\\w+)|(?'gp_start'\\()|(?'gp_end'\\))|(?'opt'\\?)|(?'more'\\+)|(?'or'\\|))*$\\s*</code><br/>
+            <code>^(?'ref_name'\w+)\s*\-\s*(?'line''(?'literal'.+?)'|(?'ws_req'\ )|(?'opt_ws_or_comment'\-)|\#(?'ref'\w+)|(?'gp_start'\()|(?'gp_end'\))|(?'opt'\?)|(?'more'\+)|(?'or'\|))*$\s*</code><br/>
             Explanation:<br/>
             <code>
             ○ Match if at the beginning of the string.<br/>
@@ -1044,21 +769,16 @@
         </member>
         <member name="T:Parser.Spec">
             <summary>A class containing the operations, requirements, and instructions for reading a file.</summary>
-        </member>
-        <member name="P:Parser.Spec.Active">
-            <summary>The currently active specififcation. Used for objects that cannot see the parser.</summary>
-        </member>
-        <member name="F:Parser.Spec.LoadFromSpec">
-            <summary>Use this in operations that support it to load the values defined in the <see cref="T:Parser.Spec"/>.</summary>
+            <remarks>This class is immutable, and should never be altered during operation.</remarks>
         </member>
         <member name="P:Parser.Spec.Name">
             <summary>The name of this Spec.</summary>
         </member>
         <member name="P:Parser.Spec.Operations">
-            <summary>A <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see cref="T:Parser.Ops.Operation"/> objects that are executed in order to produce the result.</summary>
+            <summary>An <see cref="T:Parser.OperationStrategy"/> of <see cref="T:Parser.Ops.IOperation"/> objects that are executed in order to produce the result.</summary>
         </member>
         <member name="P:Parser.Spec.FileInferences">
-            <summary>A <see cref="T:System.Collections.ObjectModel.Collection`1"/> of <see cref="T:Parser.Inference.InferenceNode"/> objects that specify what files use this specification.</summary>
+            <summary>A <see cref="T:System.Collections.ObjectModel.ReadOnlyCollection`1"/> of <see cref="T:Parser.Inference.InferenceNode"/> objects that specify what files use this specification.</summary>
         </member>
         <member name="P:Parser.Spec.IsTextFile">
             <summary>Determines whether to use a byte parser or a text one.</summary>
@@ -1068,269 +788,32 @@
         </member>
         <member name="P:Parser.Spec.SC">
             <summary>The default string comparison type to use.</summary>
-        </member>
-        <member name="P:Parser.Spec.TokenTypeLookup">
-            <summary>Define the names for tranlating the string based rules.</summary>
+            <remarks>This will automatically set <see cref="F:System.Text.RegularExpressions.RegexOptions.IgnoreCase"/> if this is set to <see cref="F:System.StringComparison.OrdinalIgnoreCase"/>.</remarks>
         </member>
         <member name="P:Parser.Spec.TokenCompatLookup">
             <summary>Define the names of equilivent groups of tokens.</summary>
         </member>
+        <member name="P:Parser.Spec.DefaultRuleSet">
+            <summary>The default rule that is added to every rule definition.</summary>
+            <remarks>Useful for adding ignore case to the entire defintion.</remarks>
+        </member>
         <member name="P:Parser.Spec.TokenRules">
-            <summary>Token rules for the tokenize operration..</summary>
+            <summary>Token rules for the tokenize operation.</summary>
         </member>
         <member name="P:Parser.Spec.GroupTokenRules">
-            <summary>Group token rules for the tokenize operration..</summary>
+            <summary>Group token rules for the token assembly operation.</summary>
         </member>
-        <member name="P:Parser.Spec.RegexBasicTokens">
-            <summary>Token types that are basic building blocks.</summary>
+        <member name="P:Parser.Spec.TokenRuleSet">
+            <summary>A rule set for a capture tokenizer.</summary>
         </member>
-        <member name="P:Parser.Spec.WhitespaceTokens">
-            <summary>Token types to ignore.</summary>
-        </member>
-        <member name="P:Parser.Spec.AllTokens">
-            <summary>All token types handled by this specification.</summary>
-        </member>
-        <member name="M:Parser.Spec.SetAsActive">
-            <summary>Marks this instance as the active specification.</summary>
-            <remarks>Subsequent operations that depend on the active object will reference this instance after calling
-            this method. If another instance was previously active, it will be replaced.</remarks>
-        </member>
-        <member name="M:Parser.Spec.FromDynamic``1">
-            <summary>This casts the TokenRules to a specific TokenType.</summary>
-            <typeparam name="T">The Token Type to cast the rules to. This must be a string or an enum.</typeparam>
-            <returns>The casted rule collection.</returns>
-        </member>
-        <member name="M:Parser.Tokens.Chunk.TokenExtensions.GetProperty(System.String)">
-            <summary>
-            Removes the prefix from the group name.
-            </summary>
-            <param name="groupName"></param>
-            <returns>The cleaned group name.</returns>
-        </member>
-        <member name="T:Parser.Tokens.CToken">
-            <summary>A rule defining how to match 1 token in a rule group.</summary>
-        </member>
-        <member name="P:Parser.Tokens.CToken.Type">
-            <summary>The token type required. If the type matches any of these, it passes this check.</summary>
-            <remarks>An empty list bypasses the check.</remarks>
-        </member>
-        <member name="P:Parser.Tokens.CToken.Content">
-            <summary>The content of the token to match. If the content matches any of these, it passes this check.</summary>
-            <remarks>An empty list bypasses the check.</remarks>
-        </member>
-        <member name="P:Parser.Tokens.CToken.Depth">
-            <summary>The required depth value to match.</summary>
-            <remarks>A null value bypasses this check.</remarks>
-        </member>
-        <member name="P:Parser.Tokens.CToken.IsOptional">
-            <summary>Whether or not the token rule is optional or not.</summary>
-        </member>
-        <member name="P:Parser.Tokens.CToken.IsOneOrMany">
-            <summary>Whether or not the token rule can consume multiple tokens.</summary>
-        </member>
-        <member name="M:Parser.Tokens.CToken.MkDepth(System.Int32)">
-            <summary>Creates a new depth CToken.</summary>
-            <param name="depth">The depth to look for.</param>
-            <returns>A <see cref="T:Parser.Tokens.CToken"/> that checks for a specific depth.</returns>
-        </member>
-        <member name="M:Parser.Tokens.CToken.Parse(System.String)">
-            <summary>Parses the string passed as a required parameter to the rule into a Collection of <see cref="T:Parser.Tokens.CToken"/> objects.</summary>
-            <param name="input">The string input to parse.</param>
-            <returns>A Collection of <see cref="T:Parser.Tokens.CToken"/> objects.</returns>
-        </member>
-        <member name="P:Parser.Tokens.IRegexToken.Children">
-            <summary>The child tokens within this token. If the token is made of multiple tokens, this will be utilized.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IRegexToken.Properties">
-            <summary>The properties of this token.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IParentToken.Template">
-            <summary>The template used to form this token group.</summary>
-            <remarks>This will only be set on a consolidated group of tokens, never on a single token with no children.</remarks>
-        </member>
-        <member name="T:Parser.Tokens.IToken">
-            <summary>
-            Base interface for tokens.
-            Reference this and not <see cref="T:Parser.Tokens.Token"/> unless defining a class.
-            </summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken.IsIgnored">
-            <summary>Whether or not the token is ignored by further operations.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken.Content">
-            <summary>The content of this token.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken.HasProperties">
-            <summary>Gets a value indicating whether the current object contains any properties.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken.Length">
-            <summary>The length of the text of this token.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken.Depth">
-            <summary>The depth of this token.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken.Position">
-            <summary>The position of this token in the original text.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken.EndPos">
-            <summary>The last position this token holds.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken.Type">
-            <summary>Type of token.</summary>
-        </member>
-        <member name="M:Parser.Tokens.IToken.ToString">
-            <summary>Displays the text content of this token.</summary>
-            <returns>A <see langword="string"/> representing the token.</returns>
-        </member>
-        <member name="P:Parser.Tokens.IToken.FromNode">
-            <summary>The node structure that this token was created from.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken.LinkNode">
-            <summary>The specific node item that represents this child token.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken.Node">
-            <summary>The <see cref="T:Parser.Tokens.CToken"/> that matched this token.</summary>
-        </member>
-        <member name="T:Parser.Tokens.IToken`1">
-            <summary>
-            Base interface for tokens.
-            Reference this and not <see cref="T:Parser.Tokens.Token"/> unless defining a class.
-            </summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken`1.IsIgnored">
-            <summary>Whether or not the token is ignored by further operations.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken`1.Content">
-            <summary>The content of this token.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken`1.HasProperties">
-            <summary>Gets a value indicating whether the current object contains any properties.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken`1.Length">
-            <summary>The length of the text of this token.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken`1.Depth">
-            <summary>The depth of this token.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken`1.Position">
-            <summary>The position of this token in the original text.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken`1.EndPos">
-            <summary>The last position this token holds.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken`1.Type">
-            <summary>Type of token.</summary>
-        </member>
-        <member name="M:Parser.Tokens.IToken`1.ToString">
-            <summary>Displays the text content of this token.</summary>
-            <returns>A <see langword="string"/> representing the token.</returns>
-        </member>
-        <member name="P:Parser.Tokens.IToken`1.FromNode">
-            <summary>The node structure that this token was created from.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken`1.LinkNode">
-            <summary>The specific node item that represents this child token.</summary>
-        </member>
-        <member name="P:Parser.Tokens.IToken`1.Node">
-            <summary>The <see cref="T:Parser.Tokens.CToken"/> that matched this token.</summary>
-        </member>
-        <member name="M:Parser.Tokens.Node.TokenNode.Consume">
-            <summary>
-            Sets <c>Consumed</c> and honors <c>IsOptional</c> and <c>IsOneOrMany</c> node options.
-            </summary>
-        </member>
-        <member name="T:Parser.Tokens.Node.TokenNodeBasic">
-            <summary>
-            A simple token node.
-            </summary>
-        </member>
-        <member name="T:Parser.Tokens.Node.TokenNodeCommand">
-            <summary>
-            A simple token node.
-            </summary>
-        </member>
-        <member name="T:Parser.Tokens.Node.TokenNodeFactory">
-            <summary>A factory that produces <see cref="T:Parser.Tokens.Node.TokenNode"/> objects.</summary>
-        </member>
-        <member name="T:Parser.Tokens.Node.TokenNodeGroup">
-            <summary>
-            A group of token nodes.
-            </summary>
-        </member>
-        <member name="T:Parser.Tokens.Node.TokenNodeType">
-            <summary>
-            The type of token node.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.None">
-            <summary>
-            No type, this is not valid.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.GroupSt">
-            <summary>
-            Group start '('.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.GroupEn">
-            <summary>
-            Group end ')'.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.Or">
-            <summary>
-            Alternative '|'.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.Command">
-            <summary>
-            A command modifying the previous item.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.Any">
-            <summary>
-            Any (Opt &amp; More) '*'.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.More">
-            <summary>
-            One or many '+'.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.Opt">
-            <summary>
-            Optional '?'.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.Literal">
-            <summary>
-            Literal text or characters.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.Ref">
-            <summary>
-            Reference to another template group that this group contains.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.Base">
-            <summary>
-            Reference to a basic regex group that this group contains.
-            </summary>
-        </member>
-        <member name="F:Parser.Tokens.Node.TokenNodeType.Group">
-            <summary>
-            A fully formed and stackable group.
-            </summary>
-        </member>
-        <member name="M:Parser.Tokens.Raw.ChkToken`1.#ctor(System.String)">
-            <summary>Builds a <see cref="T:Parser.Tokens.Raw.ChkToken`1"/> from a <see langword="string"/>.<br/>
+        <member name="T:Parser.Tokens.ChkToken">
+            <summary>Builds a <see cref="T:Parser.Tokens.ChkToken"/> from a <see langword="string"/>.<br/>
             <list type="bullet">
             <listheader>Syntax</listheader>
             <item><c>prefix:value</c></item>
             <item><c>prefix:(value1|value2|value3...)</c></item>
             </list>
             </summary>
-            <param name="data_string">The individual token defintion.</param>
             <remarks>
             <list type="table">
             <listheader>Specifications</listheader>
@@ -1338,311 +821,273 @@
             </list>
             <list type="table">
             <listheader>Examples</listheader>
-            <item><c>tn:Name</c> - Token Type 'Name', Store as a Name.</item>
-            <item><c>tv:Dec</c> - Token Type 'Dec', store as a Value.</item>
+            <item><c>n:Name</c> - Token Type 'Name', Store as a Name.</item>
+            <item><c>t:Dec</c> - Token Type 'Dec', store as a Value.</item>
             <item><c>cyi:Script</c> - Content 'Script', Case insensitive, store as a Type.</item>
             </list>
             </remarks>
         </member>
-        <member name="M:Parser.Tokens.Raw.Section.CompareTo(Parser.Tokens.Raw.Section)">
-            <inheritdoc/>
+        <member name="M:Parser.Tokens.ChkToken.Parse(System.String,Parser.Spec)">
+            <summary>Creates a <see cref="T:Parser.Tokens.ChkToken"/> object from the <see langword="string"/>.</summary>
+            <param name="definition">The definition string.</param>
+            <param name="spec">The <see cref="T:Parser.Spec"/> reference.</param>
+            <returns>A <see cref="T:Parser.Tokens.ChkToken"/> object from the <see langword="string"/>.</returns>
+            <exception cref="T:System.ArgumentException"/>
         </member>
-        <member name="T:Parser.Tokens.Raw.TokenCollection`1">
+        <member name="M:Parser.Tokens.ChkToken.AllAllowedTypes(System.Collections.Generic.IEnumerable{System.String},Parser.Spec)">
+            <summary>Gets all the allowed derived types of tf this token.</summary>
+            <param name="types">The initially allowed types.</param>
+            <param name="spec">The <see cref="T:Parser.Spec"/> to lookup from.</param>
+            <returns>A list of all the allowed token types.</returns>
+        </member>
+        <member name="T:Parser.Tokens.ComplexToken">
+            <summary>A token made up of other tokens that have roles within this one.</summary>
+        </member>
+        <member name="P:Parser.Tokens.ComplexToken.TokenPieces">
+            <summary>The dictionary of tokens making up this complex token.</summary>
+        </member>
+        <member name="P:Parser.Tokens.ComplexToken.Value">
+            <summary>Value is simply the first item in the ValueList.</summary>
+        </member>
+        <member name="M:Parser.Tokens.ComplexToken.EachPart(System.Action{System.Collections.Generic.KeyValuePair{System.String,System.Object}})">
+            <summary>Calls the action on every piece in this token.</summary>
+            <param name="action">The action to call.</param>
+            <remarks>This will not call both Value and ValueList. It chooses based on the quantity of the list.</remarks>
+        </member>
+        <member name="P:Parser.Tokens.IToken.AssignTo">
+            <summary>Assigned at match, cleared if match fails, kept if passes.</summary>
+        </member>
+        <member name="T:Parser.Tokens.TokenAssemblyResult">
+            <summary>A class that holds the results of a token grouping operation.</summary>
+            <param name="Tokens">The token list, of physical tokens. These are actual segments of text.</param>
+            <param name="Parents">The grouping constructs.</param>
+            <param name="Hierarchy">The whole assembly in a full hierarchy.</param>
+        </member>
+        <member name="M:Parser.Tokens.TokenAssemblyResult.#ctor(Parser.Tokens.TokenCollection,Parser.Tokens.TokenCollection,Parser.Tokens.TokenCollection)">
+            <summary>A class that holds the results of a token grouping operation.</summary>
+            <param name="Tokens">The token list, of physical tokens. These are actual segments of text.</param>
+            <param name="Parents">The grouping constructs.</param>
+            <param name="Hierarchy">The whole assembly in a full hierarchy.</param>
+        </member>
+        <member name="P:Parser.Tokens.TokenAssemblyResult.Tokens">
+            <summary>The token list, of physical tokens. These are actual segments of text.</summary>
+        </member>
+        <member name="P:Parser.Tokens.TokenAssemblyResult.Parents">
+            <summary>The grouping constructs.</summary>
+        </member>
+        <member name="P:Parser.Tokens.TokenAssemblyResult.Hierarchy">
+            <summary>The whole assembly in a full hierarchy.</summary>
+        </member>
+        <member name="T:Parser.Tokens.TokenCollection">
             <summary>A collection of tokens, use this to keep token operations consistent.</summary>
-            <typeparam name="T">The type of token type object used.</typeparam>
         </member>
-        <member name="M:Parser.Tokens.Raw.TokenCollection`1.#ctor">
+        <member name="M:Parser.Tokens.TokenCollection.#ctor">
             <summary>A collection of tokens, use this to keep token operations consistent.</summary>
-            <typeparam name="T">The type of token type object used.</typeparam>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenCollection`1._tokens">
+        <member name="F:Parser.Tokens.TokenCollection._tokens">
             <summary>The internal token list.</summary>
         </member>
-        <member name="M:Parser.Tokens.Raw.TokenCollection`1.#ctor(System.Collections.Generic.IEnumerable{Parser.Tokens.Raw.IToken{`0}})">
+        <member name="M:Parser.Tokens.TokenCollection.#ctor(System.Collections.Generic.IEnumerable{Parser.Tokens.IToken})">
             <summary>Creates the collection from a collection of tokens.</summary>
             <param name="tokens">The tokens to add to the list.</param>
         </member>
-        <member name="P:Parser.Tokens.Raw.TokenCollection`1.Item(System.Int32)">
-            <summary>Gets or sets the token at a given index.</summary>
-            <param name="index">The index to modify or retrieve.</param>
+        <member name="P:Parser.Tokens.TokenCollection.Item(System.Int32)">
+            <summary>Gets the token at a given index.</summary>
+            <param name="index">The index to retrieve.</param>
             <returns>A token at the specified index.</returns>
         </member>
-        <member name="M:Parser.Tokens.Raw.TokenCollection`1.Remove(System.Int32,System.Int32)">
+        <member name="M:Parser.Tokens.TokenCollection.Remove(System.Int32,System.Int32)">
             <summary>Removes <paramref name="count"/> from the collection starting at <paramref name="first"/>.</summary>
             <param name="first">The first token to remove.</param>
             <param name="count">The number of tokens to remove.</param>
         </member>
-        <member name="T:Parser.Tokens.Raw.TokenCollection`2">
-            <summary>A collection of tokens of a specific type, use this to keep token operations consistent, and specific.</summary>
-            <typeparam name="TClass">The token class to utilize.</typeparam>
-            <typeparam name="TTokenType">The token type class.</typeparam>
-            <remarks>This is used for <see cref="T:Parser.Tokens.Raw.TokenObject`1"/> to implement the <see cref="T:Parser.Tokens.Raw.TokenProperty`1"/> collection.</remarks>
+        <member name="T:Parser.Tokens.TokenFactory">
+            <summary>Match Tokenizer</summary>
+            <remarks>Each match is a token.</remarks>
         </member>
-        <member name="M:Parser.Tokens.Raw.TokenCollection`2.#ctor">
-            <summary>A collection of tokens of a specific type, use this to keep token operations consistent, and specific.</summary>
-            <typeparam name="TClass">The token class to utilize.</typeparam>
-            <typeparam name="TTokenType">The token type class.</typeparam>
-            <remarks>This is used for <see cref="T:Parser.Tokens.Raw.TokenObject`1"/> to implement the <see cref="T:Parser.Tokens.Raw.TokenProperty`1"/> collection.</remarks>
+        <member name="M:Parser.Tokens.TokenFactory.StoreExtra">
+            <summary>Checks every unmatched section for a match, and if said section matches, adds the token.</summary>
+            <remarks>This will NOT see anything but the unmatched section, so any lookaheads or lookbehinds will FAIL.</remarks>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenCollection`2._tokens">
-            <summary>The internal token list.</summary>
+        <member name="M:Parser.Tokens.TokenFactory.ExactMatch">
+            <summary>Exact (no regex) match, uses the rule's ignore case property, not the spec's one.</summary>
         </member>
-        <member name="M:Parser.Tokens.Raw.TokenCollection`2.Remove(System.Int32,System.Int32)">
-            <summary>Removes <paramref name="count"/> from the collection starting at <paramref name="first"/>.</summary>
-            <param name="first">The first token to remove.</param>
-            <param name="count">The number of tokens to remove.</param>
+        <member name="T:Parser.Tokens.TokenRef">
+            <summary>A tokenPiece reference.</summary>
         </member>
-        <member name="T:Parser.Tokens.Raw.TokenRuleType">
+        <member name="F:Parser.Tokens.TokenRef.Inherit">
+            <summary>This token sequence entry will supply any fields not already filled by other definitions from its own respective values.</summary>
+            <remarks>
+            If a <see cref="T:Parser.Tokens.ComplexToken"/> was passed to any field of a <see cref="T:Parser.Tokens.ComplexToken"/> with this type assigned, all of its parts would populate the one being created.
+            These properties would be overwritten by any defined token sequence entries.<br/>
+            If a <see cref="T:Parser.Tokens.Token"/> was passed to any field of a <see cref="T:Parser.Tokens.ComplexToken"/> with this
+            type assigned, only the Token Type would copy, and the value would be assigned
+            to the <see cref="F:Parser.Tokens.TokenRef.Value"/> entry.<br/>
+            </remarks>
+        </member>
+        <member name="M:Parser.Tokens.TokenRule.#ctor(System.String,System.String)">
+            <summary>Use this constructor to make a basic non-recursive group rule.</summary>
+            <param name="typeToAssign">The type to assign to the assembled token.</param>
+            <param name="ruleStringData">The assembly definition.</param>
+        </member>
+        <member name="M:Parser.Tokens.TokenRule.#ctor(System.Object,System.String)">
+            <summary>Use this constructor to make a basic non-recursive group rule.</summary>
+            <param name="typeToAssign">The type to assign to the assembled token.</param>
+            <param name="ruleStringData">The assembly definition.</param>
+        </member>
+        <member name="M:Parser.Tokens.TokenRule.MakeSingleCharRules(System.String,Parser.Tokens.TokenRuleType,System.Collections.ObjectModel.Collection{System.String})">
+            <summary>Makes a series of single character TokenExact styled rules.</summary>
+            <param name="chars">The characters to use.</param>
+            <param name="type">The rule type. Should be TokenExact or SplitExact, plus any necessary modifiers.</param>
+            <param name="typeToAssign">The type to assign. May be a single object applied to all, or a list of objects the same length as <paramref name="chars"/>.</param>
+            <returns>An array of TokenRules.</returns>
+        </member>
+        <member name="M:Parser.Tokens.TokenRule.MakeWordMatchRules(System.Boolean,System.Collections.ObjectModel.Collection{System.ValueTuple{System.String,System.String}})">
+            <summary>Creates an array of token rules representing keywords.</summary>
+            <returns>A list of TokenMatch rules that properly exempt ranges.</returns>
+        </member>
+        <member name="T:Parser.Tokens.TokenRuleType">
             <summary>The type of rule to enforce.</summary>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.None">
+        <member name="F:Parser.Tokens.TokenRuleType.None">
             <summary>No type, Rule will be ignored.</summary>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.TokenExact">
+        <member name="F:Parser.Tokens.TokenRuleType.TokenExact">
             <summary>This Token Rule will exactly match the string provided.</summary>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.TokenMatch">
+        <member name="F:Parser.Tokens.TokenRuleType.TokenMatch">
             <summary>This Token Rule will match to the regex provided.</summary>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.SplitMatch">
+        <member name="F:Parser.Tokens.TokenRuleType.SplitMatch">
             <summary>This Token Rule will split the input at the regex provided, limiting future matches.</summary>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.SplitExact">
+        <member name="F:Parser.Tokens.TokenRuleType.SplitExact">
             <summary>This Token Rule will split the input at the exact string provided, limiting future matches.</summary>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.StoreExtra">
+        <member name="F:Parser.Tokens.TokenRuleType.StoreExtra">
             <summary>This Token Rule will store the unmatched data parts that match the regex provided as tokens with this type.</summary>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.StoreOther">
+        <member name="F:Parser.Tokens.TokenRuleType.StoreOther">
             <summary>This Token Rule will store the unmatched data parts as tokens with this type.</summary>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.BuildProperty">
-            <summary>This Token Group Rule will assemble a <see cref="T:Parser.Tokens.Raw.TokenProperty`1"/>.</summary>
+        <member name="F:Parser.Tokens.TokenRuleType.ErrorMatch">
+            <summary>This token or sequence means the parsed content is not valid.</summary>
+            <remarks>Use <c>error_pos</c> to specify the character position to point at in the error report.</remarks>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.BuildArray">
-            <summary>This Token Group Rule will assemble a <see cref="T:Parser.Tokens.Raw.TokenArray`1"/>.</summary>
+        <member name="F:Parser.Tokens.TokenRuleType.TokenExtract">
+            <summary>Extracts and uses the value(s) stored in the group named 'keep'.
+            If there are multiple captures, they will be stored as additional tokens of this type.</summary>
+            <remarks>The entire match is exempted if flagged as exempt, but the value of the created tokens will ONLY be what is in the named matching group 'keep'.</remarks>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.BuildObject">
-            <summary>This Token Group Rule will assemble a <see cref="T:Parser.Tokens.Raw.TokenObject`1"/>.</summary>
-        </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.BuildFlag">
-            <summary>This Token Group Rule will assemble a <see cref="T:Parser.Tokens.Raw.TokenFlag`1"/>.</summary>
-        </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.BuildTypedValue">
-            <summary>This Token Group Rule will assemble a <see cref="T:Parser.Tokens.Raw.TokenTypedValue`1"/>.</summary>
-        </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.AssignValue">
-            <summary>This Token Group Token Code will store the value as the 'Value' in a <see cref="T:Parser.Tokens.Raw.TokenProperty`1"/> or <see cref="T:Parser.Tokens.Raw.TokenArray`1"/>.</summary>
-        </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.AssignName">
-            <summary>This Token Group Token Code will store the value as the 'Name' in a <see cref="T:Parser.Tokens.Raw.TokenProperty`1"/> or <see cref="T:Parser.Tokens.Raw.TokenObject`1"/>.</summary>
-        </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.AssignType">
-            <summary>This Token Group Token Code will store the value as the 'Type' in a <see cref="T:Parser.Tokens.Raw.TokenObject`1"/>.</summary>
-        </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.AddProperty">
-            <summary>This Token Group Token Code will store the value as a 'Property' in a <see cref="T:Parser.Tokens.Raw.TokenObject`1"/>.</summary>
-        </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.AddFlag">
-            <summary>This Token Group Token Code will set <see cref="P:Parser.Tokens.Raw.TokenFlag`1.AddFlag"/> to <see langword="true"/> in a <see cref="T:Parser.Tokens.Raw.TokenFlag`1"/>.</summary>
-        </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.RemFlag">
-            <summary>This Token Group Token Code will set <see cref="P:Parser.Tokens.Raw.TokenFlag`1.AddFlag"/> to <see langword="false"/> in a <see cref="T:Parser.Tokens.Raw.TokenFlag`1"/>.</summary>
-        </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.FromTokens">
-            <summary>This Token Rule will only match from existing tokens.</summary>
-            <remarks>This is useful for special keywords.</remarks>
-        </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.ExemptAllWithin">
-            <summary>This Token Rule will exempt all matches from being checked.</summary>
-            <remarks>This is useful for strings, comments, and quoted or escaped items.</remarks>
-        </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.IgnoredToken">
+        <member name="F:Parser.Tokens.TokenRuleType.IgnoredToken">
             <summary>Flags the created token as ignored.</summary>
             <remarks>This is useful for whitespace and comments.</remarks>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.IgnoreCase">
+        <member name="F:Parser.Tokens.TokenRuleType.ThrowMatch">
+            <summary>This Token Rule will throw away the matched tokens.</summary>
+        </member>
+        <member name="F:Parser.Tokens.TokenRuleType.IgnoreCase">
             <summary>Exact matches and regex will ignore case.</summary>
             <remarks>This is useful for languages that are not case sensitive.</remarks>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.Competitive">
+        <member name="F:Parser.Tokens.TokenRuleType.Competitive">
             <summary>All Token Match Rules with this flag will run concurrently and exclusively.</summary>
             <remarks>This is useful for strings and comments.</remarks>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.Recursive">
-            <summary>The rule will execute until no matches occur.</summary>
+        <member name="F:Parser.Tokens.TokenRuleType.TokenComment">
+            <summary>This Token Rule alias is short for <see cref="F:Parser.Tokens.TokenRuleType.Competitive"/> and <see cref="F:Parser.Tokens.TokenRuleType.IgnoredToken"/>.</summary>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.Opt">
+        <member name="F:Parser.Tokens.TokenRuleType.Recursive">
+            <summary>The rule will execute until no more matches occur.</summary>
+        </member>
+        <member name="F:Parser.Tokens.TokenRuleType.Opt">
             <summary>This token sequence entry is not required, but will be consumed if present.</summary>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.Mult">
+        <member name="F:Parser.Tokens.TokenRuleType.Mult">
             <summary>This token sequence entry can have additional entries, and will consume them if present.</summary>
         </member>
-        <member name="F:Parser.Tokens.Raw.TokenRuleType.FlagBits">
+        <member name="F:Parser.Tokens.TokenRuleType.Any">
+            <summary>This token sequence entry can have no entries, or additional entries, and will consume them if present.</summary>
+        </member>
+        <member name="F:Parser.Tokens.TokenRuleType.Error">
+            <summary>This flag means a character was not recognized.</summary>
+        </member>
+        <member name="F:Parser.Tokens.TokenRuleType.FlagBits">
             <summary>The bits to remove to get the type correctly.</summary>
         </member>
-        <member name="T:Parser.Tokens.TemplateSet">
-            <summary>A token template, for assembling tokens.</summary>
-        </member>
-        <member name="P:Parser.Tokens.TemplateSet.Type">
-            <summary>The type of token to be assembled.</summary>
-        </member>
-        <member name="T:Parser.Tokens.Token">
-            <summary>Base abstract for tokens.<br/>
-            Reference this and not <see cref="T:Parser.Tokens.IToken"/> when defining a class.<br/>
-            Reference <see cref="T:Parser.Tokens.IToken"/> when creating a field or property, or returning a value from a method.
-            </summary>
-            <remarks>
-            A basic token object used by the <see cref="T:Parser.XParser"/>.<br/>
-            </remarks>
-            <seealso cref="T:Parser.Tokens.IToken"/>
-        </member>
-        <member name="P:Parser.Tokens.Token.Content">
-            <summary>The content of this token.</summary>
-        </member>
-        <member name="P:Parser.Tokens.Token.Position">
-            <summary>The position of the token in the original string.</summary>
-        </member>
-        <member name="P:Parser.Tokens.Token.Length">
-            <summary>The length of the token.</summary>
-        </member>
-        <member name="P:Parser.Tokens.Token.Type">
-            <summary>The type of token this is.</summary>
-        </member>
-        <member name="P:Parser.Tokens.Token.HasProperties">
-            <summary>Whether this token has any properties.</summary>
-        </member>
-        <member name="M:Parser.Tokens.Token.#ctor(System.String,System.String)">
-            <summary>Creates a <see cref="T:Parser.Tokens.Token"/> from a string and optionally a type.</summary>
-            <param name="type">The type of token this is.</param>
-            <param name="content"><see cref="T:System.String"/> content to initialize this token with.</param>
-        </member>
-        <member name="M:Parser.Tokens.Token.ToString">
-            <inheritdoc/>
-        </member>
-        <member name="M:Parser.Tokens.Token.Clone">
-            <inheritdoc/>
-        </member>
-        <member name="M:Parser.Tokens.Token.Generate(System.ValueTuple{Common.Regex.MatchDataSet,System.String})">
-            <summary>Creates a <see cref="T:Parser.Tokens.Token"/> from a <see cref="T:Common.Regex.MatchDataSet"/> object.</summary>
-            <param name="data">The originating object, as a <see cref="T:Common.Regex.MatchDataSet"/> paired with a string</param>
-            <returns>A token that represents the contents of the <see cref="T:Common.Regex.MatchDataSet"/> object.</returns>
-        </member>
-        <member name="M:Parser.Tokens.TokenStaticFunctions.MarkAs(System.String,System.String)">
-            <summary>Adds a marker to the <see cref="T:Common.Regex.MatchDataSet"/>.</summary>
-            <param name="name">The marker name to set.</param>
-            <param name="pattern">The regex pattern to match.</param>
-            <remarks><c>Tokenized</c> - This will generate tokens.</remarks>
-            <returns>A regular expression that adds the marker.</returns>
-        </member>
-        <member name="P:Parser.Tokens.TokenStaticFunctions.Ws">
-            <summary>Optional Whitespace.</summary>
-            <remarks><c>Tokenized</c> - This will generate tokens.</remarks>
-        </member>
-        <member name="P:Parser.Tokens.TokenStaticFunctions.WsReq">
-            <summary>Required Whitespace.</summary>
-            <remarks><c>Tokenized</c> - This will generate tokens.</remarks>
-        </member>
-        <member name="M:Parser.Tokens.TokenStaticFunctions.Op(System.String)">
-            <summary>An operator or symbol. This accepts a string, but breaks it down and 'or's the characters together.</summary>
-            <remarks><c>Tokenized</c> - This will generate tokens.</remarks>
-        </member>
-        <member name="M:Parser.Tokens.TokenStaticFunctions.Mp(System.String,System.String)">
-            <summary>A property of this token chunk.</summary>
-            <remarks><c>Tokenized</c> - This will generate tokens.</remarks>
-        </member>
-        <member name="M:Parser.Tokens.TokenStaticFunctions.Kp(System.Int32,System.String)">
-            <summary>Adds a key property with the name to be the contents of the match, that pairs with a similarly found value on the specified index.</summary>
-            <remarks><c>Tokenized</c> - This will generate tokens.</remarks>
-        </member>
-        <member name="M:Parser.Tokens.TokenStaticFunctions.Vp(System.Int32,System.String)">
-            <summary>Adds a value property with the value to be the contents of the match, that pairs with a similarly found key on the specified index.<br/>
-            Use with <seealso cref="M:Parser.Tokens.TokenStaticFunctions.Kp(System.Int32,System.String)"/></summary>
-            <remarks><c>Tokenized</c> - This will generate tokens.</remarks>
-            
-        </member>
-        <member name="P:Parser.Tokens.TokenStaticFunctions.Ln">
-            <summary>Adds a newline character.</summary>
-            <remarks><c>Tokenized</c> - This will generate tokens.</remarks>
-        </member>
-        <member name="P:Parser.Tokens.TokenStaticFunctions.LnEnd">
-            <summary>Marks the end of a line.</summary>
-            <remarks><c>Not Tokenized</c> - This will not generate tokens.</remarks>
-        </member>
-        <member name="F:Parser.XParser.Area">
-            <summary>
-            The class name for debugging.
-            </summary>
+        <member name="T:Parser.XParser">
+            <summary>A parser the takes a file's content and turns it into tokens or objects.</summary>
         </member>
         <member name="P:Parser.XParser.OpIndex">
-            <inheritdoc/>
+            <summary>The current operation index.</summary>
         </member>
         <member name="P:Parser.XParser.NextOpIndex">
-            <inheritdoc/>
+            <summary>The next operation index.</summary>
         </member>
         <member name="P:Parser.XParser.CurrentOp">
-            <inheritdoc/>
+            <summary>The current operation.</summary>
         </member>
         <member name="P:Parser.XParser.NextOp">
-            <inheritdoc/>
+            <summary>The next operation.</summary>
         </member>
         <member name="P:Parser.XParser.LastStatus">
-            <inheritdoc/>
+            <summary>The status of the last operation performed.</summary>
         </member>
-        <member name="M:Parser.XParser.OperationLoad">
+        <member name="P:Parser.XParser.LocalDefaultSpec">
+            <summary>Gets the file data as a list of bytes.</summary>
+        </member>
+        <member name="M:Parser.XParser.OperationLoad(Parser.OperationStrategy)">
             <summary>Loads the operations into a flat pattern.</summary>
         </member>
-        <member name="M:Parser.XParser.InitializeParser(Parser.Spec)">
-            <summary>
-            Sets up the Specification and DataStore for the parser.
-            </summary>
-            <param name="spec">The specificiation to use.</param>
-        </member>
-        <member name="P:Parser.XParser.Spec">
-            <summary>
-            The spec to use for this parser.
-            </summary>
-        </member>
-        <member name="P:Parser.XParser.Operations">
-            <inheritdoc/>
-        </member>
-        <member name="P:Parser.XParser.Labels">
-            <inheritdoc/>
-        </member>
         <member name="P:Parser.XParser.Data">
-            <inheritdoc/>
+            <summary>The dictionary storing all of the data from the parsed file.</summary>
         </member>
         <member name="P:Parser.XParser.Result">
-            <inheritdoc/>
-        </member>
-        <member name="P:Parser.XParser.HasResult">
-            <inheritdoc/>
+            <summary>Gets the result of a successful parse operation set.</summary>
+            <remarks>This property returns <see langword="null"/> if the operation sequence has failed, or has not ran.</remarks>
         </member>
         <member name="P:Parser.XParser.OpCount">
-            <inheritdoc/>
+            <summary>The number of operations in the currently loaded specification, after parsing the operation sequence.</summary>
         </member>
-        <member name="M:Parser.XParser.CountOfKey(System.String)">
-            <inheritdoc/>
-            <exception cref="T:System.InvalidOperationException"/>
+        <member name="M:Parser.XParser.InitializeParser(Parser.Spec)">
+            <summary>Sets up the Specification and DataStore for the parser.</summary>
+            <param name="spec">The specification to use.</param>
         </member>
-        <member name="M:Parser.XParser.GetCursorByKey(System.String)">
-            <inheritdoc/>
-            <exception cref="T:System.InvalidOperationException"/>
-            <exception cref="T:System.ArgumentNullException"/>
+        <member name="M:Parser.XParser.ParseLoop">
+            <summary>Performs all the operations, ending on a fail or a completion of the sequence.</summary>
+            <returns>The <see cref="T:Parser.OpStatus"/> representing the result.</returns>
         </member>
-        <member name="M:Parser.XParser.AddCursor(System.String)">
-            <inheritdoc/>
+        <member name="M:Parser.XParser.PerformOperation">
+            <summary>Performs the operation indicated by <see cref="P:Parser.XParser.OpIndex"/> and advances to the next operation.</summary>
+            <returns>The <see cref="T:Parser.OpStatus"/> representing the result.</returns>
         </member>
-        <member name="P:Parser.XParser.FileData">
-            <summary>
-            Gets the file data as a list of bytes.
-            </summary>
+        <member name="M:Parser.XParser.ParseData``1(Parser.Spec,``0)">
+            <summary>Initializes the data and begins parsing.</summary>
+            <param name="spec">The specification to use.</param>
+            <param name="data">The data to pass to the parser.</param>
+            <typeparam name="TData">The type of data to pass to the parser.</typeparam>
+            <returns>The <see cref="T:Parser.OpStatus"/> representing the result.</returns>
         </member>
-        <member name="M:Parser.XParser.Parse">
-            <summary>
-            Parses the provided binary data.
-            </summary>
-            <returns><see cref="F:Parser.OpStatus.Pass"/> if successful, or an error code.</returns>
+        <member name="M:Parser.XParser.ParseFile(Parser.Spec,System.String)">
+            <summary>Parses the specified file based on the spec assigned to this <see cref="T:Parser.XParser"/> object.</summary>
+            <param name="spec">The spec to use.</param>
+            <param name="path">The path to the file to parse.</param>
+            <returns>The <see cref="T:Parser.OpStatus"/> representing the result.</returns>
+        </member>
+        <member name="M:Parser.XParser.SetNextOperationIndex(System.Int32)">
+            <summary>Sets the next operation to be the one at <paramref name="index"/>.</summary>
+            <param name="index">The index of the next operation to execute.</param>
+        </member>
+        <member name="M:Parser.XParser.SetInput``1(``0)">
+            <summary>Assigns the input to the parser.</summary>
+            <typeparam name="TData">The type of input. Can be a <see langword="string"/> or a <see langword="byte"/> array.</typeparam>
+            <param name="input">The input to assign.</param>
+            <remarks>A byte array could be a <see cref="T:System.Memory`1"/> object, a <see cref="T:System.Span`1"/>, a <see cref="T:System.Collections.Generic.List`1"/>, or a simple <see cref="T:System.Collections.Generic.IEnumerable`1"/></remarks>
+        </member>
+        <member name="M:Parser.XParser.StepThrough">
+            <summary>Incrementally steps through all the operations, requesting user confirmation to continue.</summary>
+            <returns>The <see cref="T:Parser.OpStatus"/> codes representing the result of each operation.</returns>
+            <exception cref="T:Parser.Exceptions.OperationBadDefinitionException">Called StepThrough without assigning or initializing input data.</exception>
         </member>
         <member name="T:System.Text.RegularExpressions.Generated.LineEnd_0">
             <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the LineEnd method.</summary>

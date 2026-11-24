@@ -11,44 +11,40 @@ namespace Parser.Ops.Text;
 /// Inputs: <see langword="string"/>, <see cref="IEnumerable{T}"/>(<see langword="string"/>)<br/>
 /// Output: <c>Same as input</c>
 /// </code><br/>
-/// Statuses:
-/// <code>
-/// <see cref="OpStatus.Pass"/>: Operation completed successfully.
-/// <see cref="OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.
-/// <see cref="OpStatus.FailBadInputNull"/>: The data at the key was <see langword="null"/> or missing.
-/// </code>
+/// Statuses:<br/>
+/// <see cref="OpStatus.Pass"/>: Operation completed successfully.<br/>
+/// <see cref="OpStatus.FailBadInputType"/>: Operation was provided the wrong type as input.<br/>
+/// <see cref="OpStatus.FailNoSuchVarName"/>: The data at the key was missing.<br/>
 /// </remarks>
 public class ReplaceOperation : Operation
 {
-  private readonly ReplaceNodes _nodes;
-  /// <summary>Creates a new <see cref="ReplaceOperation"/> with nodes.</summary>
-  /// <param name="nodes">The replacement and look for pairs.</param>
-  /// <param name="input_key">The key to get the input from.</param>
-  /// <param name="output_key">The key to write the output to.</param>
-  public ReplaceOperation (ReplaceNodes nodes, string input_key, string output_key) : base(input_key, output_key) => _nodes = nodes;
-  public ReplaceOperation (string ln, string input_key, string output_key) : base(input_key, output_key) => _nodes = [(RX.LnEnd, ln)];
+  public Collection<ReplaceNode> Nodes { get; init; } = [(RX.LnEnd, Chars.LFs)];
+  public required string InputKey { get; init; }
+  public required string OutputKey { get; init; }
 
   protected override void Execute ()
   {
-    if (WorkData is string s)
+    if (Data[InputKey] is string s)
     {
-      foreach (ReplaceNode node in _nodes)
+      foreach (ReplaceNode node in Nodes)
       {
         s = node.ReplaceRegex(s, Spec.RxOpt);
       }
-      WorkData = s;
+      Data[OutputKey] = s;
       Status = OpStatus.Pass;
     }
-    else if (WorkData is IEnumerable<string> list)
+    else if (Data[InputKey] is IEnumerable<string> list)
     {
-      foreach (ReplaceNode node in _nodes)
+      foreach (ReplaceNode node in Nodes)
       {
         list = [.. list.Select(line => node.ReplaceRegex(line, Spec.RxOpt))];
       }
-      WorkData = list.ToCollection();
+      Data[OutputKey] = list;
       Status = OpStatus.Pass;
     }
     else
-      Status = Op.ThrowBadInput("string or IEnumerable<string>", $"{WorkData?.GetType()}");
+    {
+      throw Err.ThrowBadInput("string or IEnumerable<string>", Data[InputKey].TypeName);
+    }
   }
 }

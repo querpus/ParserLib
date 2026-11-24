@@ -1,7 +1,7 @@
 namespace Specification.IPL;
 
 /// <summary>Represents a command to compare.</summary>
-public struct IPLCommandTemplate : IEquatable<IPLCommandTemplate>, ITextSerializer
+public struct IPLCommandTemplate : IEquatable<IPLCommandTemplate>, ISerializable
 {
   /// <summary>The command type.</summary>
   public required string CmdType { get; set; }

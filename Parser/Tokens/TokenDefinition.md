@@ -1,3 +1,6 @@
+
+# _OBSOLETE_
+
 # Token Rules Guide
 
   This is a guide to explain the new token system, and the rule syntax.
@@ -7,26 +10,27 @@
 
 ## 1. Tokenizer Flags
 
-* <code>None</code> = <code>0</code> No flags defined. Using <code>None</code> is likely an error.<br/>
+* `None` = `0` No flags defined. Using `None` is likely an error.<br/>
 ### These specify the type of operation for the Tokenizer.
 
-* <code>TokenExact</code> - This Token Rule will exactly match the string provided.
-* <code>TokenMatch</code> - This Token Rule will match to the regex provided.
-* <code>SplitMatch</code> - This Token Rule will split the input at the regex provided, limiting future matches.
-* <code>SplitExact</code> - This Token Rule will split the input at the exact string provided, limiting future matches.
-* <code>StoreExtra</code> - This Token Rule will store the unmatched data parts that match the regex provided as tokens with this type.
-* <code>StoreOther</code> - This Token Rule will store the unmatched data parts as tokens with this type.
-* <code>TokenExtract</code> - This Token Rule will store the unmatched data parts as tokens with this type.
-* <code>ErrorMatch</code> - This Token Rule will fail the assembly if matched.
-* <code>Competitive</code> - All Token Rules with this flag will run concurrently and exclusively as a TokenMatch. You do not need to include TokenMatch.
+* `TokenExact` - This Token Rule will exactly match the string provided.
+* `TokenMatch` - This Token Rule will match to the regex provided.
+* `SplitMatch` - This Token Rule will split the input at the regex provided, limiting future matches.
+* `SplitExact` - This Token Rule will split the input at the exact string provided, limiting future matches.
+* `StoreExtra` - This Token Rule will store the unmatched data parts that match the regex provided as tokens with this type.
+* `StoreOther` - This Token Rule will store the unmatched data parts as tokens with this type.
+* `TokenExtract` - This Token Rule will store the unmatched data parts as tokens with this type.
+* `ErrorMatch` - This Token Rule will fail the assembly if matched.
+* `Competitive` - All Token Rules with this flag will run concurrently and exclusively as a `TokenMatch`. You do not need to include TokenMatch.
 ### These are flags and modifiers.
-* <code>IgnoredToken</code> - Flags the created token as ignored.
-* <code>IgnoreCase</code> - Exact matches and regex will ignore case.
-* <code>Recursive</code> - The rule will execute until no matches occur.
-* <code>Opt</code> - This token sequence entry is not required, but will be consumed if present.
-* <code>Mult</code> - This token sequence entry can have additional entries, and will consume them if present.
+* `IgnoredToken` - Flags the created token as ignored.
+* `IgnoreCase` - Exact matches and regex will ignore case.
+* `Recursive` - The rule will execute until no matches occur.
+* `Any` - Shorthand for `Opt` and `Mult`.
+* `Opt` - This token sequence entry is not required, but will be consumed if present.
+* `Mult` - This token sequence entry can have additional entries, and will consume them if present.
 ### This is the mask to remove all of the flags to get the type.
-* <code>FlagBits</code> = <code>Mult | Opt | Recursive | IgnoreCase | IgnoredToken | ExemptAllWithin | FromTokens</code>
+* `FlagBits` = `Mult | Opt | Recursive | IgnoreCase | IgnoredToken | ExemptAllWithin | FromTokens`
 
 
 ## Token Assembly Syntax
@@ -39,7 +43,7 @@
 
 No spaces (or tabs, or line feeds) can be between any single token assembly structure.
 The hyphens in the 2nd example can be interchanged with '&', '|', or '+', like in the 3rd example. <br><br>
-If you classify many tokens specifically, but need a general token to represent multiple other possibiliies, be sure to define <code>TokenCompatLookup</code> in your Spec to make your rule strings more clear.
+If you classify many tokens specifically, but need a general token to represent multiple other possibiliies, be sure to define `TokenCompatLookup` in your Spec to make your rule strings more clear.
 
 ## Prefix Letters
 
@@ -91,32 +95,32 @@ Must have only one of these:
 
 ### Constructable Tokens
 
-- <code><b><font name="cascadia code" size=3 color=#5588FF>TokenObject\<T\></font></b></code>
+- `<b><font name="cascadia code" size=3 color=#5588FF>TokenObject\<T\></font></b>`
   - Name - Optional
   - Type - Optional
   - PropertyList - Zero or more items
   - FlagList - Zero or more items
-* <code><b><font name="cascadia code" size=3 color=#5588FF>TokenFlag\<T\></font></b></code>
+* `<b><font name="cascadia code" size=3 color=#5588FF>TokenFlag\<T\></font></b>`
   * Name - Required
   * BooleanValue - Required
-* <code><b><font name="cascadia code" size=3 color=#5588FF>TokenTypedValue\<T\></font></b></code>
+* `<b><font name="cascadia code" size=3 color=#5588FF>TokenTypedValue\<T\></font></b>`
   * Type - Optional
   * Value - Optional
-* <code><b><font name="cascadia code" size=3 color=#5588FF>TokenLabel\<T\></font></b></code>
+* `<b><font name="cascadia code" size=3 color=#5588FF>TokenLabel\<T\></font></b>`
   - Name - Required
-* <code><b><font name="cascadia code" size=3 color=#5588FF>TokenArray\<T\></font></b></code>
+* `<b><font name="cascadia code" size=3 color=#5588FF>TokenArray\<T\></font></b>`
   * Type - Optional
   * ValueList - Zero or more items
-* <code><b><font name="cascadia code" size=3 color=#5588FF>TokenProperty\<T\></font></b></code>
+* `<b><font name="cascadia code" size=3 color=#5588FF>TokenProperty\<T\></font></b>`
   - Name - Required
   - Type - Optional
   - Value - Optional
-* <code><b><font name="cascadia code" size=3 color=#5588FF>TokenStatement\<T\></font></b></code>
+* `<b><font name="cascadia code" size=3 color=#5588FF>TokenStatement\<T\></font></b>`
   - Name - Required
   - Type - Optional
   - Value - Optional
   - ParameterList - Zero or more items
-* <code><b><font name="cascadia code" size=3 color=#5588FF>TokenExpression\<T\></font></b></code>
+* <b><font name="cascadia code" size=3 color=#5588FF>TokenExpression\<T\></font></b>
   - Left - Optional
   - Type - Optional
   - Right - Optional

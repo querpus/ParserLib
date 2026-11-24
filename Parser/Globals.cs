@@ -2,6 +2,7 @@ global using System;
 global using System.Collections;
 global using System.Collections.Generic;
 global using System.Collections.ObjectModel;
+global using System.Collections.Immutable;
 global using System.Data;
 global using System.Diagnostics.CodeAnalysis;
 global using System.IO;
@@ -13,24 +14,27 @@ global using System.Text.RegularExpressions;
 
 global using Common;
 global using Common.Extensions;
-global using Common.Regex;
+global using Common.RegExp;
 
-global using Parser.Condition;
 global using Parser.Exceptions;
 global using Parser.Ops;
 global using Parser.Tokens;
 
-global using static Common.Names;
 global using static Common.Debug;
+global using static Common.Names;
 
 global using DM = Common.DictionaryMode;
 global using IT = Parser.Inference.InferenceType;
-global using OAT = Parser.OperationActionType;
+global using Regex = System.Text.RegularExpressions.Regex;
 global using RT = Parser.Tokens.TokenRuleType;
 global using SS = System.Diagnostics.CodeAnalysis.StringSyntaxAttribute;
 
 [assembly: AssemblyCompany("Parser")]
+#if DEBUG
 [assembly: AssemblyConfiguration("Debug")]
+#elif RELEASE
+[assembly: AssemblyConfiguration("Release")]
+#endif
 [assembly: AssemblyFlags(AssemblyNameFlags.None)]
 [assembly: AssemblyProduct("Parser")]
 [assembly: AssemblyTitle("Parser")]

@@ -1,10 +1,12 @@
-using Parser.Tokens;
+using System.Collections.Immutable;
+
+using Specification.ZDoom;
 
 namespace UnitTest;
 
 public class ACSTests
 {
-  internal const string Expression1 = "var_name * 34";
+  internal const string Expression1 = "var_name + 34";
   internal const string Expression2 = "var_name != true";
   internal const string Expression3 = "!var_name";
 
@@ -27,12 +29,24 @@ public class ACSTests
   [InlineData(Statement6)]
   public void ACS_PieceParse (string to_parse)
   {
-    TokenFactory tokenFactory = new(Specification.ZDoom.Definition.ACS);
-    TokenAssembler tokenAssembler = new(Specification.ZDoom.Definition.ACS);
+    TokenFactory tokenFactory = new(Definition.ACS);
+    TokenAssembler tokenAssembler = new(Definition.ACS);
 
-    TokenCollection tokens = tokenFactory.Produce(to_parse);
+    ImmutableList<IToken> tokens = tokenFactory.Tokenize(to_parse);
     Assert.NotEmpty(tokens);
-    TokenCollection tc = tokenAssembler.Execute(tokens);
-    _ = Assert.Single(tc);
+    TokenAssemblyResult tc = tokenAssembler.Execute([.. tokens]);
+    _ = Assert.Single(tc.Hierarchy);
+  }
+
+  [Theory]
+  [InlineData("var + (564 * 45) / func_call(expr + other_expr) == 74")]
+  public void ACS_ExpressionParse (string to_parse)
+  {
+    TokenFactory tokenFactory = new(Definition.ACS);
+    TokenAssembler tokenAssembler = new(Definition.ACS);
+    ImmutableList<IToken> tokens = tokenFactory.Tokenize(to_parse);
+    Assert.NotEmpty(tokens);
+    TokenAssemblyResult tc = tokenAssembler.Execute([.. tokens]);
+    _ = Assert.Single(tc.Hierarchy);
   }
 }

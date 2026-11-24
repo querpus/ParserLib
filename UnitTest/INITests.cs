@@ -1,55 +1,47 @@
-using System.IO;
-
-using Common;
-
-using Parser;
-
 using Specification.INI;
 
 namespace UnitTest;
 
 public class INITests
 {
-  internal const string Default = @"C:\Users\$user$\source\repos\Git\ParserLib\Parser\Samples\default.ini";
-
   [Fact]
   public void INI_Constructor ()
   {
     INIDocument test = ["Section1"];
     test["Section1"].Set("key", "Section1_Value");
     Assert.Equal("Section1_Value", test["Section1"]["key"]);
-    int count = test["Section1"].Count;
-    Assert.Equal(1, count);
+    _ = Assert.Single(test["Section1"]);
   }
 
   [Theory]
-  [InlineData(Default)]
+  [InlineData(Helper.Default)]
   public void ParserInit (string file)
   {
-    string file_text = File.ReadAllText(file.UserDirFix());
+    string file_text = File.ReadAllText(Helper.GitDir + file);
     XParser parser = new(Definition.Spec);
-    Assert.Equal(OpStatus.Pass, parser.Parse(file_text));
-    Assert.True(parser.Data.CanLoad("result"));
+    parser.SetInput(file_text);
+    Assert.True(parser.ParseData(Definition.Spec, file_text).IsPass);
+    Assert.NotNull(parser.Result);
   }
 
   [Theory]
-  [InlineData(Default)]
+  [InlineData(Helper.Default)]
   public void ParserTypeInit (string file)
   {
-    string file_text = File.ReadAllText(file.UserDirFix());
-    XParser parser = new(Definition.Spec);
-    Assert.Equal(OpStatus.Pass, parser.Parse(file_text));
-    Assert.True(parser.Data.CanLoad<INIDocument>("result"));
+    string file_text = File.ReadAllText(Helper.GitDir + file);
+    XParser parser = new();
+    Assert.True(parser.ParseData(Definition.Spec, file_text).IsPass);
+    _ = Assert.IsType<INIDocument>(parser.Result);
   }
 
   [Theory]
-  [InlineData(Default)]
+  [InlineData(Helper.Default)]
   public void ParserTypeInit_Sections (string file)
   {
-    string file_text = File.ReadAllText(file.UserDirFix());
-    XParser parser = new(Definition.Spec);
-    Assert.Equal(OpStatus.Pass, parser.Parse(file_text));
-    Assert.True(parser.Data.TryLoad<INIDocument>("result", out INIDocument? doc));
+    string file_text = File.ReadAllText(Helper.GitDir + file);
+    XParser parser = new();
+    Assert.True(parser.ParseData(Definition.Spec, file_text).IsPass);
+    INIDocument doc = Assert.IsType<INIDocument>(parser.Result);
     Assert.Equal(2, doc.Count);
   }
 }

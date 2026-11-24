@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace ParserVisualizer;
 
-public partial class OperationBuilder : Form
+internal sealed partial class OperationBuilder : Form
 {
   public OperationBuilder ()
   {

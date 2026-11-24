@@ -1,16 +1,14 @@
 #if HAS_OFFICE
-using Common.Regex;
+using Common.RegExp;
 
 using XlRange = Microsoft.Office.Interop.Excel.Range;
 
 namespace Common.Excel;
 /// <summary>A node within a range.</summary>
-public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>, IGeneratable
+public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>
 {
   #region Static Members
   public static RangeNode Empty => new();
-  private static void Log (string msg) =>
-    Debug.Log(MsgClass.Debug, msg);
   #endregion
 
   #region Public Properties
@@ -43,14 +41,14 @@ public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>, IGenerat
   public string? TColumn { get; set; }
   public bool ThisRow { get; set; }
 
-  public bool IsEmpty => Address.IsEmpty();
+  public bool IsEmpty => Address.IsEmpty;
   public bool IsError => Equals(Empty) && !IsEmpty;
   public IMatchItem ParseData { get; protected set; }
   #endregion
 
   protected XlRange? Rng { get; set; }
 
-  public RangeNode () => ParseData = new MatchDataSet();
+  public RangeNode () => ParseData = GroupDataSet.Null;
   public static RangeNode Generate (MatchDataSet mdd)
   {
     ANEx.ThrowIfNull(mdd);
@@ -83,9 +81,9 @@ public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>, IGenerat
     temp.ThisRow = mdd.HasGroup("thisrow");
 
     if (temp.IsError)
-      Log("ERROR: " + mdd.Content);
+      Debug.Log(MsgClass.Error, "ERROR: " + mdd.Content, "RangeNode");
     else
-      Log(mdd.Content);
+      Debug.Log(MsgClass.Debug, mdd.Content, "RangeNode");
 
     return temp;
   }
@@ -112,7 +110,7 @@ public class RangeNode : IEquatable<RangeNode>, IComparable<RangeNode>, IGenerat
   public static bool operator <= (RangeNode left, RangeNode right) =>
     left is null || left.CompareTo(right) <= 0;
   public static bool operator > (RangeNode left, RangeNode right) =>
-    left is not null && left.CompareTo(right) > 0;
+    left?.CompareTo(right) > 0;
   public static bool operator >= (RangeNode left, RangeNode right) =>
     left is null ? right is null : left.CompareTo(right) >= 0;
   #endregion

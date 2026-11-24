@@ -18,14 +18,13 @@ namespace Parser.Tokens;
 /// </list>
 /// <list type="table">
 /// <listheader>Examples</listheader>
-/// <item><c>tn:Name</c> - Token Type 'Name', Store as a Name.</item>
-/// <item><c>tv:Dec</c> - Token Type 'Dec', store as a Value.</item>
+/// <item><c>n:Name</c> - Token Type 'Name', Store as a Name.</item>
+/// <item><c>t:Dec</c> - Token Type 'Dec', store as a Value.</item>
 /// <item><c>cyi:Script</c> - Content 'Script', Case insensitive, store as a Type.</item>
 /// </list>
 /// </remarks>
-public sealed class ChkToken () : IEquatable<IToken>
+public sealed class ChkToken
 {
-  private Spec? _spec;
   internal static Dictionary<char, RT> LetterReference { get; } = new()
   {
     ['A'] = RT.Any,
@@ -40,7 +39,6 @@ public sealed class ChkToken () : IEquatable<IToken>
   public Collection<string> AllowedTypes { get; init; } = [];
   public string RegexValidator { get; init; } = SE;
   public bool IgnoreCase => TokenRule.HasFlag(RT.IgnoreCase);
-  private StringComparison SC => IgnoreCase || _spec?.SC == SCOIC ? SCOIC : SCO;
   /// <summary>Creates a <see cref="ChkToken"/> object from the <see langword="string"/>.</summary>
   /// <param name="definition">The definition string.</param>
   /// <param name="spec">The <see cref="Spec"/> reference.</param>
@@ -52,14 +50,14 @@ public sealed class ChkToken () : IEquatable<IToken>
     Regex regexobj = new(regex, ROEC, new TimeSpan(0, 0, 1));
     Match m = regexobj.Match(definition);
     if (!m.Success)
-      _ = Op.ThrowBadDef($"Bad Token Sequence String. {definition}");
+      _ = Err.ThrowBadDef($"Bad Token Sequence String. {definition}");
 
     RT rule = RT.None;
     string prefix = SE;
     string? prop = null;
     T assnTo = T.Custom;
 
-    if (m.Groups.ContainsKey("custom_prop") && m.Groups["custom_prop"].Value.IsNotEmpty())
+    if (m.HasValidGroup("custom_prop"))
     {
       prop = m.Groups["custom_prop"].Value;
     }
@@ -68,8 +66,14 @@ public sealed class ChkToken () : IEquatable<IToken>
       prefix = m.Groups["prefix"].Value;
       assnTo = GetTokenRef(prefix);
     }
-    Collection<string> allowed_types = [];
+    HashSet<string> allowed_types = [];
     string regex_validator = SE;
+
+    //Automatically assign ignore case if the spec declares it.
+    if (spec.SC == SCOIC)
+    {
+      rule |= RT.IgnoreCase;
+    }
 
     foreach (char c in prefix.ToUpperInvariant().RemoveAllButChars("AOMI"))
     {
@@ -78,29 +82,28 @@ public sealed class ChkToken () : IEquatable<IToken>
 
     if (assnTo == T.Error)
     {
-      _ = Op.ThrowBadDef($"Bad Prefix Char. ({prefix})");
+      _ = Err.ThrowBadDef($"Bad Prefix Char. ({prefix})");
     }
 
     if (m.Groups.ContainsKey("type_def"))
+    {
       foreach (Capture c in m.Groups["type_def"].Captures)
-        allowed_types.Add(c.Value);
+        _ = allowed_types.Add(c.Value);
+    }
 
     if (m.Groups.ContainsKey("literal_def"))
       regex_validator = m.Groups["literal_def"].Value;
 
-    Collection<string> expanded_types = spec is null ? allowed_types : AllAllowedTypes(allowed_types, spec);
+    HashSet<string> expanded_types = spec is null ? allowed_types : AllAllowedTypes(allowed_types, spec);
 
-    ChkToken result = new()
+    return new()
     {
       CustomPropertyName = prop,
       RegexValidator = regex_validator,
-      AllowedTypes = expanded_types,
+      AllowedTypes = [.. expanded_types],
       TokenRule = rule,
-      _spec = spec,
       AssignTo = assnTo,
     };
-
-    return result;
   }
   public static T GetTokenRef (string prefix)
   {
@@ -129,19 +132,20 @@ public sealed class ChkToken () : IEquatable<IToken>
         _ => T.Error,
       };
   }
-  private bool IsFullRegexMatch (IToken? token) =>
-    token is not null && (RegexValidator.IsEmpty() || Regex.Match(token.Content, RegexValidator, ROEC | ROML | ROIPW | (TokenRule.HasFlag(RT.IgnoreCase) ? ROIC : RON)).Value.Length == token.Content.Length);
-  internal static Collection<string> AllAllowedTypes (IEnumerable<string> types, Spec spec)
+  /// <summary>Gets all the allowed derived types of tf this token.</summary>
+  /// <param name="types">The initially allowed types.</param>
+  /// <param name="spec">The <see cref="Spec"/> to lookup from.</param>
+  /// <returns>A list of all the allowed token types.</returns>
+  internal static HashSet<string> AllAllowedTypes (IEnumerable<string> types, Spec spec)
   {
     HashSet<string> all_types_allowed = [.. types];
 
     foreach (string item in types)
     {
-      if (spec.TokenCompatLookup.Keys.Any(i => i.ToString().Equals(item, SCOIC)))
+      if (spec.TokenCompatLookup.Keys.Any(i => i.Equals(item, SCOIC)))
       {
-        dynamic key = spec.TokenCompatLookup.Keys.Single(i => i.ToString().Equals(item, SCOIC));
-        Collection<object> list = spec.TokenCompatLookup[key];
-        foreach (string? s in list.Select(obj => obj.ToString()))
+        string key = spec.TokenCompatLookup.Keys.Single(i => i.Equals(item, SCOIC));
+        foreach (string? s in spec.TokenCompatLookup[key])
         {
           if (s is null) continue;
 
@@ -149,18 +153,18 @@ public sealed class ChkToken () : IEquatable<IToken>
 
           if (added)
           {
-            all_types_allowed = [.. AllAllowedTypes(all_types_allowed, spec)];
+            all_types_allowed = AllAllowedTypes(all_types_allowed, spec);
           }
         }
       }
     }
     return [.. all_types_allowed];
   }
-  internal bool Check_Type (IToken? token) => token is not null && token.HasType && AllowedTypes.Any(type => token.Type.Like(type)) || AllowedTypes.Count == 0;
-  /// <summary>Checks if the specified token satisfies this object's conditions.</summary>
-  /// <param name="other">The token to check.</param>
-  /// <returns><see langword="true"/> if the token satisfies this object's conditions, <see langword="false"/> otherwise.</returns>
-  public bool Equals (IToken? other) =>
-    IsFullRegexMatch(other) && Check_Type(other);
+  internal bool Check_Type (IToken? token) => (token?.HasType == true && AllowedTypes.Any(type => token.Type.Like(type))) || AllowedTypes.Count == 0;
+
   public override string ToString () => $"ChkToken: {AllowedTypes.TextJoin("-")}" + (RegexValidator.Length > 0 ? $"{{{RegexValidator}}}" : "");
+  internal bool IsStatisfiedBy (IToken token, Spec spec) =>
+    token is not null &&
+    (RegexValidator.IsEmpty || Regex.Match(token.Content, RegexValidator, ROEC | ROML | ROIPW | (TokenRule.HasFlag(RT.IgnoreCase) || spec.SC == SCOIC ? ROIC : RON)).Value.Length == token.Content.Length) &&
+    Check_Type(token);
 }

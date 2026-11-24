@@ -1,5 +1,6 @@
 namespace Parser.Exceptions;
 
+/// <summary>Thrown when the operation expects a different type of input than what it was given.</summary>
 public class OperationBadInputTypeException : OperationException
 {
   public OperationBadInputTypeException () : base("Bad input type passed to operation.") { }

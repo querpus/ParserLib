@@ -61,7 +61,7 @@ namespace Specification.ZDoom.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\ACS\FooLib.acs.
+        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\Samples\ACS\FooLib.acs.
         /// </summary>
         public static string acs_foolib {
             get {
@@ -88,7 +88,7 @@ namespace Specification.ZDoom.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\ACS\sample.acs.
+        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\Samples\ACS\sample.acs.
         /// </summary>
         public static string acs_sample {
             get {
@@ -97,7 +97,16 @@ namespace Specification.ZDoom.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\MapInfo\mapinfo.txt.
+        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\Samples\Decorate\Weapon_MkII.dec.
+        /// </summary>
+        public static string dec_mkii {
+            get {
+                return ResourceManager.GetString("dec_mkii", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\Samples\MapInfo\mapinfo.txt.
         /// </summary>
         public static string mapinfo_common {
             get {
@@ -106,7 +115,7 @@ namespace Specification.ZDoom.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\SndInfo\sndinfo.txt.
+        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\Samples\SndInfo\sndinfo.txt.
         /// </summary>
         public static string sndinfo_test {
             get {
@@ -115,7 +124,7 @@ namespace Specification.ZDoom.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\UDMF\map00.udmf.
+        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\Samples\UDMF\map00.udmf.
         /// </summary>
         public static string udmf_map00 {
             get {
@@ -124,7 +133,7 @@ namespace Specification.ZDoom.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\UDMF\sample.udmf.
+        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\Samples\UDMF\sample.udmf.
         /// </summary>
         public static string udmf_sample {
             get {
@@ -133,7 +142,7 @@ namespace Specification.ZDoom.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\ACS\ACS Rules.xml.
+        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\Samples\ACS\ACS Rules.xml.
         /// </summary>
         public static string xml_acs {
             get {
@@ -142,7 +151,7 @@ namespace Specification.ZDoom.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\ZScript\demon.zs.
+        ///   Looks up a localized string similar to ParserLib\Specification.ZDoom\Samples\ZScript\demon.zs.
         /// </summary>
         public static string zs_demon {
             get {

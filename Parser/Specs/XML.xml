@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Definition xmlns="Parser/Spec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
+  <Spec name="xml" type="text">
+    <TokenRules>
+      <Rule type="Competitive" assign="DString">
+        <Data> "[^">&lt;]*" </Data>
+      </Rule>
+      <Rule type="Competitive" assign="SString">
+        <Data> '[^'>&lt;]*' </Data>
+      </Rule>
+      <Rule type="TokenComment" assign="Comment">
+        <Data> &lt;!--((?!--).)*--> </Data>
+      </Rule>
+    </TokenRules>
+    <GroupTokenRules>
+      <Rule assign="Attribute">
+        <Data> n:AttrKey x:Eq v:String </Data>
+      </Rule>
+      <Rule assign="Header">
+        <Data> x:Ao x:Qm n:ElementName{xml} pa:Attribute x:Qm x:Ac </Data>
+      </Rule>
+      <Rule assign="DocumentNamespace">
+        <Data> t:NamespaceAttr x:Co d:Attribute </Data>
+      </Rule>
+      <Rule assign="DocumentNamespace">
+        <Data> t:NamespaceAttr x:Eq v:String </Data>
+      </Rule>
+      <Rule assign="AttributeWithNamespace">
+        <Data> t:Namespace x:Co n:AttrKey x:Eq v:String </Data>
+      </Rule>
+      <Rule assign="ElementEndWithNamespace">
+        <Data> x:Ao x:Sl t:Namespace x:Co n:ElementName x:Ac </Data>
+      </Rule>
+      <Rule assign="ElementEnd">
+        <Data> x:Ao x:Sl n:ElementName x:Ac </Data>
+      </Rule>
+      <Rule assign="ElementSingleWithNamespace">
+        <Data> x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Sl x:Ac </Data>
+      </Rule>
+      <Rule assign="ElementSingle">
+        <Data> x:Ao n:ElementName pa:Attribute x:Sl x:Ac </Data>
+      </Rule>
+      <Rule assign="ElementStartWithNamespace">
+        <Data> x:Ao t:Namespace x:Co n:ElementName pa:Attribute x:Ac </Data>
+      </Rule>
+      <Rule assign="ElementStart">
+        <Data> x:Ao n:ElementName pa:Attribute x:Ac </Data>
+      </Rule>
+      <Rule type="Recursive" assign="ElementPair">
+        <Data>d:ElementStart va:ValidContent x:ElementEnd</Data>
+      </Rule>
+    </GroupTokenRules>
+    <Instructions>
+      <Tokenize input_var="text" output_var="tokens" tokenizer="XParser"/>
+      <Print check_var="tokens"/>
+      <TokenAssemble input_var="tokens" output_var="token_groups"/>
+      <Print check_var="token_groups"/>
+      <Terminate success="true"/>
+    </Instructions>
+    <FileInferences initial="or">
+      <Extension>xml</Extension>
+      <Extension>xaml</Extension>
+      <Extension>csproj</Extension>
+      <Extension>props</Extension>
+    </FileInferences>
+  </Spec>
+</Definition>

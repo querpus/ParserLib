@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="acs_foolib" xml:space="preserve">
-    <value>ParserLib\Specification.ZDoom\ACS\FooLib.acs</value>
+    <value>ParserLib\Specification.ZDoom\Samples\ACS\FooLib.acs</value>
   </data>
   <data name="acs_rpglevel" xml:space="preserve">
     <value>DoomRPG\doomrpg-code\src\RPGLevel.acs</value>
@@ -127,24 +127,27 @@
     <value>DoomRPG\doomrpg-code\src\RPGMFunc.acs</value>
   </data>
   <data name="acs_sample" xml:space="preserve">
-    <value>ParserLib\Specification.ZDoom\ACS\sample.acs</value>
+    <value>ParserLib\Specification.ZDoom\Samples\ACS\sample.acs</value>
+  </data>
+  <data name="dec_mkii" xml:space="preserve">
+    <value>ParserLib\Specification.ZDoom\Samples\Decorate\Weapon_MkII.dec</value>
   </data>
   <data name="mapinfo_common" xml:space="preserve">
-    <value>ParserLib\Specification.ZDoom\MapInfo\mapinfo.txt</value>
+    <value>ParserLib\Specification.ZDoom\Samples\MapInfo\mapinfo.txt</value>
   </data>
   <data name="sndinfo_test" xml:space="preserve">
-    <value>ParserLib\Specification.ZDoom\SndInfo\sndinfo.txt</value>
+    <value>ParserLib\Specification.ZDoom\Samples\SndInfo\sndinfo.txt</value>
   </data>
   <data name="udmf_map00" xml:space="preserve">
-    <value>ParserLib\Specification.ZDoom\UDMF\map00.udmf</value>
+    <value>ParserLib\Specification.ZDoom\Samples\UDMF\map00.udmf</value>
   </data>
   <data name="udmf_sample" xml:space="preserve">
-    <value>ParserLib\Specification.ZDoom\UDMF\sample.udmf</value>
+    <value>ParserLib\Specification.ZDoom\Samples\UDMF\sample.udmf</value>
   </data>
   <data name="xml_acs" xml:space="preserve">
-    <value>ParserLib\Specification.ZDoom\ACS\ACS Rules.xml</value>
+    <value>ParserLib\Specification.ZDoom\Samples\ACS\ACS Rules.xml</value>
   </data>
   <data name="zs_demon" xml:space="preserve">
-    <value>ParserLib\Specification.ZDoom\ZScript\demon.zs</value>
+    <value>ParserLib\Specification.ZDoom\Samples\ZScript\demon.zs</value>
   </data>
 </root>

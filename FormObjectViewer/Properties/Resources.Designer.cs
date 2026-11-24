@@ -113,6 +113,16 @@ namespace FormObjectViewer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap StatusSecurityWarning {
+            get {
+                object obj = ResourceManager.GetObject("StatusSecurityWarning", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap ToolStripIcon_Image {
             get {
                 object obj = ResourceManager.GetObject("ToolStripIcon.Image", resourceCulture);

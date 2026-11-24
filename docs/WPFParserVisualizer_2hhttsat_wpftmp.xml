@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WPFParserVisualizer</name>
+    </assembly>
+    <members>
+        <member name="T:WPFParserVisualizer.App">
+            <summary>
+            Interaction logic for App.xaml
+            </summary>
+            <summary>
+            App
+            </summary>
+        </member>
+        <member name="M:WPFParserVisualizer.App.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="M:WPFParserVisualizer.App.Main">
+            <summary>
+            Application Entry Point.
+            </summary>
+        </member>
+        <member name="T:WPFParserVisualizer.MainWindow">
+            <summary>
+            Interaction logic for MainWindow.xaml
+            </summary>
+            <summary>
+            MainWindow
+            </summary>
+        </member>
+        <member name="M:WPFParserVisualizer.MainWindow.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+        <member name="T:WPFParserVisualizer.Page1">
+            <summary>
+            Interaction logic for Page1.xaml
+            </summary>
+            <summary>
+            Page1
+            </summary>
+        </member>
+        <member name="M:WPFParserVisualizer.Page1.InitializeComponent">
+            <summary>
+            InitializeComponent
+            </summary>
+        </member>
+    </members>
+</doc>

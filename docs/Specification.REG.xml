@@ -10,18 +10,6 @@
         <member name="P:Specification.REG.Definition.Spec">
             <summary>Defines the Registry spec.</summary>
         </member>
-        <member name="T:Specification.REG.EntryNameEqual">
-            <summary>An <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> comparer to determine if the name of the <see cref="T:Specification.REG.RegProperty"/> is the same as another.</summary>
-        </member>
-        <member name="M:Specification.REG.EntryNameEqual.#ctor">
-            <summary>An <see cref="T:System.Collections.Generic.IEqualityComparer`1"/> comparer to determine if the name of the <see cref="T:Specification.REG.RegProperty"/> is the same as another.</summary>
-        </member>
-        <member name="M:Specification.REG.EntryNameEqual.Equals(Specification.REG.RegProperty,Specification.REG.RegProperty)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Specification.REG.EntryNameEqual.GetHashCode(Specification.REG.RegProperty)">
-            <inheritdoc/>
-        </member>
         <member name="T:Specification.REG.Header">
             <summary>Represents the text header of a registry file.</summary>
             <param name="text">The text if not using the default text.</param>
@@ -42,6 +30,47 @@
         <member name="M:Specification.REG.Header.ToString">
             <summary>Gets the header string value.</summary>
             <returns>The header string value.</returns>
+        </member>
+        <member name="T:Specification.REG.Properties.Samples">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Specification.REG.Properties.Samples.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Specification.REG.Properties.Samples.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Specification.REG.Properties.Samples.reg_classext">
+            <summary>
+              Looks up a localized string similar to ParserLib\Specification.REG\Resources\HKEY_Classes_Root\ClassExt.reg.
+            </summary>
+        </member>
+        <member name="P:Specification.REG.Properties.Samples.reg_dllfile">
+            <summary>
+              Looks up a localized string similar to ParserLib\Specification.REG\Resources\Types\dllfile.reg.
+            </summary>
+        </member>
+        <member name="P:Specification.REG.Properties.Samples.reg_ipl">
+            <summary>
+              Looks up a localized string similar to ParserLib\Specification.REG\Resources\Types\ipl.reg.
+            </summary>
+        </member>
+        <member name="P:Specification.REG.Properties.Samples.reg_iplfile">
+            <summary>
+              Looks up a localized string similar to ParserLib\Specification.REG\Resources\Types\ipl.reg.
+            </summary>
+        </member>
+        <member name="P:Specification.REG.Properties.Samples.reg_querpus">
+            <summary>
+              Looks up a localized string similar to ParserLib\Specification.REG\querpus.ipl.
+            </summary>
         </member>
         <member name="T:Specification.REG.RegProperty">
             <summary>A registry key, type, and value, with an option to delete the entry.</summary>
@@ -71,17 +100,11 @@
             <summary>The parent key.</summary>
         </member>
         <member name="P:Specification.REG.RegProperty.IsDefault">
-            <summary><see langword="true"/> if this key is null or default initial value;</summary>
+            <summary><see langword="true"/> if this key is <see langword="null"/> or an empty <see langword="string"/>, <see langword="false"/> otherwise.</summary>
         </member>
-        <member name="M:Specification.REG.RegProperty.Generate(Common.Regex.MatchDataSet)">
-            <inheritdoc/>
-            <exception cref="T:System.InvalidOperationException"/>
-        </member>
-        <member name="M:Specification.REG.RegProperty.Equals(Common.IProperty{System.String})">
-            <inheritdoc/>
-        </member>
-        <member name="M:Specification.REG.RegProperty.CompareTo(Common.IProperty{System.String})">
-            <inheritdoc/>
+        <member name="M:Specification.REG.RegProperty.Generate(Common.RegExp.MatchDataSet)">
+            <summary>Generates a <see cref="T:Specification.REG.RegProperty"/> from a <see cref="T:Common.RegExp.MatchDataSet"/>.</summary>
+            <exception cref="T:System.InvalidOperationException">The <see cref="T:Common.RegExp.MatchDataSet"/> was missing a required group.</exception>
         </member>
         <member name="M:Specification.REG.RegProperty.AssignValue(System.String)">
             <summary>Assigns the specified value to the <see cref="P:Specification.REG.RegProperty.Value"/> property.</summary>
@@ -90,12 +113,6 @@
         <member name="M:Specification.REG.RegProperty.AssignValue(System.Object)">
             <summary>Assigns a value to the <see cref="P:Specification.REG.RegProperty.Value"/> property, converting it to a string.</summary>
             <param name="value">The object to assign. If <paramref name="value"/> is <see langword="null"/>, a default value is assigned instead.</param>
-        </member>
-        <member name="M:Specification.REG.RegProperty.Equals(System.Object)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Specification.REG.RegProperty.GetHashCode">
-            <inheritdoc/>
         </member>
         <member name="T:Specification.REG.RegSection">
             <summary>A registry key.</summary>

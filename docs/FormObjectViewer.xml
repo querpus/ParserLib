@@ -17,12 +17,6 @@
             the contents of this method with the code editor.
             </summary>
         </member>
-        <member name="M:FormObjectViewer.MainForm.LoadProprietaryImage(System.String)">
-            <summary>
-            Reads a proprietary format and converts it to a Bitmap.
-            Replace the parsing logic with your actual format reader.
-            </summary>
-        </member>
         <member name="F:FormObjectViewer.ParserForm.components">
             <summary> Required designer variable.</summary>
         </member>
@@ -80,9 +74,31 @@
               Looks up a localized resource of type System.Drawing.Bitmap.
             </summary>
         </member>
+        <member name="P:FormObjectViewer.Properties.Resources.StatusSecurityWarning">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
         <member name="P:FormObjectViewer.Properties.Resources.ToolStripIcon_Image">
             <summary>
               Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="F:FormObjectViewer.RegexMaker.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:FormObjectViewer.RegexMaker.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:FormObjectViewer.RegexMaker.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
             </summary>
         </member>
         <member name="F:FormObjectViewer.RuleEditForm.components">

@@ -3,12 +3,10 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
-using Parser.Ops;
-
 namespace Specification.IPL;
 
 /// <summary>Contains the details of an IPL command.</summary>
-public class CommandDataSet : IEquatable<CommandDataSet>, ITextSerializer, IGeneratable, IComparable<CommandDataSet>, IReadOnlyCollection<object>
+public class CommandDataSet : IEquatable<CommandDataSet>, ISerializable, IComparable<CommandDataSet>, IReadOnlyCollection<object>
 {
   /// <summary>The data that created this object.</summary>
   public MatchDataSet Origin { get; }
@@ -65,7 +63,7 @@ public class CommandDataSet : IEquatable<CommandDataSet>, ITextSerializer, IGene
     "E" when IsEscaped && !IsShifted => ICT.SelectFormat,
     "P" or "R" when !IsEscaped && !IsShifted => ICT.Simple,
     "C" or "P" or "c" when IsEscaped && !IsShifted => ICT.Simple,
-    string when Mode is IPLPrinterMode.Print && !IsEscaped => ICT.FieldData,
+    string when Mode is IPLPrinterMode.Print && !IsEscaped && !IsShifted => ICT.FieldData,
     "F" when IsEscaped && Mode is IPLPrinterMode.Print => ICT.FieldSet,
     _ => ICT.Unknown
   };
@@ -128,7 +126,7 @@ public class CommandDataSet : IEquatable<CommandDataSet>, ITextSerializer, IGene
     MatchDataSet parseMe =
       toParse is null && Origin is null ? throw new InvalidOperationException("MDD Cannot be null") :
       toParse is null && Origin is not null ? Origin :
-      toParse is not null ? toParse : throw new InvalidOperationException();
+      toParse ?? throw new InvalidOperationException();
     CmdLetter = parseMe["letter"].Content;
     if (parseMe.HasGroup("qty"))
       CmdLetter = parseMe["qty"].Content;
@@ -175,14 +173,14 @@ public class CommandDataSet : IEquatable<CommandDataSet>, ITextSerializer, IGene
     DebugIn("CommandDataSet", "GetIntData");
     if (!Data.TryGetValue(index, out object? data_obj))
     {
-      _ = Op.ThrowBadDef($"No data at index {index}.");
+      _ = Err.ThrowBadDef($"No data at index {index}.");
       throw null;
     }
     if (data_obj is int data_int)
     {
       return data_int;
     }
-    _ = Op.ThrowBadInput("int", $"{data_obj.GetType()}");
+    _ = Err.ThrowBadInput("int", $"{data_obj.GetType()}");
     throw null;
   }
   /// <summary>Gets the data field at the given index as a <see langword="decimal"/>.</summary>
@@ -196,7 +194,7 @@ public class CommandDataSet : IEquatable<CommandDataSet>, ITextSerializer, IGene
     }
     catch (InvalidCastException ice)
     {
-      Debug.LogException(ice);
+      LogException(ice);
       return ErrVal;
     }
   }
@@ -235,19 +233,14 @@ public class CommandDataSet : IEquatable<CommandDataSet>, ITextSerializer, IGene
     return escape + shift + cmd + field + props;
   }
   /// <inheritdoc/>
-  public static CommandDataSet Generate (MatchDataSet input)
-  {
-    CommandDataSet result = new(input);
-
-    return result;
-  }
+  public static CommandDataSet Generate (MatchDataSet input) => new(input);
   #endregion
   #region Static Operators
   /// <summary>Checks basic equality with another CommonData object.</summary>
   /// <param name="left">The left object.</param>
   /// <param name="right">The right object.</param>
   /// <returns><see langword="true"/> if left equals right, <see langword="false"/> otherwise.</returns>
-  public static bool operator == (CommandDataSet left, CommandDataSet right) => left is null && right is null || (left?.Equals(right) ?? false);
+  public static bool operator == (CommandDataSet left, CommandDataSet right) => (left is null && right is null) || (left?.Equals(right) ?? false);
   /// <summary>Checks basic inequality with another CommonData object.</summary>
   /// <param name="left">The left object.</param>
   /// <param name="right">The right object.</param>

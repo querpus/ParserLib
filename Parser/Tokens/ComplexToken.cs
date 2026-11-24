@@ -1,11 +1,16 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 
+using Parser.Nodes;
+
 namespace Parser.Tokens;
 
-public sealed class ComplexToken : IToken
+/// <summary>A token made up of other tokens that have roles within this one.</summary>
+public sealed class ComplexToken : IToken, IMultiToken
 {
+  public string Delim { get; init; } = " ";
   private readonly Dictionary<TokenRef, IToken> _token_pieces = [];
   public TokenRef? AssignTo { get; set; }
+  /// <summary>The dictionary of tokens making up this complex token.</summary>
   public Dictionary<TokenRef, IToken?> TokenPieces
   {
     init => _token_pieces = [.. value];
@@ -18,72 +23,103 @@ public sealed class ComplexToken : IToken
     set => _token_pieces[piece_type] = value;
   }
 
-  public IToken? Name => GetPieceToken(TokenRef.Name);
-  public IToken? ObjType => GetPieceToken(TokenRef.Type);
-  public IToken? Value => GetPieceToken(TokenRef.Value);
-  public IToken? Left => GetPieceToken(TokenRef.Left);
-  public IToken? Right => GetPieceToken(TokenRef.Right);
-  public IToken? Center => GetPieceToken(TokenRef.Center);
-  public TokenCollection? AddFlags => GetPieceTokens(TokenRef.AddFlagList);
-  public TokenCollection? SubFlags => GetPieceTokens(TokenRef.SubFlagList);
-  public TokenCollection? Properties => GetPieceTokens(TokenRef.PropertyList);
-  public TokenCollection? Parameters => GetPieceTokens(TokenRef.ParameterList);
-  public TokenCollection? Statements => GetPieceTokens(TokenRef.StatementList);
-  public TokenCollection? Values => GetPieceTokens(TokenRef.ValueList);
+  public IToken? Name => GetPiece(TokenRef.Name);
+  public IToken? ObjType => GetPiece(TokenRef.Type);
+  /// <summary>Value is simply the first item in the ValueList.</summary>
+  public IToken? Value => Values?.Count > 0 ? Values[0] : null;
+  public IToken? Left => GetPiece(TokenRef.Left);
+  public IToken? Right => GetPiece(TokenRef.Right);
+  public IToken? Center => GetPiece(TokenRef.Center);
+  public ImmutableList<IToken>? AddFlags => GetPieces(TokenRef.AddFlagList);
+  public ImmutableList<IToken>? SubFlags => GetPieces(TokenRef.SubFlagList);
+  public ImmutableList<IToken>? Properties => GetPieces(TokenRef.PropertyList);
+  public ImmutableList<IToken>? Parameters => GetPieces(TokenRef.ParameterList);
+  public ImmutableList<IToken>? Statements => GetPieces(TokenRef.StatementList);
+  public ImmutableList<IToken>? Values => GetPieces(TokenRef.ValueList);
 
-  public string Content => Children.Select(i => i.Content).TextJoin(" ");
+  public string Content => Children.Select(i => i.Content).TextJoin(Delim);
   public IReadOnlyCollection<TokenRef> PiecesPresent => [.. _token_pieces.Keys.Where(kvp => kvp.IsUsed(_token_pieces))];
   public string Type { get; set; } = SE;
-  public bool HasType => Type.IsNotEmpty() && !Type.Like("None");
-  public bool Exempt { get; set; }
-  public IList<IToken> Children { get; set; } = [];
+  public bool HasType => Type.IsNotEmpty && !Type.Like("None") && !Type.Like("-");
+  public IToken? Parent { get; set; }
+  public IList<IToken> Children { get; init; } = [];
   public int Index => Children.Count > 0 ? Children[0].Index : -1;
-  public int CompareTo (IToken? other) => Index.CompareTo(other?.Index);
-  public bool Equals (IToken? other) => other is ComplexToken && Children.SequenceEqual(other.Children);
-  public IToken? GetPieceToken (TokenRef piece_type) => _token_pieces.TryGetValue(piece_type, out IToken? value) ? value : null;
-  public TokenCollection? GetPieceTokens (TokenRef piece_type) => _token_pieces.TryGetValue(piece_type, out IToken? value) ? value as TokenCollection : null;
-  public string? GetPieceContent (TokenRef piece_type) => _token_pieces.TryGetValue(piece_type, out IToken? value) ? value.Content : null;
-  public bool HasPieceType (TokenRef piece_type) => _token_pieces.ContainsKey(piece_type) && piece_type.IsUsed(_token_pieces);
-
+  public int CompareTo (IIndexSortable? other) => Index.CompareTo(other?.Index);
+  public bool Equals (IToken? other) => other is ComplexToken ct && Children.SequenceEqual(ct.Children);
+  public IToken? GetPiece (TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) ? value : null;
+  public ImmutableList<IToken>? GetPieces (TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) && value is IMultiToken multi ? [.. multi.Children.Cast<IToken>()] : null;
+  public string? GetPieceContent (TokenRef piece_type) => _token_pieces.TryGetValue(GetListID(piece_type), out IToken? value) ? value.Content : null;
+  public bool HasPieceType (TokenRef piece_type) => piece_type.IsUsed(_token_pieces);
+  public bool HasPieceTypes (TokenRef[] piece_types) => piece_types.All(p => p.IsUsed(_token_pieces));
+  private static TokenRef GetListID (TokenRef itemID) => itemID switch
+  {
+    TokenRef.Value => TokenRef.ValueList,
+    TokenRef.Property => TokenRef.PropertyList,
+    TokenRef.Statement => TokenRef.StatementList,
+    TokenRef.Parameter => TokenRef.ParameterList,
+    TokenRef.AddFlag => TokenRef.AddFlagList,
+    TokenRef.SubFlag => TokenRef.SubFlagList,
+    _ => itemID
+  };
+  private static bool HasListID (TokenRef itemID) => itemID != GetListID(itemID);
   public void AddPieceType (TokenRef piece_type, IToken token)
   {
-    if (HasPieceType(piece_type) && _token_pieces[piece_type] is TokenCollection list)
+    if (!HasListID(piece_type))
     {
-      list.Add(token);
-    }
-    else
-    {
-      _token_pieces[piece_type] = new TokenCollection() { token };
-    }
-  }
-  public void AddPieceTypes (TokenRef piece_type, TokenCollection tokens)
-  {
-    if (tokens is null)
+      SetPieceType(piece_type, token);
       return;
-
-    if (HasPieceType(piece_type) && _token_pieces[piece_type] is TokenCollection list)
+    }
+    if (!HasPieceType(piece_type))
     {
-      foreach (IToken token in tokens)
+      TokenCollection new_list = [token];
+      SetPieceType(GetListID(piece_type), new_list);
+      SetPieceType(piece_type, new_list);
+      return;
+    }
+
+    IToken piece = GetPiece(piece_type)!;
+
+    if (piece is TokenCollection tc)
+    {
+      if (tc.Count == 0)
       {
-        list.Add(token);
+        TokenCollection new_list = [token];
+        SetPieceType(GetListID(piece_type), new_list);
+        SetPieceType(piece_type, new_list);
+      }
+      else
+      {
+        tc.Add(token);
       }
     }
     else
     {
-      _token_pieces[piece_type] = tokens;
+      TokenCollection new_list = [piece, token];
+      SetPieceType(GetListID(piece_type), new_list);
+      SetPieceType(piece_type, new_list);
     }
   }
-  public void SetPieceType (TokenRef piece_type, IToken token) => _token_pieces[piece_type] = token;
+  public void AddPiecesToType (TokenRef piece_type, TokenCollection tokens)
+  {
+    if (tokens is null || tokens.Count == 0)
+      return;
+
+    foreach (IToken token in tokens)
+    {
+      AddPieceType(piece_type, token);
+    }
+  }
+  private void SetPieceType (TokenRef piece_type, IToken token) => _token_pieces[piece_type] = token;
   public override bool Equals (object? obj) => obj is IToken ct && Equals(ct);
   public override int GetHashCode () => _token_pieces.GetHashCode();
   public static bool operator == (ComplexToken left, ComplexToken right) => left is null ? right is null : left.Equals(right);
   public static bool operator != (ComplexToken left, ComplexToken right) => !(left == right);
   public static bool operator < (ComplexToken left, ComplexToken right) => left is null ? right is not null : left.CompareTo(right) < 0;
   public static bool operator <= (ComplexToken left, ComplexToken right) => left is null || left.CompareTo(right) <= 0;
-  public static bool operator > (ComplexToken left, ComplexToken right) => left is not null && left.CompareTo(right) > 0;
+  public static bool operator > (ComplexToken left, ComplexToken right) => left?.CompareTo(right) > 0;
   public static bool operator >= (ComplexToken left, ComplexToken right) => left is null ? right is null : left.CompareTo(right) >= 0;
 
-  private Dictionary<string, IToken?> Parts => new()
+  private Dictionary<string, dynamic?> Parts => new()
   {
     ["Name"] = Name,
     ["Type"] = ObjType,
@@ -99,54 +135,88 @@ public sealed class ComplexToken : IToken
     ["StatementList"] = Statements,
   };
 
-  public override string ToString ()
+  public required Spec Spec { get; init; }
+
+  string Nodes.IToken.Content => Content;
+
+  bool IPrintable.HasHeaderLine => true;
+
+  IList<Nodes.IToken> IMultiToken.Children => [.. Children.Cast<IToken>()];
+
+  /// <summary>Calls the action on every piece in this token.</summary>
+  /// <param name="action">The action to call.</param>
+  /// <remarks>This will not call both Value and ValueList. It chooses based on the quantity of the list.</remarks>
+  private void EachPart (Action<KeyValuePair<string, dynamic?>> action)
   {
-    return ToString(0);
+    foreach (KeyValuePair<string, dynamic?> part in Parts.Where(k => k.Value is not null))
+    {
+      if (part.Key.Like("Value") && (part.Value is not TokenCollection tc || tc.Count == 1))
+      {
+        action(part);
+      }
+      else if (part.Key.Like("ValueList") && (part.Value is TokenCollection tc2 && tc2.Count > 1))
+      {
+        action(part);
+      }
+      else if (part.Key.Like(["StatementList", "PropertyList", "AddFlagList", "SubFlagList", "ParameterList", "Left", "Right", "Center", "Type", "Name"]))
+      {
+        action(part);
+      }
+    }
   }
+
+  public override string ToString () => ToString(0);
   public void Print (int indent)
   {
-    LogPart(MsgClass.Forced, Type);
-    foreach (KeyValuePair<string, IToken?> kvp in Parts)
+    string sp = new(' ', indent);
+    LogPart(MsgClass.BlueValue, Type);
+    EachPart(kvp =>
     {
-      NewLine();
-      LogPart(MsgClass.Forced, new(' ', indent));
-      LogPart(MsgClass.Warning, kvp.Key);
-      LogPart(MsgClass.BlueInfo, " : ");
-      kvp.Value?.Print(indent + 2);
-    }
+      if (kvp.Value is IToken tok)
+      {
+        NewLine();
+        LogPart(MsgClass.Hidden, sp);
+        LogPart(MsgClass.GreenInfo, kvp.Key);
+        LogPart(MsgClass.Warning, " : ");
+        tok.Print(indent + 2);
+      }
+    });
   }
   public string ToString (int indent)
   {
+    DebugIn("ComplexToken", "ToString");
     static string sp (int i) => new(' ', i);
     int spCount = indent + 2;
     string indent2 = $"{sp(spCount)}";
 
     string temp = $"{Type}";
 
-    if (HasPieceType(TokenRef.Name)) temp += $"\n{indent2}Name = {Name?.ToString(spCount + 2)}";
-    if (HasPieceType(TokenRef.Type)) temp += $"\n{indent2}Type = {ObjType?.ToString(spCount)}";
-    if (HasPieceType(TokenRef.Value)) temp += $"\n{indent2}Value = {Value?.ToString(spCount)}";
-    if (HasPieceType(TokenRef.Left)) temp += $"\n{indent2}Left = {Left?.ToString(spCount)}";
-    if (HasPieceType(TokenRef.Center)) temp += $"\n{indent2}Center = {Center?.ToString(spCount)}";
-    if (HasPieceType(TokenRef.Right)) temp += $"\n{indent2}Right = {Right?.ToString(spCount)}";
-    if (HasPieceType(TokenRef.AddFlagList)) temp += $"\n{indent2}AddFlagList = {AddFlags?.ToString(spCount)}";
-    if (HasPieceType(TokenRef.SubFlagList)) temp += $"\n{indent2}SubFlagList = {SubFlags?.ToString(spCount)}";
-    if (HasPieceType(TokenRef.ParameterList)) temp += $"\n{indent2}ParameterList = {Parameters?.ToString(spCount)}";
-    if (HasPieceType(TokenRef.PropertyList)) temp += $"\n{indent2}PropertyList = {Properties?.ToString(spCount)}";
-    if (HasPieceType(TokenRef.ValueList)) temp += $"\n{indent2}ValueList = {Values?.ToString(spCount)}";
-    if (HasPieceType(TokenRef.StatementList)) temp += $"\n{indent2}StatementList = {Statements?.ToString(spCount)}";
+    bool multiple_values = Values?.Count > 1;
+
+    EachPart(kvp =>
+    {
+      if (kvp.Value is null ||
+      (kvp.Value is TokenCollection tc && tc.IsEmpty) ||
+      (kvp.Key is "Value" && multiple_values) ||
+      (kvp.Key is "ValueList" && !multiple_values))
+      {
+        return;
+      }
+
+      temp += $"\n{indent2}{kvp.Key} = {kvp.Value.ToString(spCount + 2)}";
+    });
+    DebugOut();
     return temp;
   }
 
-  public object Clone ()
+  public object Clone () => new ComplexToken()
   {
-    ComplexToken clone = new()
-    {
-      TokenPieces = [.. _token_pieces],
-      Children = [.. Children],
-      Exempt = Exempt,
-      Type = Type,
-    };
-    return clone;
-  }
+    Spec = Spec,
+    TokenPieces = [.. _token_pieces],
+    Children = [.. Children],
+    Type = Type,
+  };
+  string ISerializable.Serialize () => Children.Select(c => c.Serialize()).TextJoin("");
+  int IComparable.CompareTo (object? obj) => obj is IIndexSortable iis ? CompareTo(iis) : -1;
+  void IMultiToken.Add (Nodes.IToken token) => Children.Add((IToken) token);
 }

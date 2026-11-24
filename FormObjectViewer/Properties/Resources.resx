@@ -139,12 +139,16 @@
     <value>..\Resources\CloseGroup.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Open" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\OpenFolder.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\Open.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <comment>This may be corrupt</comment>
   </data>
   <data name="RigidRelationshipInfo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\RigidRelationshipInfo.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="AddMemeber" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\AddMemeber.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StatusSecurityWarning" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\StatusSecurityWarning.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

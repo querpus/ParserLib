@@ -1,0 +1,180 @@
+// Comments always allowed on outside
+// Comments allowed within Spec block
+// Default keyword should not be used unless you are editing the default for unknown files!
+// Spec Syntax:
+//   Spec "<spec_name_no_spaces>" [Default]
+{
+  // Bracket Boxes may have special parsing rules
+  // Simple definitions must end with a semicolon.
+  "Format": "Text",
+  "Inferences": [
+    "ExtIs",
+    [
+      "ini",
+      "url",
+      "vnc",
+      "inf"
+    ]
+  ],
+  "Tokens": {
+    // Options Include:
+    //   DotAsNewLine
+    //   RightToLeft
+    // May also use this format:
+    //   RegexOptions = MultiLine | ExplicitCapture | IgnorePatternWhitespace | CaseInsensitive;
+    "RegexOptions": [
+      "MultiLine",
+      "ExplicitCapture",
+      "IgnorePatternWhitespace",
+      "CaseInsensitive"
+    ],
+    // Comment Line
+    // use "-" for "None" or omit type.
+    // regex extends from after whitespace following type until the first line break
+    // UNLESS the next line starts with a "=>" sequence
+    // Syntax:
+    //
+    "Rules": [
+      {
+        "rule": "TokenComment",
+        "type": "-",
+        "expr": ";.*"
+      },
+      {
+        "rule": "Competitive",
+        "type": "Value",
+        "expr": "(?<= =\\s*)  (?'keep'[^\\\\=\\n;]|\\.)*? \\s* (?=$|;)  (?# Trim )*"
+      },
+      {
+        "rule": "Competitive",
+        "type": "Key",
+        "expr": "(?<= ^\\s*)   ([^\"[\\]\\s\\\\=\\n;]|\\\\.)+"
+      },
+      { 
+        "rule": "Competitive",
+        "type": "QKey",
+        "expr": "(?<= ^\\s*) \"(([^\"[\\]\\s\\\\=\\n;]|\\\\.)+)\""
+      },
+      {
+        "rule": "TokenExact",
+        "type": "Eq",
+        "expr": "="
+      },
+      {
+        "rule": "TokenExtract",
+        "type": "Section",
+        "expr": "\\[ (?'keep'.*?) \\]"
+      }
+    ],
+    "Groups": [
+      // Group Constructs
+      {
+        "Type": "Property",
+        "Items": [
+          {
+            "Piece": "n",
+            "Type": "Key"
+          },
+          {
+            "Piece": "x",
+            "Type": "Eq"
+          },
+          {
+            "Piece": "v",
+            "Type": "Value"
+          }
+        ]
+      },
+      {
+        "Type": "SectionWProps",
+        "Items": [
+          {
+            "Piece": "n",
+            "Type": "Section"
+          },
+          {
+            "Piece": "pa",
+            "Type": "Property"
+          }
+        ]
+      }
+    ],
+    // Constructs make tokens into objects.
+    // They name a property and assign the specified token to it.
+    // They process in order, construct smaller tokens and then move to bigger ones.
+    // They actively update the hierarchy, so they must define a condition to execute on.
+    // EVERYTHING TOP-LEVEL must be constructed or discarded
+    // Anything not top-level and not constructed is automatically discarded
+    "Constructs": {
+      // Condition parses like the evaluate operation.
+      //  Ex. [Variables_Go_In_Braces] = "Value"
+      //  Ex. [IsBasic] = true
+      // Condition Variables:
+      //  TokenType - The Token Type Assigned
+      //  TokenLength - The Length of the token
+      //  TokenText - The actual text of the token
+      //  IsComplex - If the token is a group
+      //  IsBasic - If the token is not grouped
+      //  HasGroup(GroupName) - If The Token Has the named group
+      // Property Keyword Signifies a property is to be initialized on the constructed item.
+      // CriticalProperty means that it must not be an empty string or null object, and the value must be present.
+      // Syntax:
+      //  Property [ListType] "PropertyName" = Complex_Token_Variable
+
+      // Complex Token Variables:
+      //  Name - The "Name" Complex Token Item
+      //  Value - The "Value" Complex Token Item
+      //  ValueList - A Collection of the "Value" Token Items
+      //  PropertyList - A Collection of the "Property" Token Items
+      // ListType Values:
+      //  Collection - List
+      //  HashSet - Unique Item List
+      //  Dictionary - Unique Keys and Values
+
+      //Name of the construct definition (to reference later)
+      "Property": {
+        //Conditions that must be met for this construct to be used
+        "Conditions": [
+          {
+            //Must be token type "Property"
+            "TokenType": "Property",
+            //Must be a complex token "ComplexToken"
+            "IsComplex": true
+          }
+        ],
+        //Type of object to create
+        "Type": "PropertyObj",
+        //Critical Properties must be present and not null or empty
+        "CriticalProperties": {
+          //"PropertyName" : "ComplexTokenPieceName"
+          "Key": "Name"
+        },
+        //Properties to assign to the object
+        "Properties": {
+          //"PropertyName" : "ComplexTokenPieceName"
+          "Value": "Value"
+        }
+      },
+      "Section": {
+        "Conditions": [
+          {
+            "TokenType": "SectionWProps",
+            "IsComplex": true
+          }
+        ],
+        "Type": "INISection",
+        "CriticalProperties": {
+          "Name": "Name"
+        },
+
+        "Properties": {
+          //"PropertyName" : { Details }
+          "Properties": {
+            "Piece": "PropertyList",
+            "Type": "Collection"
+          }
+        }
+      }
+    }
+  }
+}

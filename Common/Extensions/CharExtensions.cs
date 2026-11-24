@@ -1,45 +1,44 @@
 //#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+using static Common.Chars;
 
 namespace Common.Extensions;
 
 /// <summary>Extension methods for the <see cref="char"/> type.</summary>
 public static class CharExtensions
 {
-#pragma warning disable IDE1006 // Naming Styles
-  private const char
-    _a = 'a', _z = 'z', _Z = 'Z', _A = 'A';
-#pragma warning restore IDE1006 // Naming Styles
-
-  public static bool IsAlphanumeric (this char c) =>
-    c.IsLower() || c.IsUpper() || c.In('0', '9');
-  /// <summary>Checks if this character is lowercase a thru z.</summary>
+  /// <summary>Char Extensions</summary>
   /// <param name="c">The character to check.</param>
-  /// <returns>true is the character is between ascii 'a' and 'z', false otherwise.</returns>
-  public static bool IsLower (this char c) => c.In(_a, _z);
-  public static bool IsUpper (this char c) => c is >= _A and <= _Z;
-  public static bool IsControl (this char c) => c < 32;
-  /// <summary>Checks if this character must be represented in 16 bits (256-65535).</summary>
-  /// <param name="c">The character to check.</param>
-  /// <returns><see langword="true"/> if it is within the specified range, otherwise <see langword="false"/>.</returns>
-  public static bool Is16bit (this char c) => c.In(256, short.MaxValue);
-  public static bool IsNumber (this char c) => c.IsInteger() || c is '.';
-  public static bool IsInteger (this char c) => c.IsPosInteger() || c is '-';
-  public static bool IsPosInteger (this char c) => c.In('0', '9');
-  /// <summary>Checks if a character is considered whitespace by Unicode standards.</summary>
-  /// <param name="c">The character to check.</param>
-  /// <returns><see langword="true"/> if the character is whitespace, otherwise <see langword="false"/>.</returns>
-  public static bool IsWhitespace (this char c) =>
-    c.In(9, 13) || c.In(8192, 8202) || (int) c is 32 or 133 or 160 or
-    5760 or 8232 or 8233 or 8239 or 8287 or 12288;
-  public static bool Is (this char c, int value) => c == value;
-  public static bool Is (this char c, char value) => c == value;
-  public static bool Is (this char c, params int[] values) => values.Any(i => c.Is(i));
-  public static bool In (this char c, int min, int max) => c >= min && c <= max;
-  public static char ToLower (this char c) =>
-    c.IsUpper() ? (char) (c + 32) : c;
-  /// <summary>Gets the uppercase variant of this character, or the character, if there isn't one.</summary>
-  /// <param name="c">The character to make uppercase.</param>
-  /// <returns>The uppercase variant, or the character itself.</returns>
-  public static char ToUpper (this char c) =>
-    c.IsLower() ? (char) (c - 32) : c;
+  extension(char c)
+  {
+    public char Display => c switch
+    {
+      < SP => (char) ('␀' + c),
+      DEL => '␡',
+      _ => c
+    };
+    public bool IsAlphanumeric () =>
+      c.IsLC || c.IsUC || c.In('0'..'9');
+    /// <summary>Checks if this character is lowercase a thru z.</summary>
+    /// <returns>true is the character is between ascii 'a' and 'z', false otherwise.</returns>
+    public bool IsLC => c.In('a'..'z');
+    public bool IsUC => c.In('A'..'Z');
+    public bool IsCtrl => c is < ' ' or DEL;
+    /// <summary>Checks if this character must be represented in 16 bits (256-65535).</summary>
+    /// <returns><see langword="true"/> if it is within the specified range, otherwise <see langword="false"/>.</returns>
+    public bool Is16bit => c.In(256, short.MaxValue);
+    public bool IsNumber => c.IsInteger || c is '.';
+    public bool IsInteger => c.IsPosInteger || c is '-';
+    public bool IsPosInteger => c.In('0', '9');
+    /// <summary>Checks if a character is considered whitespace by Unicode standards.</summary>
+    /// <returns><see langword="true"/> if the character is whitespace, otherwise <see langword="false"/>.</returns>
+    public bool IsWhitespace () =>
+      c.In(9..13) || c.In(8192..8202) || c.Is(32, 133, 160, 5760, 8232, 8233, 8239, 8287, 12288);
+    public bool Is (params int[] values) => values.Any(val => c == val);
+    public bool In (int min, int max) => c >= min && c <= max;
+    public bool In (Range range) => c >= range.Start.Value && c <= range.End.Value;
+    public char ToLower () => c.IsUC ? (char) (c + ' ') : c;
+    /// <summary>Gets the uppercase variant of this character, or the character, if there isn't one.</summary>
+    /// <returns>The uppercase variant, or the character itself.</returns>
+    public char ToUpper () => c.IsLC ? (char) (c - 32) : c;
+  }
 }

@@ -9,19 +9,20 @@ public static class DefinitionStaticFunctions
   public static RxS NmOr (string name, Collection<string> options) => RxS.GrpNm(name, Or(options));
   public static RxS Nm (string name, [SS("Regex")] string rx) => RxS.GrpNm(name, rx);
   public static RxS Gp ([SS("Regex")] string rx) => RxS.Grp(rx);
+  public static RxS Gp ([SS("Regex")] params Collection<string> rxs) => RxS.Grp(RxS.OOr(rxs));
   public static RxS Rx ([SS("Regex")] string rx) => RxS.Rx(rx);
   public static RxS Rx ([SS("Regex")] params Collection<string> values) => Or(values);
   public static RxS Or ([SS("Regex")] IEnumerable<string> list) => RxS.OOr(list);
   public static RxS Or ([SS("Regex")] string content, [SS("Regex")] params Collection<string> values) => RxS.Or(content, values);
   public static InferenceNode IfN (IT it, string value) => new(it, value);
-  public static InferenceNodeOr IfNOr (params IEnumerable<IInferenceNode> nodes) => new(nodes);
-  public static InferenceNodeAnd IfNAnd (params IEnumerable<IInferenceNode> nodes) => new(nodes);
+  public static InferenceNodeGroup IfNOr (params IEnumerable<InferenceNode> nodes) => new(nodes, IT.Or);
+  public static InferenceNodeGroup IfNAnd (params IEnumerable<InferenceNode> nodes) => new(nodes, IT.And);
 
   // Word Start RxS
   public static readonly RxS St = Rx(@"\b");
 
   // IT Flag Combos
-  public static readonly IT
+  public const IT
     ExtIs = Ext | Is,
     HeadSt = FileHeader | Start,
     BodyContains = FileContent | Contains;

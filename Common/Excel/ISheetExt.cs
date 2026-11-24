@@ -19,8 +19,7 @@ public interface ISheetExt
       return [];
 
     Collection<string> result = [];
-    Collection<ICollection<XlRange>> cells;
-    cells = [.. rng.Nodes.Select(i => (ICollection<XlRange>) sheet.Range[i.MinAddress, i.MaxAddress].Cells)];
+    Collection<ICollection<XlRange>> cells = [.. rng.Nodes.Select(i => (ICollection<XlRange>) sheet.Range[i.MinAddress, i.MaxAddress].Cells)];
 
     return result;
   }

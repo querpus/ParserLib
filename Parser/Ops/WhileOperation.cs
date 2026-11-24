@@ -1,47 +1,17 @@
 namespace Parser.Ops;
 
-public sealed class WhileOperation (string cursor_key, ICondition condition, IEnumerable<IOperation> operations) : Operation, IPlaceholderOperation
+public sealed class WhileOperation : LoopOperation
 {
-  public override bool NoOutput => true;
-  public override bool NoInput => true;
-  /// <summary>The name of this loop.</summary>
-  public string CursorKey { get; } = cursor_key;
-  /// <summary>Operations to perform.</summary>
-  public IEnumerable<IOperation> Operations { get; } = operations;
   /// <summary>While Condition</summary>
-  public ICondition Condition { get; } = condition;
-  /// <summary>Start of loop section.</summary>
-  public int OpIndex { get; private set; }
-  public int Unpack ([NotNull] Collection<IOperation> operations, int index, XParser? parser_ref = null)
-  {
-    Collection<IOperation> additions = [];
-    OpIndex = operations.Count;
-    IOperation start = new OperationCheckLoopCondition(Condition, CursorKey, index);
-    additions.Add(start);
-    additions.AddRange(Operations);
-    additions.Add(new OperationContinue());
-    foreach (IOperation op in additions)
-    {
-      if (op is OperationBreak ob)
-        ob.SetupBreakTarget(index, CursorKey);
-
-      if (op is OperationContinue oc)
-        oc.SetupContinue(OpIndex, 0, CursorKey);
-    }
-    operations.AddRange(additions);
-    return operations.Count;
-  }
+  public required string? Condition { get; init; }
+  protected override IOperation ContinueOp => new OperationContinue(LoopIndex, 0, CursorKey);
+  protected override IOperation StartLoop => Condition is null
+        ? throw Err.ThrowBadDef("Condition is null on a while loop")
+        : new OperationCheckLoopCondition(Condition, CursorKey, CurrentIndex);
 
   protected override void Execute ()
   {
-    if (OpIndex == 0)
-      Status = Op.ThrowBadDef("Loop Pre-processing not complete.");
-
-    if (Condition is null)
-      Status = Op.ThrowBadDef("Condition is null on a while loop");
-
-    Parser.Data.Save<bool>(CursorKey, true);
-    Parser.AddCursor(CursorKey);
-    Parser.SetNextOperationIndex(OpIndex);
+    Data[CursorKey] = new CursorData(Parser);
+    Parser.SetNextOperationIndex(LoopIndex);
   }
 }

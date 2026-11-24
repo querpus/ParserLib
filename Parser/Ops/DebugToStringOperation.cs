@@ -1,39 +1,28 @@
 namespace Parser.Ops;
 /// <summary>An operation that logs the contents of the provided key.</summary>
-/// <remarks>Constructs an operation that logs the contents of the provided key.</remarks>
-/// <param name="input_key">The key to output the contents of.</param>
-public class DebugToStringOperation (string input_key) : Operation(input_key, SE)
+public class DebugToStringOperation : Operation
 {
-  public override bool NoOutput => true;
-
-  private static string GetCaller (object? type) =>
-    $"DebugToStringOperation.Execute<{type?.GetType()}>";
-  private static string GetCaller (string? type) =>
-    $"DebugToStringOperation.Execute<{type}>";
+  public required string InputKey { get; init; }
 
   /// <inheritdoc/>
   /// <remarks>This is a debugging operation and does not store data.</remarks>
   protected override void Execute ()
   {
-    switch (WorkData)
+    switch (Data[InputKey])
     {
       case string s:
-        Log(GetCaller(s), s);
+        Log(MsgClass.Debug, s, this);
         break;
       case IEnumerable<string> strs:
         foreach (string str in strs)
-          Log(GetCaller("string"), str);
-        break;
-      case IEnumerable<MatchDataSet> mdds:
-        foreach (MatchDataSet mdd in mdds)
-          Log(GetCaller(mdds), mdd.ToString2());
+          Log(MsgClass.Debug, str, this);
         break;
       case IEnumerable<IToken> itokens:
         foreach (IToken it in itokens)
-          Log(GetCaller("IToken<>"), it.ToString2() ?? "<null data>");
+          Log(MsgClass.Debug, it.ToString2() ?? "<null data>", this);
         break;
       default:
-        Log(GetCaller(WorkData), WorkData?.ToString2() ?? "<null data>");
+        Log(MsgClass.Debug, Data[InputKey]?.ToString2() ?? "<null data>", this);
         break;
     }
   }

@@ -1,84 +1,85 @@
 #pragma warning disable CA1710 // Identifiers should have correct suffix
 
+using Parser.Nodes;
+
 using MC = Common.MsgClass;
 
 namespace Parser.Tokens;
 
-public sealed class TokenFactory
+/// <summary>Match Tokenizer</summary>
+/// <remarks>Each match is a token.</remarks>
+public sealed class TokenFactory : ITokenizer<IToken>
 {
+  IEnumerable<IToken> ITokenizer<IToken>.Tokenize (string input) => Tokenize(input);
+  IEnumerable<IToken> ITokenizer<IToken>.Tokens => Tokens;
   #region Private Fields
+  private const string Area = "TokenFactory";
   private readonly TokenRuleCollection _rules = [];
   private readonly TokenCollection _result = [];
   private TokenRule? _currentRule;
-  private Spec _spec;
-  private RT _default_rule;
-  private bool _competed;
+  private int _ruleIndex;
+  private int _ruleIndexAfterCompete;
   #endregion
   #region Public Properties
+  public Spec Spec
+  {
+    get;
+    set
+    {
+      _rules.AddRange(value.TokenRules);
+      field = value;
+    }
+  }
   public string Input { get; private set; } = SE;
   [NotNull]
   public SectionCollection? CannotMatch { get; private set; }
   public bool PromptAfterEach { get; set; }
+  public Collection<IToken> Tokens => [.. _result];
   #endregion
   #region Constructors
-  public TokenFactory (IEnumerable<TokenRule> rules, Spec spec)
+  public TokenFactory (Spec spec, IEnumerable<TokenRule>? rules = null)
   {
-    SetSpec(spec);
-    _rules.AddRange(rules);
+    Spec = spec;
+    _rules = spec.TokenRules;
+    _rules.AddRange(rules ?? spec.TokenRules);
   }
-  public TokenFactory (Spec spec)
+  public TokenFactory ()
   {
-    spec.ThrowIfNull();
-    SetSpec(spec);
-    _rules.AddRange(spec.TokenRules);
+    Spec = DefaultSpec.Unknown;
+    _rules = Spec.TokenRules;
   }
-  public TokenFactory () => SetSpec(DefaultSpec.Unknown);
   #endregion
   #region Private Helper Properties
-  private bool IgnoreCase => (_currentRule?.Type.HasFlag(RT.IgnoreCase) ?? false) || _default_rule.HasFlag(RT.IgnoreCase);
+  private RT DefaultRule => Spec.DefaultRuleSet;
+  private bool IgnoreCase => (_currentRule?.Type.HasFlag(RT.IgnoreCase) ?? false) || DefaultRule.HasFlag(RT.IgnoreCase);
   private StringComparison IC => IgnoreCase ? SCOIC : SCO;
-  private bool Competes => (_currentRule?.Type.HasFlag(RT.Competitive) ?? false) || _default_rule.HasFlag(RT.Competitive);
-  private bool IgnoredToken => (_currentRule?.Type.HasFlag(RT.IgnoredToken) ?? false) || _default_rule.HasFlag(RT.IgnoredToken);
+  private bool Competes => (_currentRule?.Type.HasFlag(RT.Competitive) ?? false) || DefaultRule.HasFlag(RT.Competitive);
+  private bool IgnoredToken => (_currentRule?.Type.HasFlag(RT.IgnoredToken) ?? false) || DefaultRule.HasFlag(RT.IgnoredToken);
   private bool HasError => _currentRule?.Type.HasFlag(RT.Error) ?? false;
   private RT Type => GetMaskedType(_currentRule?.Type ?? RT.None);
   private string RuleData => _currentRule?.RuleStringData ?? SE;
-  private string AssignType => _currentRule?.TypeToAssign ?? SE;
   private Action RuleAction => Type switch
   {
-    RT when HasError => ActionInvalidLog,
-    RT when Competes && !_competed => RunCompete,
-    RT when Competes && _competed => ActionCompetedLog,
-    RT.None => ActionBadLog,
+    RT when HasError => () => Log(MC.Error, "Error: Invalid rule. Skipping rule.", this),
+    RT when Competes => RunCompete,
+    RT.None => () => Log(MC.Warning, "Warning: No type defined. Skipping rule.", this),
     RT.TokenMatch or RT.TokenExtract or RT.SplitMatch => RegexMatch,
     RT.TokenExact or RT.SplitExact => ExactMatch,
     RT.StoreExtra => StoreExtra,
     RT.StoreOther => StoreOther,
     RT.ErrorMatch => ErrorMatch,
-    _ => ActionBadLog
+    _ => () => Log(MC.Warning, "Warning: Bad type defined. Skipping rule.", this)
   };
+
+  dynamic? ITokenizer<IToken>.Rules { get => Spec; init => Spec = (value as Spec) ?? throw new InvalidTokenException("Attempt to assign a null Spec."); }
+
   #endregion
   #region Private Logging Methods
-  private static void DebugLog (string msg)
-  {
-    LogHead(MC.Debug);
-    LogPart(MC.BlueInfo, msg);
-    NewLine();
-  }
-  private static void WarnLog (string msg)
-  {
-    LogHead(MC.Debug);
-    LogPart(MC.Warning, msg);
-    NewLine();
-  }
-  private static void ErrorLog (string msg)
-  {
-    LogHead(MC.Debug);
-    LogPart(MC.Error, msg);
-    NewLine();
-  }
+  private void DebugLog (string msg) => Log(MC.Debug, msg, this);
+  private void WarnLog (string msg) => Log(MC.Warning, msg, this);
   #endregion
   #region Private Static Methods
-  private static string GetRuleRegex (TokenRule rule, int? index = null)
+  private static string GetRuleRegex (TokenRule rule, int index)
   {
     string regex = rule?.RuleStringData ?? SE;
 
@@ -89,14 +90,12 @@ public sealed class TokenFactory
 
     string casemod = rule?.Type.HasFlag(RT.IgnoreCase) ?? false ? "(?i)" : "(?-i)";
 
-    regex = index is not null ? $"{casemod}(?'_R{index}'{regex})" : $"{casemod}{regex}";
-
-    return regex;
+    return $"{casemod}(?'_R{index}'{regex})";
   }
   private static RT GetMaskedType (RT type) => type.RemoveBitLong<RT>(RT.FlagBits);
-  private static int GetRuleGroupIndex (Match match)
+  private int GetRuleGroupIndex (Match match)
   {
-    DebugIn("GetRuleGroupIndex");
+    DebugIn(Area, "GetRuleGroupIndex");
     string num = match.Groups.
       AsReadOnly().
       First(static g => g.Name.StartsWith("_R", SCO) && g.Value.Length > 0).
@@ -104,7 +103,7 @@ public sealed class TokenFactory
     int result = int.TryParse(num, out int value) ? value : ErrVal;
     if (result == ErrVal)
     {
-      ErrorLog("GetRuleGroupIndex Returned -1");
+      Log(MC.Error, "GetRuleGroupIndex Returned -1", this);
     }
     DebugOut();
     return result;
@@ -118,7 +117,7 @@ public sealed class TokenFactory
       return;
 
     bool singleChar = false;
-    if (match.Start - match.End == 0)
+    if (match.Start == match.End)
     {
       singleChar = true;
     }
@@ -127,15 +126,16 @@ public sealed class TokenFactory
     {
       Index = match.Start,
       Content = singleChar ? $"{Input[match.Start]}" : Input[match.Start..(match.End + 1)],
-      Type = rule.TypeToAssign
+      Type = rule.TypeToAssign,
+      Spec = Spec
     };
 
     _result.Add(token);
   }
   private void StoreOther ()
   {
-    DebugIn("StoreOther");
-    DebugLog($"Storing remaining zones.");
+    DebugIn(Area, "StoreOther");
+    DebugLog("Storing remaining zones.");
     foreach (Pos applicant in CannotMatch.Inverse())
     {
       DebugLog($"Section: {applicant} Found with no token.");
@@ -148,15 +148,14 @@ public sealed class TokenFactory
   /// <remarks>This will NOT see anything but the unmatched section, so any lookaheads or lookbehinds will FAIL.</remarks>
   private void StoreExtra ()
   {
-    DebugIn("StoreExtra");
+    DebugIn(Area, "StoreExtra");
     DebugLog($"Storing remaining zones matching {RuleData}");
     foreach (Pos applicant in CannotMatch.Inverse())
     {
       string text = CannotMatch.GetText(applicant);
       if (Regex.IsMatch(text, RuleData))
       {
-        MatchCollection mc = Regex.Matches(text, RuleData);
-        foreach (Match m in mc)
+        foreach (Match m in Regex.Matches(text, RuleData))
         {
           Pos tsec = new(applicant.Start + m.Index, m.Length);
           CannotMatch.Add(tsec);
@@ -169,20 +168,20 @@ public sealed class TokenFactory
   /// <summary>Exact (no regex) match, uses the rule's ignore case property, not the spec's one.</summary>
   private void ExactMatch ()
   {
-    DebugIn("ExactMatch");
+    DebugIn(Area, "ExactMatch");
     DebugLog("Token Exact starting, from input string.");
     int length = 0;
     if (RuleData.Length > 0)
       length = RuleData.Length;
     else
-      _ = Op.ThrowBadDef("RuleData has a length of 0 on an exact token.");
+      _ = Err.ThrowBadDef("RuleData has a length of 0 on an exact token.");
 
     int cursor = 0;
     int next = Input.IndexOf(RuleData, cursor, IC);
 
     while (next >= 0 && cursor <= Input.Length)
     {
-      Section match = Section.ByLength(next, length, Input);
+      Section match = new(next, length, Input);
       if (!CannotMatch.Overlaps(match))
       {
         if (Type is RT.TokenExact)
@@ -198,9 +197,9 @@ public sealed class TokenFactory
   }
   private void RegexMatch ()
   {
-    DebugIn("RegexMatch");
+    DebugIn(Area, "RegexMatch");
     DebugLog("Token matching starting, from input string.");
-    Regex regex = new(RuleData, IgnoreCase ? _spec.RxOpt | ROIC : _spec.RxOpt);
+    Regex regex = new(RuleData, IgnoreCase ? Spec.RxOpt | ROIC : Spec.RxOpt);
 
     MatchCollection mc = regex.Matches(Input);
 
@@ -211,11 +210,14 @@ public sealed class TokenFactory
       if (!CannotMatch.Overlaps(rng))
       {
         if (Type is RT.TokenExtract)
+        {
           foreach (Pos c in match.Groups["keep"].Captures.Select(c => new Pos(c.Index, c.Length)))
             MakeAddToken(c);
-
+        }
         else if (Type is RT.TokenMatch)
+        {
           MakeAddToken(rng);
+        }
 
         CannotMatch.Add(rng);
       }
@@ -224,9 +226,9 @@ public sealed class TokenFactory
   }
   private void ErrorMatch ()
   {
-    DebugIn("ErrorMatch");
+    DebugIn(Area, "ErrorMatch");
     DebugLog("Error matching starting, from input string.");
-    Regex regex = new(RuleData, IgnoreCase ? _spec.RxOpt | ROIC : _spec.RxOpt);
+    Regex regex = new(RuleData, IgnoreCase ? Spec.RxOpt | ROIC : Spec.RxOpt);
 
     MatchCollection mc = regex.Matches(Input);
     bool failUponEnding = false;
@@ -239,67 +241,81 @@ public sealed class TokenFactory
       int error_surround_pos = match.Groups.ContainsKey("error_surround") ? match.Groups["error_surround"].Index : -1;
       int error_surround_len = match.Groups.ContainsKey("error_surround") ? match.Groups["error_surround"].Length : -1;
       (int err_line, int err_col) = Input.Get2DPosition(error_pos);
-      string[] lines = Input.Split('\n');
-      int line_max = lines.Length;
+      //string[] lines = Input.Split('\n');
+      //int line_max = lines.Length;
       WarnLog($"Error at line {err_line}, column {err_col}.");
       ErrorPlacement err = new() { Error = match, Text = Input };
       err.WriteError();
     }
     if (failUponEnding)
-      _ = Op.ThrowBadResult("You must correct the above listed errors to parse this file.");
+      _ = Err.ThrowBadResult("You must correct the above listed errors to parse this file.");
     DebugOut();
+  }
+  private Collection<(TokenRule Rule, int Index)> GetCompeteBlock ()
+  {
+    Collection<(TokenRule Rule, int Index)> result = [];
+    for (int i = _ruleIndex; i < _rules.Count; i++)
+    {
+      if (_rules[i].Type.HasFlag(RT.Competitive) && _rules[i].RuleStringData is not null)
+      {
+        result.Add((_rules[i], i));
+      }
+      else
+      {
+        _ruleIndexAfterCompete = i;
+        return result;
+      }
+    }
+    _ruleIndexAfterCompete = _rules.Count;
+    return result;
   }
   private void RunCompete ()
   {
-    DebugIn("RunCompete");
-    DebugLog("Running competition.");
-    Collection<(TokenRule Rule, int Index)> contestants = [.. _rules.Where(r => r.Type.HasFlag(RT.Competitive) && r.RuleStringData is not null).Select((r, i) => (r, i))];
+    DebugIn(Area, "RunCompete");
+    Log(MC.GreenInfo, "Running competition.", this);
+    IEnumerable<(TokenRule Rule, int Index)> contestants = GetCompeteBlock();
     string regexPatterns = contestants.Select(r => GetRuleRegex(r.Rule, r.Index)).TextJoin("|");
-    Regex regex = new(regexPatterns, _spec.RxOpt.RemoveBit<RegexOptions>(ROIC));
+    Regex regex = new(regexPatterns, Spec.RxOpt.RemoveBit<RegexOptions>(ROIC));
 
-    MatchCollection mc = regex.Matches(Input);
-    foreach (Match match in mc)
+    foreach (Match match in regex.Matches(Input))
     {
       int index = GetRuleGroupIndex(match);
       Pos rng = new(match.Index, match.Length);
 
-      _currentRule = contestants[index].Rule;
+      _currentRule = _rules[index];
 
       if (!IgnoredToken)
         MakeAddToken(rng);
 
       CannotMatch.Add(rng);
     }
-    _competed = true;
+    _ruleIndex = _ruleIndexAfterCompete > _ruleIndex ? _ruleIndexAfterCompete : _ruleIndex;
     DebugOut();
   }
-  private void ActionInvalidLog () => ErrorLog("Error: Invalid rule. Skipping rule.");
-  private void ActionCompetedLog () => DebugLog("Already ran competition. Skipping rule.");
-  private void ActionBadLog () => WarnLog("Warning: Bad type defined. Skipping rule.");
   #region Public Methods
-  [MemberNotNull(nameof(_spec), nameof(_default_rule))]
-  public void SetSpec (Spec spec)
-  {
-    _spec = spec;
-    _default_rule = _spec.DefaultRuleSet;
-  }
   [MemberNotNull(nameof(CannotMatch))]
-  public TokenCollection Produce (string input)
+  public ImmutableList<IToken> Tokenize (string input)
   {
-    DebugIn("TokenFactory", "Produce");
+    DebugIn(Area, "Produce");
     _result.Clear();
     CannotMatch = new(input);
-    _competed = false;
     input.ThrowIfNull();
     Input = input;
-    foreach (TokenRule rule in _rules)
+    for (_ruleIndex = 0; _ruleIndex < _rules.Count; _ruleIndex++)
     {
-      _currentRule = rule;
+      _currentRule = _rules[_ruleIndex];
 
-      try { RuleAction.Invoke(); } catch (OperationException e) { LogException(e); throw new OperationException("Error found.", e); }
+      try
+      {
+        RuleAction.Invoke();
+      }
+      catch (OperationException e)
+      {
+        Log(MsgClass.Error, e.Message, this);
+        throw new OperationException("Error found.", e);
+      }
       _result.SortByIndex();
     }
-    _result.SortByIndex();
     DebugOut();
     return [.. _result];
   }

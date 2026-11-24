@@ -1,13 +1,18 @@
+using Common.Extensions;
+
 using Parser.Ops;
 
 namespace Specification.IPL;
 
 /// <summary>An operation that fills out the mode, format, and field numbers.</summary>
-public class IPLCommandOperation (string input_key, string output_key) : Operation(input_key, output_key)
+public class IPLCommandOperation : Operation
 {
+  public required string InputKey { get; init; }
+  public required string OutputKey { get; init; }
   /// <inheritdoc/>
   protected override void Execute ()
   {
+    DebugIn(nameof(IPLCommandOperation), nameof(Execute));
     Collection<CommandDataSet> newData = [];
     CommandDataSet? current = null;
     IPLPrinterMode mode = IPLPrinterMode.None;
@@ -18,29 +23,30 @@ public class IPLCommandOperation (string input_key, string output_key) : Operati
       bqty = 1;
     IEnumerable<CommandDataSet>? items;
 
-    if (WorkData is IDictionary<int, CommandDataSet> dic)
+    switch (Data[InputKey])
     {
-      Debug.Log("IPLCommandOperation", "Input is a dictionary of CommandDataSet.");
-      items = dic.Values;
-    }
-    else if (WorkData is IEnumerable<CommandDataSet> enm)
-    {
-      Debug.Log("IPLCommandOperation", "Input is a collection of CommandData.");
-      items = enm;
-    }
-    else
-    {
-      Status = OpStatus.FailBadInputType;
-      return;
+      case IDictionary<int, CommandDataSet> dic:
+        Log(MsgClass.BlueInfo, "Input is a dictionary of CommandDataSet.", this);
+        items = dic.Values;
+        break;
+      case IEnumerable<CommandDataSet> enm:
+        Log(MsgClass.BlueInfo, "Input is a collection of CommandDataSet.", this);
+        items = enm;
+        break;
+      default:
+        _ = Err.ThrowBadInput("IDictionary<CommandDataSet> or IEnumerable<CommandDataSet>", Data[InputKey].TypeName);
+        throw null;
     }
 
     foreach (CommandDataSet item in items)
     {
-      Debug.Log("IPLCommandOperation", $"Processing command: {item.FullCommandText}");
+      Log(MsgClass.BlueInfo, $"Processing command: {item.FullCommandText}", this);
+
+      #region Local Methods
       bool isPrintCommand () =>
-        item.Type is ICT.Simple && (item.CmdLetter is "<ETB>" || item.CmdLetter.StartsWith(Chars.ETB, SCO));
+    item.Type is ICT.Simple && (item.CmdLetter is "<ETB>" || item.CmdLetter.StartsWith(Chars.ETB, SCO));
       bool isResetFieldCommand () =>
-        mode is IPLPrinterMode.Print && item.CmdLetter == "<CAN>" || item.Count > 0 && item.CmdLetter[0] == Chars.CAN;
+        (mode is IPLPrinterMode.Print && item.CmdLetter == "<CAN>") || (item.Count > 0 && item.CmdLetter[0] == Chars.CAN);
       bool isSetFieldCommand () =>
         mode is IPLPrinterMode.Print && item.CmdLetter == "F" && item.IsEscaped;
       bool isNextFieldCommand () =>
@@ -58,23 +64,25 @@ public class IPLCommandOperation (string input_key, string output_key) : Operati
         if (item.Type is ICT.SetFormat or ICT.SelectFormat)
           format = item.GetIntData(0);
         else if (isClearFormatCommand())
-          Debug.Log("IPLCommandOperation", $"Format {item.GetIntData(0)} cleared.");
+          Log(MsgClass.BlueInfo, $"Format {item.GetIntData(0)} cleared.", this);
         item.Format = format;
       }
       void setLineCmd ()
       {
         if (item.Type is ICT.Line)
+        {
           current = item;
+        }
         else if (item.Type is ICT.Prop)
         {
           if (current is null)
           {
-            Debug.Log("IPLCommandOperation", "The currently selected line object is null.");
+            Log(MsgClass.BlueInfo, "The currently selected line object is null.", this);
             Status = OpStatus.FailBadOpResult;
           }
           else if (current.Type is not ICT.Line)
           {
-            Debug.Log("IPLCommandOperation", "The currently selected line object is not a line object.");
+            Log(MsgClass.BlueInfo, "The currently selected line object is not a line object.", this);
             Status = OpStatus.FailBadOpResult;
           }
           else if (current.Type is ICT.Line)
@@ -117,7 +125,7 @@ public class IPLCommandOperation (string input_key, string output_key) : Operati
       OpStatus assignCommon ()
       {
         setLineCmd();
-        if (Status.IsFail(ContinueOnFail)) { return Status; }
+        if (Status.IsFail && !ContinueOnFail) { return Status; }
         setMode();
         setFormat();
         setQty();
@@ -125,16 +133,18 @@ public class IPLCommandOperation (string input_key, string output_key) : Operati
         updateResult();
         return OpStatus.Pass;
       }
+      #endregion Local Methods
 
       OpStatus status = assignCommon();
 
-      if (status.IsFail(ContinueOnFail))
+      if (status.IsFail && !ContinueOnFail)
       {
-        Debug.Log("IPLCommandOperation", $"Failed to assign common properties for command: {item.CmdLetter}");
+        Log(MsgClass.Warning, $"Failed to assign common properties for command: {item.CmdLetter}", this);
         Status = status;
         return;
       }
     }
-    WorkData = newData;
+    Data[OutputKey] = newData;
+    DebugOut();
   }
 }

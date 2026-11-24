@@ -3,30 +3,15 @@
   <Class Name="Parser.Tokens.ChkToken">
     <Position X="5.25" Y="0.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>gAAgAAAEAAABEAAEgAAAQACAAAAAAAAAACCAAAAAAAQ=</HashCode>
+      <HashCode>gAAgAAAECABAEAAEgAAAAICAAAAAgAAAACCAAAAAAA0=</HashCode>
       <FileName>Tokens\ChkToken.cs</FileName>
-    </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="Parser.Tokens.Token">
-    <Position X="2.5" Y="1" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAoAAAAAAgAAAAABAAAAAAIAAAAAAAAAAAAA=</HashCode>
-      <FileName>Tokens\Token.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Parser.Tokens.TokenBase">
-    <Position X="0.5" Y="0.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>BAAAAAAAggAAAAwEgACEAgQAAACAwIAAAQEAAAAAByA=</HashCode>
-      <FileName>Tokens\TokenBase.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Parser.Tokens.TokenCollection" Collapsed="true">
     <Position X="7" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>IEIAAEAAAAAAAB0EjACEBgQAIAQQAIAECSEAEABIByA=</HashCode>
+      <HashCode>IEIAAEAAAAAAAFwEjACEBgQAIAQAgIAECSEAEABMByA=</HashCode>
       <FileName>Tokens\TokenCollection.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />

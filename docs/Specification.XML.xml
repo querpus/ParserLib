@@ -7,22 +7,6 @@
         <member name="T:Specification.XML.Definition">
             <summary>The XML definition object.</summary>
         </member>
-        <member name="P:Specification.XML.Definition.Regex">
-            <summary>
-            <para>XML Regex for tokens</para>
-            Old: <see href="https://regex101.com/r/PTKqnJ/3"/><br/>
-            New: <see href="https://regex101.com/r/jcPotD/4"/>
-            </summary>
-        </member>
-        <member name="F:Specification.XML.Definition.Attribute">
-            <summary>The attribute regular expression.</summary>
-        </member>
-        <member name="F:Specification.XML.Definition.TagName">
-            <summary>The attribute regular expression.</summary>
-        </member>
-        <member name="F:Specification.XML.Definition.WS">
-            <summary>The attribute regular expression.</summary>
-        </member>
         <member name="P:Specification.XML.Definition.Spec">
             <summary>The XML specification.</summary>
         </member>
@@ -68,12 +52,6 @@
         <member name="P:Specification.XML.XMLContent.Content">
             <summary>Text content between tags.</summary>
         </member>
-        <member name="T:Specification.XML.XMLElementClose">
-            <summary>Represents a closing XML element.</summary>
-        </member>
-        <member name="M:Specification.XML.XMLElementClose.#ctor">
-            <summary>Represents a closing XML element.</summary>
-        </member>
         <member name="T:Specification.XML.XMLElement">
             <summary>Represents a paired XML element open and close with content.</summary>
         </member>
@@ -82,6 +60,12 @@
         </member>
         <member name="P:Specification.XML.XMLElement.Content">
             <summary>The contents of this XML node.</summary>
+        </member>
+        <member name="T:Specification.XML.XMLElementClose">
+            <summary>Represents a closing XML element.</summary>
+        </member>
+        <member name="M:Specification.XML.XMLElementClose.#ctor">
+            <summary>Represents a closing XML element.</summary>
         </member>
         <member name="T:Specification.XML.XMLElementOpen">
             <summary>Represents an opening XML tag.</summary>
@@ -106,6 +90,9 @@
         </member>
         <member name="P:Specification.XML.XMLNode.Tag">
             <summary>The name of the element.</summary>
+        </member>
+        <member name="P:Specification.XML.XMLNode.XMLNamespace">
+            <summary>The namespace of the element.</summary>
         </member>
         <member name="T:Specification.XML.XMLNodeAttr">
             <summary>Represents an XML attribute.</summary>

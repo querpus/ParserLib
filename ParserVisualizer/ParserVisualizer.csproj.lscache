@@ -1,0 +1,123 @@
+version=2.2
+
+# This file caches language service data to improve the performance of C# Dev Kit.
+# It is not intended for manual editing. It can safely be deleted and will be
+# regenerated automatically. For more information, see https://aka.ms/lscache
+#
+# To control where cache files are stored, use the following VS Code setting:
+#   "dotnet.projectsystem.cacheInProjectFolder": true
+
+[project]
+project=ParserVisualizer.csproj
+language=C#
+primary
+lastDtbSucceeded
+
+[properties]
+AssemblyName=ParserVisualizer
+BaseIntermediateOutputPath=obj/
+BaseOutputPath=bin/
+MaxSupportedLangVersion=14.0
+OutputType=WinExe
+ProjectAssetsFile=<PATH>obj/project.assets.json
+RootNamespace=ParserVisualizer
+RunAnalyzersDuringLiveAnalysis=true
+TargetFramework=net10.0-windows
+TargetFrameworkIdentifier=.NETCoreApp
+TargetFrameworkVersion=v10.0
+TargetPath=<PATH>bin/x64/Debug/net10.0-windows/ParserVisualizer.dll
+TargetRefPath=<PATH>obj/x64/Debug/net10.0-windows/ref/ParserVisualizer.dll
+TemporaryDependencyNodeTargetIdentifier=net10.0-windows
+
+[commandLineArguments]
+/noconfig
+/unsafe-
+/checked-
+/nowarn:1701,1702,1701,1702,8002
+/fullpaths
+/nostdlib+
+/errorreport:send
+/warn:9999
+/doc:../docs/ParserVisualizer.xml
+/define:TRACE;DEBUG;NET;NET10_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
+/highentropyva+
+/nullable:enable
+/features:"InterceptorsNamespaces=;Microsoft.Extensions.Validation.Generated"
+/debug+
+/debug:portable
+/filealign:512
+/optimize-
+/out:obj/x64/Debug/net10.0-windows/ParserVisualizer.dll
+/refout:obj/x64/Debug/net10.0-windows/refint/ParserVisualizer.dll
+/target:winexe
+/warnaserror-
+/utf8output
+/deterministic+
+/langversion:preview
+/warnaserror+:NU1605,SYSLIB0011
+
+[sourceFiles]
+obj/x64/Debug/net10.0-windows/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+OperationBuilder.cs
+OperationBuilder.Designer.cs
+ParserForm.cs
+ParserForm.Designer.cs
+Program.cs
+
+[frameworkPacks]
+Microsoft.NETCore.App.Ref
+Microsoft.WindowsDesktop.App.Ref
+
+[metadataReferences]
+<NUGET>/catharsis.commons/4.0.1/lib/netcoreapp2.2/Catharsis.Commons.dll
+
+[analyzerReferences]
+<NETSDK>/Sdks/Microsoft.NET.Sdk/
+ analyzers/
+  Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll
+  Microsoft.CodeAnalysis.NetAnalyzers.dll
+ codestyle/cs/
+  Microsoft.CodeAnalysis.CodeStyle.dll
+  Microsoft.CodeAnalysis.CodeStyle.Fixes.dll
+  Microsoft.CodeAnalysis.CSharp.CodeStyle.dll
+  Microsoft.CodeAnalysis.CSharp.CodeStyle.Fixes.dll
+<NUGET>/
+ roslynator.analyzers/4.15.0/analyzers/dotnet/roslyn4.7/cs/
+  Roslynator.CSharp.Analyzers.CodeFixes.dll
+  Roslynator.CSharp.Analyzers.dll
+  Roslynator_Analyzers_Roslynator.Common.dll
+  Roslynator_Analyzers_Roslynator.Core.dll
+  Roslynator_Analyzers_Roslynator.CSharp.dll
+  Roslynator_Analyzers_Roslynator.CSharp.Workspaces.dll
+  Roslynator_Analyzers_Roslynator.Workspaces.Common.dll
+  Roslynator_Analyzers_Roslynator.Workspaces.Core.dll
+ roslynator.codefixes/4.15.0/analyzers/dotnet/roslyn4.7/cs/
+  Roslynator.CSharp.CodeFixes.dll
+  Roslynator_CodeFixes_Roslynator.Common.dll
+  Roslynator_CodeFixes_Roslynator.Core.dll
+  Roslynator_CodeFixes_Roslynator.CSharp.dll
+  Roslynator_CodeFixes_Roslynator.CSharp.Workspaces.dll
+  Roslynator_CodeFixes_Roslynator.Workspaces.Common.dll
+  Roslynator_CodeFixes_Roslynator.Workspaces.Core.dll
+ roslynator.formatting.analyzers/4.15.0/analyzers/dotnet/roslyn4.7/cs/
+  Roslynator.Formatting.Analyzers.CodeFixes.dll
+  Roslynator.Formatting.Analyzers.dll
+
+[sdkAnalyzerConfigPolicy]
+Microsoft.NET.Sdk/analyzers|AnalysisMode=AllEnabledByDefault
+Microsoft.NET.Sdk/codestyle/cs|AnalysisMode=AllEnabledByDefault
+
+[analyzerConfigFiles]
+../.editorconfig
+obj/x64/Debug/net10.0-windows/ParserVisualizer.GeneratedMSBuildEditorConfig.editorconfig
+
+[embeddedResources]
+OperationBuilder.resx
+ParserForm.resx
+
+[projectReferences]
+
+[capabilities]
+CrossPlatformExecutable
+Pack
+SupportsHotReload

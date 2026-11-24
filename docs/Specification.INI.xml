@@ -107,6 +107,7 @@
         </member>
         <member name="M:Specification.INI.INISection.SerializeProp(System.Collections.Generic.KeyValuePair{System.String,System.String})">
             <summary>Gets the <see langword="string"/> representation of the object for serialization.</summary>
+            <param name="k">The <see cref="T:System.Collections.Generic.KeyValuePair`2"/> to serialize.</param>
             <returns>The <see langword="string"/> representation of the object.</returns>
         </member>
         <member name="M:Specification.INI.INISection.Set(System.String,System.String)">
@@ -126,34 +127,10 @@
             <summary>Adds multiple properties, or sets the values for any that already exist.</summary>
             <param name="children">The properties to add.</param>
         </member>
-        <member name="M:Specification.INI.INISection.GetEnumerator">
-            <inheritdoc/>
-        </member>
-        <member name="M:Specification.INI.INISection.System#Collections#Generic#IEnumerable{Common#IProperty{System#String}}#GetEnumerator">
-            <inheritdoc/>
-        </member>
-        <member name="M:Specification.INI.INISection.Clear">
-            <inheritdoc/>
-        </member>
-        <member name="M:Specification.INI.INISection.Contains(Specification.INI.PropertyObj)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Specification.INI.INISection.Remove(Specification.INI.PropertyObj)">
-            <inheritdoc/>
-        </member>
         <member name="M:Specification.INI.INISection.Remove(System.String)">
             <summary>Removes the property with the provided name.</summary>
             <param name="name">The name of the property to remove.</param>
             <returns><see langword="true"/> if the property was removed, <see langword="false"/> otherwise.</returns>
-        </member>
-        <member name="M:Specification.INI.INISection.Serialize">
-            <inheritdoc/>
-        </member>
-        <member name="M:Specification.INI.INISection.Clone">
-            <inheritdoc/>
-        </member>
-        <member name="M:Specification.INI.INISection.System#Collections#IEnumerable#GetEnumerator">
-            <inheritdoc/>
         </member>
         <member name="F:Specification.INI.INITokenType.None">
             <summary>No type defined.</summary>
@@ -182,12 +159,6 @@
         <member name="T:Specification.INI.PropertyObj">
             <summary>A key and value pair in an INI file.</summary>
         </member>
-        <member name="P:Specification.INI.PropertyObj.Key">
-            <summary>The key name.</summary>
-        </member>
-        <member name="P:Specification.INI.PropertyObj.Value">
-            <summary>The value assigned to the key.</summary>
-        </member>
         <member name="M:Specification.INI.PropertyObj.#ctor">
             <summary>Creates an empty <see cref="T:Specification.INI.PropertyObj"/>.</summary>
         </member>
@@ -204,7 +175,7 @@
             <summary>Creates a property from an IProperty interface</summary>
             <param name="iprop">The other property.</param>
         </member>
-        <member name="M:Specification.INI.PropertyObj.Generate(Common.Regex.MatchDataSet)">
+        <member name="M:Specification.INI.PropertyObj.Generate(Common.RegExp.MatchDataSet)">
             <inheritdoc/>
             <remarks>
             <list type="table">

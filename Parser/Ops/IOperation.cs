@@ -8,10 +8,6 @@ public interface IOperation
   bool ContinueOnFail { get; set; }
   /// <summary>Specifies that the operation should be skipped.</summary>
   bool SkipOperation { get; set; }
-  /// <summary>Specifies that the operation loads no data.</summary>
-  bool NoInput { get; }
-  /// <summary>Specifies that the operation writes no data.</summary>
-  bool NoOutput { get; }
   /// <summary>Specifies that the operation performs no action, and simply advances to the next operation.</summary>
   bool NoExecution { get; }
   #endregion
@@ -22,9 +18,5 @@ public interface IOperation
   /// <summary>Applies these attributes to the operation.</summary>
   /// <param name="cont">Specifies that the operation should not stop the parser upon failure.</param>
   /// <param name="skip">Specifies that the operation should be skipped.</param>
-  void ApplyProperties (bool cont, bool skip)
-  {
-    ContinueOnFail = cont || ContinueOnFail;
-    SkipOperation = skip || SkipOperation;
-  }
+  void ApplyProperties (bool cont, bool skip);
 }

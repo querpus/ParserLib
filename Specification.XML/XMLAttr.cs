@@ -29,6 +29,6 @@ public sealed class XMLAttr () : IXMLObject, IProperty<string>, IEquatable<IProp
   public static bool operator != (XMLAttr left, XMLAttr right) => !(left == right);
   public static bool operator < (XMLAttr left, XMLAttr right) => left is null ? right is not null : left.CompareTo(right) < 0;
   public static bool operator <= (XMLAttr left, XMLAttr right) => left is null || left.CompareTo(right) <= 0;
-  public static bool operator > (XMLAttr left, XMLAttr right) => left is not null && left.CompareTo(right) > 0;
+  public static bool operator > (XMLAttr left, XMLAttr right) => left?.CompareTo(right) > 0;
   public static bool operator >= (XMLAttr left, XMLAttr right) => left is null ? right is null : left.CompareTo(right) >= 0;
 }

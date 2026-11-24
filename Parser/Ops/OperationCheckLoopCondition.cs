@@ -1,24 +1,28 @@
+using Parser.Condition;
+
 namespace Parser.Ops;
 
-public sealed class OperationCheckLoopCondition (ICondition condition, string cursor_key, int break_target) : Operation
+/// <summary>This is placed at the start of a while loop.</summary>
+/// <param name="condition">The condition to check.</param>
+/// <param name="cursor_key">The key for the cursor.</param>
+/// <param name="break_target">The target index to break to.</param>
+public sealed class OperationCheckLoopCondition (string condition, string cursor_key, int break_target) : Operation
 {
-  public int BreakTarget { get; private set; } = break_target;
-  public string CursorKey { get; private set; } = cursor_key;
-  public ICondition Condition { get; private set; } = condition;
-  public override bool NoInput => true;
-  public override bool NoOutput => true;
+  public int BreakTarget { get; init; } = break_target;
+  public string CursorKey { get; init; } = cursor_key;
+  public ParsedExpression Condition { get; init; } = (ParsedExpression) condition;
 
   protected override void Execute ()
   {
-    if (!Condition.Evaluate(Parser))
+    if (Condition.Evaluate(Data) is bool b && b)
     {
-      Parser.SetNextOperationIndex(BreakTarget);
-      Parser.RemCursorByKey(CursorKey);
-      Status = OpStatus.ConditionFail;
+      Status = OpStatus.ConditionPass;
     }
     else
     {
-      Status = OpStatus.ConditionPass;
+      Parser.SetNextOperationIndex(BreakTarget);
+      _ = Data.Remove(CursorKey);
+      Status = OpStatus.ConditionFail;
     }
   }
 }

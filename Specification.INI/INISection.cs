@@ -1,11 +1,13 @@
 //using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
+using System.Collections.Immutable;
+
 using Parser.Tokens;
 
 namespace Specification.INI;
 
 /// <summary>Represents a INISection heading in an INI formatted file.</summary>
-public sealed class INISection : IGeneratable, IEnumerable<IProperty<string>>, ITextSerializer, ICloneable
+public sealed class INISection : IEnumerable<IProperty<string>>, ISerializable, ICloneable
 {
   /// <summary>Creates an empty INISection.</summary>
   private INISection () { }
@@ -13,7 +15,37 @@ public sealed class INISection : IGeneratable, IEnumerable<IProperty<string>>, I
   /// <param name="name">The name of the INISection.</param>
   [SetsRequiredMembers]
   public INISection (string name) => Name = name;
+  public INISection (IToken token)
+  {
+    if (token is not ComplexToken ct)
+    {
+      throw Err.ThrowBadResult($"Token was not formed ({token.Content}).");
+    }
 
+    string? name = ct.Name?.Content;
+    ImmutableList<IToken>? props = ct.Properties;
+
+    if (name is null)
+    {
+      throw Err.ThrowBadResult($"Token was missing name piece \"{ct.Content}\".");
+    }
+
+    Name = name;
+
+    if (props is null || props.Count == 0)
+    {
+      Debug.Log(MsgClass.Warning, $"Section {name} had no properties.", this);
+      return;
+    }
+
+    foreach (IToken prop in props)
+    {
+      if (prop.Type.Like("Property"))
+      {
+        Set(new(prop));
+      }
+    }
+  }
   /// <summary>Creates a INISection from a string.</summary>
   /// <param name="name">The name of the section.</param>
   public static implicit operator INISection (string name) => new() { Name = name };
@@ -32,6 +64,7 @@ public sealed class INISection : IGeneratable, IEnumerable<IProperty<string>>, I
   /// <summary>The number of properties this section contains.</summary>
   public int Count => Properties.Count;
   /// <summary>Gets the <see langword="string"/> representation of the object for serialization.</summary>
+  /// <param name="k">The <see cref="KeyValuePair{TKey, TValue}"/> to serialize.</param>
   /// <returns>The <see langword="string"/> representation of the object.</returns>
   public static string SerializeProp (KeyValuePair<string, string> k) => $"  {k.Key}={k.Value}";
   public static PropertyBase<string> GenerateProp (ComplexToken input)
@@ -53,12 +86,9 @@ public sealed class INISection : IGeneratable, IEnumerable<IProperty<string>>, I
   /// <param name="prop">The property to add or apply.</param>
   public void Set (PropertyObj prop)
   {
-    if (prop is null)
+    if (prop is null || prop.Value is null)
       return;
-    if (!Properties.TryGetValue(prop.Key, out string? value))
-      Properties.Add(prop);
-    else
-      Properties[prop.Key] = value;
+    Properties[prop.Key] = prop.Value;
   }
   public void SetRange (IEnumerable<PropertyObj> children)
   {
@@ -74,25 +104,18 @@ public sealed class INISection : IGeneratable, IEnumerable<IProperty<string>>, I
   /// <summary>Adds multiple properties, or sets the values for any that already exist.</summary>
   /// <param name="children">The properties to add.</param>
   public void AddRange (IEnumerable<PropertyObj> children) => SetRange(children);
-  /// <inheritdoc/>
   public IEnumerator<IProperty<string>> GetEnumerator () =>
     (from prop in Properties select new PropertyBase<string>() { Key = prop.Key, Value = prop.Value }).GetEnumerator();
-  /// <inheritdoc/>
   IEnumerator<IProperty<string>> IEnumerable<IProperty<string>>.GetEnumerator () => GetEnumerator();
-  /// <inheritdoc/>
   public void Clear () => Properties.Clear();
-  /// <inheritdoc/>
   public bool Contains (PropertyObj item) => item?.Key is not null && Properties.ContainsKey(item.Key);
-  /// <inheritdoc/>
   public bool Remove (PropertyObj item) => !(item is null || item.Key is null || !Properties.Remove(item.Key));
 
   /// <summary>Removes the property with the provided name.</summary>
   /// <param name="name">The name of the property to remove.</param>
   /// <returns><see langword="true"/> if the property was removed, <see langword="false"/> otherwise.</returns>
   public bool Remove (string name) => Properties.Remove(name);
-  /// <inheritdoc/>
   public string Serialize () => $"[{Name}]";
-  /// <inheritdoc/>
   public object Clone ()
   {
     INISection result = new(Name);
@@ -103,6 +126,5 @@ public sealed class INISection : IGeneratable, IEnumerable<IProperty<string>>, I
     }
     return result;
   }
-  /// <inheritdoc/>
   IEnumerator IEnumerable.GetEnumerator () => Properties.GetEnumerator();
 }

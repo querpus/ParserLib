@@ -1,3 +1,9 @@
+using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using System.Xml.Linq;
+
+using Microsoft.Extensions.Options;
+
 using static Parser.OpStatus;
 
 namespace Parser;
@@ -5,104 +11,184 @@ namespace Parser;
 /// <summary>A parser the takes a file's content and turns it into tokens or objects.</summary>
 public sealed class XParser
 {
+  private record struct State (int Index, int NextIndex, OperationStrategy Strategy, ReadOnlyCollection<IOperation> ParsedOperations, Collection<Action<XParser>> Actions, ReadOnlyDictionary<string, int> Labels)
+  {
+    public static State Snapshot (XParser parser) => new()
+    {
+      Index = parser.OpIndex,
+      NextIndex = parser.NextOpIndex,
+      Strategy = parser.CurrentStrategy,
+      ParsedOperations = new(parser.ParsedOperations),
+      Actions = [],
+      Labels = new(parser.Labels)
+    };
+    public static readonly State Empty = new()
+    {
+      Index = 0,
+      NextIndex = 0,
+      Strategy = [],
+      ParsedOperations = [],
+      Actions = [],
+      Labels = ReadOnlyDictionary<string, int>.Empty
+    };
+    public static State Initialize (OperationStrategy strategy)
+    {
+      (var parsedOperations, var actions) = OperationLoad(strategy);
+      return new()
+      {
+        Index = 0,
+        NextIndex = 0,
+        Strategy = strategy,
+        ParsedOperations = [.. parsedOperations],
+        Actions = actions,
+        Labels = ReadOnlyDictionary<string, int>.Empty
+      };
+    }
+  }
+
+  private void ApplyState (State state)
+  {
+    OpIndex = state.Index;
+    NextOpIndex = state.NextIndex;
+    CurrentStrategy = state.Strategy;
+    ParsedOperations = [.. (state.ParsedOperations)];
+    Labels = [.. state.Labels];
+
+    state.Actions.Foreach(a => a(this));
+  }
+  private static Library LibRef => Library.Instance;
+  private bool ActiveFailure => LastStatus.IsFail && !CurrentOp.ContinueOnFail;
+  private readonly Stack<State> _parentStacks = [];
   #region Public Properties
   /// <summary>The current operation index.</summary>
   public int OpIndex { get; private set; }
   /// <summary>The next operation index.</summary>
   public int NextOpIndex { get; private set; }
   /// <summary>The current operation.</summary>
-  public IOperation CurrentOp => Operations[OpIndex];
+  public IOperation CurrentOp => ParsedOperations[OpIndex];
   /// <summary>The next operation.</summary>
-  public IOperation NextOp => (NextOpIndex == -1 || NextOpIndex >= OpCount) ? Op.End : Operations[NextOpIndex];
+  public IOperation NextOp => (NextOpIndex == -1 || NextOpIndex >= OpCount) ? new OperationEnd() : ParsedOperations[NextOpIndex];
   /// <summary>The status of the last operation performed.</summary>
   public OpStatus LastStatus { get; private set; } = AtStart;
   /// <summary>Gets the file data as a list of bytes.</summary>
-  public IList<byte> FileData => [.. Data["bytes"] as IEnumerable<byte> ?? []];
-  public Spec LocalDefaultSpec
+  public Spec LocalDefaultSpec =>
+    Data?.HasData != true ? LibRef["unknown"] :
+    Data.CanLoad<string>("initial") ? LibRef["textbylines"] :
+    Data.CanLoad<Memory<byte>>("initial") ? LibRef["binary"] :
+    Data.CanLoad<XElement>("initial") ? LibRef["xelement"] :
+    LibRef["unknown"];
+  public Collection<IOperation> ParsedOperations { get; private set; } = [];
+  public Spec? Spec { get; private set; }
+  public OperationStrategy CurrentStrategy { get; private set; } = [];
+  public bool HasParent => _parentStacks.IsNotEmpty;
+  public OpStatus EnterStrategy (OperationStrategy strategy)
   {
-    get
+    var parent = State.Snapshot(this);
+    OpStatus status = AtStart;
+    var this_op = CurrentOp;
+    try
     {
-      if (Data is null || !Data.HasData)
+      var enter_state = State.Initialize(strategy);
+      ApplyState(enter_state);
+
+      status = ParseLoop();
+
+      if (status.IsFail)
       {
-        return DefaultSpec.Unknown;
+        Log(MsgClass.Error, "EnterStrategy resulted in a fail.", this);
+        throw new OperationException("EnterStrategy resulted in a fail.");
       }
-      if (Data["initial"] is string)
-        Spec = DefaultSpec.TextByLines;
-      else if (Data["initial"] is IEnumerable<byte>)
-        Spec = DefaultSpec.Binary;
-      return DefaultSpec.Unknown;
     }
+    catch (OperationException e) when (status.IsFail)
+    {
+      Log(MsgClass.Error, e.Message, this);
+    }
+    catch (OperationException e)
+    {
+      Log(MsgClass.Error, e.Message, this);
+      throw new OperationException("An exception occured without a failure code.", e);
+    }
+    finally
+    {
+      ApplyState(parent);
+    }
+    return this_op.ContinueOnFail ? FailOverride : status;
   }
-  public Collection<CursorData> Cursors { get; } = [];
-  /// <summary>The spec to use for this parser.</summary>
-  public Spec Spec { get; private set; }
-  [NotNull] public Collection<IOperation>? Operations { get; } = [];
-  public Dictionary<string, int> Labels { get; } = [];
+  /// <summary>Loads the operations into a flat pattern.</summary>
+  private static (Collection<IOperation>, Collection<Action<XParser>>) OperationLoad (OperationStrategy strategy)
+  {
+    Collection<IOperation> result = [.. strategy.Operations];
+    Collection<Action<XParser>> actions = [];
+
+    if (result.IsEmpty || result[^1] is not OperationEnd)
+    {
+      result.Add(new OperationEnd());
+    }
+    else // Unpack all operations in main list
+    {
+      for (int i = 0; i < result.Count; i++)
+      {
+        IOperation op = result[i];
+        int oldCount = result.Count;
+        if (op is IPlaceholderOperation ipo)
+        {
+          int newCount = ipo.Unpack(result, i, out Action<XParser>? action);
+          if (action is not null)
+          {
+            actions.Add(action);
+          }
+          if (newCount != oldCount)
+            Log(MsgClass.Debug, $"Operation Group Expanded From {oldCount} to {newCount}.", nameof(XParser));
+        }
+      }
+    }
+    return (result, actions);
+  }
+  public Dictionary<string, int> Labels { get; private set; } = [];
   /// <summary>The dictionary storing all of the data from the parsed file.</summary>
   [NotNull] public DataStore? Data { get; private set; }
+  /// <summary>Gets the result of a successful parse operation set.</summary>
+  /// <remarks>This property returns <see langword="null"/> if the operation sequence has failed, or has not ran.</remarks>
   public object? Result => Data.CanLoad("result") ? Data["result"] : null;
-  /// <summary>Gets a value indicating whether a valid result is available.</summary>
-  /// <remarks>This property returns <see langword="true"/> if the <see cref="Result"/> property is not <see
-  /// langword="null"/>, indicating that the operation has produced a result that can be accessed. Use this property to
-  /// check the state of the operation before attempting to access <see cref="Result"/>.</remarks>
-  [MemberNotNullWhen(true, nameof(Result))]
-  public bool HasResult => Result is not null;
-  public int OpCount => Operations.Count;
+  /// <summary>The number of operations in the currently loaded specification, after parsing the operation sequence.</summary>
+  public int OpCount => ParsedOperations.Count;
   #endregion
   #region Constructor
-  public XParser (Spec? spec = null) => InitializeParser(spec ?? LocalDefaultSpec);
+  public XParser () { }
+  public XParser (Spec spec) => InitializeParser(spec);
   public XParser (string file)
   {
-    string? name = Library.CheckFile(file);
-
-    Spec spec = Library.Lookup(name) ?? throw new InvalidOperationException("Library Error");
+    string? name = LibRef.CheckFile(file);
+    Spec spec = LibRef.LookupOrDefault(name);
     InitializeParser(spec);
   }
   #endregion
   #region Private Methods
-  /// <summary>Loads the operations into a flat pattern.</summary>
-  private void OperationLoad ()
-  {
-    DebugIn("OperationLoad");
-    Operations.AddRange(Spec.Operations);
-    Operations.Add(Op.End);
-
-    // Unpack all operations in main list
-    for (int i = 0; i < Operations.Count; i++)
-    {
-      IOperation op = Operations[i];
-      int oldCount = Operations.Count;
-      if (op is IPlaceholderOperation ipo)
-      {
-        int newCount = ipo.Unpack(Operations, i, this);
-        Log(MsgClass.Debug, $"Operation Group Expanded From {oldCount} to {newCount}.");
-      }
-    }
-    DebugOut();
-  }
   private void InitializeData<T> (T data)
   {
+    Spec.ThrowIfNull();
     if (Spec.Name.Like("unknown"))
     {
-      Spec = data is string
-          ? DefaultSpec.TextByLines
-        : data is IEnumerable<byte>
-          ? DefaultSpec.Binary
-        : throw new InvalidDataException("Data must by a byte array or a string.");
+      Spec = data switch
+      {
+        string => LibRef["textbylines"],
+        IEnumerable<byte> => LibRef["binary"],
+        XElement => LibRef["xelement"],
+        _ => throw new InvalidDataException("Data must by a byte array or a string.")
+      };
     }
-    OperationLoad();
     data.ThrowIfNull();
     Data.Initialize(data);
   }
   /// <summary>Sets up the Specification and DataStore for the parser.</summary>
-  /// <param name="spec">The specificiation to use.</param>
+  /// <param name="spec">The specification to use.</param>
   [MemberNotNull(nameof(Data), nameof(Spec))]
   private void InitializeParser (Spec spec)
   {
     Data = new() { Parser = this };
     Spec = spec;
-    Spec.SetAsActive();
-    NextOpIndex = 1;
+
+    ApplyState(State.Initialize(spec.Operations));
   }
   private void AdvanceOperation ()
   {
@@ -118,184 +204,149 @@ public sealed class XParser
   /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
   private OpStatus ParseLoop ()
   {
-    DebugIn("ParseLoop");
-    Log(MsgClass.Debug, "Initialized");
-
-    while (NextOpIndex >= 0 && !LastStatus.IsFail(CurrentOp.ContinueOnFail))
+    while (NextOpIndex >= 0 && !ActiveFailure)
     {
-      OpStatus status = PerformOperation();
-      Console.WriteLine($"{OpIndex} : {status}");
+      LastStatus = PerformOperation();
     }
-    DebugOut();
     return LastStatus;
   }
   /// <summary>Performs the operation indicated by <see cref="OpIndex"/> and advances to the next operation.</summary>
   /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
   private OpStatus PerformOperation ()
   {
-    DebugIn("PerformOperation");
-    int recoveryDepth = LogDepth;
     if (CurrentOp.SkipOperation)
     {
-      Log(MsgClass.Debug, "Skip Operation Encountered");
-      LastStatus = Skipped;
+      Log(MsgClass.Warning, "Skip Operation Encountered", this);
       AdvanceOperation();
-      DebugOut();
-      return LastStatus;
+      return Skipped;
     }
-    if (CurrentOp is IfElseOperation ifop)
+
+    Log(MsgClass.Debug, $"Performing Operation {CurrentOp.TypeName}.", this);
+
+    OpStatus result = AtStart;
+    void setExceptionData (OpStatus status, Exception toLog)
     {
-      Log(MsgClass.Debug, "If Operation Encountered");
-      LastStatus = ifop.DoOperation(this);
-      Log(MsgClass.Warning, $"If Operation Evaluated to {LastStatus}");
-      AdvanceOperation();
-      DebugOut();
-      return LastStatus;
+      result = status;
+      Log(MsgClass.Error, toLog.Message, this);
     }
 
-    Log(MsgClass.BlueInfo, $"Performing Operation {CurrentOp.GetType().Name}.");
-
-    void setExceptionData (OpStatus status, OperationException toLog)
-    {
-      LastStatus = status;
-      Log(MsgClass.Error, toLog.Message);
-      PurgeStackTo(recoveryDepth);
-    }
-
-    try { LastStatus = CurrentOp.DoOperation(this); }
+    try { result = CurrentOp.DoOperation(this); }
     catch (OperationBadInputTypeException obit) { setExceptionData(FailBadInputType, obit); }
     catch (OperationBadDefinitionException obd) { setExceptionData(FailBadOpDefinition, obd); }
     catch (OperationBadResultException obr) { setExceptionData(FailBadOpResult, obr); }
     catch (OperationNoSuchVarException onsv) { setExceptionData(FailNoSuchVarName, onsv); }
     catch (UnknownOperationException uoe) { setExceptionData(FailNoSpec, uoe); }
     catch (OperationException o) { setExceptionData(Fail, o); }
-    Log(MsgClass.Debug, $"Operation resulted in {LastStatus}.");
+    catch (Exception e) { setExceptionData(Error, e); }
+    Log(MsgClass.Debug, $"Operation resulted in {result}.", this);
 
-    if (LastStatus is EndCommand || LastStatus.IsFail(CurrentOp.ContinueOnFail))
+    if (result is EndCommand || (result.IsFail && !CurrentOp.ContinueOnFail))
       NextOpIndex = -1;
 
     AdvanceOperation();
-    DebugOut();
-    return LastStatus;
+    return result;
   }
   #endregion
   /// <summary>Initializes the data and begins parsing.</summary>
+  /// <param name="spec">The specification to use.</param>
   /// <param name="data">The data to pass to the parser.</param>
   /// <typeparam name="TData">The type of data to pass to the parser.</typeparam>
   /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
-  public OpStatus Parse<TData> (TData data)
+  public OpStatus ParseData<TData> (Spec spec, TData data)
   {
+    InitializeParser(spec);
     InitializeData(data);
     return ParseLoop();
   }
   /// <summary>Parses the specified file based on the spec assigned to this <see cref="XParser"/> object.</summary>
+  /// <param name="spec">The spec to use.</param>
   /// <param name="path">The path to the file to parse.</param>
   /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
-  public OpStatus ParseAccordingToSpec (string path)
+  public OpStatus ParseFile (Spec spec, string path)
   {
-    SetFilePath(path);
+    InitializeParser(spec);
+
+    Data["file_path"] = path;
     if (Spec.IsTextFile)
     {
       string text = File.ReadAllText(path);
-      OpStatus result = Parse(text);
-      return result;
+      InitializeData(text);
+      return ParseLoop();
     }
     else
     {
-      byte[] contents = File.ReadAllBytes(path);
-      OpStatus result = Parse(contents);
-      return result;
+      Memory<byte> contents = File.ReadAllBytes(path);
+      InitializeData(contents);
+      return ParseLoop();
     }
   }
-  /// <summary>Gets the count of the collection stored under the <paramref name="key"/>.</summary>
-  /// <exception cref="InvalidOperationException"/>
-  public int CountOfKey (string key) => Data is not null ? Data.GetCountOfKey(key) : throw new InvalidOperationException();
-  /// <summary>Gets the cursor that was created on the given key.</summary>
-  /// <param name="key">The key of the cursor to retrieve.</param>
-  /// <exception cref="InvalidOperationException"/>
-  /// <exception cref="ArgumentNullException"/>
-  public CursorData GetCursorByKey (string key) => Cursors.First(item => item.Key.Like(key));
-  public void SetCursorByKey (string key, int index) => Cursors.First(item => item.Key.Like(key)).Index = index;
-  public void IncCursorByKey (string key, int inc) => Cursors.First(item => item.Key.Like(key)).Index += inc;
-  /// <summary>Checks if a cursor exists on a given key.</summary>
-  /// <param name="key">The key to check.</param>
-  /// <returns><see langword="true"/> if the cursor exists on <paramref name="key"/>, <see langword="false"/> otherwise.</returns>
-  public bool HasCursorByKey (string key) => Cursors.Any(item => item.Key.Like(key));
-  /// <summary>Removes the cursor that was created on <paramref name="key"/>.</summary>
-  /// <param name="key">The key of the cursor to remove.</param>
-  public void RemCursorByKey (string key)
-  {
-    int index = Cursors.Index().First(c => c.Item.Key.Like(key)).Index;
-    Cursors.RemoveAt(index);
-  }
-  /// <summary>Creates a cursor to allow looping or iteration.</summary>
-  /// <param name="key">The key to make the cursor on.</param>
-  public void AddCursor (string key) => Cursors.Add(new(0, key));
   /// <summary>Sets the next operation to be the one at <paramref name="index"/>.</summary>
-  /// <param name="index">AIM=</param>
+  /// <param name="index">The index of the next operation to execute.</param>
   public void SetNextOperationIndex (int index) => NextOpIndex = index;
-  public void SetFilePath (string path) => Data.Save<string>("file_path", path);
+  /// <summary>Assigns the input to the parser.</summary>
+  /// <typeparam name="TData">The type of input. Can be a <see langword="string"/> or a <see langword="byte"/> array.</typeparam>
+  /// <param name="input">The input to assign.</param>
+  /// <remarks>A byte array could be a <see cref="Memory{T}"/> object, a <see cref="Span{T}"/>, a <see cref="List{T}"/>, or a simple <see cref="IEnumerable{T}"/></remarks>
+  public void SetInput<TData> (TData input) => InitializeData(input);
   /// <summary>Incrementally steps through all the operations, requesting user confirmation to continue.</summary>
-  /// <param name="input">The file data as a <see langword="string"/>.</param>
-  /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
-  public OpStatus StepThrough<TData> (TData input)
+  /// <returns>The <see cref="OpStatus"/> codes representing the result of each operation.</returns>
+  /// <exception cref="OperationBadDefinitionException">Called StepThrough without assigning or initializing input data.</exception>
+  public IEnumerable<OpStatus> StepThrough ()
   {
-    DebugIn("StepThrough");
-    InitializeData(input);
-    Log(MsgClass.Debug, "Initialized");
+    if (Data?.HasData != true)
+      Err.ThrowBadDef("No input data to step through.");
 
-    while (NextOpIndex >= 0)
+    while (NextOpIndex != -1)
+      yield return PerformOperation();
+  }
+
+  public void QueryOperation ()
+  {
+    string userInput;
+
+    void promptUser () => userInput = Console.ReadLine() ?? SE;
+    void checkAction (string input, dynamic data, Action<dynamic> actionOnData)
     {
-      OpStatus status = PerformOperation();
-      string userInput;
-
-      void promptUser () => userInput = Console.ReadLine() ?? SE;
-      void checkLog (string input, string? message)
+      if (userInput.Like(input))
       {
-        if (userInput.Like(input))
-        {
-          Log(MsgClass.Debug, message ?? SE);
-        }
+        actionOnData(data);
       }
-      void checkLogAsk (string input, string askmsg, Action<string> action)
-      {
-        if (userInput.Like(input))
-        {
-          Log(MsgClass.Debug, askmsg);
-          promptUser();
-          action(userInput);
-        }
-      }
-      void checkLogExec (string input, string askmsg, Action<object> action)
-      {
-        if (userInput.Like(input))
-        {
-          Log(MsgClass.Debug, askmsg);
-          promptUser();
-          action(userInput);
-        }
-      }
-
-      string[] allow_continue = [SE, "next", "quit", "exit", "skip"];
-
-      if (status != EndCommand) do
-      {
-        Log(MsgClass.Debug, $"Enter a command to analyse parser state.");
-        promptUser();
-
-        if (userInput.Like("quit"))
-          throw new QuitException();
-
-        checkLog("data", Data.ToString());
-        checkLogExec("print", "Enter the key to display.", obj => {
-          if (obj is TokenCollection tc) tc.Print(0);
-        });
-        checkLog("show next", $"Next Operation: {NextOpIndex} : {NextOp}");
-        checkLogAsk("data in", "Enter the key to display.", s => Log(MsgClass.Debug, $"[{userInput}] = {(Data.TryLoad(userInput, out object? data) ? data : "<Load Failure>")}"));
-
-      } while (!userInput.EqualsAny(allow_continue, SCOIC));
     }
-    DebugOut();
-    return LastStatus;
+    void checkPrompt (string input, string askmsg, Action<string> actionOnInput)
+    {
+      if (userInput.Like(input))
+      {
+        Log(MsgClass.Prompt, askmsg, this);
+        promptUser();
+        actionOnInput(userInput);
+      }
+    }
+
+    string[] allow_continue = [SE, "next", "quit", "exit", "skip"];
+
+    do
+    {
+      Log(MsgClass.Prompt, "Enter a command to analyze parser state.", this);
+      promptUser();
+
+      checkPrompt("quit", "are you sure? (y/n)", user => _ = user.Like("y") ? throw new QuitException() : "no quit");
+      checkAction("data", Data.ToString(), data => Log(MsgClass.Debug, data, this));
+      checkPrompt("print", "Enter the key to display.", obj =>
+      {
+        if (Data.TryLoad(obj, out object? data) && data is IPrintable ip) ip.Print();
+      });
+      checkAction("print all", Data, data =>
+      {
+        foreach (object? item in data)
+        {
+          if (item is IPrintable pr)
+            pr.Print();
+          else
+            Log(MsgClass.GreenInfo, item.ToString2(), this);
+        }
+      });
+      checkAction("show next", $"Next Operation: {NextOpIndex} : {NextOp}", data => Log(MsgClass.Debug, data, this));
+      checkPrompt("data in", "Enter the key to display.", _ => Log(MsgClass.Debug, $"[{userInput}] = {(Data.TryLoad(userInput, out object? data) ? data : "<Load Failure>")}", this));
+    } while (!userInput.EqualsAny(SCOIC, [.. allow_continue]) || userInput.IsNotEmpty);
   }
 }

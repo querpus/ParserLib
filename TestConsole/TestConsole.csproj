@@ -1,17 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
     <AnalysisLevel>preview-all</AnalysisLevel>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-    <DocumentationFile>..\docs\$(AssemblyName).xml</DocumentationFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <OutputType>Exe</OutputType>
-    <NeutralResourcesLanguage>en-us</NeutralResourcesLanguage>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <TargetFramework>net11.0</TargetFramework>
-    <Platforms>AnyCPU;x86;x64</Platforms>
+    <TargetFramework>net11.0-windows</TargetFramework>
     <StartupObject>TestConsole.Program</StartupObject>
+    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 
   <ItemGroup>

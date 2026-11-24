@@ -1,5 +1,3 @@
-using Parser.Exceptions;
-
 namespace Parser;
 
 /// <summary>
@@ -24,6 +22,11 @@ public enum OpStatus
   ConditionPass = 16,
   /// <summary>The if condition failed.</summary>
   ConditionFail = 32,
+  /// <summary>The loop was exited.</summary>
+  LoopBreak = 64,
+  /// <summary>The loop advanced to the next iteration.</summary>
+  /// <remarks>This is set by <see cref="ForCountOperation"/>, <see cref="ForEachOperation"/>, and <see cref="WhileOperation"/> loops.</remarks>
+  LoopContinue = 128,
   /// <summary>A generic failure status that indicates an operation has failed.</summary>
   /// <remarks>Caused by a generic <see cref="OperationException"/>.</remarks>
   Fail = 256,

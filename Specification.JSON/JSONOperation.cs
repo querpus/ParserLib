@@ -1,29 +1,31 @@
 using System.Linq;
 
+using Parser.Exceptions;
+
 namespace Specification.JSON;
 
-public class JSONOperation (string input_key, string output_key) : Operation(input_key, output_key)
+public class JSONOperation : Operation
 {
-  protected static void Log (string s) => Debug.Log(MsgClass.Debug, "JSONOperation", "Execute", s);
+  public required string InputKey { get; init; }
+  public required string OutputKey { get; init; }
   protected int Index { get; set; }
   protected IToken? TCurrent => Index >= Tokens.Count ? null : Tokens[Index];
   protected Collection<IToken> Tokens { get; } = [];
   protected void Init (IEnumerable<IToken> tokens) => Tokens.AddRange([.. tokens]);
   protected override void Execute ()
   {
-    if (WorkData is not IEnumerable<IToken> tokens)
+    if (Data[InputKey] is not IEnumerable<IToken> tokens)
     {
-      Status = OpStatus.FailBadInputType;
-      return;
+      throw Err.ThrowBadInput(nameof(TokenCollection), Data[InputKey].TypeName);
     }
 
     Init(tokens);
 
     int depth = 0;
-    Collection<Collection<IJSONNode>> assembly = [];
-    assembly.Add([]);
+    Collection<Collection<IJSONNode>> assembly = [[]];
     for (Index = 0; Index < Tokens.Count; Index++)
     {
+
       Collection<string> order = [];
       void addContainer (string open)
       {
@@ -65,10 +67,7 @@ public class JSONOperation (string input_key, string output_key) : Operation(inp
         }
         else if (close is "]" && assembly[depth].Last() is JSONArray arr)
         {
-          foreach (IJSONNode item in assembly[depth + 1])
-          {
-            arr.Add(item);
-          }
+          arr.AddRange(assembly[depth + 1]);
         }
         assembly.RemoveAt(depth + 1);
         Index++;
@@ -76,20 +75,20 @@ public class JSONOperation (string input_key, string output_key) : Operation(inp
       void innerArrayHelper () => innerArray(false);
       void addValueToAssembly ()
       {
-        assembly[depth].Add(Spec.GetTokenTypeValue(TCurrent.Type) switch
+        assembly[depth].Add(TCurrent.Type switch
         {
-          _ when TCurrent.Content.IsEmpty() => new JSONUndefValue(),
-          JTT.Str => new JSONStringValue(TCurrent.Content),
-          JTT.Num => new JSONNumberValue(TCurrent.Content.ToDecimal() ?? 0),
-          JTT.Bool => new JSONBoolValue(TCurrent.Content.ToBool() ?? false),
-          JTT.Null => new JSONNullValue(),
+          _ when TCurrent.Content.IsEmpty => new JSONUndefValue(),
+          "Str" => new JSONStringValue(TCurrent.Content),
+          "Num" => new JSONNumberValue(TCurrent.Content.ToDecimal() ?? 0),
+          "Bool" => new JSONBoolValue(TCurrent.Content.ToBool() ?? false),
+          "Null" => new JSONNullValue(),
           _ => new JSONUndefValue(),
         });
         Index++;
       }
       void innerArray (bool initial)
       {
-        Log($"{Index} : Array Entered");
+        Debug.Log(MsgClass.Debug, $"{Index} : Array Entered", this);
         int start_point = Index;
         int exit_depth = depth;
         int sequence = 0;
@@ -98,59 +97,55 @@ public class JSONOperation (string input_key, string output_key) : Operation(inp
           if (TCurrent is null)
             break;
           string? tContent = TCurrent.Content;
-          JTT tType = Spec.GetTokenTypeValue(TCurrent.Type);
+          string tType = TCurrent.Type;
           if (tContent is "{" or "[")
           {
             ThrowIf(sequence != 0, $"Sequence was not correct, {sequence} needs to be 0.");
-            Log($"{Index} : Opener '{tContent}'");
+            Debug.Log(MsgClass.Debug, $"{Index} : Opener '{tContent}'", this);
             addContainer(tContent);
             sequence++;
-            continue;
           }
           else if (tContent is "}" or "]")
           {
             ThrowIf(order.Peek() != tContent, $"Expected to close a {order.Peek()}, but got a {tContent}.");
             ThrowIf(depth != exit_depth, $"Depth was not correct, {depth} needs to be {exit_depth}.");
             ThrowIf(sequence != 1, $"Sequence was not correct, {sequence} needs to be 1.");
-            Log($"{Index} : Closer '{tContent}'");
+            Debug.Log(MsgClass.Debug, $"{Index} : Closer '{tContent}'", this);
             closeContainer(tContent);
             return;
           }
           else if (tContent == ",")
           {
             ThrowIf(sequence != 1, $"Sequence was not correct, {sequence} needs to be 1.");
-            ThrowIf(initial, $"Only one parent object allowed.");
-            Log($"{Index} : Comma '{tContent}'");
+            ThrowIf(initial, "Only one parent object allowed.");
+            Debug.Log(MsgClass.Debug, $"{Index} : Comma '{tContent}'", this);
             sequence = 0;
             Index++;
-            continue;
           }
           else if (tContent is "=" or ":")
           {
             // No property keys in an array.
             ThrowIf(true, $"Invalid token '='. Expected {(sequence == 0 ? "value" : $", OR {order.Peek()}")}.");
-            Log($"{Index} : op '{tContent}' [ERROR]");
+            Debug.Log(MsgClass.Debug, $"{Index} : op '{tContent}' [ERROR]", this);
             sequence = 0;
             Index++;
-            continue;
           }
-          else if (tType is JTT.Num or JTT.Null or JTT.Str or JTT.Bool)
+          else if (tType is "Num" or "Null" or "Str" or "Bool")
           {
             ThrowIf(sequence != 0, $"Sequence was not correct, {sequence} needs to be 0.");
-            Log($"{Index} : primitive '{tType}'");
+            Debug.Log(MsgClass.Debug, $"{Index} : primitive '{tType}'", this);
             sequence++;
             addValueToAssembly();
-            continue;
           }
           else
           {
-            Log($"{Index} : unknown type '{tContent}'");
+            Debug.Log(MsgClass.Debug, $"{Index} : unknown type '{tContent}'", this);
           }
         }
       }
       void innerObject ()
       {
-        Log($"{Index} : Object Entered");
+        Debug.Log(MsgClass.Debug, $"{Index} : Object Entered", this);
         int start_point = Index;
         int exit_depth = depth;
         int sequence = 0;
@@ -160,59 +155,54 @@ public class JSONOperation (string input_key, string output_key) : Operation(inp
             break;
 
           string? tContent = TCurrent.Content;
-          JTT tType = Spec.GetTokenTypeValue(TCurrent.Type);
+          string tType = TCurrent.Type;
           if (tContent is "{" or "[")
           {
             ThrowIf(sequence != 2, $"Sequence was not correct, {sequence} needs to be 2.");
-            Log($"{Index} : op '{tContent}'");
+            Debug.Log(MsgClass.Debug, $"{Index} : op '{tContent}'", this);
             addContainer(tContent);
             sequence++;
-            continue;
           }
           else if (tContent is ",")
           {
             ThrowIf(sequence != 3, $"Sequence was not correct, {sequence} needs to be 3.");
-            Log($"{Index} : op '{tContent}'");
+            Debug.Log(MsgClass.Debug, $"{Index} : op '{tContent}'", this);
             sequence = 0;
             Index++;
-            continue;
           }
           else if (tContent is "}" or "]")
           {
             ThrowIf(order.Peek() != tContent, $"Expected to close a {order.Peek()}, but got a {tContent}.");
             ThrowIf(depth != exit_depth, $"Depth was not correct, {depth} needs to be {exit_depth}.");
             ThrowIf(sequence != 3, $"Sequence was not correct, {sequence} needs to be 3.");
-            Log($"{Index} : op '{tContent}'");
+            Debug.Log(MsgClass.Debug, $"{Index} : op '{tContent}'", this);
             closeContainer(tContent);
             return;
           }
           else if (tContent is "=" or ":")
           {
             ThrowIf(sequence != 1, $"Sequence was not correct, {sequence} needs to be 1.");
-            Log($"{Index} : op '{tContent}'");
+            Debug.Log(MsgClass.Debug, $"{Index} : op '{tContent}'", this);
             sequence++;
             Index++;
-            continue;
           }
-          else if (tType is JTT.Num or JTT.Null or JTT.Bool)
+          else if (tType is "Num" or "Null" or "Bool")
           {
             ThrowIf(sequence != 2, $"Sequence was not correct, {sequence} needs to be 2.");
-            Log($"{Index} : primitive '{tType}'");
+            Debug.Log(MsgClass.Debug, $"{Index} : primitive '{tType}'", this);
             sequence++;
             addValueToAssembly();
-            continue;
           }
-          else if (tType is JTT.Str)
+          else if (tType is "Str")
           {
             ThrowIf(sequence is not 0 and not 2, $"Sequence was not correct, {sequence} needs to be 0 or 2.");
-            Log($"{Index} : primitive '{tType}'");
+            Debug.Log(MsgClass.Debug, $"{Index} : primitive '{tType}'", this);
             sequence++;
             addValueToAssembly();
-            continue;
           }
           else
           {
-            Log($"{Index} : unknown type '{tContent}'");
+            Debug.Log(MsgClass.Debug, $"{Index} : unknown type '{tContent}'", this);
             return;
           }
         }
@@ -222,11 +212,13 @@ public class JSONOperation (string input_key, string output_key) : Operation(inp
       {
         innerArray(true);
       }
-      catch (InvalidOperationException e)
+      catch (Exception e)
       {
         Debug.LogException(e);
-        Status = OpStatus.FailBadOpResult;
+        throw new OperationException("JSON Operation Failed", e);
       }
+
+      Data[OutputKey] = assembly[0];
     }
   }
 }

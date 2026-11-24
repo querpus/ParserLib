@@ -8,7 +8,7 @@
     </Compartments>
     <TypeIdentifier>
       <HashCode>AABWAAAEAACIAAAAAAABAABAAAAAAAABAAAIAAAAEAI=</HashCode>
-      <FileName>Ops\IfOperation.cs</FileName>
+      <FileName>Ops\IfElseOperation.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
@@ -18,7 +18,7 @@
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>QAAgEAAEAAgJAyRAAAACAABABAQAAJARAASIQEAjAAA=</HashCode>
+      <HashCode>QAAgEAAEAAgJAwRBAAACAABAAAQAgBABAAAIYQACAAA=</HashCode>
       <FileName>Ops\Operation.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -26,7 +26,7 @@
   <Class Name="Parser.Ops.OperationAction" Collapsed="true">
     <Position X="9.5" Y="2.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>ACEyAAACAAAggABEAAAAAABAAAAACAABBQAAAQAAABA=</HashCode>
+      <HashCode>ACEzAAACAAAggABEAAAAAABAAAAACAABBQAAAQAAABA=</HashCode>
       <FileName>Ops\OperationAction.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -34,37 +34,29 @@
   <Class Name="Parser.Ops.OperationLabel" Collapsed="true">
     <Position X="9.5" Y="4" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAASAAACAAAIgAAAAAAAAARAAAAAAAABAAAIAAAAAAI=</HashCode>
+      <HashCode>AAAAAAAAAAAIAAQAAAAAAARAAAAAAAAAAAAIAAAAAAI=</HashCode>
       <FileName>Ops\OperationLabel.cs</FileName>
-    </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="Parser.Ops.ConditionalAction" Collapsed="true">
-    <Position X="9.5" Y="1.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAASAAACAACIgAAAAAAAAABAAAAAAAABAAAIAAAAAAQ=</HashCode>
-      <FileName>Ops\ConditionalAction.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Parser.Ops.DebugToStringOperation" Collapsed="true">
     <Position X="1.75" Y="3.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAQEAAAAAAAAAAACAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAIAAQEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Ops\DebugToStringOperation.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Parser.Ops.DebugWaitForInputOperation" Collapsed="true">
     <Position X="1.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAQAAACAAAAAAAAAAAAAAAAAAQAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAIAAQAAAAAAAAAAAAAAAAAAAAIAQAAAAA=</HashCode>
       <FileName>Ops\DebugWaitForInputOperation.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Parser.Ops.OperationCollection" Collapsed="true">
     <Position X="9.5" Y="0.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>QAAAEAAGAAgggBAAAAAAAARAAAAAAAAEAAAAAAAAABI=</HashCode>
+      <HashCode>AAAAAAACAAAIABAAAAAAAARAAAAAAAAEAAAIAAAAAAI=</HashCode>
       <FileName>Ops\OperationCollection.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -72,20 +64,12 @@
   <Class Name="Parser.Ops.PromptOperation" Collapsed="true">
     <Position X="6.75" Y="2" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAQAACAAAAAAAAAAAAAAAAAAIAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAQAACAAAAAAAAAAAAAAAAAIIAAAAAA=</HashCode>
       <FileName>Ops\PromptOperation.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Parser.Ops.Text.LoadOperation" Collapsed="true">
     <Position X="7" Y="5.5" Width="1.5" />
-    <InheritanceLine Type="Parser.Ops.Operation" FixedFromPoint="true">
-      <Path>
-        <Point X="5.562" Y="5.08" />
-        <Point X="5.562" Y="5.33" />
-        <Point X="7.75" Y="5.33" />
-        <Point X="7.75" Y="5.5" />
-      </Path>
-    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Ops\Text\LoadTextOperation.cs</FileName>
@@ -93,14 +77,8 @@
   </Class>
   <Class Name="Parser.Ops.Text.TokenizeOperation" Collapsed="true">
     <Position X="4.25" Y="5.75" Width="1.5" />
-    <InheritanceLine Type="Parser.Ops.Operation" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="4.812" Y="5.08" />
-        <Point X="4.812" Y="5.75" />
-      </Path>
-    </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AgAAQAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AgAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Ops\Text\TokenizeOperation.cs</FileName>
     </TypeIdentifier>
   </Class>

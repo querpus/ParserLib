@@ -1,20 +1,28 @@
 namespace Parser.Ops;
 
-public sealed class OperationCheckCount (int count_target, string cursor_key, int break_target) : Operation
+public sealed class OperationCheckCount : Operation
 {
-  public int BreakTarget { get; private set; } = break_target;
-  public string CursorKey { get; private set; } = cursor_key;
-  public int CountTarget { get; private set; } = count_target;
-  public override bool NoInput => true;
-  public override bool NoOutput => true;
+  public int BreakTarget { get; init; }
+  public string CursorKey { get; init; }
+
+  public OperationCheckCount (string cursor_key, int break_target)
+  {
+    BreakTarget = break_target;
+    CursorKey = cursor_key;
+  }
+  public OperationCheckCount ()
+  {
+    BreakTarget = -1;
+    CursorKey = SE;
+  }
 
   protected override void Execute ()
   {
-    if (Parser.GetCursorByKey(CursorKey).Index >= CountTarget)
+    if (Data.GetCursorByKey(CursorKey).AtEnd)
     {
       Parser.SetNextOperationIndex(BreakTarget);
-      Parser.RemCursorByKey(CursorKey);
-      Status = OpStatus.ConditionFail;
+      _ = Data.Remove(CursorKey);
+      Status = OpStatus.LoopBreak;
     }
     else
     {

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Definition xmlns="Parser/Spec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
+  <Spec>
+    <Name>binary</Name>
+    <TextFile>false</TextFile>
+    <Instructions>
+      <ReadData output_var="binary_data" length="-1" type="binary" position="0" content_var="bytes"/>
+      <Terminate success="true"/>
+    </Instructions>
+  </Spec>
+</Definition>

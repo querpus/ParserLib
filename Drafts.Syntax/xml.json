@@ -1,0 +1,84 @@
+{
+  "name": "XML",
+  "description": "Basic XML highlighting",
+  "sampleText": "<!-- XML Syntax -->\n  <element ns:attr=\"dd\"> content </element",
+  "author": "Querpus",
+  "scopeName": "text.xml",
+  "rangeExtensionType": {
+    "default": "lookAround1000"
+  },
+  "listCompletionDefinitions": [
+    {
+      "comment": "",
+      "enabled": true,
+      "match": "(^[  |\\t]+)()(.*)",
+      "sequencePadding": "0",
+      "captures": {
+        "indent": "1",
+        "prefix": "2",
+        "line": "3",
+        "sequence": ""
+      },
+      "replacements": {
+      }
+    }
+  ],
+  "fileExtensions": [
+    "xml",
+    "xaml",
+    "csproj"
+  ],
+  "patterns": [
+    {
+      "match": "(<\\!--\\s*([\\s\\S]*?)\\s*-->)",
+      "exclusive": true,
+      "comment": "Block comment",
+      "captures": {
+        "1": { "scope": "code.comment" },
+        "2": { "scope": "code.comment.text" }
+      }
+    },
+    {
+      "match": "(<\\s*\/?\\s*)(\\S+)(?:\\s+(\\S+)\\s*(=)\\s*(\"(?:\\.|[^\"\\])*\"))*\\s*(\/?\\s*>)",
+      "exclusive": false,
+      "comment": "Inline comment",
+      "captures": {
+        "1": { "scope": "code.punctuation" },
+        "2": { "scope": "code.keyword" },
+        "3": { "scope": "code.keyword" },
+        "4": { "scope": "code.operator" },
+        "5": { "scope": "code.literal" },
+        "6": { "scope": "code.punctuation" }
+      }
+    },
+    {
+      "match": "(\\S+)\\s*(=)\\s*(([\"'])((?:[^\\\"]|\\\\.)*)\\4)",
+      "exclusive": true,
+      "comment": "Attribute value",
+      "captures": {
+        "1": { "scope": "code.keyword" },
+        "2": { "scope": "code.operator" },
+        "3": { "scope": "code.literal" }
+      }
+    },
+    {
+      "match": "--?|\\+\\+?|!=?=?|<=?|>=?|==?=?|&&?|\\|\\|?|\\?|\\*|\\/|~|\\^|%",
+      "exclusive": true,
+      "comment": "Operator",
+      "captures": {
+        "0": {
+          "scope": "code.operator"
+        }
+      }
+    },
+    {
+      "match": "(?<!\\w|\\$|\\%|\\@|>)(and|or|xor|for|do|while|foreach|as|return|die|exit|if|then|else|elseif|new|delete|try|throw|catch|finally|class|function|string|array|object|resource|var|bool|boolean|int|integer|float|double|real|string|array|global|const|let|static|public|private|protected|published|extends|switch|true|false|null|void|this|self|struct|char|signed|unsigned|short|long)(?!\\w|=\")",
+      "exclusive": true,
+      "comment": "Javascript keyword",
+      "captures": {
+        "1": { "scope": "code.keyword" }
+      }
+    }
+  ],
+  "navigationPatterns": []
+}

@@ -4,38 +4,35 @@
         <name>Specification.WAD</name>
     </assembly>
     <members>
-        <member name="T:Specification.WAD.Definition">
-            <summary>A static class containing the WAD, WAD2, and PAK specificiations.</summary>
-        </member>
-        <member name="T:Specification.WAD.Resources">
+        <member name="T:Specification.WAD.Properties.Resources">
             <summary>
               A strongly-typed resource class, for looking up localized strings, etc.
             </summary>
         </member>
-        <member name="P:Specification.WAD.Resources.ResourceManager">
+        <member name="P:Specification.WAD.Properties.Resources.ResourceManager">
             <summary>
               Returns the cached ResourceManager instance used by this class.
             </summary>
         </member>
-        <member name="P:Specification.WAD.Resources.Culture">
+        <member name="P:Specification.WAD.Properties.Resources.Culture">
             <summary>
               Overrides the current thread's CurrentUICulture property for all
               resource lookups using this strongly typed resource class.
             </summary>
         </member>
-        <member name="P:Specification.WAD.Resources.wad_pl2">
+        <member name="P:Specification.WAD.Properties.Resources.wad_pl2">
             <summary>
               Looks up a localized string similar to ParserLib\Specification.WAD\Samples\PL2.WAD.
             </summary>
         </member>
-        <member name="P:Specification.WAD.Resources.wad_rpg03">
+        <member name="P:Specification.WAD.Properties.Resources.wad_rpg03">
             <summary>
               Looks up a localized string similar to ParserLib\Specification.WAD\Samples\rpg03.WAD.
             </summary>
         </member>
-        <member name="P:Specification.WAD.Resources.wad_tnt">
+        <member name="P:Specification.WAD.Properties.Resources.wad_tnt">
             <summary>
-              Looks up a localized string similar to C:\Program Files (x86)\Steam\steamapps\common\Final Doom\base\TNT.WAD.
+              Looks up a localized string similar to Steam\steamapps\common\Final Doom\base\TNT.WAD.
             </summary>
         </member>
     </members>
