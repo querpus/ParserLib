@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema targetNamespace="Parser/Spec"
-           attributeFormDefault="unqualified"
-           elementFormDefault="qualified"
-           xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:xml="http://www.w3.org/XML/1998/namespace"
-           xmlns="Parser/Spec"
-           xml:lang="en-us">
-  <!-- Simple Types TODO: Finish Documentation -->
+<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns="Parser/Spec" xml:lang="en-us"><!-- Simple Types TODO: Finish Documentation -->
   <xs:simpleType name="NonEmptyTokenType">
     <xs:annotation>
       <xs:documentation>
@@ -90,7 +83,7 @@
   <xs:simpleType name="AndOrType">
     <xs:annotation>
       <xs:documentation>
-        Must be an 'and' or an 'or', case-insensitive.
+        Must be an &apos;and&apos; or an &apos;or&apos;, case-insensitive.
       </xs:documentation>
     </xs:annotation>
     <xs:restriction base="xs:token">
@@ -103,7 +96,7 @@
   <xs:simpleType name="EndianessType">
     <xs:annotation>
       <xs:documentation>
-        Must be 'big' or 'little', case-insensitive.
+        Must be &apos;big&apos; or &apos;little&apos;, case-insensitive.
       </xs:documentation>
     </xs:annotation>
     <xs:restriction base="xs:token">
@@ -198,9 +191,7 @@
         The type of rule. This is used for token rules.
       </xs:documentation>
     </xs:annotation>
-    <xs:restriction base="xs:token">
-      <!--<xs:enumeration value="None"/>-->
-      <!-- Token Rule Types -->
+    <xs:restriction base="xs:token"><!--<xs:enumeration value="None"/>--><!-- Token Rule Types -->
       <xs:enumeration value="Competitive"/>
       <xs:enumeration value="TokenMatch"/>
       <xs:enumeration value="TokenExact"/>
@@ -209,20 +200,11 @@
       <xs:enumeration value="SplitMatch"/>
       <xs:enumeration value="SplitExact"/>
       <xs:enumeration value="StoreExtra"/>
-      <xs:enumeration value="StoreOther"/>
-      <!-- Combos -->
-      <!-- IgnoredToken & TokenMatch -->
-      <xs:enumeration value="ThrowMatch"/>
-      <!-- IgnoredToken & Competitive -->
-      <xs:enumeration value="TokenComment"/>
-      <!-- Flags -->
+      <xs:enumeration value="StoreOther"/><!-- Combos --><!-- IgnoredToken & TokenMatch -->
+      <xs:enumeration value="ThrowMatch"/><!-- IgnoredToken & Competitive -->
+      <xs:enumeration value="TokenComment"/><!-- Flags -->
       <xs:enumeration value="IgnoreCase"/>
-      <xs:enumeration value="IgnoredToken"/>
-      <!--<xs:enumeration value="Opt"/>-->
-      <!--<xs:enumeration value="Mult"/>-->
-      <!--<xs:enumeration value="Recursive"/>-->
-      <!-- Opt & Mult -->
-      <!--<xs:enumeration value="Any"/>-->
+      <xs:enumeration value="IgnoredToken"/><!--<xs:enumeration value="Opt"/>--><!--<xs:enumeration value="Mult"/>--><!--<xs:enumeration value="Recursive"/>--><!-- Opt & Mult --><!--<xs:enumeration value="Any"/>-->
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="TokenRuleTypeList">
@@ -242,16 +224,14 @@
       <xs:enumeration value="RightToLeft"/>
       <xs:enumeration value=""/>
     </xs:restriction>
-  </xs:simpleType>
-  <!-- Groups TODO: Finish Documentation -->
+  </xs:simpleType><!-- Groups TODO: Finish Documentation -->
   <xs:group name="IfGroup">
     <xs:sequence>
       <xs:element name="If" type="ConditionType" minOccurs="1" maxOccurs="1"/>
       <xs:element name="ElseIf" type="ConditionType" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="Else" type="InnerInstructionSet" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-  </xs:group>
-  <!-- Complex Types TODO: Finish Documentation -->
+  </xs:group><!-- Complex Types TODO: Finish Documentation -->
   <xs:complexType name="AddItemType">
     <xs:sequence>
       <xs:element minOccurs="1" maxOccurs="unbounded" name="Property">
@@ -285,8 +265,7 @@
     <xs:attribute name="group" type="NonEmptyTokenType" use="optional"/>
     <xs:attribute name="exact" type="NonEmptyTokenType" use="optional"/>
     <xs:attribute name="ignorecase" type="xs:boolean" use="optional"/>
-  </xs:complexType>
-  <!--<xs:complexType name="EntityDefType">
+  </xs:complexType><!--<xs:complexType name="EntityDefType">
     <xs:sequence>
       <xs:choice minOccurs="1" maxOccurs="unbounded">
         <xs:element name="MatchRule" type="MatchType" minOccurs="1" maxOccurs="unbounded"/>
@@ -296,39 +275,38 @@
         <xs:element name="CmdSequence" type="InnerInstructionSet" minOccurs="1" maxOccurs="unbounded"/>
       </xs:choice>
     </xs:sequence>
-  </xs:complexType>-->
-  <xs:complexType name="StructureContentType">
-    <xs:attribute name="class" type="NonEmptyTokenType" use="required"/>
+  </xs:complexType>--><!--  <xs:complexType name="StructureContentType">
+    <xs:attribute name="class" type="NonEmptyTokenType" use="required" />
   </xs:complexType>
   <xs:complexType name="StructurePropertyType">
-    <xs:attribute name="name" type="NonEmptyTokenType" use="required"/>
-    <xs:attribute name="class" type="NonEmptyTokenType" use="required"/>
-    <xs:attribute name="value" type="xs:string" use="optional"/>
-    <xs:attribute name="group" type="xs:string" use="optional"/>
+    <xs:attribute name="name" type="NonEmptyTokenType" use="required" />
+    <xs:attribute name="class" type="NonEmptyTokenType" use="required" />
+    <xs:attribute name="value" type="xs:string" use="optional" />
+    <xs:attribute name="group" type="xs:string" use="optional" />
   </xs:complexType>
   <xs:complexType name="StructureListItemType">
     <xs:choice maxOccurs="1" minOccurs="1">
-      <xs:element name="Property" type="StructurePropertyType" minOccurs="1" maxOccurs="unbounded"/>
-      <xs:element name="Content" type="StructureContentType" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="Property" type="StructurePropertyType" minOccurs="1" maxOccurs="unbounded" />
+      <xs:element name="Content" type="StructureContentType" minOccurs="1" maxOccurs="unbounded" />
     </xs:choice>
-    <xs:attribute name="class" type="NonEmptyTokenType" use="required"/>
+    <xs:attribute name="class" type="NonEmptyTokenType" use="required" />
   </xs:complexType>
   <xs:complexType name="StructurePropertyListType">
     <xs:sequence>
-      <xs:element name="Item" type="StructureListItemType" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="Item" type="StructureListItemType" minOccurs="1" maxOccurs="unbounded" />
     </xs:sequence>
-    <xs:attribute name="name" type="NonEmptyTokenType" use="required"/>
-    <xs:attribute name="value" type="xs:string" use="optional"/>
+    <xs:attribute name="name" type="NonEmptyTokenType" use="required" />
+    <xs:attribute name="value" type="xs:string" use="optional" />
   </xs:complexType>
   <xs:complexType name="StructureType">
     <xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="Property" type="StructurePropertyType"/>
-        <xs:element name="PropertyList" type="StructurePropertyListType"/>
-        <xs:element name="Content" type="StructureContentType"/>
+        <xs:element name="Property" type="StructurePropertyType" />
+        <xs:element name="PropertyList" type="StructurePropertyListType" />
+        <xs:element name="Content" type="StructureContentType" />
       </xs:choice>
     </xs:sequence>
-  </xs:complexType>
+  </xs:complexType>-->
   <xs:complexType name="FileInferencesType">
     <xs:sequence>
       <xs:choice maxOccurs="unbounded">
@@ -350,10 +328,6 @@
   </xs:complexType>
   <xs:complexType name="RequiredNameType">
     <xs:attribute name="name" use="required" type="NonEmptyTokenType"/>
-  </xs:complexType>
-  <xs:complexType name="InputOutputType">
-    <xs:attribute name="output_var" use="required" type="DataKeyType"/>
-    <xs:attribute name="input_var" use="required" type="DataKeyType"/>
   </xs:complexType>
   <xs:complexType name="TokenizeType">
     <xs:attribute name="output_var" use="required" type="DataKeyType"/>
@@ -389,7 +363,7 @@ True by default.
   <xs:complexType name="InnerInstructionSet">
     <xs:sequence>
       <xs:choice maxOccurs="unbounded">
-        <xs:element name="CmdSequence" >
+        <xs:element name="CmdSequence">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="Parameter">
@@ -577,7 +551,7 @@ True by default.
             </xs:documentation>
           </xs:annotation>
         </xs:element>
-        <xs:group ref="IfGroup" />
+        <xs:group ref="IfGroup"/>
         <xs:element name="While" type="ConditionType"/>
         <xs:element name="Until" type="ConditionType"/>
         <xs:element name="Break" type="NoAttributesType"/>
@@ -623,8 +597,7 @@ True by default.
         <xs:attribute name="name" type="xs:ID" id="groupruledef" use="required"/>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexType>
-  <!--<xs:complexType name="RuleDef">
+  </xs:complexType><!--<xs:complexType name="RuleDef">
     <xs:all>
       <xs:element name="TypeToAssign" minOccurs="0" maxOccurs="1" type="xs:token"/>
       <xs:element name="Type" type="RuleTypeList" minOccurs="1" maxOccurs="1"/>
@@ -654,8 +627,7 @@ True by default.
         <xs:attribute name="name" type="xs:token" use="required"/>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexType>
-  <!--<xs:complexType name="RuleList">
+  </xs:complexType><!--<xs:complexType name="RuleList">
     <xs:sequence>
       <xs:element name="Rule" type="RuleDef" maxOccurs="unbounded" minOccurs="0"/>
     </xs:sequence>
@@ -681,15 +653,13 @@ True by default.
     <xs:sequence>
       <xs:element name="TokenLookup" type="TokenLookupType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-  </xs:complexType>
-  <!--<xs:complexType name="NamedComplexTokenType">
+  </xs:complexType><!--<xs:complexType name="NamedComplexTokenType">
     <xs:complexContent>
       <xs:extension base="ComplexTokenType">
         <xs:attribute name="name" type="xs:token" use="required"/>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexType>-->
-  <!--<xs:complexType name="ComplexTokenType">
+  </xs:complexType>--><!--<xs:complexType name="ComplexTokenType">
     <xs:sequence>
       <xs:element name="Name" maxOccurs="1" minOccurs="0" type="ComplexTokenType"/>
       <xs:element name="Type" maxOccurs="1" minOccurs="0" type="ComplexTokenType"/>
@@ -724,8 +694,7 @@ True by default.
       </xs:choice>
     </xs:sequence>
     <xs:attributeGroup ref="ComplexTokenAttrGroup"/>
-  </xs:complexType>-->
-  <!-- Attribute Groups TODO: Finish Documentation -->
+  </xs:complexType>--><!-- Attribute Groups TODO: Finish Documentation -->
   <xs:attributeGroup name="ComplexTokenAttrGroup">
     <xs:attribute name="tokentype" type="xs:token"/>
     <xs:attribute name="class" type="xs:token"/>
@@ -892,5 +861,9 @@ An expression that must resolve to true or false. Formatted like
   </xs:attributeGroup>
   <xs:attributeGroup name="ConditionAttrGroupSwitch">
     <xs:attribute name="condition" use="required" type="SwitchConditionType"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="InputOutputGroup">
+    <xs:attribute name="output_var" use="required" type="DataKeyType"/>
+    <xs:attribute name="input_var" use="required" type="DataKeyType"/>
   </xs:attributeGroup>
 </xs:schema>
