@@ -22,7 +22,7 @@ namespace Specification.IPL.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Specification.IPL.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Specification.IPL.Properties.Resources", typeof(Resources).Assembly);
@@ -51,12 +51,57 @@ namespace Specification.IPL.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ParserLib\Specification.INI\Samples\default.ini.
+        /// </summary>
+        public static string ini_vncdefault {
+            get {
+                return ResourceManager.GetString("ini_vncdefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ParserLib\Specification.IPL\Samples\6456 batch.txt.
+        /// </summary>
+        public static string ipl_batch6456 {
+            get {
+                return ResourceManager.GetString("ipl_batch6456", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ParserLib\Specification.IPL\Samples\6458 batch.txt.
+        /// </summary>
+        public static string ipl_batch6458 {
+            get {
+                return ResourceManager.GetString("ipl_batch6458", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ParserLib\Specification.IPL\Samples\label.ipl.
+        /// </summary>
+        public static string ipl_label {
+            get {
+                return ResourceManager.GetString("ipl_label", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ParserLib\Specification.IPL\Samples\simple.txt.
+        /// </summary>
+        public static string ipl_simple {
+            get {
+                return ResourceManager.GetString("ipl_simple", resourceCulture);
             }
         }
     }

@@ -6,7 +6,6 @@ namespace Parser;
 
 public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IReadOnlyCollection<Spec>
 {
-  private const string Area = "Library";
   private readonly Dictionary<string, Spec> _specs = [];
   /// <summary>The singleton instance of this object.</summary>
   private Dictionary<string, ReadOnlyCollection<InferenceNode>> SpecInferences =>
@@ -28,7 +27,7 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
       Log(MsgClass.Error, "Tried to lookup name of null.", this);
       throw new SpecNotDefinedException("Tried to lookup name of null.");
     }
-    return !TryLookup(name, out Spec? spec) ? XParser.Library["unknown"] : spec;
+    return !TryLookup(name, out Spec? spec) ? this["unknown"] : spec;
   }
   public bool TryLookup (string? name, [NotNullWhen(true)][MaybeNullWhen(false)] out Spec spec)
   {
@@ -48,9 +47,7 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
   /// <param name="domain">The domain that we are loading the <see cref="Spec"/> objects from.</param>
   public static Library InitializeLibrary (AppDomain domain)
   {
-    DebugIn(Area, "InitializeLibrary");
-    Library lib = new();
-    XParser.Library = lib;
+    Instance = new();
     domain.ThrowIfNull();
 
     List<Assembly> assemblies = [.. domain.GetAssemblies()];
@@ -73,7 +70,7 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
           {
             Spec? check = prop.GetValue(null) as Spec;
             check.ThrowIfNull();
-            lib._specs[check.Name.ToLower(CIIC)] = check;
+            Instance._specs[check.Name.ToLower(CIIC)] = check;
           }
         }
       }
@@ -84,13 +81,12 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
       string fpath = Path.GetFullPath(path);
       foreach (Spec spec in SpecInstructionParser.LoadSpecFile(fpath))
       {
-        lib._specs[spec.Name.ToLower(CIIC)] = spec;
+        Instance._specs[spec.Name.ToLower(CIIC)] = spec;
       }
     }
 
-    Log(MsgClass.BlueInfo, $"{lib._specs.Count} Specs Loaded.", nameof(Library));
-    DebugOut();
-    return lib;
+    Log(MsgClass.BlueInfo, $"{Instance._specs.Count} Specs Loaded.", nameof(Library));
+    return Instance;
   }
   /// <summary>Provides the <see cref="Spec"/> for the provided file path.</summary>
   public string? CheckFile (string path)
@@ -126,6 +122,8 @@ public sealed class Library : IReadOnlyDictionary<string, Spec>, IPrintable, IRe
   IEnumerable<string> IReadOnlyDictionary<string, Spec>.Keys => _specs.Keys;
   public IEnumerable<Spec> Values => _specs.Values;
   public int Count => _specs.Count;
+  [NotNull]
+  public static Library? Instance { get; private set; }
 
   bool IPrintable.HasHeaderLine => true;
 }

@@ -1,46 +1,44 @@
-//#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 namespace Common.Extensions;
 
 /// <summary>Extensions for Dictionary objects.</summary>
 public static class DictionaryExtensions
 {
   // Dictionary <TKey, TValue>
-  public static void Add<TKey, TValue> (this Dictionary<TKey, TValue> dic, (TKey Key, TValue Value) item) where TKey : notnull =>
-    dic?.Add(item.Key, item.Value);
-  public static void Add<TKey, TValue> (this Dictionary<TKey, TValue> dic, KeyValuePair<TKey, TValue> item) where TKey : notnull
+  extension<TKey, TValue> (IDictionary<TKey, TValue> idict) where TKey : notnull
   {
-    if (dic is null)
-      return;
-    dic[item.Key] = item.Value;
-  }
-  public static void Add<TKey, TValue> (this SortedDictionary<TKey, TValue> dic, KeyValuePair<TKey, TValue> item) where TKey : notnull =>
-    dic?.Add(item.Key, item.Value);
-  public static void AddRange<TKey, TValue> (this Dictionary<TKey, TValue> dic, IDictionary<TKey, TValue> items) where TKey : notnull =>
-    dic.AddRange(items.AsEnumerable());
-  public static void AddRange<TKey, TValue> (this Dictionary<TKey, TValue> dic, IEnumerable<KeyValuePair<TKey, TValue>> items) where TKey : notnull
-  {
-    if (items is null)
-      return;
-    foreach (KeyValuePair<TKey, TValue> item in items)
+    public void Add ((TKey Key, TValue Value) item) =>
+      idict.Add(item.Key, item.Value);
+    public void Add (KeyValuePair<TKey, TValue> item) =>
+      idict[item.Key] = item.Value;
+    public void AddRange (IDictionary<TKey, TValue> items) =>
+      idict.AddRange([.. items]);
+    public void AddRange (IEnumerable<KeyValuePair<TKey, TValue>> items) =>
+      items.Foreach(idict.Add);
+    public void AddRange (IEnumerable<(TKey Key, TValue Value)> items) =>
+      items.Foreach(item => idict.Add(item.Key, item.Value));
+    public void AddRange (IEnumerable list)
     {
-      dic.Add(item);
+      foreach (var item in list)
+      {
+        if (item is KeyValuePair<TKey, TValue> tv)
+        {
+          idict.Add(tv);
+        }
+        else if (item is IHasInternalKey<TKey> iik && item.GetType().IsAssignableTo(typeof(TValue)))
+        {
+          idict.Add(iik.Key, (TValue) item);
+        }
+        else
+        {
+          throw new ArgumentException("The list was incompatible with the target IDictionary type.", nameof(list));
+        }
+      }
     }
   }
-  public static void AddRange<TKey, TValue> (this Dictionary<TKey, TValue> dic, IEnumerable<(TKey Key, TValue Value)> items) where TKey : notnull
+  // When TValue : IHasInternalKey<TKey>
+  extension<TKey, TValue> (IDictionary<TKey, TValue> idict) where TKey : notnull where TValue : IHasInternalKey<TKey>
   {
-    if (items is null)
-      return;
-    foreach ((TKey Key, TValue Value) item in items)
-    {
-      dic.Add(item);
-    }
-  }
-  public static void AddRange<TKey, TValue> (this Dictionary<TKey, TValue> dic, IEnumerable list) where TKey : notnull
-  {
-    foreach (KeyValuePair<TKey, TValue> item in list.OfType<KeyValuePair<TKey, TValue>>())
-    {
-      dic?.Add(item.Key, item.Value);
-    }
+    public void Add (TValue item) =>
+      idict.Add(item.Key, item);
   }
 }

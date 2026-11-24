@@ -9,35 +9,33 @@ public static class IEnumerableExtensions
 {
   /// <summary>Generic IEnumerable Extensions</summary>
   /// <typeparam name="TBaseType">The base object type</typeparam>
-  extension<TBaseType> (IEnumerable<TBaseType> list)
+  extension<TBaseType> (IEnumerable<TBaseType> list) where TBaseType : class
   {
     public IEnumerable<TBaseType> OfTypes<TAllowedType1, TAllowedType2> ()
       where TAllowedType1 : TBaseType
-      where TAllowedType2 : TBaseType
-    {
-      foreach (TBaseType item in list)
-      {
-        if (item is TAllowedType1 or TAllowedType2)
-          yield return item;
-      }
-    }
+      where TAllowedType2 : TBaseType =>
+      Explicit(list, [typeof(TAllowedType1), typeof(TAllowedType2)]);
     public IEnumerable<TBaseType> NotOfType<TDisallowedType> ()
-      where TDisallowedType : TBaseType
-    {
-      foreach (TBaseType item in list)
-      {
-        if (item is not TDisallowedType)
-          yield return item;
-      }
-    }
+      where TDisallowedType : TBaseType =>
+      Restrict(list, [typeof(TDisallowedType)]);
     public IEnumerable<TBaseType> NotOfTypes<TDisallowedType1, TDisallowedType2> ()
       where TDisallowedType1 : TBaseType
-      where TDisallowedType2 : TBaseType
+      where TDisallowedType2 : TBaseType =>
+      Restrict(list, [typeof(TDisallowedType1), typeof(TDisallowedType2)]);
+    private IEnumerable<TBaseType> Restrict ([NotNull] IEnumerable<Type> types)
     {
+      if (types.IsEmpty)
+        return list;
       foreach (TBaseType item in list)
       {
-        if (item is not TDisallowedType1 and not TDisallowedType2)
-          yield return item;
+        Type item_type = item.GetType();
+        foreach (Type cannot_be in types)
+        {
+          if (item_type.IsAssignableTo(cannot_be))
+          {
+            list = list.
+          }
+        }
       }
     }
   }
@@ -50,7 +48,9 @@ public static class IEnumerableExtensions
     /// <param name="index">The index to retrieve.</param>
     /// <returns>The object at position <paramref name="index"/>.</returns>
     public T At (int index) => list.ToArray()[index];
-    public T this[Index i] => list.ToArray()[i];
+    public T At (Index index) => list.ToArray()[index];
+    public T this[Index i] => list.At(i);
+    public T this[int i] => list.At(i);
     public string TextJoin (string separator = EmptyString)
     {
       if (list is null)
@@ -89,6 +89,8 @@ public static class IEnumerableExtensions
       }
       return result;
     }
+    /// <summary>The position of the last item.</summary>
+    /// <remarks>If the list is empty, this returns -1.</remarks>
     public int LastIndex => list.Count() - 1;
     public bool IsEmpty => list?.Any() != true;
     /// <summary>Executes an <see cref="Action{T}"/> <see langword="delegate"/> for every item in the <see cref="IEnumerable{T}"/>.</summary>
@@ -111,6 +113,8 @@ public static class IEnumerableExtensions
   }
   extension<T> (IReadOnlyCollection<T>? list)
   {
+    /// <summary>The position of the last item.</summary>
+    /// <remarks>If the list is empty, this returns -1.</remarks>
     public int LastIndex => (list?.Count ?? 0) - 1;
   }
   extension<T> (IEnumerable<IEnumerable<T>> listlist)
@@ -120,9 +124,19 @@ public static class IEnumerableExtensions
   }
   extension(IEnumerable list)
   {
-    // IEnumerable
-
-    public int ICount => list.AsCollection<object>().Count;
+    /// <summary>Iterates the IEnumerable, and counts the items.</summary>
+    public int ICount
+    {
+      get
+      {
+        int i = 0;
+        foreach (var _ in list)
+        {
+          i++;
+        }
+        return i;
+      }
+    }
 
     public string TextJoin (string separator = EmptyString)
     {

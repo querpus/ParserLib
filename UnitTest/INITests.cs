@@ -19,7 +19,7 @@ public class INITests
   {
     string file_text = File.ReadAllText(Helper.GitDir + file);
     XParser parser = new(Definition.Spec);
-    parser.P
+    parser.SetInput(file_text);
     Assert.True(parser.ParseData(Definition.Spec, file_text).IsPass);
     Assert.NotNull(parser.Result);
   }

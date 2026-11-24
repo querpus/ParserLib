@@ -1,40 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Definition xmlns="Parser/Spec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
-  <Spec>
-    <Name>ini</Name>
-    <TextFile>true</TextFile>
-    <CaseInsensitive>true</CaseInsensitive>
-    <TokenRules>
-      <Rule>
-        <TypeToAssign>None</TypeToAssign>
-        <Type>TokenComment</Type>
+  <Spec name="ini" type="text" ignore_case="true">
+    <TokenRules RegexDotMatchesNewline="false">
+      <Rule type="TokenComment">
         <Data> ;.* </Data>
       </Rule>
-      <Rule>
-        <TypeToAssign>Value</TypeToAssign>
-        <Type>Competitive</Type>
+      <Rule assign="Value" type="Competitive">
         <Data> (?&lt;=(=))([^\\=\n;]|\\.)*(?=$|;) </Data>
       </Rule>
-      <Rule>
-        <TypeToAssign>Key</TypeToAssign>
-        <Type>Competitive</Type>
+      <Rule assign="Key" type="Competitive">
         <Data> (?&lt;=^\s*)([^\s\\=\n;]|\\.)*(?=\s*(=)) </Data>
       </Rule>
-      <Rule>
-        <TypeToAssign>Eq</TypeToAssign>
-        <Type>TokenExact</Type>
+      <Rule assign="Eq" type="TokenExact">
         <Data> = </Data>
       </Rule>
-      <Rule>
-        <TypeToAssign>Section</TypeToAssign>
-        <Type>TokenExtract</Type>
+      <Rule assign="Section" type="TokenExtract">
         <Data> \[(?&apos;keep&apos;.*?)\] </Data>
       </Rule>
     </TokenRules>
     <GroupTokenRules>
-      <Rule>
-        <Type>None</Type>
-        <TypeToAssign>Property</TypeToAssign>
+      <Rule assign="Property">
         <Data> n:Key x:Eq v:value </Data>
       </Rule>
     </GroupTokenRules>
@@ -52,13 +37,5 @@
       <Extension>url</Extension>
       <Extension>inf</Extension>
     </FileInferences>
-    <!--<EntityInfo>
-      <EntityDef>
-        <MatchRule group="key"/>
-        <Structure>
-          
-        </Structure>
-      </EntityDef>
-    </EntityInfo>-->
   </Spec>
 </Definition>

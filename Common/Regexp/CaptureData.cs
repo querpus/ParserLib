@@ -65,7 +65,7 @@ public class CaptureData : IMatchItem, IEquatable<CaptureData>
     CaptureIndex = index;
   }
 
-  public override string ToString () => Content.ContainsAny([Chars.CRLF, Chars.LFs, Chars.CRs])
+  public override string ToString () => Content.ContainsAny(SCO, Chars.NewLines)
       ? $"\"{Content.Replace([Chars.CRLF, Chars.CRs, Chars.LFs], "<NL>")}\" @ {Index} ({Len})"
       : $"\"{Content}\" @ {Index} ({Len})";
   public bool Equals (CaptureData? other) => other is not null && Index == other.Index && Name == other.Name && CaptureIndex == other.CaptureIndex && Content.Is(other.Content);

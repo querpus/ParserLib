@@ -24,8 +24,10 @@ public abstract class LoopOperation : Operation, IPlaceholderOperation
     _ => item
   });
 
-  public int Unpack ([NotNull] Collection<IOperation> operations, int index, IOperationStrategy? parser_ref = null)
+  public int Unpack ([NotNull] Collection<IOperation> operations, int index, out Action<XParser>? action)
   {
+    action = null;
+
     CurrentIndex = index;
     LoopIndex = operations.Count;
 

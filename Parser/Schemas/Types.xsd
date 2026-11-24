@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns="Parser/Spec" xml:lang="en-us"><!-- Simple Types TODO: Finish Documentation -->
+<xs:schema targetNamespace="Parser/Spec"
+           attributeFormDefault="unqualified"
+           elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:xml="http://www.w3.org/XML/1998/namespace"
+           xmlns="Parser/Spec"
+           xml:lang="en-us"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!-- Simple Types TODO: Finish Documentation -->
   <xs:simpleType name="NonEmptyTokenType">
     <xs:annotation>
       <xs:documentation>
@@ -8,6 +16,29 @@
     </xs:annotation>
     <xs:restriction base="xs:token">
       <xs:minLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="SpecInputType">
+    <xs:annotation>
+      <xs:documentation>
+        Defines the different allowed input formats for a Spec.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="NonEmptyTokenType">
+      <xs:enumeration value="text">
+        <xs:annotation>
+          <xs:documentation>
+            Loads the input as text.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="bytes">
+        <xs:annotation>
+          <xs:documentation>
+            Loads the input as a byte array. (Internally a Memory&lt;byte&gt;
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="InitializeType">
@@ -275,8 +306,9 @@
         <xs:element name="CmdSequence" type="InnerInstructionSet" minOccurs="1" maxOccurs="unbounded"/>
       </xs:choice>
     </xs:sequence>
-  </xs:complexType>--><!--  <xs:complexType name="StructureContentType">
-    <xs:attribute name="class" type="NonEmptyTokenType" use="required" />
+  </xs:complexType>-->
+  <!--<xs:complexType name="StructureContentType">
+    <xs:attribute name="class" type="NonEmptyTokenType" use="required"/>
   </xs:complexType>
   <xs:complexType name="StructurePropertyType">
     <xs:attribute name="name" type="NonEmptyTokenType" use="required" />
@@ -636,6 +668,9 @@ True by default.
     <xs:sequence>
       <xs:element name="Rule" type="TokenRuleDef" maxOccurs="unbounded" minOccurs="0"/>
     </xs:sequence>
+    <xs:attribute name="RegexDotMatchesNewline" type="xs:boolean" use="optional"/>
+    <xs:attribute name="RegexMultiLine" type="xs:boolean" use="optional"/>
+    <xs:attribute name="RegexRightToLeft" type="xs:boolean" use="optional"/>
   </xs:complexType>
   <xs:complexType name="GroupRuleList">
     <xs:sequence>
@@ -699,7 +734,7 @@ True by default.
     <xs:attribute name="tokentype" type="xs:token"/>
     <xs:attribute name="class" type="xs:token"/>
     <xs:attribute name="class_type_params" type="xs:normalizedString"/>
-  </xs:attributeGroup>
+  </xs:attributeGroup>-->
   <xs:attributeGroup name="DataReadLengthAttrGroup">
     <xs:attribute name="length" type="DataReadLength">
       <xs:annotation>

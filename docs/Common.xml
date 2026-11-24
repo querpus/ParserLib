@@ -558,7 +558,7 @@
             <summary>Checks if a <see langword="string"/> is <see langword="null"/> or empty.</summary>
             <returns><see langword="true"/> if the <see langword="string"/> is empty or is <see langword="null"/>, <see langword="false"/> otherwise.</returns>
         </member>
-        <member name="T:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.&lt;M&gt;$540C99D624ED2EECC4A4235F206A3178">
+        <member name="T:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.&lt;M&gt;$EB46340E334F0D5C7C87EEDB763DDC95">
             <summary>string extensions</summary>
             <param name="text">The <see langword="string"/> to check.</param>
         </member>
@@ -579,10 +579,6 @@
             <param name="other">The other text.</param>
             <returns><see langword="true"/> if any of the values match, otherwise <see langword="false"/>.</returns>
             <remarks>If either <paramref name="other"/> is empty, or <paramref name="text"/> is <see langword="null"/>, this method will return <see langword="false"/>.</remarks>
-        </member>
-        <member name="T:Common.Extensions.StringExtensions.&lt;G&gt;$34505F560D9EACF86A87F3ED1F85E448.&lt;M&gt;$95F501AA0E8724735C4141225132CAB6">
-            <summary>string extensions</summary>
-            <param name="text">The <see langword="string"/> to check.</param>
         </member>
         <member name="T:Common.Extensions.StringExtensions.&lt;G&gt;$F7FA263FC92DBCBA83A0107FB1627724.&lt;M&gt;$AEFD9F126DE2C6FCD08FD85135E85DEA">
             <summary>string extensions</summary>
@@ -889,6 +885,9 @@
         </member>
         <member name="T:Common.Pos">
             <summary>A lightweight variant of section that holds a start position and a length for operating on a <see cref="T:System.Span`1"/>, <see cref="T:System.Memory`1"/> or <see langword="string"/>.</summary>
+        </member>
+        <member name="P:Common.Pos.End">
+            <summary>The inclusive end of this range.</summary>
         </member>
         <member name="M:Common.Pos.#ctor(System.Int32,System.Int32)">
             <summary>Standard Constructor</summary>

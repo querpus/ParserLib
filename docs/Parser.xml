@@ -169,6 +169,24 @@
             <returns>Does not return.</returns>
             <exception cref="T:Parser.Exceptions.OperationBadInputTypeException"/>
         </member>
+        <member name="M:Parser.Err.ThrowNoVar(System.String)">
+            <summary>Throws a no such var exception.</summary>
+            <param name="key">The data key that did not exist.</param>
+            <returns>Does not return.</returns>
+            <exception cref="T:Parser.Exceptions.OperationNoSuchVarException"/>
+        </member>
+        <member name="M:Parser.Err.ThrowBadDef(System.String)">
+            <summary>Throws a bad definition exception.</summary>
+            <param name="msg">THe message to display.</param>
+            <returns>Does not return.</returns>
+            <exception cref="T:Parser.Exceptions.OperationBadDefinitionException"/>
+        </member>
+        <member name="M:Parser.Err.ThrowUnpacked(System.String)">
+            <summary>Throws an operation unpacking exception.</summary>
+            <param name="msg">The message to display.</param>
+            <returns>Does not return.</returns>
+            <exception cref="T:Parser.Exceptions.OperationUnpackingException"/>
+        </member>
         <member name="T:Parser.Exceptions.InvalidFileInferenceException">
             <summary>Thrown when there is a problem parsing the file inferences.</summary>
         </member>
@@ -218,6 +236,23 @@
         </member>
         <member name="M:Parser.Library.CheckFile(System.String)">
             <summary>Provides the <see cref="T:Parser.Spec"/> for the provided file path.</summary>
+        </member>
+        <member name="T:Parser.OperationStrategy">
+            <summary>An enhanced <see cref="T:System.Collections.Generic.IList`1"/> that contains <see cref="T:Parser.Ops.IOperation"/> objects.</summary>
+        </member>
+        <member name="P:Parser.OperationStrategy.Operations">
+            <summary>Gets the collection of operations.</summary>
+        </member>
+        <member name="P:Parser.OperationStrategy.Parser">
+            <summary>A reference to the parser.</summary>
+        </member>
+        <member name="P:Parser.OperationStrategy.Status">
+            <summary>The status that this operation will return when DoOperation completes.</summary>
+        </member>
+        <member name="M:Parser.OperationStrategy.DoOperation(Parser.XParser)">
+            <summary>Calls upon the <see cref="T:Parser.XParser"/> to save the current strategy state and enter a new strategy (This one).</summary>
+            <param name="parser_ref">The currently running <see cref="T:Parser.XParser"/>.</param>
+            <inheritdoc/>
         </member>
         <member name="T:Parser.OpStatus">
             <summary>
@@ -380,9 +415,9 @@
         </member>
         <member name="M:Parser.Ops.IPlaceholderOperation.Unpack(System.Collections.ObjectModel.Collection{Parser.Ops.IOperation},System.Int32,Parser.XParser)">
             <summary>Unpacks the operation into a flat structure.</summary>
-            <param name="operations">The operation list.</param>
+            <param name="operations">The operation list reference.</param>
             <param name="index">The index of this operation in the sequence.</param>
-            <param name="parser_ref">The parser reference.</param>
+            <param name="parser_ref">The parser or strategy reference.</param>
             <returns>The operation count after unpacking.</returns>
         </member>
         <member name="M:Parser.Ops.IPlaceholderOperation.CheckUnpacked">
@@ -740,7 +775,7 @@
             <summary>The name of this Spec.</summary>
         </member>
         <member name="P:Parser.Spec.Operations">
-            <summary>A <see cref="T:System.Collections.ObjectModel.ReadOnlyCollection`1"/> of <see cref="T:Parser.Ops.IOperation"/> objects that are executed in order to produce the result.</summary>
+            <summary>An <see cref="T:Parser.OperationStrategy"/> of <see cref="T:Parser.Ops.IOperation"/> objects that are executed in order to produce the result.</summary>
         </member>
         <member name="P:Parser.Spec.FileInferences">
             <summary>A <see cref="T:System.Collections.ObjectModel.ReadOnlyCollection`1"/> of <see cref="T:Parser.Inference.InferenceNode"/> objects that specify what files use this specification.</summary>
@@ -750,9 +785,6 @@
         </member>
         <member name="P:Parser.Spec.RxOpt">
             <summary>The default regex options to use.</summary>
-        </member>
-        <member name="P:Parser.Spec.TokenType">
-            <summary>The type of token type to use.</summary>
         </member>
         <member name="P:Parser.Spec.SC">
             <summary>The default string comparison type to use.</summary>
@@ -770,6 +802,9 @@
         </member>
         <member name="P:Parser.Spec.GroupTokenRules">
             <summary>Group token rules for the token assembly operation.</summary>
+        </member>
+        <member name="P:Parser.Spec.TokenRuleSet">
+            <summary>A rule set for a capture tokenizer.</summary>
         </member>
         <member name="T:Parser.Tokens.ChkToken">
             <summary>Builds a <see cref="T:Parser.Tokens.ChkToken"/> from a <see langword="string"/>.<br/>
@@ -1001,6 +1036,9 @@
         <member name="P:Parser.XParser.LocalDefaultSpec">
             <summary>Gets the file data as a list of bytes.</summary>
         </member>
+        <member name="M:Parser.XParser.OperationLoad(Parser.OperationStrategy)">
+            <summary>Loads the operations into a flat pattern.</summary>
+        </member>
         <member name="P:Parser.XParser.Data">
             <summary>The dictionary storing all of the data from the parsed file.</summary>
         </member>
@@ -1010,9 +1048,6 @@
         </member>
         <member name="P:Parser.XParser.OpCount">
             <summary>The number of operations in the currently loaded specification, after parsing the operation sequence.</summary>
-        </member>
-        <member name="M:Parser.XParser.OperationLoad">
-            <summary>Loads the operations into a flat pattern.</summary>
         </member>
         <member name="M:Parser.XParser.InitializeParser(Parser.Spec)">
             <summary>Sets up the Specification and DataStore for the parser.</summary>
@@ -1043,11 +1078,16 @@
             <summary>Sets the next operation to be the one at <paramref name="index"/>.</summary>
             <param name="index">The index of the next operation to execute.</param>
         </member>
-        <member name="M:Parser.XParser.StepThrough``1(``0)">
+        <member name="M:Parser.XParser.SetInput``1(``0)">
+            <summary>Assigns the input to the parser.</summary>
+            <typeparam name="TData">The type of input. Can be a <see langword="string"/> or a <see langword="byte"/> array.</typeparam>
+            <param name="input">The input to assign.</param>
+            <remarks>A byte array could be a <see cref="T:System.Memory`1"/> object, a <see cref="T:System.Span`1"/>, a <see cref="T:System.Collections.Generic.List`1"/>, or a simple <see cref="T:System.Collections.Generic.IEnumerable`1"/></remarks>
+        </member>
+        <member name="M:Parser.XParser.StepThrough">
             <summary>Incrementally steps through all the operations, requesting user confirmation to continue.</summary>
-            <param name="input">The file data as a <see langword="string"/>.</param>
-            <returns>The <see cref="T:Parser.OpStatus"/> representing the result.</returns>
-            <exception cref="T:Parser.Exceptions.QuitException">Quits the program.</exception>
+            <returns>The <see cref="T:Parser.OpStatus"/> codes representing the result of each operation.</returns>
+            <exception cref="T:Parser.Exceptions.OperationBadDefinitionException">Called StepThrough without assigning or initializing input data.</exception>
         </member>
         <member name="T:System.Text.RegularExpressions.Generated.LineEnd_0">
             <summary>Custom <see cref="T:System.Text.RegularExpressions.Regex"/>-derived type for the LineEnd method.</summary>

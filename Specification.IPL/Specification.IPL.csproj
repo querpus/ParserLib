@@ -1,17 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
   
   <PropertyGroup>
-    <AnalysisLevel>preview-all</AnalysisLevel>
-    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TargetFramework>net11.0</TargetFramework>
     <ProjectGuid>{2A6E348E-A2EB-BB8B-4682-73F048A10CF0}</ProjectGuid>
-    
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Roslynator.Analyzers" Version="5.0.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-    <PackageReference Include="Roslynator.CodeFixes" Version="5.0.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Parser\Parser.csproj" />
@@ -25,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>

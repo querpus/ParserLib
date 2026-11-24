@@ -1,35 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Definition xmlns="Parser/Spec" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="Parser\Spec ..\Schemas\Spec.xsd">
-  <Spec>
-    <Name>xml</Name>
-    <TextFile>true</TextFile>
-    <CaseInsensitive>false</CaseInsensitive>
-    <!--<EntityInfo>
-      <EntityDef>
-        <MatchRule group="element"/>
-        <Structure>
-          <Property name="Name" class="string" group="name"/>
-          <PropertyList name="Attributes">
-            <Item class="AttributeEntity">
-              <Property name="Namespace" class="string" group="a_ns"/>
-              <Property name="Key" class="string" group="a_key"/>
-              <Property name="Quote" class="string" group="a_qt"/>
-              <Property name="Value" class="string" group="a_val"/>
-            </Item>
-          </PropertyList>
-          <PropertyList name="Children">
-            <Item class="IEntity">
-              <Content class="ContentEntity"/>
-              <Content class="ElementEntity"/>
-              <Content class="WhitespaceEntity"/>
-              <Content class="CommentEntity"/>
-            </Item>
-          </PropertyList>
-          <Property name="IsSingle" class="bool" value="false"/>
-          <Property name="IsHeader" class="bool" value="false"/>
-        </Structure>
-      </EntityDef>
-    </EntityInfo>-->
+  <Spec name="xml" type="text">
     <TokenRules>
       <Rule type="Competitive" assign="DString">
         <Data> "[^">&lt;]*" </Data>
@@ -37,20 +8,10 @@
       <Rule type="Competitive" assign="SString">
         <Data> '[^'>&lt;]*' </Data>
       </Rule>
-      <Rule type="Competitive IgnoredToken" assign="Comment">
+      <Rule type="TokenComment" assign="Comment">
         <Data> &lt;!--((?!--).)*--> </Data>
       </Rule>
     </TokenRules>
-    <!--<Constructs>
-      <Object class="XMLAttribute">
-        <Token property="Key" type="AttrKey"/>
-        <Token type="Eq"/>
-        <Token property="Value" type="String"/>
-      </Object>
-      <Object class="XMLElementOpen">
-        <Token type=""/>
-      </Object>
-    </Constructs>-->
     <GroupTokenRules>
       <Rule assign="Attribute">
         <Data> n:AttrKey x:Eq v:String </Data>
