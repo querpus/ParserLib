@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema
-    targetNamespace="Parser/Spec"
-    attributeFormDefault="unqualified"
-    elementFormDefault="qualified"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    xmlns:xml="http://www.w3.org/XML/1998/namespace"
-    xmlns="Parser/Spec">
+<xs:schema targetNamespace="Parser/Spec" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns="Parser/Spec">
   <xs:include schemaLocation="Types.xsd"/>
-  <xs:element name="Definition" >
+  <xs:element name="Definition">
     <xs:annotation>
       <xs:documentation>
         The root node. Should contain the optional Prefabs element first, then Spec elements following it. There must be at least 1 spec in the file.
