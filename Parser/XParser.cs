@@ -1,8 +1,4 @@
-using System.Runtime.InteropServices;
-using System.Security.AccessControl;
 using System.Xml.Linq;
-
-using Microsoft.Extensions.Options;
 
 using static Parser.OpStatus;
 
@@ -223,21 +219,31 @@ public sealed class XParser
 
     Log(MsgClass.Debug, $"Performing Operation {CurrentOp.TypeName}.", this);
 
-    OpStatus result = AtStart;
-    void setExceptionData (OpStatus status, Exception toLog)
-    {
-      result = status;
-      Log(MsgClass.Error, toLog.Message, this);
-    }
+    OpStatus result;
 
-    try { result = CurrentOp.DoOperation(this); }
-    catch (OperationBadInputTypeException obit) { setExceptionData(FailBadInputType, obit); }
-    catch (OperationBadDefinitionException obd) { setExceptionData(FailBadOpDefinition, obd); }
-    catch (OperationBadResultException obr) { setExceptionData(FailBadOpResult, obr); }
-    catch (OperationNoSuchVarException onsv) { setExceptionData(FailNoSuchVarName, onsv); }
-    catch (UnknownOperationException uoe) { setExceptionData(FailNoSpec, uoe); }
-    catch (OperationException o) { setExceptionData(Fail, o); }
-    catch (Exception e) { setExceptionData(Error, e); }
+    try
+    {
+      result = CurrentOp.DoOperation(this);
+    }
+    catch (Exception e)
+    {
+      result = e switch
+      {
+        OperationBadDefinitionException or OperationConditionStringException or OperationUnpackingException => FailBadOpDefinition,
+        OperationBadInputTypeException => FailBadInputType,
+        OperationBadResultException => FailBadOpResult,
+        OperationNoSuchVarException => FailNoSuchVarName,
+        OperationException => Fail,
+        Exception => Error,
+      };
+
+      LogPart(MsgClass.Critical, "Operation Error");
+      LogPart(MsgClass.Warning, " : ");
+      LogPart(MsgClass.Error, $"{result}");
+      LogPart(MsgClass.Warning, " : ");
+      LogPart(MsgClass.Error, e.Message);
+      NewLine();
+    }
     Log(MsgClass.Debug, $"Operation resulted in {result}.", this);
 
     if (result is EndCommand || (result.IsFail && !CurrentOp.ContinueOnFail))
