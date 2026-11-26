@@ -1,8 +1,4 @@
-using System.Runtime.InteropServices;
-using System.Security.AccessControl;
 using System.Xml.Linq;
-
-using Microsoft.Extensions.Options;
 
 using static Parser.OpStatus;
 
@@ -57,8 +53,6 @@ public sealed class XParser
     state.Actions.Foreach(a => a(this));
   }
   private static Library LibRef => Library.Instance;
-  private bool ActiveFailure => LastStatus.IsFail && !CurrentOp.ContinueOnFail;
-  private readonly Stack<State> _parentStacks = [];
   #region Public Properties
   /// <summary>The current operation index.</summary>
   public int OpIndex { get; private set; }
@@ -68,8 +62,6 @@ public sealed class XParser
   public IOperation CurrentOp => ParsedOperations[OpIndex];
   /// <summary>The next operation.</summary>
   public IOperation NextOp => (NextOpIndex == -1 || NextOpIndex >= OpCount) ? new OperationEnd() : ParsedOperations[NextOpIndex];
-  /// <summary>The status of the last operation performed.</summary>
-  public OpStatus LastStatus { get; private set; } = AtStart;
   /// <summary>Gets the file data as a list of bytes.</summary>
   public Spec LocalDefaultSpec =>
     Data?.HasData != true ? LibRef["unknown"] :
@@ -77,10 +69,11 @@ public sealed class XParser
     Data.CanLoad<Memory<byte>>("initial") ? LibRef["binary"] :
     Data.CanLoad<XElement>("initial") ? LibRef["xelement"] :
     LibRef["unknown"];
+  /// <summary>The flattened and parsed operation strategy.</summary>
   public Collection<IOperation> ParsedOperations { get; private set; } = [];
   public Spec? Spec { get; private set; }
+  /// <summary>A sequence of <see cref="IOperation"/> objects that process data.</summary>
   public OperationStrategy CurrentStrategy { get; private set; } = [];
-  public bool HasParent => _parentStacks.IsNotEmpty;
   public OpStatus EnterStrategy (OperationStrategy strategy)
   {
     var parent = State.Snapshot(this);
@@ -174,7 +167,7 @@ public sealed class XParser
         string => LibRef["textbylines"],
         IEnumerable<byte> => LibRef["binary"],
         XElement => LibRef["xelement"],
-        _ => throw new InvalidDataException("Data must by a byte array or a string.")
+        _ => throw new InvalidDataException("Data must by a byte array, a string, or ")
       };
     }
     data.ThrowIfNull();
@@ -204,11 +197,12 @@ public sealed class XParser
   /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
   private OpStatus ParseLoop ()
   {
-    while (NextOpIndex >= 0 && !ActiveFailure)
+    OpStatus status = AtStart;
+    while (NextOpIndex >= 0 && !status.IsFail)
     {
-      LastStatus = PerformOperation();
+      status = PerformOperation();
     }
-    return LastStatus;
+    return status;
   }
   /// <summary>Performs the operation indicated by <see cref="OpIndex"/> and advances to the next operation.</summary>
   /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
@@ -223,7 +217,7 @@ public sealed class XParser
 
     Log(MsgClass.Debug, $"Performing Operation {CurrentOp.TypeName}.", this);
 
-    OpStatus result = AtStart;
+    OpStatus result;
     void setExceptionData (OpStatus status, Exception toLog)
     {
       result = status;
@@ -240,7 +234,10 @@ public sealed class XParser
     catch (Exception e) { setExceptionData(Error, e); }
     Log(MsgClass.Debug, $"Operation resulted in {result}.", this);
 
-    if (result is EndCommand || (result.IsFail && !CurrentOp.ContinueOnFail))
+    if (result.IsFail && CurrentOp.ContinueOnFail)
+      result = FailOverride;
+
+    if (result is EndCommand || result.IsFail)
       NextOpIndex = -1;
 
     AdvanceOperation();
@@ -262,22 +259,22 @@ public sealed class XParser
   /// <param name="spec">The spec to use.</param>
   /// <param name="path">The path to the file to parse.</param>
   /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
-  public OpStatus ParseFile (Spec spec, string path)
+  public static OpStatus ParseFile (Spec spec, string path)
   {
-    InitializeParser(spec);
+    XParser parser = new(spec);
 
-    Data["file_path"] = path;
-    if (Spec.IsTextFile)
+    parser.Data["file_path"] = path;
+    if (spec.IsTextFile)
     {
       string text = File.ReadAllText(path);
-      InitializeData(text);
-      return ParseLoop();
+      parser.InitializeData(text);
+      return parser.ParseLoop();
     }
     else
     {
       Memory<byte> contents = File.ReadAllBytes(path);
-      InitializeData(contents);
-      return ParseLoop();
+      parser.InitializeData(contents);
+      return parser.ParseLoop();
     }
   }
   /// <summary>Sets the next operation to be the one at <paramref name="index"/>.</summary>

@@ -14,7 +14,7 @@ public static class IEnumerableExtensions
     public IEnumerable<TBaseType> OfTypes<TAllowedType1, TAllowedType2> ()
       where TAllowedType1 : TBaseType
       where TAllowedType2 : TBaseType =>
-      Explicit(list, [typeof(TAllowedType1), typeof(TAllowedType2)]);
+      Restrict(list, [typeof(TAllowedType1), typeof(TAllowedType2)], must_assign: true);
     public IEnumerable<TBaseType> NotOfType<TDisallowedType> ()
       where TDisallowedType : TBaseType =>
       Restrict(list, [typeof(TDisallowedType)]);
@@ -22,21 +22,29 @@ public static class IEnumerableExtensions
       where TDisallowedType1 : TBaseType
       where TDisallowedType2 : TBaseType =>
       Restrict(list, [typeof(TDisallowedType1), typeof(TDisallowedType2)]);
-    private IEnumerable<TBaseType> Restrict ([NotNull] IEnumerable<Type> types)
+    private IEnumerable<TBaseType> Restrict ([NotNull] IEnumerable<Type> types, bool must_assign = false)
     {
       if (types.IsEmpty)
         return list;
+      Collection<TBaseType> result = [];
       foreach (TBaseType item in list)
       {
+        bool assigned = false;
         Type item_type = item.GetType();
         foreach (Type cannot_be in types)
         {
           if (item_type.IsAssignableTo(cannot_be))
           {
-            list = list.
+            assigned = true;
+            break;
           }
         }
+        if (assigned == must_assign)
+        {
+          result.Add(item);
+        }
       }
+      return [.. result];
     }
   }
   /// <summary>Generic IEnumerable Extensions</summary>

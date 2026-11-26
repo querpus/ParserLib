@@ -28,7 +28,6 @@ internal static class Program
   internal static string? UserInput;
   #endregion
   #region Properties
-  internal static XParser Parser { get; set; } = new();
   [AllowNull]
   internal static Library LibRef { get; set; }
   #endregion
@@ -239,7 +238,8 @@ internal static class Program
         spec = LibRef.Lookup(specName);
       }
 
-      status = Parser.ParseFile(spec, path);
+      XParser parser = new(spec);
+      status = parser.ParseFile(path);
 
       Log(MsgClass.Debug, "OpStatus is " + status, This);
 
