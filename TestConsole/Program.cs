@@ -323,20 +323,19 @@ internal static class Program
     Log(MsgClass.Warning, $"Operations have concluded with status {status}.", This);
   }
 
-  internal static XParser TestTextParser (string path, Spec spec)
+  internal static Result TestTextParser (string path, Spec spec)
   {
+    DataStore data;
     OpStatus status;
     DebugIn("Program", "TestTextParser");
     if (spec.IsTextFile)
     {
       string content = File.ReadAllText(path);
-      Parser = new(spec);
-      status = StepAndOutput(content);
+      status = StepAndOutput(spec, content);
     }
     else
     {
       Memory<byte> bytes = File.ReadAllBytes(path);
-      Parser = new(spec);
       status = StepAndOutput(bytes);
     }
 
