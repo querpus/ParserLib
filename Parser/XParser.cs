@@ -218,20 +218,30 @@ public sealed class XParser
     Log(MsgClass.Debug, $"Performing Operation {CurrentOp.TypeName}.", this);
 
     OpStatus result;
-    void setExceptionData (OpStatus status, Exception toLog)
-    {
-      result = status;
-      Log(MsgClass.Error, toLog.Message, this);
-    }
 
-    try { result = CurrentOp.DoOperation(this); }
-    catch (OperationBadInputTypeException obit) { setExceptionData(FailBadInputType, obit); }
-    catch (OperationBadDefinitionException obd) { setExceptionData(FailBadOpDefinition, obd); }
-    catch (OperationBadResultException obr) { setExceptionData(FailBadOpResult, obr); }
-    catch (OperationNoSuchVarException onsv) { setExceptionData(FailNoSuchVarName, onsv); }
-    catch (UnknownOperationException uoe) { setExceptionData(FailNoSpec, uoe); }
-    catch (OperationException o) { setExceptionData(Fail, o); }
-    catch (Exception e) { setExceptionData(Error, e); }
+    try
+    {
+      result = CurrentOp.DoOperation(this);
+    }
+    catch (Exception e)
+    {
+      result = e switch
+      {
+        OperationBadDefinitionException or OperationConditionStringException or OperationUnpackingException => FailBadOpDefinition,
+        OperationBadInputTypeException => FailBadInputType,
+        OperationBadResultException => FailBadOpResult,
+        OperationNoSuchVarException => FailNoSuchVarName,
+        OperationException => Fail,
+        Exception => Error,
+      };
+
+      LogPart(MsgClass.Critical, "Operation Error");
+      LogPart(MsgClass.Warning, " : ");
+      LogPart(MsgClass.Error, $"{result}");
+      LogPart(MsgClass.Warning, " : ");
+      LogPart(MsgClass.Error, e.Message);
+      NewLine();
+    }
     Log(MsgClass.Debug, $"Operation resulted in {result}.", this);
 
     if (result.IsFail && CurrentOp.ContinueOnFail)
@@ -259,23 +269,26 @@ public sealed class XParser
   /// <param name="spec">The spec to use.</param>
   /// <param name="path">The path to the file to parse.</param>
   /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
-  public static OpStatus ParseFile (Spec spec, string path)
+  public static (OpStatus, DataStore) ParseFile (Spec spec, string path)
   {
     XParser parser = new(spec);
+    OpStatus status = AtStart;
 
     parser.Data["file_path"] = path;
     if (spec.IsTextFile)
     {
       string text = File.ReadAllText(path);
       parser.InitializeData(text);
-      return parser.ParseLoop();
+      status = parser.ParseLoop();
     }
     else
     {
       Memory<byte> contents = File.ReadAllBytes(path);
       parser.InitializeData(contents);
-      return parser.ParseLoop();
+      status = parser.ParseLoop();
     }
+
+    return (status, parser.Data);
   }
   /// <summary>Sets the next operation to be the one at <paramref name="index"/>.</summary>
   /// <param name="index">The index of the next operation to execute.</param>

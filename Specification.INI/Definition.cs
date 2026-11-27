@@ -13,7 +13,7 @@ public static class Definition
   [DefinitionExport]
   public static Spec Spec => new()
   {
-    Name = "ini",
+    Name = "ini_cs",
     FileInferences = [
       IfN(ExtIs, "ini"),
       IfN(ExtIs, "vnc"),
@@ -41,5 +41,6 @@ public static class Definition
 
     DefaultRuleSet = IgnoreCase,
     TokenRuleSet = StandardRuleSets.INITokenRuleSet,
+    NodeRuleSet = StandardRuleSets.INIRuleSet
   };
 }

@@ -6,6 +6,7 @@ using Parser.Nodes;
 
 using IBasicToken = Parser.Nodes.IToken;
 using ResIPL = Specification.IPL.Properties.Resources;
+using Result = (Parser.OpStatus Status, Parser.DataStore Data);
 using ResWAD = Specification.WAD.Properties.Resources;
 using ResZDoom = Specification.ZDoom.Properties.Resources;
 using SpecIPL = Specification.IPL.Definition;
@@ -226,6 +227,7 @@ internal static class Program
   internal static void ProcessArgs (string[] args)
   {
     OpStatus status;
+    DataStore data;
     foreach (string path in args)
     {
       string? specName = LibRef.CheckFile(path);
@@ -238,15 +240,10 @@ internal static class Program
         spec = LibRef.Lookup(specName);
       }
 
-      XParser parser = new(spec);
-      status = parser.ParseFile(path);
+      (status, data) = XParser.ParseFile(spec, path);
 
       Log(MsgClass.Debug, "OpStatus is " + status, This);
-
-      Log(MsgClass.Debug, "Result is " + Parser.Result, This);
-      Log(MsgClass.Debug, "Result count = " + Parser.Result.AsCollection().Count, This);
-      if (Parser.Result is IPrintable ip)
-        ip.Print();
+      Log(MsgClass.Debug, "Result count = " + data.Count, This);
     }
   }
 
@@ -263,18 +260,19 @@ internal static class Program
     }
     DebugOut();
   }
-  internal static OpStatus StepAndOutput<T> (T data)
+  internal static Result StepAndOutput<T> (T data)
   {
-    Parser.SetInput(data);
+    XParser parser = new();
+    parser.SetInput(data);
     int i = 0;
     OpStatus result = OpStatus.AtStart;
-    foreach (var os in Parser.StepThrough())
+    foreach (var os in parser.StepThrough())
     {
       result = os;
-      Log(MsgClass.Warning, "The operation " + Parser.ParsedOperations[i++] + "resulted in " + os, This);
-      Parser.QueryOperation();
+      Log(MsgClass.Warning, "The operation " + parser.ParsedOperations[i++] + "resulted in " + os, This);
+      parser.QueryOperation();
     }
-    return result;
+    return (result, parser.Data);
   }
   internal static void InitialTest (Spec spec, string file, bool use_file_as_text_input = false)
   {
@@ -283,7 +281,7 @@ internal static class Program
       Log(MsgClass.Warning, $"Starting test, using text data with '{spec.Name}'.", This);
     else
       Log(MsgClass.Warning, $"Starting test of '{Path.GetFileName(file)}' with '{spec.Name}'.", This);
-    Parser = new(spec);
+    XParser parser = new(spec);
     OpStatus status = OpStatus.AtStart;
 
     if (spec.IsTextFile && !use_file_as_text_input)
@@ -325,20 +323,19 @@ internal static class Program
     Log(MsgClass.Warning, $"Operations have concluded with status {status}.", This);
   }
 
-  internal static XParser TestTextParser (string path, Spec spec)
+  internal static Result TestTextParser (string path, Spec spec)
   {
+    DataStore data;
     OpStatus status;
     DebugIn("Program", "TestTextParser");
     if (spec.IsTextFile)
     {
       string content = File.ReadAllText(path);
-      Parser = new(spec);
-      status = StepAndOutput(content);
+      status = StepAndOutput(spec, content);
     }
     else
     {
       Memory<byte> bytes = File.ReadAllBytes(path);
-      Parser = new(spec);
       status = StepAndOutput(bytes);
     }
 

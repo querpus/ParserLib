@@ -3,6 +3,7 @@ namespace Parser.Tokens;
 
 public class TokenRule
 {
+  public const string NoType = "None";
   public required RT Type { get; set; }
   public string? RuleStringData { get; set; }
   public string TypeToAssign { get; set; }
@@ -23,14 +24,7 @@ public class TokenRule
     RuleStringData = ruleStringData;
     TypeToAssign = typeToAssign;
   }
-  [SetsRequiredMembers]
-  public TokenRule (RT type, object typeToAssign, [SS("regex")] string ruleStringData)
-  {
-    Type = type;
-    RuleStringData = ruleStringData;
-    TypeToAssign = typeToAssign?.ToString() ?? SE;
-  }
-  public TokenRule () => TypeToAssign = SE;
+  public TokenRule () => TypeToAssign = NoType;
   /// <summary>Use this constructor to make a basic non-recursive group rule.</summary>
   /// <param name="typeToAssign">The type to assign to the assembled token.</param>
   /// <param name="ruleStringData">The assembly definition.</param>
@@ -40,16 +34,6 @@ public class TokenRule
     Type = RT.None;
     RuleStringData = ruleStringData;
     TypeToAssign = typeToAssign;
-  }
-  /// <summary>Use this constructor to make a basic non-recursive group rule.</summary>
-  /// <param name="typeToAssign">The type to assign to the assembled token.</param>
-  /// <param name="ruleStringData">The assembly definition.</param>
-  [SetsRequiredMembers]
-  public TokenRule (object typeToAssign, [SS("regex")] string ruleStringData)
-  {
-    Type = RT.None;
-    RuleStringData = ruleStringData;
-    TypeToAssign = typeToAssign?.ToString() ?? SE;
   }
   #endregion
   #region Static Generation

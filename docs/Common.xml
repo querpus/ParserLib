@@ -302,10 +302,19 @@
         <member name="M:Common.Extensions.IEnumerableExtensions.At``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
             <inheritdoc cref="M:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.At(System.Int32)"/>
         </member>
+        <member name="M:Common.Extensions.IEnumerableExtensions.get_LastIndex``1(System.Collections.Generic.IEnumerable{``0})">
+            <inheritdoc cref="P:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.LastIndex"/>
+        </member>
         <member name="M:Common.Extensions.IEnumerableExtensions.Foreach``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0})">
             <inheritdoc cref="M:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.Foreach(System.Action{`0})"/>
         </member>
-        <member name="T:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.&lt;M&gt;$DC4DC80DDDDEF7462B0A0C39742B9657">
+        <member name="M:Common.Extensions.IEnumerableExtensions.get_LastIndex``1(System.Collections.Generic.IReadOnlyCollection{``0})">
+            <inheritdoc cref="P:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$DC550F3D42D3085FE7D720396E05FB19`1.LastIndex"/>
+        </member>
+        <member name="M:Common.Extensions.IEnumerableExtensions.get_ICount(System.Collections.IEnumerable)">
+            <inheritdoc cref="P:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$8155DB530523D3520582ED295906B9FC.ICount"/>
+        </member>
+        <member name="T:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$1BD4FEAF00BE0B98A77E2F634853CD38`1.&lt;M&gt;$B93CFE41131E3A94F0D88AC2F146E130">
             <summary>Generic IEnumerable Extensions</summary>
             <typeparam name="TBaseType">The base object type</typeparam>
         </member>
@@ -319,9 +328,20 @@
             <param name="index">The index to retrieve.</param>
             <returns>The object at position <paramref name="index"/>.</returns>
         </member>
+        <member name="P:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.LastIndex">
+            <summary>The position of the last item.</summary>
+            <remarks>If the list is empty, this returns -1.</remarks>
+        </member>
         <member name="M:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$E09FCB5EB13C1AE2FC524F6744DE5322`1.Foreach(System.Action{`0})">
             <summary>Executes an <see cref="T:System.Action`1"/> <see langword="delegate"/> for every item in the <see cref="T:System.Collections.Generic.IEnumerable`1"/>.</summary>
             <param name="action"></param>
+        </member>
+        <member name="P:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$DC550F3D42D3085FE7D720396E05FB19`1.LastIndex">
+            <summary>The position of the last item.</summary>
+            <remarks>If the list is empty, this returns -1.</remarks>
+        </member>
+        <member name="P:Common.Extensions.IEnumerableExtensions.&lt;G&gt;$8155DB530523D3520582ED295906B9FC.ICount">
+            <summary>Iterates the IEnumerable, and counts the items.</summary>
         </member>
         <member name="T:Common.Extensions.IListExtensions">
             <summary><see cref="T:System.Collections.Generic.IList`1"/> extensions.</summary>

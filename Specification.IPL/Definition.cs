@@ -86,7 +86,7 @@ public static class Definition
   public static Regex OpRegex => new(Regex, Spec.RxOpt);
   #endregion
 
-  private const RegexOptions RxOpts = ROML | ROIPW | ROEC | ROSL;
+  private const RegexOptions RxOpts = ROML | ROIPW | ROEC | ROSL | ROCI;
 
   [DefinitionExport]
   public static Spec Spec => new()

@@ -14,7 +14,7 @@ public static class IEnumerableExtensions
     public IEnumerable<TBaseType> OfTypes<TAllowedType1, TAllowedType2> ()
       where TAllowedType1 : TBaseType
       where TAllowedType2 : TBaseType =>
-      Restrict(list, [typeof(TAllowedType1), typeof(TAllowedType2)], must_assign: true);
+      Restrict(list, null, [typeof(TAllowedType1), typeof(TAllowedType2)]);
     public IEnumerable<TBaseType> NotOfType<TDisallowedType> ()
       where TDisallowedType : TBaseType =>
       Restrict(list, [typeof(TDisallowedType)]);
@@ -22,29 +22,34 @@ public static class IEnumerableExtensions
       where TDisallowedType1 : TBaseType
       where TDisallowedType2 : TBaseType =>
       Restrict(list, [typeof(TDisallowedType1), typeof(TDisallowedType2)]);
-    private IEnumerable<TBaseType> Restrict ([NotNull] IEnumerable<Type> types, bool must_assign = false)
+    private IEnumerable<TBaseType> Restrict (IEnumerable<Type>? cannot_be_types = null, IEnumerable<Type>? must_be_one_of_types = null)
     {
-      if (types.IsEmpty)
-        return list;
-      Collection<TBaseType> result = [];
-      foreach (TBaseType item in list)
+      static bool? check_assignment (object item_to_check, IEnumerable<Type>? checks)
       {
-        bool assigned = false;
-        Type item_type = item.GetType();
-        foreach (Type cannot_be in types)
+        if (checks is null)
+          return null;
+        Type item_type = item_to_check.GetType();
+        foreach (Type check_type in checks)
         {
-          if (item_type.IsAssignableTo(cannot_be))
+          if (item_type.IsAssignableTo(check_type))
           {
-            assigned = true;
-            break;
+            return true;
           }
         }
-        if (assigned == must_assign)
+        return false;
+      }
+
+      IEnumerable<TBaseType> result = [];
+      foreach (TBaseType item in list)
+      {
+        if (
+          check_assignment(item, cannot_be_types) is null or false &&
+          check_assignment(item, must_be_one_of_types) is null or true)
         {
-          result.Add(item);
+          result = result.Append(item);
         }
       }
-      return [.. result];
+      return result;
     }
   }
   /// <summary>Generic IEnumerable Extensions</summary>
@@ -137,12 +142,17 @@ public static class IEnumerableExtensions
     {
       get
       {
-        int i = 0;
-        foreach (var _ in list)
-        {
-          i++;
-        }
-        return i;
+        int index = 0;
+        list.Foreach(_ => index++);
+        return index;
+      }
+    }
+
+    public void Foreach (Action<object> action)
+    {
+      foreach (object item in list)
+      {
+        action(item);
       }
     }
 

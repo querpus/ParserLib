@@ -68,6 +68,7 @@ public sealed class TokenFactory : ITokenizer<IToken>
     RT.StoreExtra => StoreExtra,
     RT.StoreOther => StoreOther,
     RT.ErrorMatch => ErrorMatch,
+    RT.Separator => () => Log(MC.GreenInfo, "Separator: Skipping rule.", this),
     _ => () => Log(MC.Warning, "Warning: Bad type defined. Skipping rule.", this)
   };
 
