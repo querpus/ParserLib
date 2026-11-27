@@ -269,23 +269,26 @@ public sealed class XParser
   /// <param name="spec">The spec to use.</param>
   /// <param name="path">The path to the file to parse.</param>
   /// <returns>The <see cref="OpStatus"/> representing the result.</returns>
-  public static OpStatus ParseFile (Spec spec, string path)
+  public static (OpStatus, DataStore) ParseFile (Spec spec, string path)
   {
     XParser parser = new(spec);
+    OpStatus status = AtStart;
 
     parser.Data["file_path"] = path;
     if (spec.IsTextFile)
     {
       string text = File.ReadAllText(path);
       parser.InitializeData(text);
-      return parser.ParseLoop();
+      status = parser.ParseLoop();
     }
     else
     {
       Memory<byte> contents = File.ReadAllBytes(path);
       parser.InitializeData(contents);
-      return parser.ParseLoop();
+      status = parser.ParseLoop();
     }
+
+    return (status, parser.Data);
   }
   /// <summary>Sets the next operation to be the one at <paramref name="index"/>.</summary>
   /// <param name="index">The index of the next operation to execute.</param>

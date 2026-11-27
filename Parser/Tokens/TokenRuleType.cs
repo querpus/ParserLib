@@ -51,4 +51,5 @@ public enum TokenRuleType : long
   Error = 1 << 14,
   /// <summary>The bits to remove to get the type correctly.</summary>
   FlagBits = Any | Recursive | IgnoreCase | IgnoredToken | Error,
+  Separator = 1 << 15,
 }
